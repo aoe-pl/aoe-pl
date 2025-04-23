@@ -37,3 +37,7 @@ jobs:
       - name: Build
         run: pnpm run build
         if: always()
+
+      - name: Find deadcode
+        run: pnpm run knip
+        if: always()
