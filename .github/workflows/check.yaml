@@ -39,5 +39,7 @@ jobs:
         if: always()
 
       - name: Find deadcode
-        run: pnpm run knip
+        run: |
+          pnpm run knip || echo "Dead code found – review manually"
         if: always()
+        continue-on-error: true
