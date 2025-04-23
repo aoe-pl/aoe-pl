@@ -35,5 +35,5 @@ jobs:
           AUTH_SECRET: dummy
           AUTH_DISCORD_ID: dummy
           AUTH_DISCORD_SECRET: dummy
-          DATABASE_URL: dummy
+          DATABASE_URL: https://example.com
         if: always()
