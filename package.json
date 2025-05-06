@@ -19,7 +19,11 @@
     "preview": "next build && next start",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "knip": "knip"
+    "knip": "knip",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:restart": "docker compose restart",
+    "db:logs": "docker compose logs -f"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
