@@ -7,7 +7,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="flex">
-      <div className="w-64">
+      <div>
         <Sidebar />
       </div>
       <main className="flex-1">{children}</main>

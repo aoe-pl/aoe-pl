@@ -7,12 +7,10 @@ import Link from "next/link";
 export default async function AdminTournamentsPage() {
   return (
     <>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col items-center justify-between md:flex-row">
         <h1 className="text-3xl font-bold text-white">Tournaments</h1>
         <Link href="/admin/tournaments/create">
-          <Button className="bg-yellow-600 text-white hover:bg-yellow-500">
-            + Create Tournament
-          </Button>
+          <Button>Create Tournament</Button>
         </Link>
       </div>
       <TournamentList />

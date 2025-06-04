@@ -10,17 +10,14 @@ import {
   BackspaceIcon,
 } from "@/components/icons";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed top-0 left-0 z-40 flex h-full w-16 min-w-[64px] flex-col bg-[#232a36] text-white transition-all duration-300 md:w-64">
-      <div className="flex items-center gap-2 px-4 py-6 text-2xl font-bold">
-        <span className="text-yellow-400">🏆</span>
-        <span className="hidden md:inline">AoE2 Admin</span>
-      </div>
-      <nav className="mt-4 flex flex-1 flex-col gap-1 overflow-y-auto">
+    <aside className="bg-sidebar text-sidebar-foreground fixed top-0 left-0 z-40 flex h-full w-16 min-w-[64px] flex-col transition-all duration-300 md:w-64">
+      <nav className="flex flex-1 flex-col overflow-y-auto">
         <NavItem
           href="/admin"
           icon={<HomeIcon />}
@@ -78,7 +75,12 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-base transition-colors hover:bg-[#2d3646] ${active ? "bg-[#2d3646] font-semibold text-white" : "text-gray-300"}`}
+      className={cn(
+        "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground flex items-center gap-2 px-3 py-2 text-base transition-colors justify-center md:justify-start",
+        active
+          ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
+          : "text-sidebar-foreground",
+      )}
     >
       <span className="h-5 w-5">{icon}</span>
       <span className="hidden md:inline">{children}</span>
