@@ -31,6 +31,7 @@ export const tournamentRepository = {
     });
   },
   async createTournament(data: {
+    name: string;
     urlKey: string;
     registrationMode: RegistrationMode;
     tournamentSeriesId: string;

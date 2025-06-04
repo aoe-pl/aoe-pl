@@ -1,11 +1,10 @@
-import React from 'react';
+import { TournamentForm } from "@/lib/admin-panel/tournaments/tournament-form";
 
-export default function AdminTournamentCreatePage() {
+export default function CreateTournamentPage() {
   return (
-    <>
-      <h1 className="text-3xl font-bold text-white mb-8">Create New Tournament</h1>
-      {/* TournamentForm will go here */}
-      <div className="bg-[#232a36] rounded-xl p-8 text-white">Tournament creation form coming soon...</div>
-    </>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold">Tournament creation</h1>
+      <TournamentForm />
+    </div>
   );
-} 
+}
