@@ -22,11 +22,15 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { TournamentSeriesSelector } from "./tournament-series-selector";
+import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 
 // turn into zod schema and extract
 type TournamentFormData = {
   name: string;
   urlKey: string;
+  tournamentSeriesId: string;
+  matchModeId: string;
   registrationMode: RegistrationMode;
   description: string;
   isTeamBased: boolean;
@@ -38,9 +42,6 @@ type TournamentFormData = {
   status: TournamentStatus;
   isVisible: boolean;
   // additional:
-  // sections
-  // tournamentSeriesId: string;
-  // matchModeId: string;
   // stages
 };
 
@@ -62,6 +63,8 @@ export function TournamentForm() {
     defaultValues: {
       name: "",
       urlKey: "",
+      tournamentSeriesId: "",
+      matchModeId: "",
       registrationMode: "INDIVIDUAL",
       description: "",
       isTeamBased: false,
@@ -93,6 +96,46 @@ export function TournamentForm() {
                 <FormControl>
                   <Input placeholder="Enter tournament name" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="tournamentSeriesId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tournament Series</FormLabel>
+                <FormControl>
+                  <TournamentSeriesSelector
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Select the tournament series this tournament belongs to
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="matchModeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Match Mode</FormLabel>
+                <FormControl>
+                  <TournamentMatchModeSelector
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Select the match format for tournament games
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
