@@ -2,12 +2,17 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
-import { TournamentStatus, RegistrationMode } from "@prisma/client";
+import {
+  TournamentStatus,
+  RegistrationMode,
+  TournamentMatchModeType,
+} from "@prisma/client";
 import type {
   Tournament,
   TournamentSeries,
   TournamentParticipant,
 } from "@prisma/client";
+import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
 
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
@@ -111,12 +116,56 @@ export const tournamentRouter = createTRPCRouter({
         }),
       )
       .mutation(async ({ input }) => {
-        return tournamentSeriesRepository.updateTournamentSeries(input.id, input.data);
+        return tournamentSeriesRepository.updateTournamentSeries(
+          input.id,
+          input.data,
+        );
       }),
     delete: publicProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentSeriesRepository.deleteTournamentSeries(input.id);
+      }),
+  }),
+  matchMode: createTRPCRouter({
+    list: publicProcedure.query(async () => {
+      return tournamentMatchModeRepository.getMatchModes();
+    }),
+    get: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentMatchModeRepository.getMatchModeById(input.id);
+      }),
+    create: publicProcedure
+      .input(
+        z.object({
+          mode: z.nativeEnum(TournamentMatchModeType),
+          gameCount: z.number().int().positive(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchModeRepository.createMatchMode(input);
+      }),
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          data: z.object({
+            mode: z.nativeEnum(TournamentMatchModeType).optional(),
+            gameCount: z.number().int().positive().optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchModeRepository.updateMatchMode(
+          input.id,
+          input.data,
+        );
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentMatchModeRepository.deleteMatchMode(input.id);
       }),
   }),
 });
