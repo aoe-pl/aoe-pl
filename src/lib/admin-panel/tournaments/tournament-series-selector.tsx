@@ -43,50 +43,22 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
-// Mock data - replace with actual API calls later
-const mockTournamentSeries = [
-  {
-    id: "1",
-    name: "Age of Empires Championship",
-    description: "Premier competitive series",
-    displayOrder: 1,
-    ownerId: "user1",
-    ownerName: "Admin User",
-  },
-  {
-    id: "2",
-    name: "Community Cup Series",
-    description: "Monthly community tournaments",
-    displayOrder: 2,
-    ownerId: "user2",
-    ownerName: "Tournament Organizer",
-  },
-  {
-    id: "3",
-    name: "Weekly Tournaments",
-    description: "Regular weekly competitions",
-    displayOrder: 3,
-    ownerId: "user1",
-    ownerName: "Admin User",
-  },
-];
+const tournamentSeriesFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string(),
+  displayOrder: z.number().int().positive(),
+  ownerId: z.string().min(1, "Owner is required"),
+});
 
-const mockUsers = [
-  { id: "user1", name: "Admin User" },
-  { id: "user2", name: "Tournament Organizer" },
-  { id: "user3", name: "Community Manager" },
-];
-
-type TournamentSeriesFormData = {
-  name: string;
-  description: string;
-  displayOrder: number;
-  ownerId: string;
-};
+type TournamentSeriesFormData = z.infer<typeof tournamentSeriesFormSchema>;
 
 interface TournamentSeriesSelectorProps {
   value: string;
@@ -100,40 +72,77 @@ export function TournamentSeriesSelector({
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // tRPC queries
+  const {
+    data: tournamentSeries = [],
+    refetch: refetchSeries,
+    isLoading: seriesLoading,
+  } = api.tournaments.series.list.useQuery();
+
+  const { data: users = [], isLoading: usersLoading } =
+    api.users.list.useQuery();
+
+  // tRPC mutations
+  const createSeriesMutation = api.tournaments.series.create.useMutation({
+    onSuccess: (newSeries) => {
+      toast.success("Tournament series created successfully!");
+      void refetchSeries();
+      onChange(newSeries.id);
+      setDrawerOpen(false);
+      seriesForm.reset({
+        name: "",
+        description: "",
+        displayOrder: tournamentSeries.length + 1,
+        ownerId: "",
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to create tournament series: ${error.message}`);
+    },
+  });
+
   const seriesForm = useForm<TournamentSeriesFormData>({
+    resolver: zodResolver(tournamentSeriesFormSchema),
     defaultValues: {
       name: "",
       description: "",
-      displayOrder: mockTournamentSeries.length + 1,
+      displayOrder: tournamentSeries.length + 1,
       ownerId: "",
     },
   });
 
   const onCreateSeries = (data: TournamentSeriesFormData) => {
-    console.log("Creating tournament series:", data);
-    // Here you would normally create the series via API
-    // For now, just close the drawer and reset form
-    setDrawerOpen(false);
-    seriesForm.reset({
-      name: "",
-      description: "",
-      displayOrder: mockTournamentSeries.length + 1,
-      ownerId: "",
-    });
+    createSeriesMutation.mutate(data);
   };
 
-  const selectedSeries = mockTournamentSeries.find(
-    (series) => series.id === value,
-  );
+  const selectedSeries = tournamentSeries.find((series) => series.id === value);
 
   const handleCreateNewClick = () => {
     setOpen(false);
+    // Update display order to be current length + 1
+    seriesForm.setValue("displayOrder", tournamentSeries.length + 1);
     setDrawerOpen(true);
   };
 
+  if (seriesLoading) {
+    return (
+      <Button
+        variant="outline"
+        disabled
+        className="w-full justify-between"
+      >
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Loading series...
+      </Button>
+    );
+  }
+
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={setOpen}
+      >
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -153,7 +162,7 @@ export function TournamentSeriesSelector({
             <CommandList>
               <CommandEmpty>No tournament series found.</CommandEmpty>
               <CommandGroup>
-                {mockTournamentSeries.map((series) => (
+                {tournamentSeries.map((series) => (
                   <CommandItem
                     key={series.id}
                     value={series.name}
@@ -192,8 +201,11 @@ export function TournamentSeriesSelector({
         </PopoverContent>
       </Popover>
 
-      {/* Drawer is now outside the Popover */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+      {/* Drawer for creating new series */}
+      <Drawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Create New Tournament Series</DrawerTitle>
@@ -214,7 +226,10 @@ export function TournamentSeriesSelector({
                     <FormItem>
                       <FormLabel>Series Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter series name" {...field} />
+                        <Input
+                          placeholder="Enter series name"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -255,11 +270,24 @@ export function TournamentSeriesSelector({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {mockUsers.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.name}
+                          {usersLoading ? (
+                            <SelectItem
+                              value=""
+                              disabled
+                            >
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Loading users...
                             </SelectItem>
-                          ))}
+                          ) : (
+                            users.map((user) => (
+                              <SelectItem
+                                key={user.id}
+                                value={user.id}
+                              >
+                                {user.name ?? "Unknown User"}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -295,8 +323,18 @@ export function TournamentSeriesSelector({
             </Form>
           </div>
           <DrawerFooter>
-            <Button onClick={seriesForm.handleSubmit(onCreateSeries)}>
-              Create Series
+            <Button
+              onClick={seriesForm.handleSubmit(onCreateSeries)}
+              disabled={createSeriesMutation.isPending}
+            >
+              {createSeriesMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Series"
+              )}
             </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
