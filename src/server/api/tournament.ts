@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
+import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
 import { TournamentStatus, RegistrationMode } from "@prisma/client";
 import type {
   Tournament,
@@ -26,6 +27,7 @@ export const tournamentRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
+        name: z.string(),
         urlKey: z.string(),
         registrationMode: z.nativeEnum(RegistrationMode),
         tournamentSeriesId: z.string(),
@@ -73,4 +75,48 @@ export const tournamentRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return tournamentRepository.deleteTournament(input.id);
     }),
+
+  // Tournament Series routes
+  series: createTRPCRouter({
+    list: publicProcedure.query(async () => {
+      return tournamentSeriesRepository.getTournamentSeries();
+    }),
+    get: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentSeriesRepository.getTournamentSeriesById(input.id);
+      }),
+    create: publicProcedure
+      .input(
+        z.object({
+          name: z.string().min(1, "Name is required"),
+          description: z.string(),
+          displayOrder: z.number().int().positive(),
+          ownerId: z.string().min(1, "Owner is required"),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentSeriesRepository.createTournamentSeries(input);
+      }),
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          data: z.object({
+            name: z.string().min(1).optional(),
+            description: z.string().optional(),
+            displayOrder: z.number().int().positive().optional(),
+            ownerId: z.string().optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentSeriesRepository.updateTournamentSeries(input.id, input.data);
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentSeriesRepository.deleteTournamentSeries(input.id);
+      }),
+  }),
 });
