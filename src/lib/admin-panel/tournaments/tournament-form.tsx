@@ -95,7 +95,7 @@ export function TournamentForm() {
       isTeamBased: false,
       startDate: undefined,
       endDate: undefined,
-      participantsLimit: 32,
+      participantsLimit: undefined,
       registrationStartDate: undefined,
       registrationEndDate: undefined,
       status: TournamentStatus.PENDING,
@@ -329,6 +329,8 @@ export function TournamentForm() {
                       disabled={(date) => date < new Date()}
                       captionLayout="dropdown"
                       className="min-w-[300px]"
+                      startMonth={new Date(new Date().getFullYear() - 1, 0, 1)}
+                      endMonth={new Date(new Date().getFullYear() + 1, 11, 31)}
                     />
                   </PopoverContent>
                 </Popover>
@@ -373,6 +375,8 @@ export function TournamentForm() {
                       disabled={(date) => date < new Date()}
                       captionLayout="dropdown"
                       className="min-w-[300px]"
+                      startMonth={new Date(new Date().getFullYear() - 1, 0, 1)}
+                      endMonth={new Date(new Date().getFullYear() + 1, 11, 31)}
                     />
                   </PopoverContent>
                 </Popover>
@@ -392,11 +396,14 @@ export function TournamentForm() {
                     type="number"
                     placeholder="32"
                     {...field}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value ? parseInt(e.target.value) : undefined,
-                      )
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (!value) {
+                        field.onChange(undefined);
+                      } else {
+                        field.onChange(parseInt(value));
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -440,6 +447,8 @@ export function TournamentForm() {
                       disabled={(date) => date < new Date()}
                       captionLayout="dropdown"
                       className="min-w-[300px]"
+                      startMonth={new Date(new Date().getFullYear() - 1, 0, 1)}
+                      endMonth={new Date(new Date().getFullYear() + 1, 11, 31)}
                     />
                   </PopoverContent>
                 </Popover>
@@ -484,6 +493,8 @@ export function TournamentForm() {
                       disabled={(date) => date < new Date()}
                       captionLayout="dropdown"
                       className="min-w-[300px]"
+                      startMonth={new Date(new Date().getFullYear() - 1, 0, 1)}
+                      endMonth={new Date(new Date().getFullYear() + 1, 11, 31)}
                     />
                   </PopoverContent>
                 </Popover>
@@ -496,19 +507,21 @@ export function TournamentForm() {
             control={form.control}
             name="isTeamBased"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Team Based</FormLabel>
-                  <FormDescription>
-                    Tournament allows team participation
-                  </FormDescription>
-                </div>
+              <FormItem>
+                <FormLabel className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    Team Based
+                    <FormDescription>
+                      Tournament allows team participation
+                    </FormDescription>
+                  </div>
+                </FormLabel>
               </FormItem>
             )}
           />
@@ -517,19 +530,21 @@ export function TournamentForm() {
             control={form.control}
             name="isVisible"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Visible to Public</FormLabel>
-                  <FormDescription>
-                    Tournament will be visible on the website
-                  </FormDescription>
-                </div>
+              <FormItem>
+                <FormLabel className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    Visible to Public
+                    <FormDescription>
+                      Tournament will be visible on the website
+                    </FormDescription>
+                  </div>
+                </FormLabel>
               </FormItem>
             )}
           />

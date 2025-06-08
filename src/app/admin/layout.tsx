@@ -1,4 +1,5 @@
 import { Sidebar } from "@/lib/admin-panel/components/sidebar";
+import { Toaster } from "sonner";
 
 export default function AdminLayout({
   children,
@@ -11,6 +12,7 @@ export default function AdminLayout({
         <Sidebar />
       </div>
       <main className="flex-1">{children}</main>
+      <Toaster />
     </div>
   );
 }
