@@ -158,9 +158,14 @@ model TournamentSeries {
     tournament   Tournament[]
 }
 
+enum TournamentMatchModeType {
+    BEST_OF
+    PLAY_ALL
+}
+
 model TournamentMatchMode {
-    id              String            @id @default(cuid())
-    mode            String
+    id              String                  @id @default(cuid())
+    mode            TournamentMatchModeType
     gameCount       Int // Number of games in match bo7 = 7 etc.
     tournament      Tournament[]
     groups          TournamentGroup[]
@@ -219,6 +224,7 @@ enum BracketType {
 
 model Tournament {
     id                    String                  @id @default(cuid())
+    name                  String
     urlKey                String
     registrationMode      RegistrationMode
     tournamentSeriesId    String
@@ -240,13 +246,20 @@ model Tournament {
     TournamentParticipant TournamentParticipant[]
 }
 
+enum TournamentSectionType {
+    HOW_TO_START
+    RULES
+    PRIZES
+    GENERAL
+}
+
 model TournamentSection {
-    id           String     @id @default(cuid())
+    id           String                @id @default(cuid())
     tournamentId String
-    tournament   Tournament @relation(fields: [tournamentId], references: [id])
-    type         String // group / prices / how to start etc.
+    tournament   Tournament            @relation(fields: [tournamentId], references: [id])
+    type         TournamentSectionType
     isVisible    Boolean
-    content      String?    @db.Text // markdown
+    content      String?               @db.Text // markdown
 
     @@unique([tournamentId, type])
 }
@@ -270,65 +283,63 @@ model TournamentTeam {
 }
 
 model TournamentStage {
-    id              String            @id @default(cuid())
-    tournamentId    String
-    tournament      Tournament        @relation(fields: [tournamentId], references: [id])
-    name            String
-    type            TournamentStageType
-    isActive        Boolean           @default(false)
-    startDate       DateTime?
-    endDate         DateTime?
-    description     String?
-    
+    id           String              @id @default(cuid())
+    tournamentId String
+    tournament   Tournament          @relation(fields: [tournamentId], references: [id])
+    name         String
+    type         TournamentStageType
+    isActive     Boolean             @default(false)
+    description  String?
+
     // For bracket stages
-    bracketType     BracketType?
-    bracketSize     Int?             // Number of participants in bracket
-    isSeeded        Boolean          @default(true)
-    
-    groups          TournamentGroup[]
-    brackets        TournamentBracket[]
+    bracketType BracketType?
+    bracketSize Int? // Number of participants in bracket
+    isSeeded    Boolean      @default(true)
+
+    groups   TournamentGroup[]
+    brackets TournamentBracket[]
 
     @@unique([tournamentId, type])
 }
 
 model TournamentBracket {
-    id              String            @id @default(cuid())
-    stageId         String
-    stage           TournamentStage   @relation(fields: [stageId], references: [id])
-    name            String
-    displayOrder    Int
-    isActive        Boolean           @default(false)
-    startDate       DateTime?
-    endDate         DateTime?
-    description     String?           @db.Text
-    
+    id           String          @id @default(cuid())
+    stageId      String
+    stage        TournamentStage @relation(fields: [stageId], references: [id])
+    name         String
+    displayOrder Int
+    isActive     Boolean         @default(false)
+    startDate    DateTime?
+    endDate      DateTime?
+    description  String?         @db.Text
+
     // Bracket configuration
     bracketType     BracketType
-    bracketSize     Int              // Number of participants in bracket
-    isSeeded        Boolean          @default(true)
-    isManualSeeding Boolean          @default(false) // If true, admin can manually set matchups
-    
-    bracketNodes    TournamentBracketNode[]
+    bracketSize     Int // Number of participants in bracket
+    isSeeded        Boolean     @default(true)
+    isManualSeeding Boolean     @default(false) // If true, admin can manually set matchups
+
+    bracketNodes TournamentBracketNode[]
 
     @@unique([stageId, displayOrder])
 }
 
 model TournamentBracketNode {
-    id              String            @id @default(cuid())
+    id              String                  @id @default(cuid())
     bracketId       String
-    bracket         TournamentBracket @relation(fields: [bracketId], references: [id])
-    round           Int               // Round number in bracket
-    position        Int               // Position in round
-    isWinnerBracket Boolean           @default(true) // For double elimination
-    parentNodeId    String?           // Reference to parent node in bracket
-    parentNode      TournamentBracketNode? @relation("BracketNodeParent", fields: [parentNodeId], references: [id])
+    bracket         TournamentBracket       @relation(fields: [bracketId], references: [id])
+    round           Int // Round number in bracket
+    position        Int // Position in round
+    isWinnerBracket Boolean                 @default(true) // For double elimination
+    parentNodeId    String? // Reference to parent node in bracket
+    parentNode      TournamentBracketNode?  @relation("BracketNodeParent", fields: [parentNodeId], references: [id])
     childNodes      TournamentBracketNode[] @relation("BracketNodeParent")
     matchId         String?
-    match           TournamentMatch?  @relation(fields: [matchId], references: [id])
-    
+    match           TournamentMatch?        @relation(fields: [matchId], references: [id])
+
     // Admin control fields
-    isManualMatch   Boolean           @default(false) // If true, this match was manually created
-    adminComment    String?           @db.Text // For admin notes about this node
+    isManualMatch Boolean @default(false) // If true, this match was manually created
+    adminComment  String? @db.Text // For admin notes about this node
 
     @@unique([bracketId, round, position])
 }
@@ -341,7 +352,7 @@ model TournamentGroup {
 
     displayOrder Int
     name         String
-    description  String?    @db.Text
+    description  String?             @db.Text
     matchModeId  String
     matchMode    TournamentMatchMode @relation(fields: [matchModeId], references: [id])
 
@@ -396,20 +407,20 @@ model TournamentMatch {
     mapDraftKey String
 
     status       MatchStatus
-    comment      String?           @db.Text
-    adminComment String?           @db.Text
+    comment      String?     @db.Text
+    adminComment String?     @db.Text
 
     // Match creation info
-    isManualMatch Boolean           @default(false) // If true, this match was manually created
-    createdBy     String?           // User ID who created the match
-    createdAt     DateTime          @default(now())
+    isManualMatch Boolean  @default(false) // If true, this match was manually created
+    createdBy     String? // User ID who created the match
+    createdAt     DateTime @default(now())
 
     TournamentMatchMode        TournamentMatchMode?         @relation(fields: [tournamentMatchModeId], references: [id])
     tournamentMatchModeId      String?
     TournamentMatchParticipant TournamentMatchParticipant[] // Contains the two participants/teams
     Game                       Game[]
     TournamentMatchStream      TournamentMatchStream[]
-    bracketNodes               TournamentBracketNode[]      // Links to bracket nodes that use this match
+    bracketNodes               TournamentBracketNode[] // Links to bracket nodes that use this match
 
     @@unique([groupId]) // Ensures a match belongs to either a group or is part of a bracket node
 }
@@ -430,19 +441,19 @@ model TournamentMatchStream {
 }
 
 model TournamentMatchParticipant {
-    id                String                 @id @default(cuid())
-    matchId           String
-    match             TournamentMatch        @relation(fields: [matchId], references: [id])
-    participantId     String?
-    participant       TournamentParticipant? @relation(fields: [participantId], references: [id])
-    teamId            String?
-    team              TournamentTeam?        @relation(fields: [teamId], references: [id])
-    isWinner          Boolean                @default(false)
-    score             Int?                   // Optional score for the participant/team
+    id            String                 @id @default(cuid())
+    matchId       String
+    match         TournamentMatch        @relation(fields: [matchId], references: [id])
+    participantId String?
+    participant   TournamentParticipant? @relation(fields: [participantId], references: [id])
+    teamId        String?
+    team          TournamentTeam?        @relation(fields: [teamId], references: [id])
+    isWinner      Boolean                @default(false)
+    score         Int? // Optional score for the participant/team
 
     // Relations for games
-    gamesWon          Game[]                 @relation("GameWinner")
-    gamesLost         Game[]                 @relation("GameLoser")
+    gamesWon  Game[] @relation("GameWinner")
+    gamesLost Game[] @relation("GameLoser")
 
     @@unique([matchId, participantId])
     @@unique([matchId, teamId])
@@ -457,7 +468,7 @@ model Game {
     map   Map    @relation(fields: [mapId], references: [id])
 
     gameDate DateTime
-    recUrl   String?        @db.Text
+    recUrl   String?  @db.Text
 
     winnerId String
     winner   TournamentMatchParticipant @relation("GameWinner", fields: [winnerId], references: [id])

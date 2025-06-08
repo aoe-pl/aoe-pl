@@ -1,18 +1,19 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
     image: postgres:16
     container_name: aoe-pl-db
     environment:
-      POSTGRES_USER: aoepl
-      POSTGRES_PASSWORD: aoeplpassword
-      POSTGRES_DB: aoepl
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
 volumes:
-  postgres_data: 
+  postgres-data:
+    driver: local

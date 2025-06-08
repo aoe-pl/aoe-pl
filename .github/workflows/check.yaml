@@ -18,32 +18,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: npm
 
-      - name: Install deps
-        run: pnpm install
+      - name: Install deps with platform-specific binaries
+        run: |
+          npm install
+          npm install lightningcss --force
+
+      - name: Rebuild native modules
+        run: npm rebuild
 
       - name: Format check
-        run: pnpm run format:check
+        run: npm run format:check
         if: always()
 
       - name: Lint
-        run: pnpm run lint
+        run: npm run lint
         if: always()
 
       - name: Build
-        run: pnpm run build
+        run: npm run build
         if: always()
 
       - name: Find deadcode
         run: |
-          pnpm run knip || echo "Dead code found – review manually"
+          npm run knip || echo "Dead code found – review manually"
         if: always()
         continue-on-error: true
