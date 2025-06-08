@@ -24,8 +24,13 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install deps
-        run: npm ci
+      - name: Install deps with platform-specific binaries
+        run: |
+          npm install
+          npm install lightningcss --force
+
+      - name: Rebuild native modules
+        run: npm rebuild
 
       - name: Format check
         run: npm run format:check
