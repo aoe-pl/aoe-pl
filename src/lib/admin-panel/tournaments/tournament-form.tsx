@@ -1,21 +1,18 @@
 "use client";
 
 import {
-  Form,
   FormMessage,
   FormDescription,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
+  Form,
 } from "@/components/ui/form";
 import {
-  TournamentStatus,
-  RegistrationMode,
-  getRegistrationModeLabel,
-  TournamentStageType,
-  getTournamentStatusLabel,
-  tournamentFormSchema,
+  type tournamentFormSchema,
+  registrationModes,
+  tournamentStatuses,
 } from "./tournament";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,8 +31,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
@@ -43,91 +38,21 @@ import { cn } from "@/lib/utils";
 import { TournamentSeriesSelector } from "./tournament-series-selector";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 import { TournamentStageManager } from "./tournament-stage-manager";
-import { api } from "@/trpc/react";
-import { toast } from "sonner";
+import type { UseFormReturn } from "react-hook-form";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
-const registrationModes: { value: RegistrationMode; label: string }[] = [
-  {
-    value: RegistrationMode.INDIVIDUAL,
-    label: getRegistrationModeLabel(RegistrationMode.INDIVIDUAL),
-  },
-  {
-    value: RegistrationMode.TEAM,
-    label: getRegistrationModeLabel(RegistrationMode.TEAM),
-  },
-  {
-    value: RegistrationMode.ADMIN,
-    label: getRegistrationModeLabel(RegistrationMode.ADMIN),
-  },
-];
+type TournamentFormProps = {
+  onSubmit: (data: TournamentFormData) => void;
+  form: UseFormReturn<TournamentFormData>;
+  isPending: boolean;
+};
 
-const tournamentStatuses: { value: TournamentStatus; label: string }[] = [
-  {
-    value: TournamentStatus.PENDING,
-    label: getTournamentStatusLabel(TournamentStatus.PENDING),
-  },
-  {
-    value: TournamentStatus.ACTIVE,
-    label: getTournamentStatusLabel(TournamentStatus.ACTIVE),
-  },
-  {
-    value: TournamentStatus.FINISHED,
-    label: getTournamentStatusLabel(TournamentStatus.FINISHED),
-  },
-  {
-    value: TournamentStatus.CANCELLED,
-    label: getTournamentStatusLabel(TournamentStatus.CANCELLED),
-  },
-];
-
-export function TournamentForm() {
-  const form = useForm<TournamentFormData>({
-    resolver: zodResolver(tournamentFormSchema),
-    defaultValues: {
-      name: "",
-      urlKey: "",
-      tournamentSeriesId: "",
-      matchModeId: "",
-      registrationMode: RegistrationMode.INDIVIDUAL,
-      description: "",
-      isTeamBased: false,
-      startDate: undefined,
-      endDate: undefined,
-      participantsLimit: undefined,
-      registrationStartDate: undefined,
-      registrationEndDate: undefined,
-      status: TournamentStatus.PENDING,
-      isVisible: false,
-      stages: [
-        {
-          name: "Group Stage",
-          type: TournamentStageType.GROUP,
-          isActive: true,
-          description: "Standard group stage",
-          isSeeded: true,
-        },
-      ],
-    },
-  });
-
-  // tRPC mutation for creating tournament
-  const createTournamentMutation = api.tournaments.create.useMutation({
-    onSuccess: (data) => {
-      toast.success("Tournament created successfully!");
-      // Reset form after successful creation
-      form.reset();
-    },
-    onError: (error) => {
-      toast.error(`Failed to create tournament: ${error.message}`);
-    },
-  });
-
-  const onSubmit = (data: TournamentFormData) => {
-    createTournamentMutation.mutate(data);
-  };
-
+export function TournamentForm({
+  onSubmit,
+  form,
+  isPending,
+}: TournamentFormProps) {
   return (
     <div className="flex flex-col gap-4">
       <Form {...form}>
@@ -571,10 +496,10 @@ export function TournamentForm() {
 
           <Button
             type="submit"
-            disabled={createTournamentMutation.isPending}
+            disabled={isPending}
             className="w-full"
           >
-            {createTournamentMutation.isPending ? (
+            {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating Tournament...

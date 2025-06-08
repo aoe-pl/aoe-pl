@@ -112,6 +112,40 @@ const tournamentFormSchema = z
     },
   );
 
+const registrationModes: { value: RegistrationMode; label: string }[] = [
+  {
+    value: RegistrationMode.INDIVIDUAL,
+    label: getRegistrationModeLabel(RegistrationMode.INDIVIDUAL),
+  },
+  {
+    value: RegistrationMode.TEAM,
+    label: getRegistrationModeLabel(RegistrationMode.TEAM),
+  },
+  {
+    value: RegistrationMode.ADMIN,
+    label: getRegistrationModeLabel(RegistrationMode.ADMIN),
+  },
+];
+
+const tournamentStatuses: { value: TournamentStatus; label: string }[] = [
+  {
+    value: TournamentStatus.PENDING,
+    label: getTournamentStatusLabel(TournamentStatus.PENDING),
+  },
+  {
+    value: TournamentStatus.ACTIVE,
+    label: getTournamentStatusLabel(TournamentStatus.ACTIVE),
+  },
+  {
+    value: TournamentStatus.FINISHED,
+    label: getTournamentStatusLabel(TournamentStatus.FINISHED),
+  },
+  {
+    value: TournamentStatus.CANCELLED,
+    label: getTournamentStatusLabel(TournamentStatus.CANCELLED),
+  },
+];
+
 export {
   registrationModesLabels,
   tournamentStatusesLabels,
@@ -126,4 +160,6 @@ export {
   getTournamentStatusLabel,
   getRegistrationModeLabel,
   tournamentFormSchema,
+  registrationModes,
+  tournamentStatuses,
 };
