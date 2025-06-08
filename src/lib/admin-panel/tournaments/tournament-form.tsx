@@ -9,7 +9,11 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { type TournamentStatus, type RegistrationMode } from "./tournament";
+import {
+  type TournamentStatus,
+  type RegistrationMode,
+  TournamentStageType,
+} from "./tournament";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,6 +28,10 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { TournamentSeriesSelector } from "./tournament-series-selector";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
+import {
+  TournamentStageManager,
+  type TournamentStageData,
+} from "./tournament-stage-manager";
 
 // turn into zod schema and extract
 type TournamentFormData = {
@@ -41,8 +49,7 @@ type TournamentFormData = {
   registrationEndDate?: string;
   status: TournamentStatus;
   isVisible: boolean;
-  // additional:
-  // stages
+  stages: TournamentStageData[];
 };
 
 const registrationModes: { value: RegistrationMode; label: string }[] = [
@@ -75,6 +82,14 @@ export function TournamentForm() {
       registrationEndDate: "",
       status: "PENDING",
       isVisible: false,
+      stages: [
+        {
+          name: "Group Stage",
+          type: TournamentStageType.GROUP,
+          isActive: true,
+          description: "Standard group stage",
+        },
+      ],
     },
   });
 
@@ -86,7 +101,10 @@ export function TournamentForm() {
   return (
     <div className="flex flex-col gap-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8"
+        >
           <FormField
             control={form.control}
             name="name"
@@ -94,7 +112,10 @@ export function TournamentForm() {
               <FormItem>
                 <FormLabel>Tournament Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter tournament name" {...field} />
+                  <Input
+                    placeholder="Enter tournament name"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -148,7 +169,10 @@ export function TournamentForm() {
               <FormItem>
                 <FormLabel>URL Key</FormLabel>
                 <FormControl>
-                  <Input placeholder="tournament-url-key" {...field} />
+                  <Input
+                    placeholder="tournament-url-key"
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
                   Used in the tournament URL. Use lowercase letters, numbers,
@@ -194,7 +218,10 @@ export function TournamentForm() {
                   </FormControl>
                   <SelectContent>
                     {registrationModes.map((mode) => (
-                      <SelectItem key={mode.value} value={mode.value}>
+                      <SelectItem
+                        key={mode.value}
+                        value={mode.value}
+                      >
                         {mode.label}
                       </SelectItem>
                     ))}
@@ -222,7 +249,10 @@ export function TournamentForm() {
                   </FormControl>
                   <SelectContent>
                     {tournamentStatuses.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
+                      <SelectItem
+                        key={status.value}
+                        value={status.value}
+                      >
                         {status.label}
                       </SelectItem>
                     ))}
@@ -240,7 +270,10 @@ export function TournamentForm() {
               <FormItem>
                 <FormLabel>Start Date</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -254,7 +287,10 @@ export function TournamentForm() {
               <FormItem>
                 <FormLabel>End Date (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -291,7 +327,10 @@ export function TournamentForm() {
               <FormItem>
                 <FormLabel>Registration Start Date (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -305,7 +344,10 @@ export function TournamentForm() {
               <FormItem>
                 <FormLabel>Registration End Date (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -350,6 +392,26 @@ export function TournamentForm() {
                     Tournament will be visible on the website
                   </FormDescription>
                 </div>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="stages"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <TournamentStageManager
+                    stages={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Configure the stages of your tournament (group stage,
+                  brackets, etc.)
+                </FormDescription>
+                <FormMessage />
               </FormItem>
             )}
           />
