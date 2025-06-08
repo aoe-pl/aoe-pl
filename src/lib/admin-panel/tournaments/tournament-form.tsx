@@ -10,9 +10,12 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import {
-  type TournamentStatus,
-  type RegistrationMode,
+  TournamentStatus,
+  RegistrationMode,
+  getRegistrationModeLabel,
   TournamentStageType,
+  getTournamentStatusLabel,
+  tournamentFormSchema,
 } from "./tournament";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,62 +28,77 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TournamentSeriesSelector } from "./tournament-series-selector";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
-import {
-  TournamentStageManager,
-  type TournamentStageData,
-} from "./tournament-stage-manager";
+import { TournamentStageManager } from "./tournament-stage-manager";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
-// turn into zod schema and extract
-type TournamentFormData = {
-  name: string;
-  urlKey: string;
-  tournamentSeriesId: string;
-  matchModeId: string;
-  registrationMode: RegistrationMode;
-  description: string;
-  isTeamBased: boolean;
-  startDate: string;
-  endDate?: string;
-  participantsLimit?: number;
-  registrationStartDate?: string;
-  registrationEndDate?: string;
-  status: TournamentStatus;
-  isVisible: boolean;
-  stages: TournamentStageData[];
-};
+type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
 const registrationModes: { value: RegistrationMode; label: string }[] = [
-  { value: "INDIVIDUAL" as const, label: "Individual" },
-  { value: "TEAM" as const, label: "Team" },
-  { value: "ADMIN" as const, label: "Admin Only" },
+  {
+    value: RegistrationMode.INDIVIDUAL,
+    label: getRegistrationModeLabel(RegistrationMode.INDIVIDUAL),
+  },
+  {
+    value: RegistrationMode.TEAM,
+    label: getRegistrationModeLabel(RegistrationMode.TEAM),
+  },
+  {
+    value: RegistrationMode.ADMIN,
+    label: getRegistrationModeLabel(RegistrationMode.ADMIN),
+  },
 ];
 
 const tournamentStatuses: { value: TournamentStatus; label: string }[] = [
-  { value: "PENDING" as const, label: "Pending" },
-  { value: "ACTIVE" as const, label: "Active" },
-  { value: "FINISHED" as const, label: "Finished" },
-  { value: "CANCELLED" as const, label: "Cancelled" },
+  {
+    value: TournamentStatus.PENDING,
+    label: getTournamentStatusLabel(TournamentStatus.PENDING),
+  },
+  {
+    value: TournamentStatus.ACTIVE,
+    label: getTournamentStatusLabel(TournamentStatus.ACTIVE),
+  },
+  {
+    value: TournamentStatus.FINISHED,
+    label: getTournamentStatusLabel(TournamentStatus.FINISHED),
+  },
+  {
+    value: TournamentStatus.CANCELLED,
+    label: getTournamentStatusLabel(TournamentStatus.CANCELLED),
+  },
 ];
 
 export function TournamentForm() {
   const form = useForm<TournamentFormData>({
+    resolver: zodResolver(tournamentFormSchema),
     defaultValues: {
       name: "",
       urlKey: "",
       tournamentSeriesId: "",
       matchModeId: "",
-      registrationMode: "INDIVIDUAL",
+      registrationMode: RegistrationMode.INDIVIDUAL,
       description: "",
       isTeamBased: false,
-      startDate: "",
-      endDate: "",
+      startDate: undefined,
+      endDate: undefined,
       participantsLimit: 32,
-      registrationStartDate: "",
-      registrationEndDate: "",
-      status: "PENDING",
+      registrationStartDate: undefined,
+      registrationEndDate: undefined,
+      status: TournamentStatus.PENDING,
       isVisible: false,
       stages: [
         {
@@ -88,14 +106,26 @@ export function TournamentForm() {
           type: TournamentStageType.GROUP,
           isActive: true,
           description: "Standard group stage",
+          isSeeded: true,
         },
       ],
     },
   });
 
+  // tRPC mutation for creating tournament
+  const createTournamentMutation = api.tournaments.create.useMutation({
+    onSuccess: (data) => {
+      toast.success("Tournament created successfully!");
+      // Reset form after successful creation
+      form.reset();
+    },
+    onError: (error) => {
+      toast.error(`Failed to create tournament: ${error.message}`);
+    },
+  });
+
   const onSubmit = (data: TournamentFormData) => {
-    console.log("Tournament form data:", data);
-    // This would normally submit to the backend
+    createTournamentMutation.mutate(data);
   };
 
   return (
@@ -267,14 +297,41 @@ export function TournamentForm() {
             control={form.control}
             name="startDate"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Start Date</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                  />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a start date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date()}
+                      captionLayout="dropdown"
+                      className="min-w-[300px]"
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
@@ -284,14 +341,41 @@ export function TournamentForm() {
             control={form.control}
             name="endDate"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>End Date (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                  />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick an end date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date()}
+                      captionLayout="dropdown"
+                      className="min-w-[300px]"
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
@@ -324,14 +408,41 @@ export function TournamentForm() {
             control={form.control}
             name="registrationStartDate"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Registration Start Date (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                  />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a registration start date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date()}
+                      captionLayout="dropdown"
+                      className="min-w-[300px]"
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
@@ -341,14 +452,41 @@ export function TournamentForm() {
             control={form.control}
             name="registrationEndDate"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Registration End Date (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                  />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a registration end date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date()}
+                      captionLayout="dropdown"
+                      className="min-w-[300px]"
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
@@ -416,7 +554,20 @@ export function TournamentForm() {
             )}
           />
 
-          <Button type="submit">Submit</Button>
+          <Button
+            type="submit"
+            disabled={createTournamentMutation.isPending}
+            className="w-full"
+          >
+            {createTournamentMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating Tournament...
+              </>
+            ) : (
+              "Create Tournament"
+            )}
+          </Button>
         </form>
       </Form>
     </div>

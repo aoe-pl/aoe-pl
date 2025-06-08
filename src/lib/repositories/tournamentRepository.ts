@@ -1,6 +1,11 @@
 import { db } from "@/server/db";
 
-import type { TournamentStatus, RegistrationMode } from "@prisma/client";
+import type {
+  TournamentStatus,
+  RegistrationMode,
+  TournamentStageType,
+  BracketType,
+} from "@prisma/client";
 
 export const tournamentRepository = {
   async getTournaments() {
@@ -47,6 +52,54 @@ export const tournamentRepository = {
     isVisible: boolean;
   }) {
     return db.tournament.create({ data });
+  },
+  async createTournamentWithStages(
+    tournamentData: {
+      name: string;
+      urlKey: string;
+      registrationMode: RegistrationMode;
+      tournamentSeriesId: string;
+      matchModeId: string;
+      description: string;
+      isTeamBased: boolean;
+      startDate: Date;
+      endDate?: Date;
+      participantsLimit?: number;
+      registrationStartDate?: Date;
+      registrationEndDate?: Date;
+      status: TournamentStatus;
+      isVisible: boolean;
+    },
+    stagesData: {
+      name: string;
+      type: TournamentStageType;
+      isActive: boolean;
+      description?: string;
+      bracketType?: BracketType;
+      bracketSize?: number;
+      isSeeded: boolean;
+    }[],
+  ) {
+    const { tournamentSeriesId, matchModeId, ...rest } = tournamentData;
+
+    return db.tournament.create({
+      data: {
+        ...rest,
+        tournamentSeries: {
+          connect: {
+            id: tournamentSeriesId,
+          },
+        },
+        matchMode: {
+          connect: {
+            id: matchModeId,
+          },
+        },
+        stages: {
+          create: stagesData,
+        },
+      },
+    });
   },
   async updateTournament(
     id: string,

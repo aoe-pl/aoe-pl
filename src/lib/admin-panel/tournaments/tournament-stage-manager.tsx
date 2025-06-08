@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +32,8 @@ export type TournamentStageData = {
 };
 
 interface TournamentStageManagerProps {
-  stages: TournamentStageData[];
-  onChange: (stages: TournamentStageData[]) => void;
+  stages: Omit<TournamentStageData, "id">[];
+  onChange: (stages: Omit<TournamentStageData, "id">[]) => void;
 }
 
 export function TournamentStageManager({
@@ -44,6 +44,16 @@ export function TournamentStageManager({
   const [editingStage, setEditingStage] = useState<TournamentStageData | null>(
     null,
   );
+
+  const [innerStages, setInnerStages] = useState<TournamentStageData[]>(
+    stages.map((stage, index) => ({ ...stage, id: index.toString() })),
+  );
+
+  useEffect(() => {
+    setInnerStages(
+      stages.map((stage, index) => ({ ...stage, id: index.toString() })),
+    );
+  }, [stages]);
 
   const handleAddStage = () => {
     setEditingStage(null);
@@ -56,7 +66,7 @@ export function TournamentStageManager({
   };
 
   const handleDeleteStage = (stageId: string) => {
-    const newStages = stages.filter((s) => s.id !== stageId);
+    const newStages = innerStages.filter((s) => s.id !== stageId);
     // we need to update  other stages ID then
     const stagesToSave = newStages.map((stage, index) => {
       return { ...stage, id: index.toString() };
@@ -70,21 +80,28 @@ export function TournamentStageManager({
 
     if (editingStage?.id !== undefined) {
       // Editing existing stage
-      const index = parseInt(editingStage.id);
-      newStages = [...stages];
-      newStages[index] = stageData;
+      const stageIndex = innerStages.findIndex((s) => s.id === editingStage.id);
+      newStages = [...innerStages];
+      newStages[stageIndex] = { ...stageData, id: editingStage.id };
     } else {
-      // Adding new stage
-      newStages = [...stages, stageData];
+      // Adding new stage - generate new ID
+      const newId = Math.max(
+        0,
+        ...innerStages.map((s) => parseInt(s.id)),
+      ).toString();
+      const nextId = (parseInt(newId) + 1).toString();
+      newStages = [...innerStages, { ...stageData, id: nextId }];
     }
 
     // If this stage is being set to active, deactivate all other stages
     if (stageData.isActive) {
-      const activeStageIndex = newStages.findIndex((stage) => stage.isActive);
-
-      if (activeStageIndex !== -1 && newStages[activeStageIndex]) {
-        newStages[activeStageIndex].isActive = false;
-      }
+      newStages = newStages.map((stage) => ({
+        ...stage,
+        isActive:
+          stage.id === (editingStage?.id ?? newStages[newStages.length - 1]?.id)
+            ? true
+            : false,
+      }));
     }
 
     onChange(newStages);
@@ -97,6 +114,7 @@ export function TournamentStageManager({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Tournament Stages</h3>
         <Button
+          type="button"
           onClick={handleAddStage}
           size="sm"
         >
@@ -110,6 +128,7 @@ export function TournamentStageManager({
           <CardContent className="flex flex-col items-center justify-center py-8">
             <p className="text-muted-foreground mb-4">No stages configured</p>
             <Button
+              type="button"
               onClick={handleAddStage}
               variant="outline"
             >
@@ -120,7 +139,7 @@ export function TournamentStageManager({
         </Card>
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          {stages.map((stage, index) => (
+          {innerStages.map((stage, index) => (
             <Card
               key={index}
               className="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
@@ -137,6 +156,7 @@ export function TournamentStageManager({
                     </Badge>
                     <div className="flex gap-1">
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditStage(stage)}
@@ -144,6 +164,7 @@ export function TournamentStageManager({
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteStage(stage.id)}
@@ -197,7 +218,7 @@ export function TournamentStageManager({
             initialData={editingStage}
             onSubmit={handleStageSubmit}
             onCancel={() => setIsDrawerOpen(false)}
-            existingStages={stages}
+            existingStages={innerStages}
           />
         </DrawerContent>
       </Drawer>

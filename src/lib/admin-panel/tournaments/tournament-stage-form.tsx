@@ -30,7 +30,7 @@ import {
   stageTypesLabels,
   TournamentStageType,
 } from "./tournament";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface TournamentStageFormProps {
   initialData: TournamentStageData | null;
@@ -63,6 +63,7 @@ export function TournamentStageForm({
 }: TournamentStageFormProps) {
   const form = useForm<TournamentStageData>({
     defaultValues: {
+      id: initialData?.id ?? "0",
       name: initialData?.name ?? "",
       type: initialData?.type ?? "GROUP",
       isActive: initialData?.isActive ?? false,
@@ -77,8 +78,8 @@ export function TournamentStageForm({
   const isActiveStage = form.watch("isActive");
 
   // Check if there are other active stages
-  const hasOtherActiveStages = existingStages.some((stage, index) => {
-    if (initialData?.id !== undefined && index === parseInt(initialData.id)) {
+  const hasOtherActiveStages = existingStages.some((stage) => {
+    if (initialData?.id !== undefined && stage.id === initialData.id) {
       return false; // Don't count the stage being edited
     }
     return stage.isActive;
@@ -100,7 +101,11 @@ export function TournamentStageForm({
     <ScrollArea className="h-[60vh] px-4">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(handleSubmit)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void form.handleSubmit(handleSubmit)(e);
+          }}
           className="space-y-6"
         >
           <div className="space-y-4">
@@ -297,6 +302,7 @@ export function TournamentStageForm({
             </Button>
             <DrawerClose asChild>
               <Button
+                type="button"
                 variant="outline"
                 onClick={onCancel}
               >

@@ -2,17 +2,14 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
-import {
-  TournamentStatus,
-  RegistrationMode,
-  TournamentMatchModeType,
-} from "@prisma/client";
+import { TournamentMatchModeType } from "@prisma/client";
 import type {
   Tournament,
   TournamentSeries,
   TournamentParticipant,
 } from "@prisma/client";
 import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
+import { tournamentFormSchema } from "@/lib/admin-panel/tournaments/tournament";
 
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
@@ -30,46 +27,19 @@ export const tournamentRouter = createTRPCRouter({
       return tournamentRepository.getTournamentById(input.id);
     }),
   create: publicProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        urlKey: z.string(),
-        registrationMode: z.nativeEnum(RegistrationMode),
-        tournamentSeriesId: z.string(),
-        matchModeId: z.string(),
-        description: z.string(),
-        isTeamBased: z.boolean(),
-        startDate: z.coerce.date(),
-        endDate: z.coerce.date().optional(),
-        participantsLimit: z.number().optional(),
-        registrationStartDate: z.coerce.date().optional(),
-        registrationEndDate: z.coerce.date().optional(),
-        status: z.nativeEnum(TournamentStatus),
-        isVisible: z.boolean(),
-      }),
-    )
+    .input(tournamentFormSchema)
     .mutation(async ({ input }) => {
-      return tournamentRepository.createTournament(input);
+      const { stages, ...tournamentData } = input;
+      return tournamentRepository.createTournamentWithStages(
+        tournamentData,
+        stages,
+      );
     }),
   update: publicProcedure
     .input(
       z.object({
         id: z.string(),
-        data: z.object({
-          urlKey: z.string().optional(),
-          registrationMode: z.nativeEnum(RegistrationMode).optional(),
-          tournamentSeriesId: z.string().optional(),
-          matchModeId: z.string().optional(),
-          description: z.string().optional(),
-          isTeamBased: z.boolean().optional(),
-          startDate: z.coerce.date().optional(),
-          endDate: z.coerce.date().optional(),
-          participantsLimit: z.number().optional(),
-          registrationStartDate: z.coerce.date().optional(),
-          registrationEndDate: z.coerce.date().optional(),
-          status: z.nativeEnum(TournamentStatus).optional(),
-          isVisible: z.boolean().optional(),
-        }),
+        data: tournamentFormSchema,
       }),
     )
     .mutation(async ({ input }) => {
