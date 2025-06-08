@@ -1,10 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { JSX } from "react";
 
-export function CogIcon({
-  className,
-  ...props
-}: JSX.IntrinsicElements["svg"]) {
+export function CogIcon({ className, ...props }: JSX.IntrinsicElements["svg"]) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

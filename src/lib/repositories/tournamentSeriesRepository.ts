@@ -74,4 +74,4 @@ export const tournamentSeriesRepository = {
   async deleteTournamentSeries(id: string) {
     return db.tournamentSeries.delete({ where: { id } });
   },
-}; 
+};

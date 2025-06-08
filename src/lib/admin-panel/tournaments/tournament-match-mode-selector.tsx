@@ -49,7 +49,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import { TournamentMatchModeType } from "@prisma/client";
+import { TournamentMatchModeType } from "./tournament";
 
 const matchModeTypes = [
   { value: "BEST_OF" as const, label: "Best Of" },

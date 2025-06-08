@@ -11,4 +11,4 @@ export const usersRouter = createTRPCRouter({
     .query(async ({ input }) => {
       return usersRepository.getUserById(input.id);
     }),
-}); 
+});

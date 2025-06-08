@@ -7,7 +7,7 @@ import {
   ChevronRightIcon,
 } from "lucide-react";
 import {
-  DayButton,
+  type DayButton,
   DayPicker,
   getDefaultClassNames,
   YearsDropdown,

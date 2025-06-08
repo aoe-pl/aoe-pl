@@ -53,7 +53,10 @@ export function Sidebar() {
         >
           Settings
         </NavItem>
-        <NavItem href="/" icon={<BackspaceIcon />}>
+        <NavItem
+          href="/"
+          icon={<BackspaceIcon />}
+        >
           Exit Admin
         </NavItem>
       </nav>
@@ -76,7 +79,7 @@ function NavItem({
     <Link
       href={href}
       className={cn(
-        "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground flex items-center gap-2 px-3 py-2 text-base transition-colors justify-center md:justify-start",
+        "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground flex items-center justify-center gap-2 px-3 py-2 text-base transition-colors md:justify-start",
         active
           ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
           : "text-sidebar-foreground",

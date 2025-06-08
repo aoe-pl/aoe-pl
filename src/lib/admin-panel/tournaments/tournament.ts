@@ -3,6 +3,7 @@ import {
   TournamentStageType,
   TournamentStatus,
   BracketType,
+  TournamentMatchModeType,
 } from "@prisma/client";
 import z from "zod";
 
@@ -151,6 +152,7 @@ export {
   tournamentStatusesLabels,
   stageTypesLabels,
   bracketTypesLabels,
+  TournamentMatchModeType,
   TournamentStatus,
   TournamentStageType,
   BracketType,
