@@ -13,56 +13,36 @@ export async function TournamentList() {
           {tournaments.map((tournament: TournamentWithRelations) => (
             <div
               key={tournament.id}
-              className="flex flex-col gap-4 rounded-xl border border-[#2d3646] bg-[#232a36] p-6 shadow"
+              className="flex flex-col gap-4 rounded-xl border p-6 shadow"
             >
               <div className="flex items-center justify-between">
-                <div className="text-lg font-bold text-white">
+                <div className="text-lg font-bold">
                   {tournament.tournamentSeries?.name ?? "Series"}
                 </div>
-                <span
-                  className={`rounded px-2 py-1 text-xs font-semibold ${
-                    tournament.status === "ACTIVE"
-                      ? "bg-green-700 text-green-200"
-                      : tournament.status === "PENDING"
-                        ? "bg-yellow-700 text-yellow-200"
-                        : tournament.status === "FINISHED"
-                          ? "bg-blue-700 text-blue-200"
-                          : "bg-gray-700 text-gray-200"
-                  }`}
-                >
+                <span className={`rounded px-2 py-1 text-xs font-semibold`}>
                   {tournament.status}
                 </span>
               </div>
-              <div className="text-xl font-semibold text-white">
+              <div className="text-xl font-semibold">
                 {tournament.urlKey.replace(/-/g, " ")}
               </div>
-              <div className="line-clamp-2 text-sm text-gray-400">
+              <div className="line-clamp-2 text-sm">
                 {tournament.description}
               </div>
               <div className="mt-2 flex items-center gap-4">
-                <span className="text-sm text-gray-300">
+                <span className="text-sm">
                   Participants: {tournament.TournamentParticipant?.length ?? 0}
                 </span>
-                <span className="text-sm text-gray-300">
+                <span className="text-sm">
                   Start: {new Date(tournament.startDate).toLocaleDateString()}
                 </span>
               </div>
               <div className="mt-4 flex gap-2">
                 <Link href={`/admin/tournaments/${tournament.id}/edit`}>
-                  <Button
-                    variant="secondary"
-                    className="bg-[#2d3646] text-white"
-                  >
-                    Edit
-                  </Button>
+                  <Button variant="secondary">Edit</Button>
                 </Link>
                 <Link href={`/admin/tournaments/${tournament.id}`}>
-                  <Button
-                    variant="outline"
-                    className="border-[#2d3646] text-white"
-                  >
-                    Details
-                  </Button>
+                  <Button variant="outline">Details</Button>
                 </Link>
               </div>
             </div>
