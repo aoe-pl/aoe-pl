@@ -244,6 +244,8 @@ model Tournament {
     teams                 TournamentTeam[]
     stages                TournamentStage[]
     TournamentParticipant TournamentParticipant[]
+
+    @@unique([tournamentSeriesId, urlKey])
 }
 
 enum TournamentSectionType {

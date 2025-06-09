@@ -11,11 +11,14 @@ import {
 } from "./tournament";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
+import { useRouter } from "next/navigation";
 import { TournamentForm } from "./tournament-form";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
 export function TournamentCreate() {
+  const router = useRouter();
+
   const form = useForm<TournamentFormData>({
     resolver: zodResolver(tournamentFormSchema),
     defaultValues: {
@@ -48,9 +51,7 @@ export function TournamentCreate() {
   // tRPC mutation for creating tournament
   const createTournamentMutation = api.tournaments.create.useMutation({
     onSuccess: () => {
-      toast.success("Tournament created successfully!");
-      // Reset form after successful creation
-      form.reset();
+      router.push(`/admin/tournaments`);
     },
     onError: (error) => {
       toast.error(`Failed to create tournament: ${error.message}`);
