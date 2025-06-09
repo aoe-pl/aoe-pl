@@ -13,6 +13,15 @@ import { ZodError } from "zod";
 
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
+import { getIsProductionEnv } from "@/lib/utils";
+
+// Simple in-memory cache for user roles (you might want to use Redis in production)
+const userRolesCache = new Map<
+  string,
+  { isAdmin: boolean; timestamp: number }
+>();
+
+const CACHE_TTL = getIsProductionEnv() ? 5 * 60 * 1000 : 0; // 5 minutes
 
 /**
  * 1. CONTEXT
@@ -102,6 +111,45 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 /**
+ * Helper function to get user roles with caching
+ */
+async function isUserAdmin(userId: string): Promise<boolean> {
+  const cached = userRolesCache.get(userId);
+  const now = Date.now();
+
+  // Return cached data if it's still valid
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.isAdmin;
+  }
+
+  // Fetch fresh data from database
+  const userWithRoles = await db.user.findUnique({
+    where: { id: userId },
+    include: {
+      userRoles: {
+        include: {
+          role: true,
+        },
+      },
+    },
+  });
+
+  // Handle case where user is not found
+  if (!userWithRoles) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  const isAdmin = userWithRoles.userRoles.some(
+    (ur) => ur.role?.type === "ADMIN",
+  );
+
+  // Cache the result
+  userRolesCache.set(userId, { isAdmin, timestamp: now });
+
+  return isAdmin;
+}
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
@@ -124,10 +172,25 @@ export const protectedProcedure = t.procedure
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
+
     return next({
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
       },
     });
+  });
+
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const isAdmin = await isUserAdmin(ctx.session.user.id);
+    if (!isAdmin) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    return next({ ctx });
   });
