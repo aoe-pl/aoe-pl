@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
 import { TournamentMatchModeType } from "@prisma/client";
@@ -26,7 +30,7 @@ export const tournamentRouter = createTRPCRouter({
     .query(async ({ input }) => {
       return tournamentRepository.getTournamentById(input.id);
     }),
-  create: publicProcedure
+  create: adminProcedure
     .input(tournamentFormSchema)
     .mutation(async ({ input }) => {
       const { stages, ...tournamentData } = input;
@@ -35,7 +39,7 @@ export const tournamentRouter = createTRPCRouter({
         stages,
       );
     }),
-  update: publicProcedure
+  update: adminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -45,7 +49,7 @@ export const tournamentRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return tournamentRepository.updateTournament(input.id, input.data);
     }),
-  delete: publicProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       return tournamentRepository.deleteTournament(input.id);
@@ -61,7 +65,7 @@ export const tournamentRouter = createTRPCRouter({
       .query(async ({ input }) => {
         return tournamentSeriesRepository.getTournamentSeriesById(input.id);
       }),
-    create: publicProcedure
+    create: adminProcedure
       .input(
         z.object({
           name: z.string().min(1, "Name is required"),
@@ -73,7 +77,7 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input }) => {
         return tournamentSeriesRepository.createTournamentSeries(input);
       }),
-    update: publicProcedure
+    update: adminProcedure
       .input(
         z.object({
           id: z.string(),
@@ -91,7 +95,7 @@ export const tournamentRouter = createTRPCRouter({
           input.data,
         );
       }),
-    delete: publicProcedure
+    delete: adminProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentSeriesRepository.deleteTournamentSeries(input.id);
@@ -106,7 +110,7 @@ export const tournamentRouter = createTRPCRouter({
       .query(async ({ input }) => {
         return tournamentMatchModeRepository.getMatchModeById(input.id);
       }),
-    create: publicProcedure
+    create: adminProcedure
       .input(
         z.object({
           mode: z.nativeEnum(TournamentMatchModeType),
@@ -116,7 +120,7 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input }) => {
         return tournamentMatchModeRepository.createMatchMode(input);
       }),
-    update: publicProcedure
+    update: adminProcedure
       .input(
         z.object({
           id: z.string(),
@@ -132,7 +136,7 @@ export const tournamentRouter = createTRPCRouter({
           input.data,
         );
       }),
-    delete: publicProcedure
+    delete: adminProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentMatchModeRepository.deleteMatchMode(input.id);

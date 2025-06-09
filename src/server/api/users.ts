@@ -11,4 +11,11 @@ export const usersRouter = createTRPCRouter({
     .query(async ({ input }) => {
       return usersRepository.getUserById(input.id);
     }),
+  isAdmin: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session?.user) {
+      return false;
+    }
+
+    return usersRepository.isUserAdmin(ctx.session.user.id);
+  }),
 });

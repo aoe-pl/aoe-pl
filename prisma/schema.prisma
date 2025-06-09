@@ -69,9 +69,15 @@ model UserGameProfile {
     @@unique([userId, mainAccount]) // A user can only have one main account
 }
 
+enum RoleType {
+    ADMIN
+    MODERATOR
+}
+
 model Role {
-    id             String  @id @default(cuid())
+    id             String   @id @default(cuid())
     name           String
+    type           RoleType
     comment        String?
     selfAssignable Boolean
     modAssignable  Boolean
