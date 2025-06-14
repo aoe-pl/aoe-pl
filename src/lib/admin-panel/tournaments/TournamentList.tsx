@@ -91,7 +91,7 @@ export async function TournamentList() {
                     Edit
                   </Button>
                 </Link>
-                <Link href={`/admin/tournaments/${tournament.id}`}>
+                <Link href={`/admin/tournaments/view/${tournament.id}`}>
                   <Button
                     variant="outline"
                     className="rounded-lg px-5 py-2 font-semibold"

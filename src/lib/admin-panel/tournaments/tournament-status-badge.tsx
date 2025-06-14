@@ -1,5 +1,6 @@
 import type { TournamentWithRelations } from "@/server/api/tournament";
 import { TournamentStatus } from "./tournament";
+import { Badge } from "@/components/ui/badge";
 
 const statusBadgeClasses = {
   [TournamentStatus.PENDING]: "bg-yellow-600",
@@ -13,11 +14,5 @@ export function TournamentStatusBadge({
 }: {
   status: TournamentWithRelations["status"];
 }) {
-  return (
-    <span
-      className={`rounded px-2 py-1 text-xs font-semibold text-white ${statusBadgeClasses[status]}`}
-    >
-      {status}
-    </span>
-  );
+  return <Badge className={`${statusBadgeClasses[status]}`}>{status}</Badge>;
 }
