@@ -13,7 +13,11 @@ import type {
   TournamentParticipant,
 } from "@prisma/client";
 import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
-import { tournamentFormSchema } from "@/lib/admin-panel/tournaments/tournament";
+import {
+  tournamentFormSchema,
+  tournamentStageFormSchema,
+} from "@/lib/admin-panel/tournaments/tournament";
+import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
 
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
@@ -27,18 +31,42 @@ export const tournamentRouter = createTRPCRouter({
       z
         .object({
           sortByStatus: z.boolean().optional(),
+          includeTournamentSeries: z.boolean().optional(),
+          includeStages: z.boolean().optional(),
+          includeParticipants: z.boolean().optional(),
+          includeMatchMode: z.boolean().optional(),
         })
         .optional(),
     )
     .query(async ({ input }): Promise<TournamentWithRelations[]> => {
       return tournamentRepository.getTournaments({
         sortByStatus: input?.sortByStatus,
+        includeTournamentSeries: input?.includeTournamentSeries,
+        includeStages: input?.includeStages,
+        includeParticipants: input?.includeParticipants,
+        includeMatchMode: input?.includeMatchMode,
       });
     }),
   get: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        includeTournamentSeries: z.boolean().optional(),
+        includeStages: z.boolean().optional(),
+        includeParticipants: z.boolean().optional(),
+        includeMatchMode: z.boolean().optional(),
+        includeBrackets: z.boolean().optional(),
+        includeGroups: z.boolean().optional(),
+      }),
+    )
     .query(async ({ input }) => {
-      return tournamentRepository.getTournamentById(input.id);
+      return tournamentRepository.getTournamentById(input.id, {
+        includeStages: input.includeStages,
+        includeParticipants: input.includeParticipants,
+        includeMatchMode: input.includeMatchMode,
+        includeBrackets: input.includeBrackets,
+        includeGroups: input.includeGroups,
+      });
     }),
   create: adminProcedure
     .input(tournamentFormSchema)
@@ -55,6 +83,53 @@ export const tournamentRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return tournamentRepository.updateTournament(input.id, input.data);
     }),
+
+  // Tournament Stages routes
+  stages: createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentStagesRepository.getTournamentStages(
+          input.tournamentId,
+        );
+      }),
+    get: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentStagesRepository.getTournamentStageById(input.id);
+      }),
+    create: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          data: tournamentStageFormSchema,
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentStagesRepository.createTournamentStage(
+          input.tournamentId,
+          input.data,
+        );
+      }),
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          data: tournamentStageFormSchema,
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentStagesRepository.updateTournamentStage(
+          input.id,
+          input.data,
+        );
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentStagesRepository.deleteTournamentStage(input.id);
+      }),
+  }),
 
   // Tournament Series routes
   series: createTRPCRouter({

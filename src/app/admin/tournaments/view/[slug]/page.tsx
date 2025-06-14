@@ -1,10 +1,10 @@
 import { api } from "@/trpc/server";
 import Link from "next/link";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { getRegistrationModeLabel } from "@/lib/admin-panel/tournaments/tournament";
 import { TournamentStatusBadge } from "@/lib/admin-panel/tournaments/tournament-status-badge";
+import { TournamentInfo } from "@/lib/admin-panel/tournaments/tournament-info";
+import { TournamentStages } from "@/lib/admin-panel/tournaments/tournament-stages";
 
 export default async function AdminTournamentsViewPage({
   params,
@@ -12,7 +12,10 @@ export default async function AdminTournamentsViewPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const tournament = await api.tournaments.get({ id: slug });
+  const tournament = await api.tournaments.get({
+    id: slug,
+    includeParticipants: true,
+  });
 
   if (!tournament) {
     return <div className="text-destructive">Tournament not found.</div>;
@@ -41,13 +44,6 @@ export default async function AdminTournamentsViewPage({
         )}
       </div>
 
-      {/* Edit Button */}
-      <div className="flex w-full flex-wrap gap-2">
-        <Link href={`/admin/tournaments/edit/${tournament.id}`}>
-          <Button size="sm">Edit</Button>
-        </Link>
-      </div>
-
       {/* Tabs for advanced content */}
       <Tabs
         defaultValue="info"
@@ -55,102 +51,36 @@ export default async function AdminTournamentsViewPage({
       >
         <TabsList className="mb-2">
           <TabsTrigger value="info">Info</TabsTrigger>
+          <TabsTrigger value="stages">Stages</TabsTrigger>
           <TabsTrigger value="groups">Groups</TabsTrigger>
           <TabsTrigger value="bracket">Bracket</TabsTrigger>
           <TabsTrigger value="participants">Participants</TabsTrigger>
         </TabsList>
+
         <TabsContent value="info">
-          {/* Info Card */}
-          <Card className="w-full">
-            <CardHeader className="pb-0" />
-            <CardContent className="flex flex-col gap-4 pt-0">
-              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground font-semibold">
-                    Start Date
-                  </span>
-                  <span>
-                    {new Date(tournament.startDate).toLocaleDateString()}
-                  </span>
-                </div>
-                {tournament.endDate && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-muted-foreground font-semibold">
-                      End Date
-                    </span>
-                    <span>
-                      {new Date(tournament.endDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                {tournament.registrationStartDate && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-muted-foreground font-semibold">
-                      Registration Start
-                    </span>
-                    <span>
-                      {new Date(
-                        tournament.registrationStartDate,
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                {tournament.registrationEndDate && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-muted-foreground font-semibold">
-                      Registration End
-                    </span>
-                    <span>
-                      {new Date(
-                        tournament.registrationEndDate,
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground font-semibold">
-                    Registration Mode
-                  </span>
-                  <span>
-                    {getRegistrationModeLabel(tournament.registrationMode)}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground font-semibold">
-                    Participants
-                  </span>
-                  <span>{tournament.TournamentParticipant?.length ?? 0}</span>
-                </div>
-                {tournament.participantsLimit && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-muted-foreground font-semibold">
-                      Participants Limit
-                    </span>
-                    <span>{tournament.participantsLimit}</span>
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground font-semibold">
-                    Visibility
-                  </span>
-                  <span>{tournament.isVisible ? "Visible" : "Hidden"}</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground font-semibold">
-                    Team Based
-                  </span>
-                  <span>{tournament.isTeamBased ? "Yes" : "No"}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="py-4">
+            <Link href={`/admin/tournaments/edit/${tournament.id}`}>
+              <Button size="sm">Edit</Button>
+            </Link>
+          </div>
+          <TournamentInfo
+            tournament={tournament}
+            participants={tournament.TournamentParticipant?.length ?? 0}
+          />
         </TabsContent>
+
+        <TabsContent value="stages">
+          <TournamentStages tournamentId={tournament.id} />
+        </TabsContent>
+
         <TabsContent value="groups">
           {/* Groups content goes here */}
         </TabsContent>
+
         <TabsContent value="bracket">
           {/* Bracket content goes here */}
         </TabsContent>
+
         <TabsContent value="participants">
           {/* Participants content goes here */}
         </TabsContent>

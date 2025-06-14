@@ -98,6 +98,18 @@ const tournamentFormSchema = z
     },
   );
 
+const tournamentStageFormSchema = z.object({
+  name: z.string().min(1, "Stage name is required"),
+  description: z.string().optional(),
+  type: z.nativeEnum(TournamentStageType),
+  isActive: z.boolean().optional(),
+  bracketType: z.nativeEnum(BracketType).optional(),
+  bracketSize: z.number().int().positive().optional(),
+  isSeeded: z.boolean().optional(),
+});
+
+type TournamentStageFormSchema = z.infer<typeof tournamentStageFormSchema>;
+
 const registrationModes: { value: RegistrationMode; label: string }[] = [
   {
     value: RegistrationMode.INDIVIDUAL,
@@ -133,6 +145,7 @@ const tournamentStatuses: { value: TournamentStatus; label: string }[] = [
 ];
 
 export {
+  tournamentStageFormSchema,
   registrationModesLabels,
   tournamentStatusesLabels,
   stageTypesLabels,
@@ -149,6 +162,7 @@ export {
   tournamentFormSchema,
   registrationModes,
   tournamentStatuses,
+  type TournamentStageFormSchema,
   type Tournament,
   type TournamentStage,
 };

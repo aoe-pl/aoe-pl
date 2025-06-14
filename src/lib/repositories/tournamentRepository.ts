@@ -10,13 +10,25 @@ const statusOrder = {
 };
 
 export const tournamentRepository = {
-  async getTournaments({ sortByStatus }: { sortByStatus?: boolean }) {
+  async getTournaments({
+    sortByStatus,
+    includeTournamentSeries = false,
+    includeStages = false,
+    includeParticipants = false,
+    includeMatchMode = false,
+  }: {
+    sortByStatus?: boolean;
+    includeTournamentSeries?: boolean;
+    includeStages?: boolean;
+    includeParticipants?: boolean;
+    includeMatchMode?: boolean;
+  }) {
     const tournaments = await db.tournament.findMany({
       include: {
-        tournamentSeries: true,
-        matchMode: true,
-        stages: true,
-        TournamentParticipant: true,
+        tournamentSeries: includeTournamentSeries,
+        matchMode: includeMatchMode,
+        stages: includeStages,
+        TournamentParticipant: includeParticipants,
       },
       orderBy: { startDate: "desc" },
     });
@@ -29,19 +41,36 @@ export const tournamentRepository = {
 
     return tournaments;
   },
-  async getTournamentById(id: string) {
+  async getTournamentById(
+    id: string,
+    {
+      includeGroups = false,
+      includeStages = false,
+      includeParticipants = false,
+      includeMatchMode = false,
+      includeBrackets = false,
+    }: {
+      includeGroups?: boolean;
+      includeStages?: boolean;
+      includeParticipants?: boolean;
+      includeMatchMode?: boolean;
+      includeBrackets?: boolean;
+    } = {},
+  ) {
     return db.tournament.findUnique({
       where: { id },
       include: {
         tournamentSeries: true,
-        matchMode: true,
-        stages: {
-          include: {
-            groups: true,
-            brackets: true,
-          },
-        },
-        TournamentParticipant: true,
+        matchMode: includeMatchMode,
+        stages: includeStages
+          ? {
+              include: {
+                groups: includeGroups,
+                brackets: includeBrackets,
+              },
+            }
+          : undefined,
+        TournamentParticipant: includeParticipants,
       },
     });
   },

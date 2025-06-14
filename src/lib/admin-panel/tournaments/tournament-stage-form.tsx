@@ -23,20 +23,26 @@ import {
 } from "@/components/ui/form";
 import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { TournamentStageData } from "./tournament-stage-manager";
 import {
   BracketType,
   bracketTypesLabels,
   stageTypesLabels,
   TournamentStageType,
+  type TournamentStage,
+  type TournamentStageFormSchema,
 } from "./tournament";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+type TournamentStageData = TournamentStageFormSchema & {
+  id?: string;
+};
+
 interface TournamentStageFormProps {
-  initialData: TournamentStageData | null;
+  initialData?: TournamentStage;
   onSubmit: (data: TournamentStageData) => void;
   onCancel: () => void;
-  existingStages: TournamentStageData[];
+  stages?: TournamentStage[];
+  isPending?: boolean;
 }
 
 const stageTypes: { value: TournamentStageType; label: string }[] = [
@@ -59,7 +65,8 @@ export function TournamentStageForm({
   initialData,
   onSubmit,
   onCancel,
-  existingStages,
+  stages,
+  isPending,
 }: TournamentStageFormProps) {
   const form = useForm<TournamentStageData>({
     defaultValues: {
@@ -78,12 +85,14 @@ export function TournamentStageForm({
   const isActiveStage = form.watch("isActive");
 
   // Check if there are other active stages
-  const hasOtherActiveStages = existingStages.some((stage) => {
-    if (initialData?.id !== undefined && stage.id === initialData.id) {
-      return false; // Don't count the stage being edited
-    }
-    return stage.isActive;
-  });
+  const hasOtherActiveStages = !stages
+    ? false
+    : stages.some((stage) => {
+        if (initialData?.id !== undefined && stage.id === initialData.id) {
+          return false; // Don't count the stage being edited
+        }
+        return stage.isActive;
+      });
 
   const handleSubmit = (data: TournamentStageData) => {
     // Clean up bracket-specific fields if not a bracket stage
@@ -297,14 +306,22 @@ export function TournamentStageForm({
           </div>
 
           <DrawerFooter className="px-0">
-            <Button type="submit">
-              {initialData ? "Update Stage" : "Add Stage"}
+            <Button
+              type="submit"
+              disabled={isPending}
+            >
+              {isPending
+                ? "Saving..."
+                : initialData
+                  ? "Update Stage"
+                  : "Add Stage"}
             </Button>
             <DrawerClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCancel}
+                disabled={isPending}
               >
                 Cancel
               </Button>

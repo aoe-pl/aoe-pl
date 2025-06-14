@@ -7,6 +7,7 @@ import { TournamentStatusBadge } from "./tournament-status-badge";
 export async function TournamentList() {
   const tournaments = await api.tournaments.list({
     sortByStatus: true,
+    includeParticipants: true,
   });
 
   return (
