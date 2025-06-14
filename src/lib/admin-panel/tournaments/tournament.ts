@@ -4,6 +4,8 @@ import {
   TournamentStatus,
   BracketType,
   TournamentMatchModeType,
+  type TournamentStage,
+  type Tournament,
 } from "@prisma/client";
 import z from "zod";
 
@@ -70,23 +72,6 @@ const tournamentFormSchema = z
     registrationEndDate: z.date().optional(),
     status: z.nativeEnum(TournamentStatus),
     isVisible: z.boolean(),
-    stages: z
-      .array(
-        z.object({
-          name: z.string().min(1, "Stage name is required"),
-          type: z.nativeEnum(TournamentStageType),
-          isActive: z.boolean(),
-          description: z.string().optional(),
-          bracketType: z.nativeEnum(BracketType).optional(),
-          bracketSize: z.number().int().positive().optional(),
-          isSeeded: z.boolean(),
-        }),
-      )
-      .min(1, "At least one stage is required")
-      .refine(
-        (stages) => stages.filter((stage) => stage.isActive).length <= 1,
-        "Only one stage can be active at a time",
-      ),
   })
   .refine(
     (data) => {
@@ -164,4 +149,6 @@ export {
   tournamentFormSchema,
   registrationModes,
   tournamentStatuses,
+  type Tournament,
+  type TournamentStage,
 };

@@ -1,11 +1,6 @@
 import { db } from "@/server/db";
 
-import {
-  TournamentStatus,
-  type RegistrationMode,
-  type TournamentStageType,
-  type BracketType,
-} from "@prisma/client";
+import { TournamentStatus, type RegistrationMode } from "@prisma/client";
 
 const statusOrder = {
   [TournamentStatus.ACTIVE]: 0,
@@ -66,52 +61,29 @@ export const tournamentRepository = {
     status: TournamentStatus;
     isVisible: boolean;
   }) {
-    return db.tournament.create({ data });
-  },
-  async createTournamentWithStages(
-    tournamentData: {
-      name: string;
-      urlKey: string;
-      registrationMode: RegistrationMode;
-      tournamentSeriesId: string;
-      matchModeId: string;
-      description: string;
-      isTeamBased: boolean;
-      startDate: Date;
-      endDate?: Date;
-      participantsLimit?: number;
-      registrationStartDate?: Date;
-      registrationEndDate?: Date;
-      status: TournamentStatus;
-      isVisible: boolean;
-    },
-    stagesData: {
-      name: string;
-      type: TournamentStageType;
-      isActive: boolean;
-      description?: string;
-      bracketType?: BracketType;
-      bracketSize?: number;
-      isSeeded: boolean;
-    }[],
-  ) {
-    const { tournamentSeriesId, matchModeId, ...rest } = tournamentData;
-
     return db.tournament.create({
       data: {
-        ...rest,
-        tournamentSeries: {
-          connect: {
-            id: tournamentSeriesId,
-          },
-        },
+        name: data.name,
+        urlKey: data.urlKey,
+        registrationMode: data.registrationMode,
+        description: data.description,
+        isTeamBased: data.isTeamBased,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        participantsLimit: data.participantsLimit,
+        registrationStartDate: data.registrationStartDate,
+        registrationEndDate: data.registrationEndDate,
+        status: data.status,
+        isVisible: data.isVisible,
         matchMode: {
           connect: {
-            id: matchModeId,
+            id: data.matchModeId,
           },
         },
-        stages: {
-          create: stagesData,
+        tournamentSeries: {
+          connect: {
+            id: data.tournamentSeriesId,
+          },
         },
       },
     });
@@ -119,6 +91,7 @@ export const tournamentRepository = {
   async updateTournament(
     id: string,
     data: Partial<{
+      name: string;
       urlKey: string;
       registrationMode: RegistrationMode;
       tournamentSeriesId: string;
@@ -134,7 +107,33 @@ export const tournamentRepository = {
       isVisible: boolean;
     }>,
   ) {
-    return db.tournament.update({ where: { id }, data });
+    return db.tournament.update({
+      where: { id },
+      data: {
+        name: data.name,
+        urlKey: data.urlKey,
+        registrationMode: data.registrationMode,
+        description: data.description,
+        isTeamBased: data.isTeamBased,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        participantsLimit: data.participantsLimit,
+        registrationStartDate: data.registrationStartDate,
+        registrationEndDate: data.registrationEndDate,
+        status: data.status,
+        isVisible: data.isVisible,
+        matchMode: {
+          connect: {
+            id: data.matchModeId,
+          },
+        },
+        tournamentSeries: {
+          connect: {
+            id: data.tournamentSeriesId,
+          },
+        },
+      },
+    });
   },
   async deleteTournament(id: string) {
     return db.tournament.delete({ where: { id } });

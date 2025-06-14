@@ -37,7 +37,6 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TournamentSeriesSelector } from "./tournament-series-selector";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
-import { TournamentStageManager } from "./tournament-stage-manager";
 import type { UseFormReturn } from "react-hook-form";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
@@ -470,26 +469,6 @@ export function TournamentForm({
                     </FormDescription>
                   </div>
                 </FormLabel>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="stages"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <TournamentStageManager
-                    stages={field.value}
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Configure the stages of your tournament (group stage,
-                  brackets, etc.)
-                </FormDescription>
-                <FormMessage />
               </FormItem>
             )}
           />

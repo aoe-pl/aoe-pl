@@ -306,8 +306,6 @@ model TournamentStage {
 
     groups   TournamentGroup[]
     brackets TournamentBracket[]
-
-    @@unique([tournamentId, type])
 }
 
 model TournamentBracket {

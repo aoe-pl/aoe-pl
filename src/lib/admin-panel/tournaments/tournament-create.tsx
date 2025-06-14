@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import {
   RegistrationMode,
   tournamentFormSchema,
-  TournamentStageType,
   TournamentStatus,
 } from "./tournament";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,15 +35,6 @@ export function TournamentCreate() {
       registrationEndDate: undefined,
       status: TournamentStatus.PENDING,
       isVisible: false,
-      stages: [
-        {
-          name: "Group Stage",
-          type: TournamentStageType.GROUP,
-          isActive: true,
-          description: "Standard group stage",
-          isSeeded: true,
-        },
-      ],
     },
   });
 

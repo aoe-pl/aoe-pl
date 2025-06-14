@@ -83,7 +83,7 @@ export async function TournamentList() {
               </div>
 
               <div className="mt-auto flex gap-3">
-                <Link href={`/admin/tournaments/${tournament.id}/edit`}>
+                <Link href={`/admin/tournaments/edit/${tournament.id}`}>
                   <Button
                     variant="default"
                     className="rounded-lg px-5 py-2 font-semibold"

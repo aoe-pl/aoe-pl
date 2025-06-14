@@ -43,11 +43,7 @@ export const tournamentRouter = createTRPCRouter({
   create: adminProcedure
     .input(tournamentFormSchema)
     .mutation(async ({ input }) => {
-      const { stages, ...tournamentData } = input;
-      return tournamentRepository.createTournamentWithStages(
-        tournamentData,
-        stages,
-      );
+      return tournamentRepository.createTournament(input);
     }),
   update: adminProcedure
     .input(

@@ -151,7 +151,9 @@ export default async function AdminTournamentsViewPage({
         <TabsContent value="bracket">
           {/* Bracket content goes here */}
         </TabsContent>
-        <TabsContent value="other">{/* Other content goes here */}</TabsContent>
+        <TabsContent value="participants">
+          {/* Participants content goes here */}
+        </TabsContent>
       </Tabs>
     </div>
   );
