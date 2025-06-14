@@ -1,10 +1,11 @@
 import { api } from "@/trpc/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TournamentStatusBadge } from "@/lib/admin-panel/tournaments/tournament-status-badge";
 import { TournamentInfo } from "@/lib/admin-panel/tournaments/tournament-info";
 import { TournamentStages } from "@/lib/admin-panel/tournaments/tournament-stages";
+import { TournamentTabs } from "./tabs";
 
 export default async function AdminTournamentsViewPage({
   params,
@@ -44,10 +45,8 @@ export default async function AdminTournamentsViewPage({
         )}
       </div>
 
-      {/* Tabs for advanced content */}
-      <Tabs
-        defaultValue="info"
-        className="w-full"
+      <TournamentTabs
+        tabKeys={["info", "stages", "groups", "bracket", "participants"]}
       >
         <TabsList className="mb-2">
           <TabsTrigger value="info">Info</TabsTrigger>
@@ -84,7 +83,7 @@ export default async function AdminTournamentsViewPage({
         <TabsContent value="participants">
           {/* Participants content goes here */}
         </TabsContent>
-      </Tabs>
+      </TournamentTabs>
     </div>
   );
 }
