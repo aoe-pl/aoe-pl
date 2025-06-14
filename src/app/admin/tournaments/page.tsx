@@ -8,7 +8,9 @@ export default async function AdminTournamentsPage() {
   return (
     <>
       <div className="mb-8 flex flex-col items-center justify-between md:flex-row">
-        <h1 className="text-3xl font-bold text-white">Tournaments</h1>
+        <h1 className="text-foreground text-3xl font-bold">Tournaments</h1>
+      </div>
+      <div className="mb-8 flex flex-col items-center justify-between md:flex-row">
         <Link href="/admin/tournaments/create">
           <Button>Create Tournament</Button>
         </Link>

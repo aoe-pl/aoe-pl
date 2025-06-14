@@ -1,15 +1,22 @@
 import { db } from "@/server/db";
 
-import type {
+import {
   TournamentStatus,
-  RegistrationMode,
-  TournamentStageType,
-  BracketType,
+  type RegistrationMode,
+  type TournamentStageType,
+  type BracketType,
 } from "@prisma/client";
 
+const statusOrder = {
+  [TournamentStatus.ACTIVE]: 0,
+  [TournamentStatus.PENDING]: 1,
+  [TournamentStatus.FINISHED]: 2,
+  [TournamentStatus.CANCELLED]: 3,
+};
+
 export const tournamentRepository = {
-  async getTournaments() {
-    return db.tournament.findMany({
+  async getTournaments({ sortByStatus }: { sortByStatus?: boolean }) {
+    const tournaments = await db.tournament.findMany({
       include: {
         tournamentSeries: true,
         matchMode: true,
@@ -18,6 +25,14 @@ export const tournamentRepository = {
       },
       orderBy: { startDate: "desc" },
     });
+
+    if (sortByStatus) {
+      return tournaments.sort((a, b) => {
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
+    }
+
+    return tournaments;
   },
   async getTournamentById(id: string) {
     return db.tournament.findUnique({

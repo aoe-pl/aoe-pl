@@ -22,9 +22,19 @@ export type TournamentWithRelations = Tournament & {
 };
 
 export const tournamentRouter = createTRPCRouter({
-  list: publicProcedure.query(async (): Promise<TournamentWithRelations[]> => {
-    return tournamentRepository.getTournaments();
-  }),
+  list: publicProcedure
+    .input(
+      z
+        .object({
+          sortByStatus: z.boolean().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }): Promise<TournamentWithRelations[]> => {
+      return tournamentRepository.getTournaments({
+        sortByStatus: input?.sortByStatus,
+      });
+    }),
   get: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
@@ -48,11 +58,6 @@ export const tournamentRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       return tournamentRepository.updateTournament(input.id, input.data);
-    }),
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      return tournamentRepository.deleteTournament(input.id);
     }),
 
   // Tournament Series routes
@@ -95,11 +100,6 @@ export const tournamentRouter = createTRPCRouter({
           input.data,
         );
       }),
-    delete: adminProcedure
-      .input(z.object({ id: z.string() }))
-      .mutation(async ({ input }) => {
-        return tournamentSeriesRepository.deleteTournamentSeries(input.id);
-      }),
   }),
   matchMode: createTRPCRouter({
     list: publicProcedure.query(async () => {
@@ -135,11 +135,6 @@ export const tournamentRouter = createTRPCRouter({
           input.id,
           input.data,
         );
-      }),
-    delete: adminProcedure
-      .input(z.object({ id: z.string() }))
-      .mutation(async ({ input }) => {
-        return tournamentMatchModeRepository.deleteMatchMode(input.id);
       }),
   }),
 });

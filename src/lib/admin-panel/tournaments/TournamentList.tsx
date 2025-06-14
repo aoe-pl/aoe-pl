@@ -2,9 +2,12 @@ import { api } from "@/trpc/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { TournamentWithRelations } from "@/server/api/tournament";
+import { TournamentStatusBadge } from "./tournament-status-badge";
 
 export async function TournamentList() {
-  const tournaments = await api.tournaments.list();
+  const tournaments = await api.tournaments.list({
+    sortByStatus: true,
+  });
 
   return (
     <>
@@ -13,36 +16,88 @@ export async function TournamentList() {
           {tournaments.map((tournament: TournamentWithRelations) => (
             <div
               key={tournament.id}
-              className="flex flex-col gap-4 rounded-xl border p-6 shadow"
+              className="border-border bg-card flex flex-col gap-5 rounded-2xl border p-7 shadow-lg transition hover:shadow-xl"
             >
-              <div className="flex items-center justify-between">
-                <div className="text-lg font-bold">
-                  {tournament.tournamentSeries?.name ?? "Series"}
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="text-foreground text-xl leading-tight font-extrabold">
+                    {tournament.name ?? "Series"}
+                  </div>
+                  {tournament.tournamentSeries?.name && (
+                    <div className="text-muted-foreground text-xs font-medium">
+                      {tournament.tournamentSeries?.name}
+                    </div>
+                  )}
                 </div>
-                <span className={`rounded px-2 py-1 text-xs font-semibold`}>
-                  {tournament.status}
-                </span>
+                <TournamentStatusBadge status={tournament.status} />
               </div>
-              <div className="text-xl font-semibold">
-                {tournament.urlKey.replace(/-/g, " ")}
+
+              {tournament.description && (
+                <div
+                  title={tournament.description}
+                  className="text-muted-foreground mb-1 line-clamp-2 text-sm"
+                >
+                  {tournament.description}
+                </div>
+              )}
+
+              <div className="bg-muted/60 text-muted-foreground flex flex-col gap-1 rounded-lg px-4 py-3 text-xs">
+                <div className="flex flex-wrap gap-2">
+                  <span className="font-semibold">Participants:</span>
+                  <span>{tournament.TournamentParticipant?.length ?? 0}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="font-semibold">Start:</span>
+                  <span>
+                    {new Date(tournament.startDate).toLocaleDateString()}
+                  </span>
+                </div>
+                {tournament.endDate && (
+                  <div className="flex flex-wrap gap-2">
+                    <span className="font-semibold">End:</span>
+                    <span>
+                      {new Date(tournament.endDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {tournament.registrationStartDate && (
+                  <div className="flex flex-wrap gap-2">
+                    <span className="font-semibold">Registration Start:</span>
+                    <span>
+                      {new Date(
+                        tournament.registrationStartDate,
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {tournament.registrationEndDate && (
+                  <div className="flex flex-wrap gap-2">
+                    <span className="font-semibold">Registration End:</span>
+                    <span>
+                      {new Date(
+                        tournament.registrationEndDate,
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="line-clamp-2 text-sm">
-                {tournament.description}
-              </div>
-              <div className="mt-2 flex items-center gap-4">
-                <span className="text-sm">
-                  Participants: {tournament.TournamentParticipant?.length ?? 0}
-                </span>
-                <span className="text-sm">
-                  Start: {new Date(tournament.startDate).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="mt-4 flex gap-2">
+
+              <div className="mt-auto flex gap-3">
                 <Link href={`/admin/tournaments/${tournament.id}/edit`}>
-                  <Button variant="secondary">Edit</Button>
+                  <Button
+                    variant="default"
+                    className="rounded-lg px-5 py-2 font-semibold"
+                  >
+                    Edit
+                  </Button>
                 </Link>
                 <Link href={`/admin/tournaments/${tournament.id}`}>
-                  <Button variant="outline">Details</Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-lg px-5 py-2 font-semibold"
+                  >
+                    Details
+                  </Button>
                 </Link>
               </div>
             </div>
