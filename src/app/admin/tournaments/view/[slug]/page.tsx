@@ -6,6 +6,7 @@ import { TournamentStatusBadge } from "@/lib/admin-panel/tournaments/tournament-
 import { TournamentInfo } from "@/lib/admin-panel/tournaments/tournament-info";
 import { TournamentStages } from "@/lib/admin-panel/tournaments/tournament-stages";
 import { TournamentTabs } from "./tabs";
+import { TournamentParticipants } from "@/lib/admin-panel/tournaments/tournament-participants";
 
 export default async function AdminTournamentsViewPage({
   params,
@@ -81,7 +82,7 @@ export default async function AdminTournamentsViewPage({
         </TabsContent>
 
         <TabsContent value="participants">
-          {/* Participants content goes here */}
+          <TournamentParticipants tournamentId={tournament.id} />
         </TabsContent>
       </TournamentTabs>
     </div>

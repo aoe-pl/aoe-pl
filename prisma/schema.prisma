@@ -384,6 +384,7 @@ model TournamentParticipant {
     TournamentGroupParticipant TournamentGroupParticipant[]
     TournamentMatchParticipant TournamentMatchParticipant[]
     TournamentTeam             TournamentTeam[]             @relation("TeamCaptain")
+    customName                 String?
 
     @@index([tournamentId])
 }

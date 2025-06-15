@@ -18,6 +18,7 @@ import {
   tournamentStageFormSchema,
 } from "@/lib/admin-panel/tournaments/tournament";
 import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
+import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
 
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
@@ -205,6 +206,24 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentMatchModeRepository.updateMatchMode(
           input.id,
           input.data,
+        );
+      }),
+  }),
+
+  participants: createTRPCRouter({
+    list: publicProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          includeUser: z.boolean().optional().default(false),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentParticipantRepository.getTournamentParticipants(
+          input.tournamentId,
+          {
+            includeUser: input.includeUser,
+          },
         );
       }),
   }),
