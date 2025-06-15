@@ -3,7 +3,7 @@ import {
   generateNewMatches,
   getMatchesToDelete,
   getMatchesToCreate,
-} from "@/lib/tournaments/match-generation/individual-group-matches";
+} from "@/lib/tournaments/match-generation/group-matches";
 
 export type TournamentGroupCreateData = {
   name: string;
@@ -101,37 +101,45 @@ export const tournamentGroupRepository = {
         })
       : [];
 
+    // TODO: We need to make it work differently for team based groups, because
+    // then it will be multiple participants per match.
+    // participant is assigned to a team, this is how we know how to generate the matches.
+    // we need to generate the matches for each team in pair as we do for individuals
     // Generate initial matches
     const newMatches = generateNewMatches(participants, []);
 
-    // First create the group
-    const group = await db.tournamentGroup.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        matchMode: data.matchModeId
-          ? { connect: { id: data.matchModeId } }
-          : undefined,
-        displayOrder: data.displayOrder ?? 0,
-        isTeamBased: data.isTeamBased,
-        stage: { connect: { id: stageId } },
-        TournamentGroupParticipant:
-          participantsIds && participantsIds.length > 0
-            ? {
-                create: participantsIds.map((p) => ({
-                  tournamentParticipant: {
-                    connect: { id: p.tournamentParticipantId },
-                  },
-                  displayOrder: 0,
-                })),
-              }
+    return db.$transaction(async (tx) => {
+      // Create the group
+      const group = await tx.tournamentGroup.create({
+        data: {
+          name: data.name,
+          description: data.description,
+          matchMode: data.matchModeId
+            ? { connect: { id: data.matchModeId } }
             : undefined,
-      },
-    });
+          displayOrder: data.displayOrder ?? 0,
+          isTeamBased: data.isTeamBased,
+          stage: { connect: { id: stageId } },
+          TournamentGroupParticipant:
+            participantsIds && participantsIds.length > 0
+              ? {
+                  create: participantsIds.map((p) => ({
+                    tournamentParticipant: {
+                      connect: { id: p.tournamentParticipantId },
+                    },
+                    displayOrder: 0,
+                  })),
+                }
+              : undefined,
+        },
+      });
 
-    // Then create matches if there are any
-    if (newMatches.length > 0) {
-      await db.tournamentMatch.createMany({
+      if (newMatches.length === 0) {
+        return group;
+      }
+
+      // Create matches
+      await tx.tournamentMatch.createMany({
         data: newMatches.map((match) => ({
           groupId: group.id,
           status: match.status,
@@ -141,17 +149,17 @@ export const tournamentGroupRepository = {
       });
 
       // Get created matches to add participants
-      const createdMatches = await db.tournamentMatch.findMany({
+      const matches = await tx.tournamentMatch.findMany({
         where: { groupId: group.id },
       });
 
       // Add participants to matches
-      for (let i = 0; i < createdMatches.length; i++) {
-        const match = createdMatches[i];
+      for (let i = 0; i < matches.length; i++) {
+        const match = matches[i];
         const matchData = newMatches[i];
         if (!match || !matchData) continue;
 
-        await db.tournamentMatchParticipant.createMany({
+        await tx.tournamentMatchParticipant.createMany({
           data: [
             {
               matchId: match.id,
@@ -166,9 +174,9 @@ export const tournamentGroupRepository = {
           ],
         });
       }
-    }
 
-    return group;
+      return group;
+    });
   },
 
   async updateTournamentGroup(id: string, data: TournamentGroupUpdateData) {

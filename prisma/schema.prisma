@@ -361,8 +361,8 @@ model TournamentGroup {
     matchMode    TournamentMatchMode? @relation(fields: [matchModeId], references: [id])
 
     isTeamBased                Boolean? // can override tournament setting
-    TournamentGroupParticipant TournamentGroupParticipant[]
-    matches                    TournamentMatch[]
+    TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
+    matches                    TournamentMatch[]            @relation("GroupMatches")
 
     @@unique([stageId, name])
 }
@@ -383,15 +383,15 @@ model TournamentParticipant {
     TournamentTeam             TournamentTeam[]             @relation("TeamCaptain")
     nickname                   String
 
-    @@index([tournamentId])
-
     @@unique([tournamentId, nickname])
+    @@index([tournamentId])
 }
 
 model TournamentGroupParticipant {
     id                      String                @id @default(cuid())
     tournamentGroupId       String
-    tournamentGroup         TournamentGroup       @relation(fields: [tournamentGroupId], references: [id])
+    // when group is deleted, participants will cascade to be deleted
+    tournamentGroup         TournamentGroup       @relation("GroupParticipants", fields: [tournamentGroupId], references: [id], onDelete: Cascade)
     tournamentParticipantId String
     tournamentParticipant   TournamentParticipant @relation(fields: [tournamentParticipantId], references: [id])
     displayOrder            Int
@@ -406,7 +406,8 @@ model TournamentMatch {
 
     // A match must belong to either a group or be part of a bracket node
     groupId String?
-    group   TournamentGroup? @relation(fields: [groupId], references: [id])
+    // when group is deleted, matches will cascade to be deleted
+    group   TournamentGroup? @relation("GroupMatches", fields: [groupId], references: [id], onDelete: Cascade)
 
     matchDate   DateTime?
     civDraftKey String
@@ -423,7 +424,7 @@ model TournamentMatch {
 
     TournamentMatchMode        TournamentMatchMode?         @relation(fields: [tournamentMatchModeId], references: [id])
     tournamentMatchModeId      String?
-    TournamentMatchParticipant TournamentMatchParticipant[] // Contains the two participants/teams
+    TournamentMatchParticipant TournamentMatchParticipant[] @relation("MatchParticipants")
     Game                       Game[]
     TournamentMatchStream      TournamentMatchStream[]
     bracketNodes               TournamentBracketNode[] // Links to bracket nodes that use this match
@@ -447,7 +448,8 @@ model TournamentMatchStream {
 model TournamentMatchParticipant {
     id            String                 @id @default(cuid())
     matchId       String
-    match         TournamentMatch        @relation(fields: [matchId], references: [id])
+    // when match is deleted, participants will cascade to be deleted
+    match         TournamentMatch        @relation("MatchParticipants", fields: [matchId], references: [id], onDelete: Cascade)
     participantId String?
     participant   TournamentParticipant? @relation(fields: [participantId], references: [id])
     teamId        String?
