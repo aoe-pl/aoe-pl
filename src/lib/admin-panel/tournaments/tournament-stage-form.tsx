@@ -45,10 +45,11 @@ interface TournamentStageFormProps {
   isPending?: boolean;
 }
 
-const stageTypes: { value: TournamentStageType; label: string }[] = [
-  { value: TournamentStageType.GROUP, label: stageTypesLabels.GROUP },
-  { value: TournamentStageType.BRACKET, label: stageTypesLabels.BRACKET },
-];
+// TODO: We support only groups for now
+// const stageTypes: { value: TournamentStageType; label: string }[] = [
+//   { value: TournamentStageType.GROUP, label: stageTypesLabels.GROUP },
+//   { value: TournamentStageType.BRACKET, label: stageTypesLabels.BRACKET },
+// ];
 
 const bracketTypes: { value: BracketType; label: string }[] = [
   {
@@ -135,7 +136,7 @@ export function TournamentStageForm({
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="type"
               render={({ field }) => (
@@ -167,7 +168,7 @@ export function TournamentStageForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FormField
               control={form.control}

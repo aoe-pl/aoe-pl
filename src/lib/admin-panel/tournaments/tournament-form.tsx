@@ -9,11 +9,7 @@ import {
   FormLabel,
   Form,
 } from "@/components/ui/form";
-import {
-  type tournamentFormSchema,
-  registrationModes,
-  tournamentStatuses,
-} from "./tournament";
+import { type tournamentFormSchema, tournamentStatuses } from "./tournament";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {

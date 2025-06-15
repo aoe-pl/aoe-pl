@@ -54,7 +54,6 @@ export default async function AdminTournamentsViewPage({
           <TabsTrigger value="info">Info</TabsTrigger>
           <TabsTrigger value="stages">Stages</TabsTrigger>
           <TabsTrigger value="groups">Groups</TabsTrigger>
-          <TabsTrigger value="bracket">Bracket</TabsTrigger>
           <TabsTrigger value="participants">Participants</TabsTrigger>
         </TabsList>
 
