@@ -275,6 +275,7 @@ export const tournamentRouter = createTRPCRouter({
             matchModeId: z.string().optional(),
             displayOrder: z.number().int().min(0).optional(),
             isTeamBased: z.boolean().optional(),
+            participantIds: z.array(z.string()).optional(),
           }),
         }),
       )
@@ -294,6 +295,7 @@ export const tournamentRouter = createTRPCRouter({
             matchModeId: z.string().optional(),
             displayOrder: z.number().int().min(0).optional(),
             isTeamBased: z.boolean().optional(),
+            participantIds: z.array(z.string()).optional(),
           }),
         }),
       )

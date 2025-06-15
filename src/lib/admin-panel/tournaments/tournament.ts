@@ -158,6 +158,13 @@ const tournamentGroupFormSchema = z.object({
 
 type TournamentGroupFormSchema = z.infer<typeof tournamentGroupFormSchema>;
 
+type TournamentGroupWithParticipants = TournamentGroup & {
+  TournamentGroupParticipant: {
+    tournamentParticipantId: string;
+    id: string;
+  }[];
+};
+
 export {
   tournamentStageFormSchema,
   registrationModesLabels,
@@ -183,4 +190,5 @@ export {
   type TournamentStage,
   type TournamentParticipant,
   type TournamentGroup,
+  type TournamentGroupWithParticipants,
 };

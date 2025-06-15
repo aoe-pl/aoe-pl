@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { TournamentGroupForm } from "./tournament-group-form";
-import type { TournamentGroup } from "@prisma/client";
 import { ErrorToast } from "@/components/ui/error-toast-content";
+import type { TournamentGroupWithParticipants } from "./tournament";
 
 type TournamentGroupListProps = {
   tournamentId: string;
@@ -28,7 +28,7 @@ export function TournamentGroupList({
 }: TournamentGroupListProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<
-    TournamentGroup | undefined
+    TournamentGroupWithParticipants | undefined
   >();
   const [deletingGroupId, setDeletingGroupId] = useState<string | undefined>();
 
@@ -87,7 +87,7 @@ export function TournamentGroupList({
       },
     });
 
-  const handleEdit = (group: TournamentGroup) => {
+  const handleEdit = (group: TournamentGroupWithParticipants) => {
     setEditingGroup(group);
     setIsDrawerOpen(true);
   };
@@ -116,6 +116,7 @@ export function TournamentGroupList({
       matchModeId: data.matchModeId,
       displayOrder: data.displayOrder,
       isTeamBased: data.isTeamBased,
+      participantIds: data.participantIds ?? [],
     };
 
     if (editingGroup) {

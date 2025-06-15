@@ -21,6 +21,7 @@ import {
   tournamentGroupFormSchema,
   type TournamentGroup,
   type TournamentGroupFormSchema,
+  type TournamentGroupWithParticipants,
 } from "./tournament";
 import {
   Select,
@@ -30,9 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TournamentParticipantsSelector } from "./tournament-participants-selector";
 
 type TournamentGroupFormProps = {
-  initialData?: TournamentGroup;
+  initialData?: TournamentGroupWithParticipants;
   onSubmit: (data: TournamentGroupFormSchema) => void;
   onCancel: () => void;
   groups?: TournamentGroup[];
@@ -58,6 +60,7 @@ export function TournamentGroupForm({
 
   const { data: participants } = api.tournaments.participants.list.useQuery({
     tournamentId,
+    includeUser: true,
   });
 
   const form = useForm<TournamentGroupFormSchema>({
@@ -69,7 +72,10 @@ export function TournamentGroupForm({
       displayOrder: initialData?.displayOrder ?? groups.length,
       isTeamBased: defaultIsTeamBased,
       matchModeId: defaultMatchModeId,
-      participantIds: [],
+      participantIds:
+        initialData?.TournamentGroupParticipant?.map(
+          (p) => p.tournamentParticipantId,
+        ) ?? [],
     },
   });
 
@@ -80,6 +86,7 @@ export function TournamentGroupForm({
         data.matchModeId === defaultMatchModeId ? undefined : data.matchModeId,
       isTeamBased:
         data.isTeamBased === defaultIsTeamBased ? undefined : data.isTeamBased,
+      participantIds: data.participantIds ?? [],
     });
   };
 
@@ -235,60 +242,15 @@ export function TournamentGroupForm({
                 <FormItem>
                   <FormLabel>Participants</FormLabel>
                   <FormControl>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          placeholder="Search participants..."
-                          className="flex-1"
-                          onChange={(e) => {
-                            // TODO: Implement search filtering
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            // TODO: Implement select all
-                          }}
-                        >
-                          Select All
-                        </Button>
-                      </div>
-                      <ScrollArea className="h-[200px] rounded-md border p-2">
-                        <div className="space-y-2">
-                          {participants?.map((participant) => (
-                            <div
-                              key={participant.id}
-                              className="flex items-center space-x-2 rounded-md border p-2"
-                            >
-                              <Checkbox
-                                checked={field.value?.includes(participant.id)}
-                                onCheckedChange={(checked) => {
-                                  const newValue = checked
-                                    ? [...(field.value ?? []), participant.id]
-                                    : (field.value?.filter(
-                                        (id) => id !== participant.id,
-                                      ) ?? []);
-                                  field.onChange(newValue);
-                                }}
-                              />
-                              <div>
-                                <div className="font-medium">
-                                  {participant.customName ??
-                                    participant.user?.name ??
-                                    "Unknown"}
-                                </div>
-                                {participant.user?.email && (
-                                  <div className="text-muted-foreground text-sm">
-                                    {participant.user.email}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
+                    <TournamentParticipantsSelector
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      participants={participants ?? []}
+                      isLoading={!participants}
+                      initialParticipantData={
+                        initialData?.TournamentGroupParticipant
+                      }
+                    />
                   </FormControl>
                   <FormDescription>
                     Select participants to include in this group

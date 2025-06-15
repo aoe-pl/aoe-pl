@@ -358,7 +358,7 @@ model TournamentGroup {
 
     displayOrder Int
     name         String
-    description  String?             @db.Text
+    description  String?              @db.Text
     matchModeId  String?
     matchMode    TournamentMatchMode? @relation(fields: [matchModeId], references: [id])
 
@@ -384,9 +384,11 @@ model TournamentParticipant {
     TournamentGroupParticipant TournamentGroupParticipant[]
     TournamentMatchParticipant TournamentMatchParticipant[]
     TournamentTeam             TournamentTeam[]             @relation("TeamCaptain")
-    customName                 String?
+    nickname                   String
 
     @@index([tournamentId])
+
+    @@unique([tournamentId, nickname])
 }
 
 model TournamentGroupParticipant {

@@ -6,6 +6,7 @@ export type TournamentGroupCreateData = {
   matchModeId?: string;
   displayOrder?: number;
   isTeamBased?: boolean;
+  participantIds?: string[];
 };
 
 export type TournamentGroupUpdateData = Partial<TournamentGroupCreateData>;
@@ -80,6 +81,10 @@ export const tournamentGroupRepository = {
     stageId: string,
     data: TournamentGroupCreateData,
   ) {
+    const participantsIds = data.participantIds?.map((id) => ({
+      tournamentParticipantId: id,
+    }));
+
     return db.tournamentGroup.create({
       data: {
         name: data.name,
@@ -90,10 +95,25 @@ export const tournamentGroupRepository = {
         displayOrder: data.displayOrder ?? 0,
         isTeamBased: data.isTeamBased,
         stage: { connect: { id: stageId } },
+        TournamentGroupParticipant:
+          participantsIds && participantsIds.length > 0
+            ? {
+                create: participantsIds.map((p) => ({
+                  tournamentParticipant: {
+                    connect: { id: p.tournamentParticipantId },
+                  },
+                  displayOrder: 0,
+                })),
+              }
+            : undefined,
       },
     });
   },
   async updateTournamentGroup(id: string, data: TournamentGroupUpdateData) {
+    const participantsIds = data.participantIds?.map((id) => ({
+      tournamentParticipantId: id,
+    }));
+
     return db.tournamentGroup.update({
       where: { id },
       data: {
@@ -104,6 +124,34 @@ export const tournamentGroupRepository = {
           : undefined,
         displayOrder: data.displayOrder,
         isTeamBased: data.isTeamBased,
+        TournamentGroupParticipant: participantsIds
+          ? {
+              // Delete all participants that are not in the new list
+              deleteMany: {
+                NOT: {
+                  tournamentParticipantId: {
+                    in: participantsIds.map((p) => p.tournamentParticipantId),
+                  },
+                },
+              },
+              // Upsert the participants that are in the new list
+              upsert: participantsIds.map((p) => ({
+                where: {
+                  tournamentGroupId_tournamentParticipantId: {
+                    tournamentGroupId: id,
+                    tournamentParticipantId: p.tournamentParticipantId,
+                  },
+                },
+                create: {
+                  tournamentParticipant: {
+                    connect: { id: p.tournamentParticipantId },
+                  },
+                  displayOrder: 0,
+                },
+                update: {},
+              })),
+            }
+          : undefined,
       },
     });
   },
