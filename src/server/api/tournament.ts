@@ -19,6 +19,7 @@ import {
 } from "@/lib/admin-panel/tournaments/tournament";
 import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
 import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
+import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
 
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
@@ -225,6 +226,87 @@ export const tournamentRouter = createTRPCRouter({
             includeUser: input.includeUser,
           },
         );
+      }),
+  }),
+
+  groups: createTRPCRouter({
+    list: publicProcedure
+      .input(
+        z.object({
+          stageId: z.string(),
+          includeMatchMode: z.boolean().optional().default(false),
+          includeParticipants: z.boolean().optional().default(false),
+          includeMatches: z.boolean().optional().default(false),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentGroupRepository.getTournamentGroups(input.stageId, {
+          includeMatchMode: input.includeMatchMode,
+          includeParticipants: input.includeParticipants,
+          includeMatches: input.includeMatches,
+        });
+      }),
+    listByTournament: publicProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          includeMatchMode: z.boolean().optional().default(false),
+          includeParticipants: z.boolean().optional().default(false),
+          includeMatches: z.boolean().optional().default(false),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentGroupRepository.getGroupsByTournamentId(
+          input.tournamentId,
+          {
+            includeMatchMode: input.includeMatchMode,
+            includeParticipants: input.includeParticipants,
+            includeMatches: input.includeMatches,
+          },
+        );
+      }),
+    create: adminProcedure
+      .input(
+        z.object({
+          stageId: z.string(),
+          data: z.object({
+            name: z.string().min(1),
+            description: z.string().optional(),
+            matchModeId: z.string().optional(),
+            displayOrder: z.number().int().min(0).optional(),
+            isTeamBased: z.boolean().optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentGroupRepository.createTournamentGroup(
+          input.stageId,
+          input.data,
+        );
+      }),
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          data: z.object({
+            name: z.string().min(1).optional(),
+            description: z.string().optional(),
+            matchModeId: z.string().optional(),
+            displayOrder: z.number().int().min(0).optional(),
+            isTeamBased: z.boolean().optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentGroupRepository.updateTournamentGroup(
+          input.id,
+          input.data,
+        );
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentGroupRepository.deleteTournamentGroup(input.id);
       }),
   }),
 });

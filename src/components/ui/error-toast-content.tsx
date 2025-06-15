@@ -14,7 +14,7 @@ export function ErrorToast({
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <div className="flex max-w-xs flex-col gap-2 p-2">
+    <div className="z-[10000] flex max-w-xs flex-col gap-2 p-2">
       <div className="text-accent text-sm">
         {customTitle ??
           "Something went wrong, please copy the error message and contact devs"}

@@ -42,7 +42,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,14 +65,18 @@ type TournamentMatchModeFormData = z.infer<
   typeof tournamentMatchModeFormSchema
 >;
 
-interface TournamentMatchModeSelectorProps {
+export interface TournamentMatchModeSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  allowClear?: boolean;
+  defaultMatchModeId?: string;
 }
 
 export function TournamentMatchModeSelector({
   value,
   onChange,
+  allowClear,
+  defaultMatchModeId,
 }: TournamentMatchModeSelectorProps) {
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -157,28 +161,46 @@ export function TournamentMatchModeSelector({
     );
   }
 
+  const shouldShowClearButton =
+    allowClear && !!value && value !== defaultMatchModeId;
+
   return (
     <>
       <Popover
         open={open}
         onOpenChange={setOpen}
       >
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {selectedMatchMode
-              ? generateName(
-                  selectedMatchMode.mode,
-                  selectedMatchMode.gameCount,
-                )
-              : "Select match mode..."}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+        <div className="flex w-full items-center gap-2">
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="justify-between"
+            >
+              {selectedMatchMode
+                ? generateName(
+                    selectedMatchMode.mode,
+                    selectedMatchMode.gameCount,
+                  )
+                : "Select match mode..."}
+              <div className="ml-2 flex h-4 w-4 shrink-0 items-center gap-2 opacity-50">
+                <ChevronsUpDown className="h-4 w-4" />
+              </div>
+            </Button>
+          </PopoverTrigger>
+          {shouldShowClearButton && (
+            <Button
+              title="Clear selection"
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => onChange(defaultMatchModeId ?? "")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <PopoverContent className="w-full p-0">
           <Command>
             <CommandInput placeholder="Search match modes..." />

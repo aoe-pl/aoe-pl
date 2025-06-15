@@ -7,6 +7,7 @@ import {
   type TournamentStage,
   type Tournament,
   type TournamentParticipant,
+  type TournamentGroup,
 } from "@prisma/client";
 import z from "zod";
 
@@ -145,6 +146,18 @@ const tournamentStatuses: { value: TournamentStatus; label: string }[] = [
   },
 ];
 
+const tournamentGroupFormSchema = z.object({
+  stageId: z.string().min(1, "Stage is required"),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  matchModeId: z.string().optional(),
+  displayOrder: z.number().int().min(0),
+  isTeamBased: z.boolean().optional(),
+  participantIds: z.array(z.string()).optional(),
+});
+
+type TournamentGroupFormSchema = z.infer<typeof tournamentGroupFormSchema>;
+
 export {
   tournamentStageFormSchema,
   registrationModesLabels,
@@ -163,8 +176,11 @@ export {
   tournamentFormSchema,
   registrationModes,
   tournamentStatuses,
+  tournamentGroupFormSchema,
+  type TournamentGroupFormSchema,
   type TournamentStageFormSchema,
   type Tournament,
   type TournamentStage,
   type TournamentParticipant,
+  type TournamentGroup,
 };

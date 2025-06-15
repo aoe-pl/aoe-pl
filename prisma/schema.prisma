@@ -359,10 +359,10 @@ model TournamentGroup {
     displayOrder Int
     name         String
     description  String?             @db.Text
-    matchModeId  String
-    matchMode    TournamentMatchMode @relation(fields: [matchModeId], references: [id])
+    matchModeId  String?
+    matchMode    TournamentMatchMode? @relation(fields: [matchModeId], references: [id])
 
-    isTeamBased                Boolean // can override tournament setting
+    isTeamBased                Boolean? // can override tournament setting
     TournamentGroupParticipant TournamentGroupParticipant[]
     matches                    TournamentMatch[]
 
