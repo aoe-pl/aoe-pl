@@ -326,8 +326,6 @@ model TournamentBracket {
     isManualSeeding Boolean     @default(false) // If true, admin can manually set matchups
 
     bracketNodes TournamentBracketNode[]
-
-    @@unique([stageId, displayOrder])
 }
 
 model TournamentBracketNode {
@@ -367,7 +365,6 @@ model TournamentGroup {
     matches                    TournamentMatch[]
 
     @@unique([stageId, name])
-    @@unique([stageId, displayOrder])
 }
 
 model TournamentParticipant {
@@ -411,7 +408,7 @@ model TournamentMatch {
     groupId String?
     group   TournamentGroup? @relation(fields: [groupId], references: [id])
 
-    matchDate   DateTime
+    matchDate   DateTime?
     civDraftKey String
     mapDraftKey String
 
@@ -430,8 +427,6 @@ model TournamentMatch {
     Game                       Game[]
     TournamentMatchStream      TournamentMatchStream[]
     bracketNodes               TournamentBracketNode[] // Links to bracket nodes that use this match
-
-    @@unique([groupId]) // Ensures a match belongs to either a group or is part of a bracket node
 }
 
 model TournamentMatchStream {
