@@ -155,7 +155,7 @@ export function TournamentForm({
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="registrationMode"
             render={({ field }) => (
@@ -184,7 +184,7 @@ export function TournamentForm({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <FormField
             control={form.control}

@@ -367,6 +367,7 @@ model TournamentGroup {
     @@unique([stageId, name])
 }
 
+// it can be a team or an individual person
 model TournamentParticipant {
     id                         String                       @id @default(cuid())
     tournamentId               String

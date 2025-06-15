@@ -70,8 +70,8 @@ export function TournamentGroupForm({
       name: initialData?.name ?? "",
       description: initialData?.description ?? "",
       displayOrder: initialData?.displayOrder ?? groups.length,
-      isTeamBased: defaultIsTeamBased,
-      matchModeId: defaultMatchModeId,
+      isTeamBased: initialData?.isTeamBased ?? defaultIsTeamBased,
+      matchModeId: initialData?.matchModeId ?? defaultMatchModeId,
       participantIds:
         initialData?.TournamentGroupParticipant?.map(
           (p) => p.tournamentParticipantId,

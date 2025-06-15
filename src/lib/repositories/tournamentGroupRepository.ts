@@ -101,13 +101,6 @@ export const tournamentGroupRepository = {
         })
       : [];
 
-    // TODO: We need to make it work differently for team based groups, because
-    // then it will be multiple participants per match.
-    // participant is assigned to a team, this is how we know how to generate the matches.
-    // we need to generate the matches for each team in pair as we do for individuals
-    // Generate initial matches
-    const newMatches = generateNewMatches(participants, []);
-
     return db.$transaction(async (tx) => {
       // Create the group
       const group = await tx.tournamentGroup.create({
@@ -133,6 +126,19 @@ export const tournamentGroupRepository = {
               : undefined,
         },
       });
+
+      const tournament = await tx.tournament.findUnique({
+        where: { id: stageId },
+      });
+
+      // we are not support team based registration yet
+      // and for individual registration -> team based we can't generate matches
+      // because we don't know the teams yet, admin need to create them manually
+      if (data.isTeamBased || tournament?.isTeamBased) {
+        return group;
+      }
+
+      const newMatches = generateNewMatches(participants, []);
 
       if (newMatches.length === 0) {
         return group;
@@ -237,6 +243,19 @@ export const tournamentGroupRepository = {
     // Get matches to create
     const matchesToCreate = getMatchesToCreate(currentMatches, allParticipants);
 
+    const tournament = await db.tournament.findUnique({
+      where: { id: currentGroup.stageId },
+    });
+
+    const isTeamBased = data.isTeamBased ?? tournament?.isTeamBased;
+
+    // if we change from individual -> tournament based, we need to remove all matches
+    if (isTeamBased) {
+      await db.tournamentMatch.deleteMany({
+        where: { groupId: id },
+      });
+    }
+
     return db.tournamentGroup.update({
       where: { id },
       data: {
@@ -275,26 +294,31 @@ export const tournamentGroupRepository = {
               })),
             }
           : undefined,
-        matches: {
-          // Delete matches where participants were removed
-          deleteMany: {
-            id: {
-              in: matchesToDelete.map((match) => match.id),
+        // we are not support team based registration yet
+        // and for individual registration -> team based we can't generate matches
+        // because we don't know the teams yet, admin need to create them manually
+        matches: isTeamBased
+          ? undefined
+          : {
+              // Delete matches where participants were removed
+              deleteMany: {
+                id: {
+                  in: matchesToDelete.map((match) => match.id),
+                },
+              },
+              // Create new matches for new participant combinations
+              create: matchesToCreate.map((match) => ({
+                status: match.status,
+                civDraftKey: match.civDraftKey,
+                mapDraftKey: match.mapDraftKey,
+                TournamentMatchParticipant: {
+                  create: [
+                    { participantId: match.participant1Id, isWinner: false },
+                    { participantId: match.participant2Id, isWinner: false },
+                  ],
+                },
+              })),
             },
-          },
-          // Create new matches for new participant combinations
-          create: matchesToCreate.map((match) => ({
-            status: match.status,
-            civDraftKey: match.civDraftKey,
-            mapDraftKey: match.mapDraftKey,
-            TournamentMatchParticipant: {
-              create: [
-                { participantId: match.participant1Id, isWinner: false },
-                { participantId: match.participant2Id, isWinner: false },
-              ],
-            },
-          })),
-        },
       },
     });
   },
