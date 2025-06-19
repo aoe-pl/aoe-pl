@@ -246,6 +246,15 @@ export const tournamentRouter = createTRPCRouter({
           includeMatches: input.includeMatches,
         });
       }),
+    get: publicProcedure
+      .input(
+        z.object({
+          id: z.string(),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentGroupRepository.getTournamentGroupById(input.id);
+      }),
     listByTournament: publicProcedure
       .input(
         z.object({

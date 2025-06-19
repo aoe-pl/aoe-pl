@@ -8,6 +8,7 @@ import {
   type Tournament,
   type TournamentParticipant,
   type TournamentGroup,
+  type TournamentGroupParticipant,
 } from "@prisma/client";
 import z from "zod";
 
@@ -191,4 +192,5 @@ export {
   type TournamentParticipant,
   type TournamentGroup,
   type TournamentGroupWithParticipants,
+  type TournamentGroupParticipant,
 };

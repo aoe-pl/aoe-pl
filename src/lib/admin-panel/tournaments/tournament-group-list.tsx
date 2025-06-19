@@ -14,6 +14,10 @@ import { toast } from "sonner";
 import { TournamentGroupForm } from "./tournament-group-form";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import type { TournamentGroupWithParticipants } from "./tournament";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Eye, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 type TournamentGroupListProps = {
   tournamentId: string;
@@ -32,12 +36,15 @@ export function TournamentGroupList({
   >();
   const [deletingGroupId, setDeletingGroupId] = useState<string | undefined>();
 
-  const { data: groups, refetch } =
-    api.tournaments.groups.listByTournament.useQuery({
-      tournamentId,
-      includeMatchMode: true,
-      includeParticipants: true,
-    });
+  const {
+    data: groups,
+    refetch,
+    isLoading,
+  } = api.tournaments.groups.listByTournament.useQuery({
+    tournamentId,
+    includeMatchMode: true,
+    includeParticipants: true,
+  });
 
   const { mutate: createGroup, isPending: creationPending } =
     api.tournaments.groups.create.useMutation({
@@ -134,6 +141,24 @@ export function TournamentGroupList({
     });
   };
 
+  if (!groups || groups.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <p className="text-muted-foreground mb-4">
+            {isLoading ? "Loading groups..." : "No groups yet"}
+          </p>
+          <Button
+            onClick={handleAdd}
+            disabled={isLoading}
+          >
+            Add Group
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
@@ -141,43 +166,72 @@ export function TournamentGroupList({
         <Button onClick={handleAdd}>Add Group</Button>
       </div>
 
-      <div className="space-y-4">
-        {groups?.map((group) => (
-          <div
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        {groups.map((group) => (
+          <Card
             key={group.id}
-            className="flex items-center justify-between rounded-lg border p-4"
+            className="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
           >
-            <div>
-              <h3 className="font-medium">{group.name}</h3>
-              {group.description && (
-                <p className="text-muted-foreground text-sm">
-                  {group.description}
-                </p>
-              )}
-              <p className="text-muted-foreground text-sm">
-                Stage: {group.stage.name}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleEdit(group)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDelete(group.id)}
-                disabled={deletionPending && deletingGroupId === group.id}
-              >
-                {deletionPending && deletingGroupId === group.id
-                  ? "Deleting..."
-                  : "Delete"}
-              </Button>
-            </div>
-          </div>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="text-base">{group.name}</CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline">
+                    {group.matchMode?.mode ?? "No match mode"}
+                  </Badge>
+                  <Badge variant={group.isTeamBased ? "default" : "secondary"}>
+                    {group.isTeamBased ? "Team Based" : "Individual"}
+                  </Badge>
+                  <div className="flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                    >
+                      <Link href={`/admin/tournaments/groups/${group.id}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(group)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(group.id)}
+                      disabled={deletionPending && deletingGroupId === group.id}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {group.description && (
+                  <p className="text-muted-foreground text-sm">
+                    {group.description}
+                  </p>
+                )}
+                <div className="text-muted-foreground flex flex-wrap gap-2 text-sm">
+                  <span>• Stage: {group.stage.name}</span>
+                  <span>
+                    • {group.TournamentGroupParticipant?.length} participants
+                  </span>
+                  <span>• {group.matches?.length} matches</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 

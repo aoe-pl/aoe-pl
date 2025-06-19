@@ -17,6 +17,41 @@ export type TournamentGroupCreateData = {
 export type TournamentGroupUpdateData = Partial<TournamentGroupCreateData>;
 
 export const tournamentGroupRepository = {
+  async getTournamentGroupById(id: string) {
+    return db.tournamentGroup.findUnique({
+      where: { id },
+      include: {
+        matchMode: true,
+        TournamentGroupParticipant: {
+          include: {
+            tournamentParticipant: true,
+          },
+        },
+        matches: {
+          include: {
+            TournamentMatchParticipant: {
+              include: {
+                participant: true,
+                match: true,
+                team: true,
+                gamesLost: true,
+                gamesWon: true,
+              },
+            },
+          },
+        },
+        stage: {
+          include: {
+            tournament: {
+              include: {
+                matchMode: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  },
   async getTournamentGroups(
     stageId: string,
     options?: {
