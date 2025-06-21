@@ -9,6 +9,10 @@ import {
   type TournamentParticipant,
   type TournamentGroup,
   type TournamentGroupParticipant,
+  type TournamentMatch,
+  type TournamentMatchParticipant,
+  type Game,
+  MatchStatus,
 } from "@prisma/client";
 import z from "zod";
 
@@ -49,6 +53,18 @@ const getTournamentStatusLabel = (status: TournamentStatus) => {
 
 const getRegistrationModeLabel = (mode: RegistrationMode) => {
   return registrationModesLabels[mode];
+};
+
+const matchStatusesLabels: Record<MatchStatus, string> = {
+  SCHEDULED: "Scheduled",
+  IN_PROGRESS: "In Progress",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  ADMIN_APPROVED: "Admin Approved",
+};
+
+const getMatchStatusLabel = (status: MatchStatus) => {
+  return matchStatusesLabels[status];
 };
 
 const tournamentFormSchema = z
@@ -147,6 +163,29 @@ const tournamentStatuses: { value: TournamentStatus; label: string }[] = [
   },
 ];
 
+const matchStatuses: { value: MatchStatus; label: string }[] = [
+  {
+    value: MatchStatus.SCHEDULED,
+    label: getMatchStatusLabel(MatchStatus.SCHEDULED),
+  },
+  {
+    value: MatchStatus.IN_PROGRESS,
+    label: getMatchStatusLabel(MatchStatus.IN_PROGRESS),
+  },
+  {
+    value: MatchStatus.COMPLETED,
+    label: getMatchStatusLabel(MatchStatus.COMPLETED),
+  },
+  {
+    value: MatchStatus.CANCELLED,
+    label: getMatchStatusLabel(MatchStatus.CANCELLED),
+  },
+  {
+    value: MatchStatus.ADMIN_APPROVED,
+    label: getMatchStatusLabel(MatchStatus.ADMIN_APPROVED),
+  },
+];
+
 const tournamentGroupFormSchema = z.object({
   stageId: z.string().min(1, "Stage is required"),
   name: z.string().min(1, "Name is required"),
@@ -157,7 +196,20 @@ const tournamentGroupFormSchema = z.object({
   participantIds: z.array(z.string()).optional(),
 });
 
+const tournamentMatchFormSchema = z.object({
+  groupId: z.string().optional(),
+  matchDate: z.date().optional(),
+  civDraftKey: z.string().optional(),
+  mapDraftKey: z.string().optional(),
+  status: z.nativeEnum(MatchStatus).optional(),
+  comment: z.string().optional(),
+  adminComment: z.string().optional(),
+  participantIds: z.array(z.string()).optional(),
+  teamIds: z.array(z.string()).optional(),
+});
+
 type TournamentGroupFormSchema = z.infer<typeof tournamentGroupFormSchema>;
+type TournamentMatchFormSchema = z.infer<typeof tournamentMatchFormSchema>;
 
 type TournamentGroupWithParticipants = TournamentGroup & {
   TournamentGroupParticipant: {
@@ -168,8 +220,10 @@ type TournamentGroupWithParticipants = TournamentGroup & {
 
 export {
   tournamentStageFormSchema,
+  tournamentMatchFormSchema,
   registrationModesLabels,
   tournamentStatusesLabels,
+  matchStatusesLabels,
   stageTypesLabels,
   bracketTypesLabels,
   TournamentMatchModeType,
@@ -177,15 +231,19 @@ export {
   TournamentStageType,
   BracketType,
   RegistrationMode,
+  MatchStatus,
   getStageTypeLabel,
   getBracketTypeLabel,
   getTournamentStatusLabel,
+  getMatchStatusLabel,
   getRegistrationModeLabel,
   tournamentFormSchema,
   registrationModes,
   tournamentStatuses,
+  matchStatuses,
   tournamentGroupFormSchema,
   type TournamentGroupFormSchema,
+  type TournamentMatchFormSchema,
   type TournamentStageFormSchema,
   type Tournament,
   type TournamentStage,
@@ -193,4 +251,7 @@ export {
   type TournamentGroup,
   type TournamentGroupWithParticipants,
   type TournamentGroupParticipant,
+  type TournamentMatch,
+  type TournamentMatchParticipant,
+  type Game,
 };

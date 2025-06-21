@@ -196,6 +196,7 @@ enum MatchStatus {
     IN_PROGRESS
     COMPLETED
     CANCELLED
+    ADMIN_APPROVED
 }
 
 enum StreamStatus {

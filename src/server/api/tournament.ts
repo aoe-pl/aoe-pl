@@ -6,7 +6,7 @@ import {
 } from "@/server/api/trpc";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
-import { TournamentMatchModeType } from "@prisma/client";
+import { TournamentMatchModeType, MatchStatus } from "@prisma/client";
 import type {
   Tournament,
   TournamentSeries,
@@ -20,6 +20,7 @@ import {
 import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
 import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
+import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
@@ -318,6 +319,108 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentGroupRepository.deleteTournamentGroup(input.id);
+      }),
+  }),
+
+  matches: createTRPCRouter({
+    list: publicProcedure
+      .input(
+        z.object({
+          groupId: z.string(),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentMatchRepository.getMatchesByGroupId(input.groupId);
+      }),
+    get: publicProcedure
+      .input(
+        z.object({
+          id: z.string(),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentMatchRepository.getTournamentMatchById(input.id);
+      }),
+    create: adminProcedure
+      .input(
+        z.object({
+          data: z.object({
+            groupId: z.string().optional(),
+            matchDate: z.date().optional(),
+            civDraftKey: z.string().optional(),
+            mapDraftKey: z.string().optional(),
+            status: z.nativeEnum(MatchStatus).optional(),
+            comment: z.string().optional(),
+            adminComment: z.string().optional(),
+            participantIds: z.array(z.string()).optional(),
+            teamIds: z.array(z.string()).optional(),
+            isManualMatch: z.boolean().default(false),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.createTournamentMatch(input.data);
+      }),
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          data: z.object({
+            matchDate: z.date().optional(),
+            civDraftKey: z.string().optional(),
+            mapDraftKey: z.string().optional(),
+            status: z.nativeEnum(MatchStatus).optional(),
+            comment: z.string().optional(),
+            adminComment: z.string().optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.updateTournamentMatch(
+          input.id,
+          input.data,
+        );
+      }),
+    updateParticipant: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          participantId: z.string(),
+          data: z.object({
+            isWinner: z.boolean().optional(),
+            score: z.number().int().min(0).optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.updateMatchParticipant(
+          input.matchId,
+          input.participantId,
+          input.data,
+        );
+      }),
+    updateParticipantByTeam: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          teamId: z.string(),
+          data: z.object({
+            isWinner: z.boolean().optional(),
+            score: z.number().int().min(0).optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.updateMatchParticipantByTeam(
+          input.matchId,
+          input.teamId,
+          input.data,
+        );
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.deleteTournamentMatch(input.id);
       }),
   }),
 });
