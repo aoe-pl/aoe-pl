@@ -18,6 +18,16 @@ import { ErrorToast } from "@/components/ui/error-toast-content";
 import type { ExtendedTournamentMatch } from "./match";
 import type { TournamentMatchFormSchema } from "../tournament";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface MatchManagementProps {
   groupId: string;
@@ -28,6 +38,7 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<ExtendedTournamentMatch>();
+  const [deletingMatch, setDeletingMatch] = useState<ExtendedTournamentMatch>();
 
   const refreshPage = () => {
     router.refresh();
@@ -58,20 +69,25 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
       },
     });
 
-  // const { mutate: deleteMatch, isPending: deletionPending } =
-  //   api.tournaments.matches.delete.useMutation({
-  //     onSuccess: () => {
-  //       refreshPage();
-  //       toast.success("Match deleted successfully");
-  //     },
-  //     onError: (error) => {
-  //       toast.error(<ErrorToast message={error.message} />);
-  //     },
-  //   });
+  const { mutate: deleteMatch, isPending: deletionPending } =
+    api.tournaments.matches.delete.useMutation({
+      onSuccess: () => {
+        refreshPage();
+        setDeletingMatch(undefined);
+        toast.success("Match deleted successfully");
+      },
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+      },
+    });
 
   const handleEditMatch = (match: ExtendedTournamentMatch) => {
     setEditingMatch(match);
     setIsDrawerOpen(true);
+  };
+
+  const handleDeleteMatch = (match: ExtendedTournamentMatch) => {
+    setDeletingMatch(match);
   };
 
   const handleSubmit = (data: TournamentMatchFormSchema) => {
@@ -110,6 +126,12 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
     setEditingMatch(undefined);
   };
 
+  const handleConfirmDelete = () => {
+    if (deletingMatch) {
+      deleteMatch({ id: deletingMatch.id });
+    }
+  };
+
   return (
     <>
       <div className="py-4">
@@ -130,6 +152,7 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
             key={match.id}
             match={match}
             onEdit={handleEditMatch}
+            onDelete={handleDeleteMatch}
           />
         ))}
       </div>
@@ -161,6 +184,35 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
           />
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog
+        open={!!deletingMatch}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingMatch(undefined);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Match</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this match? This action cannot be undone.
+              All game data and scores will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deletionPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletionPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Edit, MapPin, Sword, Users, Hand } from "lucide-react";
+import { Calendar, Edit, MapPin, Sword, Users, Hand, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import type { ExtendedTournamentMatch } from "./match";
 import type { MatchStatus } from "@prisma/client";
@@ -13,9 +13,10 @@ import { SpoilerText } from "./spoiler-protection";
 interface MatchCardProps {
   match: ExtendedTournamentMatch;
   onEdit?: (match: ExtendedTournamentMatch) => void;
+  onDelete?: (match: ExtendedTournamentMatch) => void;
 }
 
-export function MatchCard({ match, onEdit }: MatchCardProps) {
+export function MatchCard({ match, onEdit, onDelete }: MatchCardProps) {
   const [participant1, participant2] = match.TournamentMatchParticipant;
 
   const getStatusVariant = (status: MatchStatus) => {
@@ -129,6 +130,16 @@ export function MatchCard({ match, onEdit }: MatchCardProps) {
                   className="h-8 w-8 p-0"
                 >
                   <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(match)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>

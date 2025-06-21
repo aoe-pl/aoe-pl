@@ -361,4 +361,24 @@ export const tournamentGroupRepository = {
   async deleteTournamentGroup(id: string) {
     return db.tournamentGroup.delete({ where: { id } });
   },
+
+  async getGroupParticipants(groupId: string) {
+    const group = await db.tournamentGroup.findUnique({
+      where: { id: groupId },
+      include: {
+        TournamentGroupParticipant: {
+          include: {
+            tournamentParticipant: {
+              include: {
+                user: true,
+                team: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return group?.TournamentGroupParticipant.map((gp) => gp.tournamentParticipant) ?? [];
+  },
 };

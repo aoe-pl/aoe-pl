@@ -26,6 +26,11 @@ import { type TournamentMatchFormSchema, matchStatuses } from "./tournament";
 import { GameDisplay } from "./groups-detail/game-display";
 import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import { Calendar24 } from "@/components/ui/calendar-24";
+import { TournamentParticipantsSelector } from "./tournament-participants-selector";
+import { api } from "@/trpc/react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 type TournamentMatchData = TournamentMatchFormSchema & {
   id?: string;
@@ -46,6 +51,18 @@ export function TournamentMatchForm({
   isPending,
   groupId,
 }: TournamentMatchFormProps) {
+  // Fetch participants for the group (only for new matches)
+  const { data: participants = [], isLoading: participantsLoading } = api.tournaments.groups.getParticipants.useQuery(
+    { groupId: groupId ?? initialData?.groupId ?? "" },
+    { enabled: !!(groupId ?? initialData?.groupId) && !initialData }
+  );
+
+  // Fetch group information to check if it's team-based
+  const { data: groupInfo } = api.tournaments.groups.get.useQuery(
+    { id: groupId ?? initialData?.groupId ?? "" },
+    { enabled: !!(groupId ?? initialData?.groupId) && !initialData }
+  );
+
   const form = useForm<TournamentMatchData>({
     defaultValues: {
       id: initialData?.id ?? "",
@@ -64,6 +81,22 @@ export function TournamentMatchForm({
   });
 
   const handleSubmit = (data: TournamentMatchData) => {
+    // Only validate participants for new matches
+    if (!initialData) {
+      const participantCount = (data.participantIds?.length ?? 0) + (data.teamIds?.length ?? 0);
+      
+      // Validation: Must be 0, 2, or even number for team-based tournaments
+      if (participantCount === 1) {
+        toast.error("A match must have 0, 2, or an even number of participants");
+        return;
+      }
+      
+      if (groupInfo?.isTeamBased && participantCount > 0 && participantCount % 2 !== 0) {
+        toast.error("Team-based tournaments require an even number of participants");
+        return;
+      }
+    }
+
     onSubmit(data);
   };
 
@@ -168,6 +201,59 @@ export function TournamentMatchForm({
                 </FormItem>
               )}
             />
+
+            {/* Only show participant selection for new matches */}
+            {!initialData && (
+              <FormField
+                control={form.control}
+                name="participantIds"
+                render={({ field }) => {
+                  const participantCount = (field.value?.length ?? 0) + (form.watch("teamIds")?.length ?? 0);
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Participants</FormLabel>
+                      <FormControl>
+                        <TournamentParticipantsSelector
+                          value={field.value ?? []}
+                          onChange={field.onChange}
+                          participants={participants}
+                          isLoading={participantsLoading}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Select participants for this match
+                      </FormDescription>
+                      
+                      {/* Validation display */}
+                      <div className="mt-2">
+                        <div className="text-sm text-muted-foreground">
+                          Selected: {participantCount} participant{participantCount !== 1 ? 's' : ''}
+                        </div>
+                        {participantCount === 1 && (
+                          <Alert className="mt-2 border-orange-200 bg-orange-50">
+                            <AlertTriangle className="h-4 w-4 text-orange-600" />
+                            <AlertDescription className="text-orange-800">
+                              A match must have 0, 2, or an even number of participants
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                        {groupInfo?.isTeamBased && participantCount > 0 && participantCount % 2 !== 0 && (
+                          <Alert className="mt-2 border-orange-200 bg-orange-50">
+                            <AlertTriangle className="h-4 w-4 text-orange-600" />
+                            <AlertDescription className="text-orange-800">
+                              Team-based tournaments require an even number of participants
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                      
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            )}
 
             <FormField
               control={form.control}
