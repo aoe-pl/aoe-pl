@@ -12,6 +12,12 @@ export type TournamentMatchCreateData = {
   isManualMatch?: boolean;
   participantIds?: string[];
   teamIds?: string[];
+  participantScores?: {
+    participantId: string;
+    score: number;
+    isWinner: boolean;
+  }[];
+  teamScores?: { teamId: string; score: number; isWinner: boolean }[];
 };
 
 export type TournamentMatchUpdateData = Partial<TournamentMatchCreateData>;
@@ -106,17 +112,28 @@ export const tournamentMatchRepository = {
   },
 
   async createTournamentMatch(data: TournamentMatchCreateData) {
-    const participantData = data.participantIds?.map((id) => ({
-      participantId: id,
-      isWinner: false,
-      score: 0,
-    }));
+    // Create participant data with scores and winners
+    const participantData =
+      data.participantIds?.map((id) => {
+        const scoreData = data.participantScores?.find(
+          (s) => s.participantId === id,
+        );
+        return {
+          participantId: id,
+          isWinner: scoreData?.isWinner ?? false,
+          score: scoreData?.score ?? 0,
+        };
+      }) ?? [];
 
-    const teamData = data.teamIds?.map((id) => ({
-      teamId: id,
-      isWinner: false,
-      score: 0,
-    }));
+    const teamData =
+      data.teamIds?.map((id) => {
+        const scoreData = data.teamScores?.find((s) => s.teamId === id);
+        return {
+          teamId: id,
+          isWinner: scoreData?.isWinner ?? false,
+          score: scoreData?.score ?? 0,
+        };
+      }) ?? [];
 
     return db.tournamentMatch.create({
       data: {
@@ -129,7 +146,7 @@ export const tournamentMatchRepository = {
         adminComment: data.adminComment,
         isManualMatch: data.isManualMatch ?? false,
         TournamentMatchParticipant: {
-          create: [...(participantData ?? []), ...(teamData ?? [])],
+          create: [...participantData, ...teamData],
         },
       },
       include: {
@@ -173,22 +190,59 @@ export const tournamentMatchRepository = {
       }
     });
 
-    return db.tournamentMatch.update({
-      where: { id },
-      data: updateData,
-      include: {
-        TournamentMatchParticipant: {
-          include: {
-            participant: {
-              include: {
-                user: true,
-                team: true,
+    return db.$transaction(async (tx) => {
+      // Update match data
+      const updatedMatch = await tx.tournamentMatch.update({
+        where: { id },
+        data: updateData,
+        include: {
+          TournamentMatchParticipant: {
+            include: {
+              participant: {
+                include: {
+                  user: true,
+                  team: true,
+                },
               },
+              team: true,
             },
-            team: true,
           },
         },
-      },
+      });
+
+      // Update participant scores if provided
+      if (data.participantScores) {
+        for (const scoreData of data.participantScores) {
+          await tx.tournamentMatchParticipant.updateMany({
+            where: {
+              matchId: id,
+              participantId: scoreData.participantId,
+            },
+            data: {
+              score: scoreData.score,
+              isWinner: scoreData.isWinner,
+            },
+          });
+        }
+      }
+
+      // Update team scores if provided
+      if (data.teamScores) {
+        for (const scoreData of data.teamScores) {
+          await tx.tournamentMatchParticipant.updateMany({
+            where: {
+              matchId: id,
+              teamId: scoreData.teamId,
+            },
+            data: {
+              score: scoreData.score,
+              isWinner: scoreData.isWinner,
+            },
+          });
+        }
+      }
+
+      return updatedMatch;
     });
   },
 

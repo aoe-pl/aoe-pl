@@ -3,7 +3,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Edit, MapPin, Sword, Users, Hand, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  Edit,
+  MapPin,
+  Sword,
+  Users,
+  Hand,
+  Trash2,
+} from "lucide-react";
 import { format } from "date-fns";
 import type { ExtendedTournamentMatch } from "./match";
 import type { MatchStatus } from "@prisma/client";
@@ -108,20 +116,8 @@ export function MatchCard({ match, onEdit, onDelete }: MatchCardProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CardTitle className="text-base">Match</CardTitle>
-              {match.isManualMatch && (
-                <Badge
-                  variant="secondary"
-                  className="text-xs"
-                >
-                  <Hand className="mr-1 h-3 w-3" />
-                  Manual
-                </Badge>
-              )}
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={getStatusVariant(match.status)}>
-                {matchStatusesLabels[match.status]}
-              </Badge>
               {onEdit && (
                 <Button
                   variant="ghost"
@@ -144,8 +140,22 @@ export function MatchCard({ match, onEdit, onDelete }: MatchCardProps) {
               )}
             </div>
           </div>
+          <div className="flex gap-2">
+            <Badge variant={getStatusVariant(match.status)}>
+              {matchStatusesLabels[match.status]}
+            </Badge>
+            {match.isManualMatch && (
+              <Badge
+                variant="secondary"
+                className="text-xs"
+              >
+                <Hand className="mr-1 h-3 w-3" />
+                Manual
+              </Badge>
+            )}
+          </div>
           {/* Match Date */}
-          <div className="text-muted-foreground flex items-center gap-2 text-sm">
+          <div className="text-muted-foreground mt-4 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" />
             <span>{formatDate(match.matchDate)}</span>
           </div>

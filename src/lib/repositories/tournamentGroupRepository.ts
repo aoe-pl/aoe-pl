@@ -379,6 +379,9 @@ export const tournamentGroupRepository = {
       },
     });
 
-    return group?.TournamentGroupParticipant.map((gp) => gp.tournamentParticipant) ?? [];
+    return (
+      group?.TournamentGroupParticipant.map((gp) => gp.tournamentParticipant) ??
+      []
+    );
   },
 };

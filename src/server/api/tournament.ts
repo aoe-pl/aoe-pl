@@ -364,6 +364,24 @@ export const tournamentRouter = createTRPCRouter({
             participantIds: z.array(z.string()).optional(),
             teamIds: z.array(z.string()).optional(),
             isManualMatch: z.boolean().default(false),
+            participantScores: z
+              .array(
+                z.object({
+                  participantId: z.string(),
+                  score: z.number(),
+                  isWinner: z.boolean(),
+                }),
+              )
+              .optional(),
+            teamScores: z
+              .array(
+                z.object({
+                  teamId: z.string(),
+                  score: z.number(),
+                  isWinner: z.boolean(),
+                }),
+              )
+              .optional(),
           }),
         }),
       )
@@ -381,6 +399,24 @@ export const tournamentRouter = createTRPCRouter({
             status: z.nativeEnum(MatchStatus).optional(),
             comment: z.string().optional(),
             adminComment: z.string().optional(),
+            participantScores: z
+              .array(
+                z.object({
+                  participantId: z.string(),
+                  score: z.number(),
+                  isWinner: z.boolean(),
+                }),
+              )
+              .optional(),
+            teamScores: z
+              .array(
+                z.object({
+                  teamId: z.string(),
+                  score: z.number(),
+                  isWinner: z.boolean(),
+                }),
+              )
+              .optional(),
           }),
         }),
       )

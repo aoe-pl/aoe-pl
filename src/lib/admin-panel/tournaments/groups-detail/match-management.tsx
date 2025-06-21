@@ -101,6 +101,8 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
           status: data.status,
           comment: data.comment,
           adminComment: data.adminComment,
+          participantScores: data.participantScores,
+          teamScores: data.teamScores,
         },
       });
     } else {
@@ -116,6 +118,8 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
           participantIds: data.participantIds,
           teamIds: data.teamIds,
           isManualMatch: true,
+          participantScores: data.participantScores,
+          teamScores: data.teamScores,
         },
       });
     }
@@ -197,8 +201,8 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Match</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this match? This action cannot be undone.
-              All game data and scores will be permanently removed.
+              Are you sure you want to delete this match? This action cannot be
+              undone. All game data and scores will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

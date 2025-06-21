@@ -206,6 +206,24 @@ const tournamentMatchFormSchema = z.object({
   adminComment: z.string().optional(),
   participantIds: z.array(z.string()).optional(),
   teamIds: z.array(z.string()).optional(),
+  participantScores: z
+    .array(
+      z.object({
+        participantId: z.string(),
+        score: z.number(),
+        isWinner: z.boolean(),
+      }),
+    )
+    .optional(),
+  teamScores: z
+    .array(
+      z.object({
+        teamId: z.string(),
+        score: z.number(),
+        isWinner: z.boolean(),
+      }),
+    )
+    .optional(),
 });
 
 type TournamentGroupFormSchema = z.infer<typeof tournamentGroupFormSchema>;

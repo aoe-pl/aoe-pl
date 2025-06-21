@@ -31,9 +31,25 @@ import { api } from "@/trpc/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+
+type ParticipantScore = {
+  id: string; // Corresponds to participantId or teamId
+  name: string;
+  score: number;
+  isWinner: boolean;
+  isTeam: boolean;
+};
 
 type TournamentMatchData = TournamentMatchFormSchema & {
   id?: string;
+  participantScores: {
+    participantId: string;
+    score: number;
+    isWinner: boolean;
+  }[];
+  teamScores: { teamId: string; score: number; isWinner: boolean }[];
 };
 
 interface TournamentMatchFormProps {
@@ -51,16 +67,17 @@ export function TournamentMatchForm({
   isPending,
   groupId,
 }: TournamentMatchFormProps) {
-  // Fetch participants for the group (only for new matches)
-  const { data: participants = [], isLoading: participantsLoading } = api.tournaments.groups.getParticipants.useQuery(
-    { groupId: groupId ?? initialData?.groupId ?? "" },
-    { enabled: !!(groupId ?? initialData?.groupId) && !initialData }
-  );
+  const [scores, setScores] = useState<ParticipantScore[]>([]);
 
-  // Fetch group information to check if it's team-based
+  const { data: groupParticipants = [], isLoading: participantsLoading } =
+    api.tournaments.groups.getParticipants.useQuery(
+      { groupId: groupId ?? initialData?.groupId ?? "" },
+      { enabled: !!groupId || !!initialData?.groupId },
+    );
+
   const { data: groupInfo } = api.tournaments.groups.get.useQuery(
     { id: groupId ?? initialData?.groupId ?? "" },
-    { enabled: !!(groupId ?? initialData?.groupId) && !initialData }
+    { enabled: !!(groupId ?? initialData?.groupId) },
   );
 
   const form = useForm<TournamentMatchData>({
@@ -75,40 +92,147 @@ export function TournamentMatchForm({
       status: initialData?.status ?? "SCHEDULED",
       comment: initialData?.comment ?? "",
       adminComment: initialData?.adminComment ?? "",
-      participantIds: [],
-      teamIds: [],
+      participantIds:
+        initialData?.TournamentMatchParticipant.filter(
+          (p) => p.participantId,
+        ).map((p) => p.participantId!) ?? [],
+      teamIds:
+        initialData?.TournamentMatchParticipant.filter((p) => p.teamId).map(
+          (p) => p.teamId!,
+        ) ?? [],
+      participantScores: [],
+      teamScores: [],
     },
   });
 
+  // Initialize scores for existing matches
+  useEffect(() => {
+    if (initialData?.TournamentMatchParticipant) {
+      const initialScores = initialData.TournamentMatchParticipant.map((p) => ({
+        id: (p.participantId ?? p.teamId)!,
+        name: p.participant?.nickname ?? p.team?.name ?? "Unknown",
+        score: p.score ?? 0,
+        isWinner: p.isWinner ?? false,
+        isTeam: !!p.teamId,
+      }));
+      setScores(initialScores);
+    }
+  }, [initialData]);
+
+  // Handle participant selection for new matches
+  const handleParticipantSelection = (newParticipantIds: string[]) => {
+    form.setValue("participantIds", newParticipantIds);
+    const newScores = newParticipantIds.map((id) => {
+      const participant = groupParticipants.find((p) => p.id === id);
+      return {
+        id,
+        name: participant?.nickname ?? "Unknown",
+        score: 0,
+        isWinner: false,
+        isTeam: false,
+      };
+    });
+    setScores(newScores);
+  };
+
+  // Automatically determine winner when scores change
+  useEffect(() => {
+    if (scores.length < 2) {
+      setScores((s) => s.map((i) => ({ ...i, isWinner: false })));
+      return;
+    }
+
+    const maxScore = Math.max(...scores.map((s) => s.score));
+    if (maxScore === 0) {
+      setScores((s) => s.map((i) => ({ ...i, isWinner: false })));
+      return;
+    }
+
+    const winners = scores.filter((s) => s.score === maxScore);
+    const isTie = winners.length !== 1;
+
+    setScores((currentScores) =>
+      currentScores.map((s) => ({
+        ...s,
+        isWinner: !isTie && s.score === maxScore,
+      })),
+    );
+  }, [scores.map((s) => s.score).join(",")]);
+
   const handleSubmit = (data: TournamentMatchData) => {
-    // Only validate participants for new matches
     if (!initialData) {
-      const participantCount = (data.participantIds?.length ?? 0) + (data.teamIds?.length ?? 0);
-      
-      // Validation: Must be 0, 2, or even number for team-based tournaments
-      if (participantCount === 1) {
-        toast.error("A match must have 0, 2, or an even number of participants");
-        return;
-      }
-      
-      if (groupInfo?.isTeamBased && participantCount > 0 && participantCount % 2 !== 0) {
-        toast.error("Team-based tournaments require an even number of participants");
-        return;
+      const participantCount = data.participantIds?.length ?? 0;
+      if (participantCount > 0 && participantCount !== 2) {
+        if (groupInfo?.isTeamBased && participantCount % 2 !== 0) {
+          toast.error(
+            "Team-based matches require an even number of participants.",
+          );
+          return;
+        }
+        if (!groupInfo?.isTeamBased && participantCount !== 2) {
+          // this is temp, we can support more than 2 participants later
+        }
       }
     }
 
-    onSubmit(data);
+    const finalData = {
+      ...data,
+      participantScores: scores
+        .filter((s) => !s.isTeam)
+        .map((s) => ({
+          participantId: s.id,
+          score: s.score,
+          isWinner: s.isWinner,
+        })),
+      teamScores: scores
+        .filter((s) => s.isTeam)
+        .map((s) => ({ teamId: s.id, score: s.score, isWinner: s.isWinner })),
+    };
+
+    onSubmit(finalData);
   };
+
+  const renderScoreInputs = () => (
+    <div className="space-y-4">
+      <FormLabel>Match Results</FormLabel>
+      <div className="space-y-3">
+        {scores.map((pScore, index) => (
+          <div
+            key={pScore.id}
+            className="flex items-center justify-between rounded-lg border p-3"
+          >
+            <div className="flex items-center gap-3">
+              <span className="font-medium">{pScore.name}</span>
+              {pScore.isWinner && <Badge variant="default">Winner</Badge>}
+            </div>
+            <div className="flex items-center gap-2">
+              <FormLabel>Score:</FormLabel>
+              <Input
+                type="number"
+                min="0"
+                className="h-8 w-16 text-center"
+                value={pScore.score}
+                onChange={(e) => {
+                  const newScoreValue = parseInt(e.target.value, 10) || 0;
+                  setScores((currentScores) =>
+                    currentScores.map((s) =>
+                      s.id === pScore.id ? { ...s, score: newScoreValue } : s,
+                    ),
+                  );
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <ScrollArea className="h-[60vh] px-4">
       <Form {...form}>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            void form.handleSubmit(handleSubmit)(e);
-          }}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-6"
         >
           <div className="space-y-4">
@@ -123,7 +247,6 @@ export function TournamentMatchForm({
                       date={field.value}
                       onDateChange={(date) => {
                         if (date && field.value) {
-                          // Preserve the time from the current value
                           const currentTime = field.value;
                           date.setHours(
                             currentTime.getHours(),
@@ -146,7 +269,6 @@ export function TournamentMatchForm({
                             field.onChange(newDate);
                           }
                         } else if (!field.value && time) {
-                          // If no date is set, create a new date with today's date and the selected time
                           const [hours, minutes, seconds] = time.split(":");
                           if (hours && minutes && seconds) {
                             const newDate = new Date();
@@ -202,58 +324,40 @@ export function TournamentMatchForm({
               )}
             />
 
-            {/* Only show participant selection for new matches */}
             {!initialData && (
               <FormField
                 control={form.control}
                 name="participantIds"
-                render={({ field }) => {
-                  const participantCount = (field.value?.length ?? 0) + (form.watch("teamIds")?.length ?? 0);
-                  
-                  return (
-                    <FormItem>
-                      <FormLabel>Participants</FormLabel>
-                      <FormControl>
-                        <TournamentParticipantsSelector
-                          value={field.value ?? []}
-                          onChange={field.onChange}
-                          participants={participants}
-                          isLoading={participantsLoading}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Select participants for this match
-                      </FormDescription>
-                      
-                      {/* Validation display */}
-                      <div className="mt-2">
-                        <div className="text-sm text-muted-foreground">
-                          Selected: {participantCount} participant{participantCount !== 1 ? 's' : ''}
-                        </div>
-                        {participantCount === 1 && (
-                          <Alert className="mt-2 border-orange-200 bg-orange-50">
-                            <AlertTriangle className="h-4 w-4 text-orange-600" />
-                            <AlertDescription className="text-orange-800">
-                              A match must have 0, 2, or an even number of participants
-                            </AlertDescription>
-                          </Alert>
-                        )}
-                        {groupInfo?.isTeamBased && participantCount > 0 && participantCount % 2 !== 0 && (
-                          <Alert className="mt-2 border-orange-200 bg-orange-50">
-                            <AlertTriangle className="h-4 w-4 text-orange-600" />
-                            <AlertDescription className="text-orange-800">
-                              Team-based tournaments require an even number of participants
-                            </AlertDescription>
-                          </Alert>
-                        )}
-                      </div>
-                      
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Participants</FormLabel>
+                    <FormControl>
+                      <TournamentParticipantsSelector
+                        value={field.value ?? []}
+                        onChange={handleParticipantSelection}
+                        participants={groupParticipants}
+                        isLoading={participantsLoading}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Select participants for this match
+                    </FormDescription>
+                    {form.watch("participantIds") &&
+                      form.watch("participantIds")!.length > 0 &&
+                      form.watch("participantIds")!.length !== 2 && (
+                        <Alert className="mt-2 border-orange-200 bg-orange-50">
+                          <AlertTriangle className="h-4 w-4 text-orange-600" />
+                          <AlertDescription className="text-orange-800">
+                            You can only select 2 participants for a match.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                  </FormItem>
+                )}
               />
             )}
+
+            {scores.length > 0 && renderScoreInputs()}
 
             <FormField
               control={form.control}
@@ -337,7 +441,6 @@ export function TournamentMatchForm({
               )}
             />
 
-            {/* Display games if editing existing match */}
             {initialData?.Game && initialData.Game.length > 0 && (
               <FormItem>
                 <FormLabel>Games</FormLabel>
