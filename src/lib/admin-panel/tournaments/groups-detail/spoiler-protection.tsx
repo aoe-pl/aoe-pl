@@ -34,6 +34,7 @@ export function SpoilerProtection({
         {children}
       </span>
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         onClick={() => setShowSpoiler(!showSpoiler)}
@@ -80,6 +81,7 @@ export function SpoilerText({
         {showSpoiler ? text : fallbackText}
       </span>
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         onClick={() => setShowSpoiler(!showSpoiler)}

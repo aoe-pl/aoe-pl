@@ -33,6 +33,7 @@ import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
+import { SpoilerProtection } from "./groups-detail/spoiler-protection";
 
 type ParticipantScore = {
   id: string; // Corresponds to participantId or teamId
@@ -192,41 +193,52 @@ export function TournamentMatchForm({
     onSubmit(finalData);
   };
 
-  const renderScoreInputs = () => (
-    <div className="space-y-4">
-      <FormLabel>Match Results</FormLabel>
-      <div className="space-y-3">
-        {scores.map((pScore, index) => (
-          <div
-            key={pScore.id}
-            className="flex items-center justify-between rounded-lg border p-3"
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-medium">{pScore.name}</span>
-              {pScore.isWinner && <Badge variant="default">Winner</Badge>}
+  const renderScoreInputs = () => {
+    const currentStatus = form.watch("status");
+    const isAdminApproved = currentStatus === "ADMIN_APPROVED";
+    const hasNonZeroScores = scores.some((s) => s.score > 0);
+    const shouldHideScores = hasNonZeroScores && !isAdminApproved;
+
+    return (
+      <div className="space-y-4">
+        <FormLabel>Match Results</FormLabel>
+        <div className="space-y-3">
+          {scores.map((pScore, index) => (
+            <div
+              key={pScore.id}
+              className="flex items-center justify-between rounded-lg border p-3"
+            >
+              <div className="flex items-center gap-3">
+                <span className="font-medium">{pScore.name}</span>
+                {pScore.isWinner && <Badge variant="default">Winner</Badge>}
+              </div>
+              <div className="flex items-center gap-2">
+                <FormLabel>Score:</FormLabel>
+                <SpoilerProtection isSpoiler={shouldHideScores}>
+                  <Input
+                    type="number"
+                    min="0"
+                    className="h-8 w-16 text-center"
+                    value={pScore.score}
+                    onChange={(e) => {
+                      const newScoreValue = parseInt(e.target.value, 10) || 0;
+                      setScores((currentScores) =>
+                        currentScores.map((s) =>
+                          s.id === pScore.id
+                            ? { ...s, score: newScoreValue }
+                            : s,
+                        ),
+                      );
+                    }}
+                  />
+                </SpoilerProtection>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <FormLabel>Score:</FormLabel>
-              <Input
-                type="number"
-                min="0"
-                className="h-8 w-16 text-center"
-                value={pScore.score}
-                onChange={(e) => {
-                  const newScoreValue = parseInt(e.target.value, 10) || 0;
-                  setScores((currentScores) =>
-                    currentScores.map((s) =>
-                      s.id === pScore.id ? { ...s, score: newScoreValue } : s,
-                    ),
-                  );
-                }}
-              />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <ScrollArea className="h-[60vh] px-4">
