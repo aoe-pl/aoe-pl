@@ -357,6 +357,14 @@ export const tournamentRouter = createTRPCRouter({
       .query(async ({ input }) => {
         return tournamentMatchRepository.getTournamentMatchById(input.id);
       }),
+    getGames: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        const match = await tournamentMatchRepository.getTournamentMatchById(
+          input.id,
+        );
+        return match?.Game ?? [];
+      }),
     create: adminProcedure
       .input(
         z.object({

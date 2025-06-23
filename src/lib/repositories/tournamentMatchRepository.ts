@@ -321,7 +321,6 @@ export const tournamentMatchRepository = {
           data: {
             matchId,
             mapId: game.mapId,
-            gameDate: new Date(),
             winnerId: winner.id,
             loserId: loser.id,
           },

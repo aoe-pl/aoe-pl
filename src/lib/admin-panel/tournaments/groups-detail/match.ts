@@ -110,17 +110,14 @@ export function APItoTournamentMatch(
         ...participant,
         gamesLost: participant.gamesLost.map((game) => ({
           ...game,
-          gameDate: game.gameDate,
         })),
         gamesWon: participant.gamesWon.map((game) => ({
           ...game,
-          gameDate: game.gameDate,
         })),
       }),
     ),
     Game: (match.Game ?? []).map((game) => ({
       ...game,
-      gameDate: game.gameDate,
     })),
     group: match.group ?? null,
     TournamentMatchMode: match.TournamentMatchMode ?? null,

@@ -45,8 +45,9 @@ export function MatchManagement({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<ExtendedTournamentMatch>();
   const [deletingMatch, setDeletingMatch] = useState<ExtendedTournamentMatch>();
+
   const [managingGamesMatch, setManagingGamesMatch] =
-    useState<ExtendedTournamentMatch>();
+    useState<ExtendedTournamentMatch | null>(null);
 
   const refreshPage = () => {
     router.refresh();
@@ -170,6 +171,7 @@ export function MatchManagement({
             onEdit={handleEditMatch}
             onDelete={handleDeleteMatch}
             onManageGames={handleManageGames}
+            gamesCount={match.Game?.length}
           />
         ))}
       </div>
@@ -204,9 +206,11 @@ export function MatchManagement({
 
       {managingGamesMatch && (
         <GameManagement
-          match={managingGamesMatch}
+          match={{ ...managingGamesMatch }}
           isOpen={!!managingGamesMatch}
-          onClose={() => setManagingGamesMatch(undefined)}
+          onClose={() => {
+            setManagingGamesMatch(null);
+          }}
           matchMode={matchMode}
         />
       )}

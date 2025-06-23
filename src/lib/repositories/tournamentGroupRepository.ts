@@ -39,6 +39,11 @@ export const tournamentGroupRepository = {
                 gamesWon: true,
               },
             },
+            Game: {
+              include: {
+                map: true,
+              },
+            },
           },
         },
         stage: {

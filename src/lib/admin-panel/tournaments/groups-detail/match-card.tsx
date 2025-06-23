@@ -21,6 +21,7 @@ import { SpoilerText } from "./spoiler-protection";
 
 interface MatchCardProps {
   match: ExtendedTournamentMatch;
+  gamesCount?: number;
   onEdit?: (match: ExtendedTournamentMatch) => void;
   onDelete?: (match: ExtendedTournamentMatch) => void;
   onManageGames?: (match: ExtendedTournamentMatch) => void;
@@ -28,6 +29,7 @@ interface MatchCardProps {
 
 export function MatchCard({
   match,
+  gamesCount = 0,
   onEdit,
   onDelete,
   onManageGames,
@@ -103,12 +105,11 @@ export function MatchCard({
   };
 
   const getGamesCount = () => {
-    const count = match.Game?.length ?? 0;
-    const isSpoiler = shouldHideSpoilers() && count > 0;
+    const isSpoiler = shouldHideSpoilers() && gamesCount > 0;
 
     return (
       <SpoilerText
-        text={count.toString()}
+        text={gamesCount.toString()}
         isSpoiler={isSpoiler}
         fallbackText="••"
         className="font-medium"
