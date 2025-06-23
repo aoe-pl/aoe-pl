@@ -11,6 +11,7 @@ export type TournamentGroupCreateData = {
   matchModeId?: string;
   displayOrder?: number;
   isTeamBased?: boolean;
+  isMixed?: boolean;
   participantIds?: string[];
 };
 
@@ -147,6 +148,7 @@ export const tournamentGroupRepository = {
             : undefined,
           displayOrder: data.displayOrder ?? 0,
           isTeamBased: data.isTeamBased,
+          isMixed: data.isMixed,
           stage: { connect: { id: stageId } },
           TournamentGroupParticipant:
             participantsIds && participantsIds.length > 0
@@ -301,6 +303,7 @@ export const tournamentGroupRepository = {
           : undefined,
         displayOrder: data.displayOrder,
         isTeamBased: data.isTeamBased,
+        isMixed: data.isMixed,
         TournamentGroupParticipant: participantsIds
           ? {
               // Delete all participants that are not in the new list

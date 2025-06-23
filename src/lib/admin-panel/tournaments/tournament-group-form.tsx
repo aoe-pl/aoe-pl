@@ -71,6 +71,7 @@ export function TournamentGroupForm({
       description: initialData?.description ?? "",
       displayOrder: initialData?.displayOrder ?? groups.length,
       isTeamBased: initialData?.isTeamBased ?? defaultIsTeamBased,
+      isMixed: initialData?.isMixed ?? false,
       matchModeId: initialData?.matchModeId ?? defaultMatchModeId,
       participantIds:
         initialData?.TournamentGroupParticipant?.map(
@@ -86,6 +87,7 @@ export function TournamentGroupForm({
         data.matchModeId === defaultMatchModeId ? undefined : data.matchModeId,
       isTeamBased:
         data.isTeamBased === defaultIsTeamBased ? undefined : data.isTeamBased,
+      isMixed: data.isMixed === false ? undefined : data.isMixed,
       participantIds: data.participantIds ?? [],
     });
   };
@@ -234,6 +236,31 @@ export function TournamentGroupForm({
                 </FormItem>
               )}
             />
+
+            {form.watch("isTeamBased") && (
+              <FormField
+                control={form.control}
+                name="isMixed"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Mixed Teams</FormLabel>
+                      <FormDescription>
+                        Enable mixed teams where team compositions can change
+                        for each game. Players can be grouped into different
+                        teams for each match.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}

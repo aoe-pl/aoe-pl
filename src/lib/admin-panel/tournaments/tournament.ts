@@ -193,6 +193,7 @@ const tournamentGroupFormSchema = z.object({
   matchModeId: z.string().optional(),
   displayOrder: z.number().int().min(0),
   isTeamBased: z.boolean().optional(),
+  isMixed: z.boolean().optional(),
   participantIds: z.array(z.string()).optional(),
 });
 

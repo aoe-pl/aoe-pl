@@ -86,13 +86,15 @@ export function TournamentParticipantsSelector({
                 <Badge
                   key={participant.id}
                   variant="secondary"
-                  className="mr-1"
+                  className="mr-1 flex items-center"
                 >
                   {participant.nickname}
-                  <button
-                    className="ring-offset-background focus:ring-ring ml-1 rounded-full outline-none focus:ring-2 focus:ring-offset-2"
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    className="ring-offset-background focus:ring-ring ml-1 cursor-pointer rounded-full outline-none focus:ring-2 focus:ring-offset-2"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === "Enter" || e.key === " ") {
                         onChange(value.filter((id) => id !== participant.id));
                       }
                     }}
@@ -105,9 +107,10 @@ export function TournamentParticipantsSelector({
                       e.stopPropagation();
                       onChange(value.filter((id) => id !== participant.id));
                     }}
+                    aria-label={`Remove ${participant.nickname}`}
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </span>
                 </Badge>
               ))
             ) : (

@@ -62,6 +62,7 @@ export function HeaderContainer({
       <GroupHeader
         name={group.name}
         isTeamBased={group.isTeamBased ?? false}
+        isMixed={group.isMixed ?? false}
         participantsCount={group.TournamentGroupParticipant.length}
         matchesCount={matchesCount}
         matchMode={matchMode}

@@ -12,6 +12,7 @@ export type GroupHeaderProps = {
   matchesCount: number;
   matchMode: { mode: string; gameCount: number };
   onEdit: () => void;
+  isMixed: boolean;
 };
 
 export function GroupHeader({
@@ -21,6 +22,7 @@ export function GroupHeader({
   matchesCount,
   matchMode,
   onEdit,
+  isMixed,
 }: GroupHeaderProps) {
   return (
     <>
@@ -32,9 +34,12 @@ export function GroupHeader({
                 <Trophy className="h-5 w-5" />
                 <CardTitle>{name}</CardTitle>
               </div>
-              <Badge variant="default">
-                {isTeamBased ? "Team Based" : "1v1"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="default">
+                  {isTeamBased ? "Team Based" : "1v1"}
+                </Badge>
+                {isMixed && <Badge variant="default">Mixed</Badge>}
+              </div>
             </div>
             <Button onClick={onEdit}>Edit</Button>
           </div>

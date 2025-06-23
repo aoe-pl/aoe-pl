@@ -115,14 +115,17 @@ export function TournamentGroupList({
     description?: string | undefined;
     matchModeId?: string | undefined;
     isTeamBased?: boolean | undefined;
+    isMixed?: boolean | undefined;
     participantIds?: string[] | undefined;
   }) => {
+    console.log("data sss", data.isMixed);
     const groupData = {
       name: data.name,
       description: data.description,
       matchModeId: data.matchModeId,
       displayOrder: data.displayOrder,
       isTeamBased: data.isTeamBased,
+      isMixed: data.isMixed,
       participantIds: data.participantIds ?? [],
     };
 
@@ -182,6 +185,7 @@ export function TournamentGroupList({
                   <Badge variant={group.isTeamBased ? "default" : "secondary"}>
                     {group.isTeamBased ? "Team Based" : "Individual"}
                   </Badge>
+                  {group.isMixed && <Badge variant="default">Mixed</Badge>}
                   <div className="flex gap-1">
                     <Button
                       type="button"
