@@ -129,8 +129,8 @@ model Platform {
 model BaseMap {
     id           String @id @default(cuid())
     name         String
-    description  String
-    thumbnailUrl String
+    description  String?
+    thumbnailUrl String?
 
     maps Map[]
 }
@@ -138,8 +138,8 @@ model BaseMap {
 model Map {
     id           String @id @default(cuid())
     name         String
-    description  String
-    thumbnailUrl String
+    description  String?
+    thumbnailUrl String?
 
     baseMapId String
     baseMap   BaseMap @relation(fields: [baseMapId], references: [id])
@@ -475,7 +475,6 @@ model Game {
     mapId String
     map   Map    @relation(fields: [mapId], references: [id])
 
-    gameDate DateTime
     recUrl   String?  @db.Text
 
     winnerId String

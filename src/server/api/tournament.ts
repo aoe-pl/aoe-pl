@@ -22,6 +22,11 @@ import { tournamentParticipantRepository } from "@/lib/repositories/tournamentPa
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 
+const gameSchema = z.object({
+  mapId: z.string(),
+  winnerId: z.string(),
+});
+
 export type TournamentWithRelations = Tournament & {
   tournamentSeries: TournamentSeries | null;
   matchMode: { id: string; mode: string; gameCount: number };
@@ -424,6 +429,21 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentMatchRepository.updateTournamentMatch(
           input.id,
           input.data,
+        );
+      }),
+    manageGames: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          games: z.array(gameSchema),
+          applyScore: z.boolean(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.manageGames(
+          input.matchId,
+          input.games,
+          input.applyScore,
         );
       }),
     updateParticipant: adminProcedure

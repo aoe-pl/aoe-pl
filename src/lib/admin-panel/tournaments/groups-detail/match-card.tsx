@@ -11,6 +11,7 @@ import {
   Users,
   Hand,
   Trash2,
+  Swords,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { ExtendedTournamentMatch } from "./match";
@@ -22,9 +23,15 @@ interface MatchCardProps {
   match: ExtendedTournamentMatch;
   onEdit?: (match: ExtendedTournamentMatch) => void;
   onDelete?: (match: ExtendedTournamentMatch) => void;
+  onManageGames?: (match: ExtendedTournamentMatch) => void;
 }
 
-export function MatchCard({ match, onEdit, onDelete }: MatchCardProps) {
+export function MatchCard({
+  match,
+  onEdit,
+  onDelete,
+  onManageGames,
+}: MatchCardProps) {
   const [participant1, participant2] = match.TournamentMatchParticipant;
 
   const getStatusVariant = (status: MatchStatus) => {
@@ -118,6 +125,16 @@ export function MatchCard({ match, onEdit, onDelete }: MatchCardProps) {
               <CardTitle className="text-base">Match</CardTitle>
             </div>
             <div className="flex items-center gap-2">
+              {onManageGames && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onManageGames(match)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Swords className="h-4 w-4" />
+                </Button>
+              )}
               {onEdit && (
                 <Button
                   variant="ghost"

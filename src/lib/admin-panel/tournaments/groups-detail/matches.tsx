@@ -6,9 +6,11 @@ import type { MatchStatus } from "@prisma/client";
 export function MatchesContainer({
   matches,
   groupId,
+  matchMode,
 }: {
   matches: ExtendedTournamentMatch[];
   groupId: string;
+  matchMode: { id: string; mode: string; gameCount: number };
 }) {
   const matchesByStatus = matches.reduce(
     (acc, match) => {
@@ -35,6 +37,7 @@ export function MatchesContainer({
           <MatchManagement
             groupId={groupId}
             matches={[]}
+            matchMode={matchMode}
           />
         </CardContent>
       </Card>
@@ -58,6 +61,7 @@ export function MatchesContainer({
             <MatchManagement
               groupId={groupId}
               matches={matchesByStatus[status] ?? []}
+              matchMode={matchMode}
             />
           </div>
         ))}

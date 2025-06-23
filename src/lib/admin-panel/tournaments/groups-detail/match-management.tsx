@@ -28,17 +28,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { GameManagement } from "./game-management";
 
 interface MatchManagementProps {
   groupId: string;
   matches: ExtendedTournamentMatch[];
+  matchMode: { id: string; mode: string; gameCount: number };
 }
 
-export function MatchManagement({ groupId, matches }: MatchManagementProps) {
+export function MatchManagement({
+  groupId,
+  matches,
+  matchMode,
+}: MatchManagementProps) {
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<ExtendedTournamentMatch>();
   const [deletingMatch, setDeletingMatch] = useState<ExtendedTournamentMatch>();
+  const [managingGamesMatch, setManagingGamesMatch] =
+    useState<ExtendedTournamentMatch>();
 
   const refreshPage = () => {
     router.refresh();
@@ -88,6 +96,10 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
 
   const handleDeleteMatch = (match: ExtendedTournamentMatch) => {
     setDeletingMatch(match);
+  };
+
+  const handleManageGames = (match: ExtendedTournamentMatch) => {
+    setManagingGamesMatch(match);
   };
 
   const handleSubmit = (data: TournamentMatchFormSchema) => {
@@ -157,6 +169,7 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
             match={match}
             onEdit={handleEditMatch}
             onDelete={handleDeleteMatch}
+            onManageGames={handleManageGames}
           />
         ))}
       </div>
@@ -188,6 +201,15 @@ export function MatchManagement({ groupId, matches }: MatchManagementProps) {
           />
         </DrawerContent>
       </Drawer>
+
+      {managingGamesMatch && (
+        <GameManagement
+          match={managingGamesMatch}
+          isOpen={!!managingGamesMatch}
+          onClose={() => setManagingGamesMatch(undefined)}
+          matchMode={matchMode}
+        />
+      )}
 
       <AlertDialog
         open={!!deletingMatch}

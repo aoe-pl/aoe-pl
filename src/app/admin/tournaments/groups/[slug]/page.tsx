@@ -38,6 +38,7 @@ export default async function TournamentGroupPage({
         <MatchesContainer
           matches={matches}
           groupId={groupId}
+          matchMode={matchMode}
         />
       </div>
     </div>

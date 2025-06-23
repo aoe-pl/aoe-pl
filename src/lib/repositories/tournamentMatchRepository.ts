@@ -22,6 +22,11 @@ export type TournamentMatchCreateData = {
 
 export type TournamentMatchUpdateData = Partial<TournamentMatchCreateData>;
 
+export type GameData = {
+  mapId: string;
+  winnerId: string;
+};
+
 export const tournamentMatchRepository = {
   async getTournamentMatchById(id: string) {
     return db.tournamentMatch.findUnique({
@@ -286,5 +291,79 @@ export const tournamentMatchRepository = {
 
   async deleteTournamentMatch(id: string) {
     return db.tournamentMatch.delete({ where: { id } });
+  },
+
+  async manageGames(matchId: string, games: GameData[], applyScore: boolean) {
+    await db.$transaction(async (tx) => {
+      const matchParticipants = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId },
+      });
+
+      if (matchParticipants.length === 0) {
+        return;
+      }
+
+      await tx.game.deleteMany({
+        where: { matchId },
+      });
+
+      const gameCreationPromises = games.map((game) => {
+        const winner = matchParticipants.find((p) => p.id === game.winnerId);
+        const loser = matchParticipants.find((p) => p.id !== game.winnerId);
+
+        if (!winner || !loser) {
+          throw new Error(
+            `Invalid winner specified for the game in match ${matchId}.`,
+          );
+        }
+
+        return tx.game.create({
+          data: {
+            matchId,
+            mapId: game.mapId,
+            gameDate: new Date(),
+            winnerId: winner.id,
+            loserId: loser.id,
+          },
+        });
+      });
+
+      await Promise.all(gameCreationPromises);
+
+      if (applyScore) {
+        const gamesWon = new Map<string, number>();
+        matchParticipants.forEach((p) => gamesWon.set(p.id, 0));
+
+        for (const game of games) {
+          gamesWon.set(game.winnerId, (gamesWon.get(game.winnerId) ?? 0) + 1);
+        }
+
+        const scoreUpdatePromises = matchParticipants.map(async (p) => {
+          const score = gamesWon.get(p.id) ?? 0;
+          let isWinner = false;
+
+          const otherScores = Array.from(gamesWon.values()).filter(
+            (_, index) => matchParticipants[index]?.id !== p.id,
+          );
+
+          if (otherScores.every((s) => score > s)) {
+            isWinner = true;
+          }
+
+          return tx.tournamentMatchParticipant.update({
+            where: { id: p.id },
+            data: { score, isWinner },
+          });
+        });
+
+        await Promise.all(scoreUpdatePromises);
+
+        await tx.tournamentMatch.update({
+          where: { id: matchId },
+          data: { status: "ADMIN_APPROVED" },
+        });
+      }
+    });
+    return this.getTournamentMatchById(matchId);
   },
 };
