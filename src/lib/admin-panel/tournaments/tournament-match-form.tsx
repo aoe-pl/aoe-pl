@@ -203,7 +203,7 @@ export function TournamentMatchForm({
       <div className="space-y-4">
         <FormLabel>Match Results</FormLabel>
         <div className="space-y-3">
-          {scores.map((pScore, index) => (
+          {scores.map((pScore) => (
             <div
               key={pScore.id}
               className="flex items-center justify-between rounded-lg border p-3"
