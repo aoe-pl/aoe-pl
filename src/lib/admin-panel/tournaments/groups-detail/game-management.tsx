@@ -11,7 +11,6 @@ import type { ExtendedTournamentMatch } from "./match";
 import { TournamentGameForm } from "./tournament-game-form";
 import { api } from "@/trpc/react";
 import type { MatchParticipantWithUser } from "./match";
-import type { GameType } from "./tournament-game-form";
 
 interface GameManagementProps {
   match: ExtendedTournamentMatch;
