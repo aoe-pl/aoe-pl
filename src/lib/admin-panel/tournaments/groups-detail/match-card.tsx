@@ -25,6 +25,8 @@ interface MatchCardProps {
   onEdit?: (match: ExtendedTournamentMatch) => void;
   onDelete?: (match: ExtendedTournamentMatch) => void;
   onManageGames?: (match: ExtendedTournamentMatch) => void;
+  isTeamBased?: boolean;
+  isMixed?: boolean;
 }
 
 export function MatchCard({
@@ -33,8 +35,11 @@ export function MatchCard({
   onEdit,
   onDelete,
   onManageGames,
+  isTeamBased = false,
+  isMixed = false,
 }: MatchCardProps) {
-  const [participant1, participant2] = match.TournamentMatchParticipant;
+  const participants = match.TournamentMatchParticipant;
+  const [participant1, participant2] = participants;
 
   const getStatusVariant = (status: MatchStatus) => {
     switch (status) {
@@ -53,6 +58,8 @@ export function MatchCard({
     }
   };
 
+  const mixedTeams = isTeamBased && isMixed;
+
   const getParticipantName = (participant: typeof participant1) => {
     if (participant?.participant) {
       return participant.participant.nickname;
@@ -68,9 +75,9 @@ export function MatchCard({
   };
 
   const hasScores = () => {
-    return (
-      (participant1?.score !== null && participant1?.score !== undefined) ||
-      (participant2?.score !== null && participant2?.score !== undefined)
+    return participants.some(
+      (participant) =>
+        participant?.score !== null && participant?.score !== undefined,
     );
   };
 
@@ -117,13 +124,157 @@ export function MatchCard({
     );
   };
 
+  // Render team-based match (winners vs losers)
+  const renderMixedTeamBasedParticipants = () => {
+    const winners = participants.filter((p) => p.isWinner);
+    const losers = participants.filter((p) => !p.isWinner);
+    const allParticipants = participants.filter((p) => p.participantId);
+
+    // If no scores yet, show all participants in a simple list
+    if (!hasScores() || shouldHideSpoilers()) {
+      return (
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">
+            Participants ({allParticipants.length})
+          </h4>
+          <div className="space-y-2">
+            {allParticipants.map((participant) => (
+              <div
+                key={participant.id}
+                className="flex items-center justify-between rounded-lg border p-2"
+              >
+                <span className="text-sm font-medium">
+                  {getParticipantName(participant)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Winners */}
+        {winners.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <h4 className="text-primary text-sm font-medium">Winners</h4>
+              <Badge
+                variant="default"
+                className="bg-primary/10 text-primary text-xs"
+              >
+                {winners.length}
+              </Badge>
+            </div>
+            <div className="space-y-1">
+              {winners.map((participant) => (
+                <div
+                  key={participant.id}
+                  className="border-primary/20 bg-primary/5 flex items-center justify-between rounded-lg border p-2"
+                >
+                  <span className="text-sm font-medium">
+                    {getParticipantName(participant)}
+                  </span>
+                  <span className="text-primary text-sm font-bold">
+                    {getParticipantScore(participant)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Losers */}
+        {losers.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <h4 className="text-muted-foreground text-sm font-medium">
+                Others
+              </h4>
+              <Badge
+                variant="secondary"
+                className="text-xs"
+              >
+                {losers.length}
+              </Badge>
+            </div>
+            <div className="space-y-1">
+              {losers.map((participant) => (
+                <div
+                  key={participant.id}
+                  className="flex items-center justify-between rounded-lg border p-2"
+                >
+                  <span className="text-sm font-medium">
+                    {getParticipantName(participant)}
+                  </span>
+                  <span className="text-sm font-bold">
+                    {getParticipantScore(participant)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render 1v1 match (traditional layout)
+  const render1v1Participants = () => {
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-center">
+            <span className="text-sm font-medium">
+              {getParticipantName(participant1)}
+            </span>
+            <div className="text-primary text-lg font-bold">
+              {getParticipantScore(participant1)}
+            </div>
+          </div>
+          {isWinner(participant1) && (
+            <Badge
+              variant="default"
+              className="text-xs"
+            >
+              Winner
+            </Badge>
+          )}
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-center">
+            <span className="text-sm font-medium">
+              {getParticipantName(participant2)}
+            </span>
+            <div className="text-primary text-lg font-bold">
+              {getParticipantScore(participant2)}
+            </div>
+          </div>
+          {isWinner(participant2) && (
+            <Badge
+              variant="default"
+              className="text-xs"
+            >
+              Winner
+            </Badge>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className="w-full transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-base">Match</CardTitle>
+              <CardTitle className="text-base">
+                {isTeamBased && isMixed && participants.length > 2
+                  ? `Mixed Team Match (${participants.length})`
+                  : "Match"}
+              </CardTitle>
             </div>
             <div className="flex items-center gap-2">
               {onManageGames && (
@@ -162,6 +313,14 @@ export function MatchCard({
             <Badge variant={getStatusVariant(match.status)}>
               {matchStatusesLabels[match.status]}
             </Badge>
+            {isTeamBased && isMixed && participants.length > 2 && (
+              <Badge
+                variant="outline"
+                className="text-xs"
+              >
+                Mixed Team
+              </Badge>
+            )}
             {match.isManualMatch && (
               <Badge
                 variant="secondary"
@@ -180,45 +339,9 @@ export function MatchCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Participants */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col items-center gap-2">
-            <div className="text-center">
-              <span className="text-sm font-medium">
-                {getParticipantName(participant1)}
-              </span>
-              <div className="text-primary text-lg font-bold">
-                {getParticipantScore(participant1)}
-              </div>
-            </div>
-            {isWinner(participant1) && (
-              <Badge
-                variant="default"
-                className="text-xs"
-              >
-                Winner
-              </Badge>
-            )}
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="text-center">
-              <span className="text-sm font-medium">
-                {getParticipantName(participant2)}
-              </span>
-              <div className="text-primary text-lg font-bold">
-                {getParticipantScore(participant2)}
-              </div>
-            </div>
-            {isWinner(participant2) && (
-              <Badge
-                variant="default"
-                className="text-xs"
-              >
-                Winner
-              </Badge>
-            )}
-          </div>
-        </div>
+        {mixedTeams
+          ? renderMixedTeamBasedParticipants()
+          : render1v1Participants()}
 
         {/* Match Details */}
         <div className="space-y-2 border-t pt-3">

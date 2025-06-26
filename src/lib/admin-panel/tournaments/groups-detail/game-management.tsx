@@ -26,15 +26,18 @@ export function GameManagement({
   onClose,
   matchMode,
 }: GameManagementProps) {
-  const { data: games, isLoading: gamesLoading } =
-    api.tournaments.games.list.useQuery(
-      {
-        matchId: match.id,
-      },
-      {
-        enabled: isOpen,
-      },
-    );
+  const {
+    data: games,
+    isLoading: gamesLoading,
+    refetch: refetchGames,
+  } = api.tournaments.games.list.useQuery(
+    {
+      matchId: match.id,
+    },
+    {
+      enabled: isOpen,
+    },
+  );
 
   console.log("games", games);
 
@@ -115,6 +118,7 @@ export function GameManagement({
             games={mappedGames}
             matchId={match.id}
             availableUsers={availableUsers}
+            refetchGames={refetchGames}
           />
         )}
       </DrawerContent>

@@ -41,6 +41,8 @@ export default async function TournamentGroupPage({
           matches={matches}
           groupId={groupId}
           matchMode={matchMode}
+          isTeamBased={group.isTeamBased ?? false}
+          isMixed={group.isMixed ?? false}
         />
       </div>
     </div>

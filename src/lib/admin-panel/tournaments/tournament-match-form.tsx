@@ -148,13 +148,11 @@ export function TournamentMatchForm({
       return;
     }
 
-    const winners = scores.filter((s) => s.score === maxScore);
-    const isTie = winners.length !== 1;
-
+    // All participants with the highest score are winners
     setScores((currentScores) =>
       currentScores.map((s) => ({
         ...s,
-        isWinner: !isTie && s.score === maxScore,
+        isWinner: s.score === maxScore && maxScore > 0,
       })),
     );
   }, [scores.map((s) => s.score).join(",")]);
@@ -162,15 +160,25 @@ export function TournamentMatchForm({
   const handleSubmit = (data: TournamentMatchData) => {
     if (!initialData) {
       const participantCount = data.participantIds?.length ?? 0;
-      if (participantCount > 0 && participantCount !== 2) {
-        if (groupInfo?.isTeamBased && participantCount % 2 !== 0) {
-          toast.error(
-            "Team-based matches require an even number of participants.",
-          );
-          return;
-        }
-        if (!groupInfo?.isTeamBased && participantCount !== 2) {
-          // this is temp, we can support more than 2 participants later
+      if (participantCount > 0) {
+        if (groupInfo?.isTeamBased && groupInfo?.isMixed) {
+          // Mixed team-based matches require an even number of participants (minimum 2)
+          if (participantCount < 2) {
+            toast.error("Mixed team matches require at least 2 participants.");
+            return;
+          }
+          if (participantCount % 2 !== 0) {
+            toast.error(
+              "Mixed team matches require an even number of participants.",
+            );
+            return;
+          }
+        } else {
+          // Individual matches and regular team matches are currently limited to 2 participants
+          if (participantCount !== 2) {
+            toast.error("Matches currently support only 2 participants.");
+            return;
+          }
         }
       }
     }
@@ -354,14 +362,42 @@ export function TournamentMatchForm({
                     </FormDescription>
                     {form.watch("participantIds") &&
                       form.watch("participantIds")!.length > 0 &&
-                      form.watch("participantIds")!.length !== 2 && (
-                        <Alert className="mt-2 border-orange-200 bg-orange-50">
-                          <AlertTriangle className="h-4 w-4 text-orange-600" />
-                          <AlertDescription className="text-orange-800">
-                            You can only select 2 participants for a match.
-                          </AlertDescription>
-                        </Alert>
-                      )}
+                      (() => {
+                        const participantCount =
+                          form.watch("participantIds")!.length;
+                        const isMixedTeamBased =
+                          groupInfo?.isTeamBased && groupInfo?.isMixed;
+
+                        let shouldShowAlert = false;
+                        let alertMessage = "";
+
+                        if (isMixedTeamBased) {
+                          if (participantCount < 2) {
+                            shouldShowAlert = true;
+                            alertMessage =
+                              "Mixed team matches require at least 2 participants.";
+                          } else if (participantCount % 2 !== 0) {
+                            shouldShowAlert = true;
+                            alertMessage =
+                              "Mixed team matches require an even number of participants.";
+                          }
+                        } else {
+                          if (participantCount !== 2) {
+                            shouldShowAlert = true;
+                            alertMessage =
+                              "Matches currently support only 2 participants.";
+                          }
+                        }
+
+                        return shouldShowAlert ? (
+                          <Alert className="mt-2 border-orange-200 bg-orange-50">
+                            <AlertTriangle className="h-4 w-4 text-orange-600" />
+                            <AlertDescription className="text-orange-800">
+                              {alertMessage}
+                            </AlertDescription>
+                          </Alert>
+                        ) : null;
+                      })()}
                   </FormItem>
                 )}
               />

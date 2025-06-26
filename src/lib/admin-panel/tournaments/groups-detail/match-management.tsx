@@ -34,12 +34,16 @@ interface MatchManagementProps {
   groupId: string;
   matches: ExtendedTournamentMatch[];
   matchMode: { id: string; mode: string; gameCount: number };
+  isTeamBased?: boolean;
+  isMixed?: boolean;
 }
 
 export function MatchManagement({
   groupId,
   matches,
   matchMode,
+  isTeamBased = false,
+  isMixed = false,
 }: MatchManagementProps) {
   const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -172,6 +176,8 @@ export function MatchManagement({
             onDelete={handleDeleteMatch}
             onManageGames={handleManageGames}
             gamesCount={match.GameCount}
+            isTeamBased={isTeamBased}
+            isMixed={isMixed}
           />
         ))}
       </div>

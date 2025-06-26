@@ -75,6 +75,7 @@ interface TournamentGameFormProps {
   games: GameType[];
   matchId: string;
   availableUsers: AvailableUser[];
+  refetchGames: () => void;
 }
 
 export function TournamentGameForm({
@@ -83,6 +84,7 @@ export function TournamentGameForm({
   games,
   matchId,
   availableUsers,
+  refetchGames,
 }: TournamentGameFormProps) {
   const router = useRouter();
   const { data: maps, isLoading: mapsLoading } = api.maps.list.useQuery();
@@ -137,6 +139,7 @@ export function TournamentGameForm({
     api.tournaments.matches.manageGames.useMutation({
       onSuccess: () => {
         toast.success("Games updated successfully.");
+        refetchGames();
         router.refresh();
         onCancel();
       },

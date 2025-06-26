@@ -416,15 +416,12 @@ export const tournamentMatchRepository = {
         // Update match participant scores
         const scoreUpdatePromises = matchParticipants.map(async (p) => {
           const score = participantWins.get(p.id) ?? 0;
-          let isWinner = false;
 
-          const otherScores = Array.from(participantWins.values()).filter(
-            (_, index) => matchParticipants[index]?.id !== p.id,
-          );
+          // Find the highest score among all participants
+          const maxScore = Math.max(...Array.from(participantWins.values()));
 
-          if (otherScores.every((s) => score > s)) {
-            isWinner = true;
-          }
+          // Set as winner if this participant has the highest score (supports multiple winners)
+          const isWinner = score === maxScore && maxScore > 0;
 
           return tx.tournamentMatchParticipant.update({
             where: { id: p.id },

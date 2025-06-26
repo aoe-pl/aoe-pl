@@ -7,10 +7,14 @@ export function MatchesContainer({
   matches,
   groupId,
   matchMode,
+  isTeamBased = false,
+  isMixed = false,
 }: {
   matches: ExtendedTournamentMatch[];
   groupId: string;
   matchMode: { id: string; mode: string; gameCount: number };
+  isTeamBased?: boolean;
+  isMixed?: boolean;
 }) {
   const matchesByStatus = matches.reduce(
     (acc, match) => {
@@ -38,6 +42,8 @@ export function MatchesContainer({
             groupId={groupId}
             matches={[]}
             matchMode={matchMode}
+            isTeamBased={isTeamBased}
+            isMixed={isMixed}
           />
         </CardContent>
       </Card>
@@ -62,6 +68,8 @@ export function MatchesContainer({
               groupId={groupId}
               matches={matchesByStatus[status] ?? []}
               matchMode={matchMode}
+              isTeamBased={isTeamBased}
+              isMixed={isMixed}
             />
           </div>
         ))}
