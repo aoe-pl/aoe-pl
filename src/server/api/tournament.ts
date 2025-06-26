@@ -21,10 +21,17 @@ import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesR
 import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
+import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
 
 const gameSchema = z.object({
   mapId: z.string(),
-  winnerId: z.string(),
+  participants: z.array(
+    z.object({
+      matchParticipantId: z.string(),
+      civId: z.string().optional(),
+      isWinner: z.boolean(),
+    }),
+  ),
 });
 
 export type TournamentWithRelations = Tournament & {
@@ -357,6 +364,11 @@ export const tournamentRouter = createTRPCRouter({
       .query(async ({ input }) => {
         return tournamentMatchRepository.getTournamentMatchById(input.id);
       }),
+    getParticipants: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentMatchRepository.getMatchParticipants(input.id);
+      }),
     getGames: publicProcedure
       .input(z.object({ id: z.string() }))
       .query(async ({ input }) => {
@@ -496,6 +508,13 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentMatchRepository.deleteTournamentMatch(input.id);
+      }),
+  }),
+  games: createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ matchId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentGameRepository.getGamesByMatchId(input.matchId);
       }),
   }),
 });

@@ -3,48 +3,54 @@ import type {
   TournamentMatchParticipant,
   TournamentParticipant,
   Game as PrismaGame,
+  GameParticipant,
+  User,
+  Civ,
+  TournamentTeam,
 } from "@prisma/client";
 
 export interface ExtendedTournamentMatchParticipant
   extends TournamentMatchParticipant {
-  participant: TournamentParticipant | null;
-  team: { id: string; name: string } | null;
-  gamesWon: Game[];
-  gamesLost: Game[];
+  participant:
+    | (TournamentParticipant & {
+        user: User | null;
+        team: TournamentTeam | null;
+      })
+    | null;
+  team:
+    | (TournamentTeam & {
+        TournamentParticipant: (TournamentParticipant & {
+          user: User | null;
+        })[];
+      })
+    | null;
 }
 
-export interface Game extends PrismaGame {
-  map?: {
-    id: string;
-    name: string;
-  } | null;
-  winner?: {
-    id: string;
-    participant?: {
-      id: string;
-      nickname: string;
-    } | null;
-    team?: {
-      id: string;
-      name: string;
-    } | null;
-  } | null;
-  loser?: {
-    id: string;
-    participant?: {
-      id: string;
-      nickname: string;
-    } | null;
-    team?: {
-      id: string;
-      name: string;
-    } | null;
-  } | null;
+export interface ExtendedGameParticipant extends GameParticipant {
+  user: User;
+  civ: Civ | null;
+  matchParticipant: TournamentMatchParticipant | null;
+}
+
+export interface MatchParticipantWithUser extends TournamentMatchParticipant {
+  participant:
+    | (TournamentParticipant & {
+        user: User | null;
+        team: TournamentTeam | null;
+      })
+    | null;
+  team:
+    | (TournamentTeam & {
+        TournamentParticipant: (TournamentParticipant & {
+          user: User | null;
+        })[];
+      })
+    | null;
 }
 
 export interface ExtendedTournamentMatch extends TournamentMatch {
   TournamentMatchParticipant: ExtendedTournamentMatchParticipant[];
-  Game: Game[];
+  GameCount: number;
   group: {
     id: string;
     name: string;
@@ -73,10 +79,19 @@ export interface RawTournamentMatch extends TournamentMatch {
     teamId: string | null;
     isWinner: boolean;
     score: number | null;
-    participant: TournamentParticipant | null;
-    team: { id: string; name: string } | null;
-    gamesWon: PrismaGame[];
-    gamesLost: PrismaGame[];
+    participant:
+      | (TournamentParticipant & {
+          user: User | null;
+          team: TournamentTeam | null;
+        })
+      | null;
+    team:
+      | (TournamentTeam & {
+          TournamentParticipant: (TournamentParticipant & {
+            user: User | null;
+          })[];
+        })
+      | null;
   }[];
   Game?: PrismaGame[];
   group?: {
@@ -105,20 +120,8 @@ export function APItoTournamentMatch(
     ...match,
     matchDate: match.matchDate ?? null,
     createdAt: match.createdAt,
-    TournamentMatchParticipant: match.TournamentMatchParticipant.map(
-      (participant) => ({
-        ...participant,
-        gamesLost: participant.gamesLost.map((game) => ({
-          ...game,
-        })),
-        gamesWon: participant.gamesWon.map((game) => ({
-          ...game,
-        })),
-      }),
-    ),
-    Game: (match.Game ?? []).map((game) => ({
-      ...game,
-    })),
+    TournamentMatchParticipant: match.TournamentMatchParticipant,
+    GameCount: (match.Game ?? []).length,
     group: match.group ?? null,
     TournamentMatchMode: match.TournamentMatchMode ?? null,
   };

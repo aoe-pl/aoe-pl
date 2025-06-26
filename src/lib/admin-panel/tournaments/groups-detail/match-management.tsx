@@ -171,7 +171,7 @@ export function MatchManagement({
             onEdit={handleEditMatch}
             onDelete={handleDeleteMatch}
             onManageGames={handleManageGames}
-            gamesCount={match.Game?.length}
+            gamesCount={match.GameCount}
           />
         ))}
       </div>

@@ -23,11 +23,39 @@ export type TournamentMatchCreateData = {
 export type TournamentMatchUpdateData = Partial<TournamentMatchCreateData>;
 
 export type GameData = {
+  gameId?: string;
   mapId: string;
-  winnerId: string;
+  participants: {
+    matchParticipantId: string;
+    civId?: string;
+    isWinner: boolean;
+  }[];
 };
 
 export const tournamentMatchRepository = {
+  async getMatchParticipants(id: string) {
+    return db.tournamentMatchParticipant.findMany({
+      where: { matchId: id },
+      include: {
+        participant: {
+          include: {
+            user: true,
+            team: true,
+          },
+        },
+        team: {
+          include: {
+            TournamentParticipant: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  },
+
   async getTournamentMatchById(id: string) {
     return db.tournamentMatch.findUnique({
       where: { id },
@@ -40,24 +68,25 @@ export const tournamentMatchRepository = {
                 team: true,
               },
             },
-            team: true,
-            gamesWon: true,
-            gamesLost: true,
+            team: {
+              include: {
+                TournamentParticipant: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+            gameParticipants: true,
           },
         },
         Game: {
           include: {
             map: true,
-            winner: {
+            participants: {
               include: {
-                participant: true,
-                team: true,
-              },
-            },
-            loser: {
-              include: {
-                participant: true,
-                team: true,
+                civ: true,
+                matchParticipant: true,
               },
             },
           },
@@ -88,24 +117,25 @@ export const tournamentMatchRepository = {
                 team: true,
               },
             },
-            team: true,
-            gamesWon: true,
-            gamesLost: true,
+            team: {
+              include: {
+                TournamentParticipant: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+            gameParticipants: true,
           },
         },
         Game: {
           include: {
             map: true,
-            winner: {
+            participants: {
               include: {
-                participant: true,
-                team: true,
-              },
-            },
-            loser: {
-              include: {
-                participant: true,
-                team: true,
+                civ: true,
+                matchParticipant: true,
               },
             },
           },
@@ -294,54 +324,101 @@ export const tournamentMatchRepository = {
   },
 
   async manageGames(matchId: string, games: GameData[], applyScore: boolean) {
+    console.log("manageGames called with:", { matchId, games, applyScore });
+
     await db.$transaction(async (tx) => {
       const matchParticipants = await tx.tournamentMatchParticipant.findMany({
         where: { matchId },
+        include: {
+          participant: {
+            include: {
+              user: true,
+            },
+          },
+          team: {
+            include: {
+              TournamentParticipant: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
       });
 
+      console.log("Found match participants:", matchParticipants.length);
+
       if (matchParticipants.length === 0) {
+        console.log("No match participants found, returning early");
         return;
       }
 
+      // Get existing games for this match
+      const existingGames = await tx.game.findMany({
+        where: { matchId },
+        include: {
+          participants: true,
+        },
+      });
+
+      console.log("Existing games:", existingGames.length);
+      // we should not delete games here!
       await tx.game.deleteMany({
         where: { matchId },
       });
 
-      const gameCreationPromises = games.map((game) => {
-        const winner = matchParticipants.find((p) => p.id === game.winnerId);
-        const loser = matchParticipants.find((p) => p.id !== game.winnerId);
+      // Process each game data
+      for (const gameData of games) {
+        console.log("Processing game:", gameData);
 
-        if (!winner || !loser) {
-          throw new Error(
-            `Invalid winner specified for the game in match ${matchId}.`,
-          );
-        }
-
-        return tx.game.create({
+        // Create new game
+        const game = await tx.game.create({
           data: {
             matchId,
-            mapId: game.mapId,
-            winnerId: winner.id,
-            loserId: loser.id,
+            mapId: gameData.mapId,
           },
         });
-      });
+        console.log("Created new game:", game.id);
 
-      await Promise.all(gameCreationPromises);
+        // Create game participants
+        for (const participantData of gameData.participants) {
+          console.log("Creating participant:", participantData);
+          await tx.gameParticipant.create({
+            data: {
+              gameId: game.id,
+              matchParticipantId: participantData.matchParticipantId,
+              civId: participantData.civId,
+              isWinner: participantData.isWinner,
+            },
+          });
+        }
+      }
 
       if (applyScore) {
-        const gamesWon = new Map<string, number>();
-        matchParticipants.forEach((p) => gamesWon.set(p.id, 0));
+        // Calculate scores based on game wins
+        const participantWins = new Map<string, number>();
+        matchParticipants.forEach((p) => participantWins.set(p.id, 0));
 
-        for (const game of games) {
-          gamesWon.set(game.winnerId, (gamesWon.get(game.winnerId) ?? 0) + 1);
+        for (const gameData of games) {
+          for (const participant of gameData.participants) {
+            if (participant.isWinner && participant.matchParticipantId) {
+              const currentWins =
+                participantWins.get(participant.matchParticipantId) ?? 0;
+              participantWins.set(
+                participant.matchParticipantId,
+                currentWins + 1,
+              );
+            }
+          }
         }
 
+        // Update match participant scores
         const scoreUpdatePromises = matchParticipants.map(async (p) => {
-          const score = gamesWon.get(p.id) ?? 0;
+          const score = participantWins.get(p.id) ?? 0;
           let isWinner = false;
 
-          const otherScores = Array.from(gamesWon.values()).filter(
+          const otherScores = Array.from(participantWins.values()).filter(
             (_, index) => matchParticipants[index]?.id !== p.id,
           );
 

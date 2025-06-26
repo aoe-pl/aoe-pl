@@ -23,6 +23,8 @@ export default async function TournamentGroupPage({
   const matchMode = group.matchMode ?? group.stage.tournament.matchMode;
   const matches = group.matches.map(APItoTournamentMatch);
 
+  console.log("group.matches", group.matches);
+
   return (
     <div className="container mx-auto space-y-6 py-6">
       <HeaderContainer

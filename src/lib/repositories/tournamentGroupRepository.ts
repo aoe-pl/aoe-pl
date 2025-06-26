@@ -35,15 +35,9 @@ export const tournamentGroupRepository = {
                 participant: true,
                 match: true,
                 team: true,
-                gamesLost: true,
-                gamesWon: true,
               },
             },
-            Game: {
-              include: {
-                map: true,
-              },
-            },
+            Game: true,
           },
         },
         stage: {

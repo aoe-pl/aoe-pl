@@ -152,6 +152,8 @@ model Civ {
     description  String
     content      String
     thumbnailUrl String
+    
+    gameParticipants GameParticipant[]
 }
 
 model TournamentSeries {
@@ -438,7 +440,7 @@ model TournamentMatchStream {
     id String @id @default(cuid())
 
     tournamentMatchId String
-    tournamentMatch   TournamentMatch @relation(fields: [tournamentMatchId], references: [id])
+    tournamentMatch   TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
 
     streamerId String
     streamer   User   @relation(fields: [streamerId], references: [id])
@@ -462,26 +464,38 @@ model TournamentMatchParticipant {
     score         Int? // Optional score for the participant/team
 
     // Relations for games
-    gamesWon  Game[] @relation("GameWinner")
-    gamesLost Game[] @relation("GameLoser")
+    gameParticipants GameParticipant[]
 
     @@unique([matchId, participantId])
     @@unique([matchId, teamId])
 }
 
+model GameParticipant {
+    id      String          @id @default(cuid())
+    gameId  String
+    game    Game            @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    
+    // The civilization they used
+    civId String?
+    civ   Civ?   @relation(fields: [civId], references: [id])
+    
+    // Whether they won this game
+    isWinner Boolean @default(false)
+    
+    // Reference to which match participant/team they represent
+    matchParticipantId String
+    matchParticipant   TournamentMatchParticipant @relation(fields: [matchParticipantId], references: [id])
+}
+
 model Game {
     id      String          @id @default(cuid())
     matchId String
-    match   TournamentMatch @relation(fields: [matchId], references: [id])
+    match   TournamentMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
     mapId String
     map   Map    @relation(fields: [mapId], references: [id])
 
     recUrl   String?  @db.Text
 
-    winnerId String
-    winner   TournamentMatchParticipant @relation("GameWinner", fields: [winnerId], references: [id])
-
-    loserId String
-    loser   TournamentMatchParticipant @relation("GameLoser", fields: [loserId], references: [id])
+    participants GameParticipant[]
 }

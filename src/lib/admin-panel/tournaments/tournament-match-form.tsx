@@ -23,7 +23,6 @@ import {
 import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { type TournamentMatchFormSchema, matchStatuses } from "./tournament";
-import { GameDisplay } from "./groups-detail/game-display";
 import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import { Calendar24 } from "@/components/ui/calendar-24";
 import { TournamentParticipantsSelector } from "./tournament-participants-selector";
@@ -196,8 +195,7 @@ export function TournamentMatchForm({
   const renderScoreInputs = () => {
     const currentStatus = form.watch("status");
     const isAdminApproved = currentStatus === "ADMIN_APPROVED";
-    const hasNonZeroScores = scores.some((s) => s.score > 0);
-    const shouldHideScores = hasNonZeroScores && !isAdminApproved;
+    const shouldHideScores = !isAdminApproved;
 
     return (
       <div className="space-y-4">
@@ -452,13 +450,6 @@ export function TournamentMatchForm({
                 </FormItem>
               )}
             />
-
-            {initialData?.Game && initialData.Game.length > 0 && (
-              <FormItem>
-                <FormLabel>Games</FormLabel>
-                <GameDisplay games={initialData.Game} />
-              </FormItem>
-            )}
           </div>
 
           <DrawerFooter className="px-0">
