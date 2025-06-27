@@ -28,8 +28,8 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown, ChevronRight, Plus, Trash2, Trophy } from "lucide-react";
 import type { Game, Map } from "@prisma/client";
 
 const gameParticipantSchema = z.object({
@@ -104,6 +104,24 @@ export function TournamentGameForm({
     control: form.control,
     name: "games",
   });
+
+  const [openGames, setOpenGames] = useState<boolean[]>(() =>
+    fields.map((_, i) => i === 0),
+  );
+
+  // Sync openGames with fields.length
+  useEffect(() => {
+    setOpenGames((prev: boolean[]) => {
+      if (fields.length === prev.length) return prev;
+      if (fields.length > prev.length) {
+        return [
+          ...prev,
+          ...(Array(fields.length - prev.length).fill(false) as boolean[]),
+        ];
+      }
+      return prev.slice(0, fields.length);
+    });
+  }, [fields.length]);
 
   // Initialize games based on existing games or create empty ones
   useEffect(() => {
@@ -208,195 +226,243 @@ export function TournamentGameForm({
             {fields.map((field, gameIndex) => (
               <div
                 key={field.id}
-                className="space-y-4 rounded-lg border p-4"
+                className="rounded-xl border"
+                style={{
+                  background: "var(--color-game-card)",
+                  borderColor: `var(--color-game-header-${(gameIndex % 4) + 1})`,
+                }}
               >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Game {gameIndex + 1}</h3>
-                </div>
-
-                {/* Map Selection */}
-                <FormField
-                  control={form.control}
-                  name={`games.${gameIndex}.mapId`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Map</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select map" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {mapsLoading && (
-                            <SelectItem
-                              value="loading"
-                              disabled
-                            >
-                              Loading...
-                            </SelectItem>
-                          )}
-                          {maps?.map((map) => (
-                            <SelectItem
-                              key={map.id}
-                              value={map.id}
-                            >
-                              {map.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Participants */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <FormLabel>Participants</FormLabel>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => addParticipant(gameIndex)}
+                {/* Header */}
+                <div
+                  className="flex cursor-pointer items-center justify-between rounded-t-xl px-4 py-3 select-none"
+                  style={{
+                    background: `var(--color-game-header-${(gameIndex % 4) + 1})`,
+                  }}
+                  onClick={() =>
+                    setOpenGames((prev) =>
+                      prev.map((open, i) => (i === gameIndex ? !open : open)),
+                    )
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold"
+                      style={{
+                        background: "var(--color-primary)",
+                        color: "var(--color-primary-foreground)",
+                      }}
                     >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Participant
-                    </Button>
+                      {gameIndex + 1}
+                    </span>
+                    <span className="font-semibold">Game {gameIndex + 1}</span>
+                    <span className="ml-2 text-xs opacity-70">
+                      {form.watch(`games.${gameIndex}.participants`).length}{" "}
+                      players
+                    </span>
                   </div>
-
-                  {form
-                    .watch(`games.${gameIndex}.participants`)
-                    ?.map((_, participantIndex) => (
-                      <div
-                        key={participantIndex}
-                        className="space-y-3 rounded-lg border p-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">
-                            Participant {participantIndex + 1}
-                          </span>
-                          {form.watch(`games.${gameIndex}.participants`)
-                            .length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                removeParticipant(gameIndex, participantIndex)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                          {/* Player Selection */}
-                          <FormField
-                            control={form.control}
-                            name={`games.${gameIndex}.participants.${participantIndex}.matchParticipantId`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Player</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                  <div className="flex items-center gap-2">
+                    {openGames[gameIndex] ? (
+                      <ChevronDown className="h-5 w-5" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5" />
+                    )}
+                  </div>
+                </div>
+                {/* Collapsible Content */}
+                <div className={openGames[gameIndex] ? "block" : "hidden"}>
+                  <div className="space-y-4 p-6">
+                    {/* Map Selection */}
+                    <FormField
+                      control={form.control}
+                      name={`games.${gameIndex}.mapId`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Map</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select map" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {mapsLoading && (
+                                <SelectItem
+                                  value="loading"
+                                  disabled
                                 >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select player" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {availableUsers.map((user) => (
-                                      <SelectItem
-                                        key={user.id}
-                                        value={user.matchParticipantId}
-                                      >
-                                        {user.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          {/* Civilization Selection */}
-                          <FormField
-                            control={form.control}
-                            name={`games.${gameIndex}.participants.${participantIndex}.civId`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Civilization</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                                  Loading...
+                                </SelectItem>
+                              )}
+                              {maps?.map((map) => (
+                                <SelectItem
+                                  key={map.id}
+                                  value={map.id}
                                 >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select civilization" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {civsLoading && (
+                                  {map.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* Participants */}
+                    <div className="mb-2 flex items-center">
+                      <FormLabel className="mr-2">Participants</FormLabel>
+                    </div>
+                    <div className="flex flex-col items-start gap-2">
+                      {form
+                        .watch(`games.${gameIndex}.participants`)
+                        ?.map((_, participantIndex, arr) => (
+                          <div
+                            key={participantIndex}
+                            className="flex max-w-fit items-center gap-2 rounded-lg border bg-[var(--color-card)] px-4 py-2"
+                            style={{ minHeight: 40 }}
+                          >
+                            {/* Player Select */}
+                            <FormField
+                              control={form.control}
+                              name={`games.${gameIndex}.participants.${participantIndex}.matchParticipantId`}
+                              render={({ field }) => (
+                                <FormItem
+                                  className="mr-1"
+                                  style={{ width: 144 }}
+                                >
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue
+                                          placeholder="Player"
+                                          className="truncate"
+                                        />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {availableUsers.map((user) => (
+                                        <SelectItem
+                                          key={user.id}
+                                          value={user.matchParticipantId}
+                                          className="truncate text-xs"
+                                        >
+                                          {user.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                            {/* Civ Select */}
+                            <FormField
+                              control={form.control}
+                              name={`games.${gameIndex}.participants.${participantIndex}.civId`}
+                              render={({ field }) => (
+                                <FormItem
+                                  className="mr-1"
+                                  style={{ width: 112 }}
+                                >
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue
+                                          placeholder="Civ"
+                                          className="truncate"
+                                        />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {civsLoading && (
+                                        <SelectItem
+                                          value="loading"
+                                          disabled
+                                          className="truncate text-xs"
+                                        >
+                                          Loading...
+                                        </SelectItem>
+                                      )}
                                       <SelectItem
-                                        value="loading"
-                                        disabled
+                                        value="none"
+                                        className="truncate text-xs"
                                       >
-                                        Loading...
+                                        No civ
                                       </SelectItem>
-                                    )}
-                                    <SelectItem value="none">
-                                      No civilization
-                                    </SelectItem>
-                                    {civs?.map((civ) => (
-                                      <SelectItem
-                                        key={civ.id}
-                                        value={civ.id}
-                                      >
-                                        {civ.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
+                                      {civs?.map((civ) => (
+                                        <SelectItem
+                                          key={civ.id}
+                                          value={civ.id}
+                                          className="truncate text-xs"
+                                        >
+                                          {civ.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                            {/* Winner Icon */}
+                            <FormField
+                              control={form.control}
+                              name={`games.${gameIndex}.participants.${participantIndex}.isWinner`}
+                              render={({ field }) => (
+                                <Button
+                                  type="button"
+                                  variant={field.value ? "default" : "ghost"}
+                                  size="icon"
+                                  className={`rounded-full border ${field.value ? "bg-yellow-400 text-black" : ""} mx-1`}
+                                  onClick={() =>
+                                    form.setValue(
+                                      `games.${gameIndex}.participants.${participantIndex}.isWinner`,
+                                      !field.value,
+                                    )
+                                  }
+                                  tabIndex={-1}
+                                >
+                                  <Trophy className="h-5 w-5" />
+                                </Button>
+                              )}
+                            />
+                            {/* Remove Icon */}
+                            {arr.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="ml-1 rounded-full border"
+                                onClick={() =>
+                                  removeParticipant(gameIndex, participantIndex)
+                                }
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </Button>
                             )}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                          {/* Winner Checkbox */}
-                          <FormField
-                            control={form.control}
-                            name={`games.${gameIndex}.participants.${participantIndex}.isWinner`}
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-y-0 space-x-3">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>Winner</FormLabel>
-                                  <FormDescription>
-                                    Multiple participants can be winners
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                          </div>
+                        ))}
+                      {/* Divider and Add Participant Button */}
+                      <div className="mt-2 flex items-center">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 rounded-md px-3 py-1 font-medium shadow"
+                          onClick={() => addParticipant(gameIndex)}
+                        >
+                          <Plus className="mr-1 h-4 w-4" />
+                          Add Participant
+                        </Button>
                       </div>
-                    ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
