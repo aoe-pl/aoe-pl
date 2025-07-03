@@ -25,6 +25,8 @@ import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepos
 
 const gameSchema = z.object({
   mapId: z.string(),
+  recUrl: z.string().optional(),
+  tempFileKey: z.string().optional(), // Temporary file key from upload endpoint
   participants: z.array(
     z.object({
       matchParticipantId: z.string(),

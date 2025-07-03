@@ -474,7 +474,7 @@ model GameParticipant {
     id      String          @id @default(cuid())
     gameId  String
     game    Game            @relation(fields: [gameId], references: [id], onDelete: Cascade)
-    
+
     // The civilization they used
     civId String?
     civ   Civ?   @relation(fields: [civId], references: [id])

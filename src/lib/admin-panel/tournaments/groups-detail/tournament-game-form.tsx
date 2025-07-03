@@ -40,6 +40,7 @@ const gameParticipantSchema = z.object({
 
 const gameSchema = z.object({
   mapId: z.string().min(1, "Map is required"),
+  recUrl: z.string().optional(),
   participants: z
     .array(gameParticipantSchema)
     .min(1, "At least one participant required"),
@@ -90,6 +91,16 @@ export function TournamentGameForm({
   const { data: maps, isLoading: mapsLoading } = api.maps.list.useQuery();
   const { data: civs, isLoading: civsLoading } = api.civs.list.useQuery();
 
+  const [selectedFiles, setSelectedFiles] = useState<
+    Record<number, File | null>
+  >({});
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Record<number, { tempKey: string; fileName: string } | null>
+  >({});
+  const [uploadingFiles, setUploadingFiles] = useState<Record<number, boolean>>(
+    {},
+  );
+
   const maxGames = matchMode.gameCount ?? 1;
 
   const form = useForm<GameFormValues>({
@@ -127,6 +138,7 @@ export function TournamentGameForm({
   useEffect(() => {
     const existingGames = games.map((g) => ({
       mapId: g.mapId,
+      recUrl: g.recUrl ?? undefined,
       participants: g.participants.map((p) => ({
         matchParticipantId: p.matchParticipantId ?? "",
         civId: p.civId ?? "none",
@@ -166,31 +178,77 @@ export function TournamentGameForm({
       },
     });
 
-  function onSubmit(data: GameFormValues) {
-    // Filter out games with no participants or no map
+  const uploadFile = async (file: File, gameIndex: number) => {
+    setUploadingFiles((prev) => ({ ...prev, [gameIndex]: true }));
 
-    console.log("submit", data);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("matchId", matchId);
 
-    const validGames = data.games
-      .filter(
-        (game) =>
-          game.mapId && game.participants.some((p) => p.matchParticipantId),
-      )
-      .map((game) => ({
-        ...game,
-        participants: game.participants
-          .filter((p) => p.matchParticipantId)
-          .map((p) => ({
-            ...p,
-            civId: p.civId === "none" ? undefined : p.civId,
-          })),
+      const response = await fetch(
+        `/api/tournaments/matches/${matchId}/games`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { error?: string };
+        throw new Error(errorData.error ?? "Upload failed");
+      }
+
+      const result = (await response.json()) as {
+        tempKey: string;
+        fileName: string;
+      };
+
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [gameIndex]: { tempKey: result.tempKey, fileName: result.fileName },
       }));
 
-    manageGames({
-      matchId,
-      games: validGames,
-      applyScore: data.applyScore,
-    });
+      toast.success(`Replay "${file.name}" uploaded successfully`);
+      return result.tempKey;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload failed";
+      toast.error(<ErrorToast message={message} />);
+      throw error;
+    } finally {
+      setUploadingFiles((prev) => ({ ...prev, [gameIndex]: false }));
+    }
+  };
+
+  async function onSubmit(data: GameFormValues) {
+    try {
+      const validGames = data.games
+        .filter(
+          (game) =>
+            game.mapId && game.participants.some((p) => p.matchParticipantId),
+        )
+        .map((game, index) => ({
+          mapId: game.mapId,
+          recUrl: game.recUrl,
+          tempFileKey: uploadedFiles[index]?.tempKey,
+          participants: game.participants
+            .filter((p) => p.matchParticipantId)
+            .map((p) => ({
+              ...p,
+              civId: p.civId === "none" ? undefined : p.civId,
+            })),
+        }));
+
+      manageGames({
+        matchId,
+        games: validGames,
+        applyScore: data.applyScore,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save games";
+      toast.error(<ErrorToast message={message} />);
+    }
   }
 
   const addParticipant = (gameIndex: number) => {
@@ -310,6 +368,57 @@ export function TournamentGameForm({
                         </FormItem>
                       )}
                     />
+                    {/* Replay File Upload */}
+                    <div>
+                      <FormLabel>Replay File (Optional)</FormLabel>
+                      <div className="mt-2">
+                        <input
+                          type="file"
+                          accept=".aoe2record,.mgz,.mgx"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setSelectedFiles((prev) => ({
+                                ...prev,
+                                [gameIndex]: file,
+                              }));
+
+                              try {
+                                await uploadFile(file, gameIndex);
+                              } catch {
+                                // Error handling is done in uploadFile
+                                setSelectedFiles((prev) => ({
+                                  ...prev,
+                                  [gameIndex]: null,
+                                }));
+                              }
+                            }
+                          }}
+                          disabled={uploadingFiles[gameIndex] ?? isPending}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                        />
+                        {uploadingFiles[gameIndex] && (
+                          <div className="mt-2 text-sm text-blue-600">
+                            Uploading replay file...
+                          </div>
+                        )}
+                        {uploadedFiles[gameIndex] && (
+                          <div className="mt-2 text-sm text-green-600">
+                            ✓ Uploaded: {uploadedFiles[gameIndex]?.fileName}
+                          </div>
+                        )}
+                        {form.watch(`games.${gameIndex}.recUrl`) &&
+                          !uploadedFiles[gameIndex] && (
+                            <div className="mt-2 text-sm text-blue-600">
+                              ✓ Existing replay file attached
+                            </div>
+                          )}
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Upload an Age of Empires 2 replay file (.aoe2record,
+                        .mgz, .mgx)
+                      </p>
+                    </div>
                     {/* Participants */}
                     <div className="mb-2 flex items-center">
                       <FormLabel className="mr-2">Participants</FormLabel>

@@ -1,5 +1,6 @@
 import { db } from "@/server/db";
 import type { MatchStatus } from "@prisma/client";
+import { createAoe2RecsService } from "@/lib/storage";
 
 export type TournamentMatchCreateData = {
   groupId?: string;
@@ -25,6 +26,8 @@ export type TournamentMatchUpdateData = Partial<TournamentMatchCreateData>;
 export type GameData = {
   gameId?: string;
   mapId: string;
+  recUrl?: string;
+  tempFileKey?: string; // Temporary file key from upload endpoint
   participants: {
     matchParticipantId: string;
     civId?: string;
@@ -326,117 +329,163 @@ export const tournamentMatchRepository = {
   async manageGames(matchId: string, games: GameData[], applyScore: boolean) {
     console.log("manageGames called with:", { matchId, games, applyScore });
 
-    await db.$transaction(async (tx) => {
-      const matchParticipants = await tx.tournamentMatchParticipant.findMany({
-        where: { matchId },
-        include: {
-          participant: {
-            include: {
-              user: true,
+    const s3Service = createAoe2RecsService();
+    const tempFilesToCleanup: string[] = [];
+    const movedFiles: { from: string; to: string }[] = [];
+
+    try {
+      await db.$transaction(async (tx) => {
+        const matchParticipants = await tx.tournamentMatchParticipant.findMany({
+          where: { matchId },
+          include: {
+            participant: {
+              include: {
+                user: true,
+              },
             },
-          },
-          team: {
-            include: {
-              TournamentParticipant: {
-                include: {
-                  user: true,
+            team: {
+              include: {
+                TournamentParticipant: {
+                  include: {
+                    user: true,
+                  },
                 },
               },
             },
           },
-        },
-      });
-
-      console.log("Found match participants:", matchParticipants.length);
-
-      if (matchParticipants.length === 0) {
-        console.log("No match participants found, returning early");
-        return;
-      }
-
-      // Get existing games for this match
-      const existingGames = await tx.game.findMany({
-        where: { matchId },
-        include: {
-          participants: true,
-        },
-      });
-
-      console.log("Existing games:", existingGames.length);
-      // we should not delete games here!
-      await tx.game.deleteMany({
-        where: { matchId },
-      });
-
-      // Process each game data
-      for (const gameData of games) {
-        console.log("Processing game:", gameData);
-
-        // Create new game
-        const game = await tx.game.create({
-          data: {
-            matchId,
-            mapId: gameData.mapId,
-          },
         });
-        console.log("Created new game:", game.id);
 
-        // Create game participants
-        for (const participantData of gameData.participants) {
-          console.log("Creating participant:", participantData);
-          await tx.gameParticipant.create({
+        console.log("Found match participants:", matchParticipants.length);
+
+        if (matchParticipants.length === 0) {
+          console.log("No match participants found, returning early");
+          return;
+        }
+
+        // Delete existing games
+        await tx.game.deleteMany({
+          where: { matchId },
+        });
+
+        // Process each game data
+        for (const gameData of games) {
+          console.log("Processing game:", gameData);
+
+          let recUrl: string | undefined = gameData.recUrl;
+
+          // Handle temp file if provided
+          if (gameData.tempFileKey) {
+            // Create permanent key
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+            const fileName =
+              gameData.tempFileKey.split("/").pop() ??
+              `${timestamp}-replay.mgz`;
+            const permanentKey = `tournaments/${matchId}/games/${fileName}`;
+
+            // Move file from temp to permanent location
+            await s3Service.copy(gameData.tempFileKey, permanentKey);
+            movedFiles.push({ from: gameData.tempFileKey, to: permanentKey });
+            tempFilesToCleanup.push(gameData.tempFileKey);
+            recUrl = permanentKey;
+
+            console.log("Moved replay file from temp to permanent:", {
+              from: gameData.tempFileKey,
+              to: permanentKey,
+            });
+          }
+
+          // Create new game
+          const game = await tx.game.create({
             data: {
-              gameId: game.id,
-              matchParticipantId: participantData.matchParticipantId,
-              civId: participantData.civId,
-              isWinner: participantData.isWinner,
+              matchId,
+              mapId: gameData.mapId,
+              recUrl,
             },
           });
-        }
-      }
+          console.log("Created new game:", game.id);
 
-      if (applyScore) {
-        // Calculate scores based on game wins
-        const participantWins = new Map<string, number>();
-        matchParticipants.forEach((p) => participantWins.set(p.id, 0));
-
-        for (const gameData of games) {
-          for (const participant of gameData.participants) {
-            if (participant.isWinner && participant.matchParticipantId) {
-              const currentWins =
-                participantWins.get(participant.matchParticipantId) ?? 0;
-              participantWins.set(
-                participant.matchParticipantId,
-                currentWins + 1,
-              );
-            }
+          // Create game participants
+          for (const participantData of gameData.participants) {
+            console.log("Creating participant:", participantData);
+            await tx.gameParticipant.create({
+              data: {
+                gameId: game.id,
+                matchParticipantId: participantData.matchParticipantId,
+                civId: participantData.civId,
+                isWinner: participantData.isWinner,
+              },
+            });
           }
         }
 
-        // Update match participant scores
-        const scoreUpdatePromises = matchParticipants.map(async (p) => {
-          const score = participantWins.get(p.id) ?? 0;
+        if (applyScore) {
+          // Calculate scores based on game wins
+          const participantWins = new Map<string, number>();
+          matchParticipants.forEach((p) => participantWins.set(p.id, 0));
 
-          // Find the highest score among all participants
-          const maxScore = Math.max(...Array.from(participantWins.values()));
+          for (const gameData of games) {
+            for (const participant of gameData.participants) {
+              if (participant.isWinner && participant.matchParticipantId) {
+                const currentWins =
+                  participantWins.get(participant.matchParticipantId) ?? 0;
+                participantWins.set(
+                  participant.matchParticipantId,
+                  currentWins + 1,
+                );
+              }
+            }
+          }
 
-          // Set as winner if this participant has the highest score (supports multiple winners)
-          const isWinner = score === maxScore && maxScore > 0;
+          // Update match participant scores
+          const scoreUpdatePromises = matchParticipants.map(async (p) => {
+            const score = participantWins.get(p.id) ?? 0;
 
-          return tx.tournamentMatchParticipant.update({
-            where: { id: p.id },
-            data: { score, isWinner },
+            // Find the highest score among all participants
+            const maxScore = Math.max(...Array.from(participantWins.values()));
+
+            // Set as winner if this participant has the highest score (supports multiple winners)
+            const isWinner = score === maxScore && maxScore > 0;
+
+            return tx.tournamentMatchParticipant.update({
+              where: { id: p.id },
+              data: { score, isWinner },
+            });
           });
-        });
 
-        await Promise.all(scoreUpdatePromises);
+          await Promise.all(scoreUpdatePromises);
 
-        await tx.tournamentMatch.update({
-          where: { id: matchId },
-          data: { status: "ADMIN_APPROVED" },
-        });
+          await tx.tournamentMatch.update({
+            where: { id: matchId },
+            data: { status: "ADMIN_APPROVED" },
+          });
+        }
+      });
+
+      // Clean up temp files after successful transaction
+      for (const tempKey of tempFilesToCleanup) {
+        try {
+          await s3Service.delete(tempKey);
+          console.log("Cleaned up temp file:", tempKey);
+        } catch (error) {
+          console.warn("Failed to cleanup temp file:", tempKey, error);
+        }
       }
-    });
-    return this.getTournamentMatchById(matchId);
+
+      return this.getTournamentMatchById(matchId);
+    } catch (error) {
+      console.error("Transaction failed, rolling back file moves:", error);
+
+      // Rollback: delete any files that were moved to permanent locations
+      for (const move of movedFiles) {
+        try {
+          await s3Service.delete(move.to);
+          console.log("Rolled back moved file:", move.to);
+        } catch (rollbackError) {
+          console.warn("Failed to rollback file:", move.to, rollbackError);
+        }
+      }
+
+      throw error;
+    }
   },
 };
