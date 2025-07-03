@@ -326,12 +326,25 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.delete({ where: { id } });
   },
 
-  async manageGames(matchId: string, games: GameData[], applyScore: boolean) {
-    console.log("manageGames called with:", { matchId, games, applyScore });
+  async manageGames(matchId: string, games: GameData[], applyScore: boolean, filesToRemove?: string[]) {
+    console.log("manageGames called with:", { matchId, games, applyScore, filesToRemove });
 
     const s3Service = createAoe2RecsService();
     const tempFilesToCleanup: string[] = [];
     const movedFiles: { from: string; to: string }[] = [];
+
+    // Delete specific files marked for removal
+    if (filesToRemove && filesToRemove.length > 0) {
+      console.log("Deleting specific replay files:", filesToRemove);
+      for (const fileKey of filesToRemove) {
+        try {
+          await s3Service.delete(fileKey);
+          console.log("Deleted replay file:", fileKey);
+        } catch (error) {
+          console.warn("Failed to delete replay file:", fileKey, error);
+        }
+      }
+    }
 
     try {
       await db.$transaction(async (tx) => {

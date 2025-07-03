@@ -461,6 +461,7 @@ export const tournamentRouter = createTRPCRouter({
           matchId: z.string(),
           games: z.array(gameSchema),
           applyScore: z.boolean(),
+          filesToRemove: z.array(z.string()).optional(),
         }),
       )
       .mutation(async ({ input }) => {
@@ -468,6 +469,7 @@ export const tournamentRouter = createTRPCRouter({
           input.matchId,
           input.games,
           input.applyScore,
+          input.filesToRemove,
         );
       }),
     updateParticipant: adminProcedure

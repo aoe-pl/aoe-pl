@@ -91,15 +91,13 @@ export function TournamentGameForm({
   const { data: maps, isLoading: mapsLoading } = api.maps.list.useQuery();
   const { data: civs, isLoading: civsLoading } = api.civs.list.useQuery();
 
-  const [selectedFiles, setSelectedFiles] = useState<
-    Record<number, File | null>
-  >({});
   const [uploadedFiles, setUploadedFiles] = useState<
     Record<number, { tempKey: string; fileName: string } | null>
   >({});
   const [uploadingFiles, setUploadingFiles] = useState<Record<number, boolean>>(
     {},
   );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const maxGames = matchMode.gameCount ?? 1;
 
@@ -243,6 +241,7 @@ export function TournamentGameForm({
         matchId,
         games: validGames,
         applyScore: data.applyScore,
+        filesToRemove,
       });
     } catch (error) {
       const message =
@@ -271,6 +270,25 @@ export function TournamentGameForm({
       );
       form.setValue(`games.${gameIndex}.participants`, newParticipants);
     }
+  };
+
+  const removeReplay = (gameIndex: number) => {
+    // Get the current recUrl to track for removal
+    const currentRecUrl = form.getValues(`games.${gameIndex}.recUrl`);
+    
+    // If there's an existing recUrl, add it to filesToRemove
+    if (currentRecUrl) {
+      setFilesToRemove((prev) => [...prev, currentRecUrl]);
+    }
+    
+    // Clear the recUrl in the form
+    form.setValue(`games.${gameIndex}.recUrl`, undefined);
+    
+    // Clear the uploaded file state
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [gameIndex]: null,
+    }));
   };
 
   return (
@@ -378,20 +396,7 @@ export function TournamentGameForm({
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              setSelectedFiles((prev) => ({
-                                ...prev,
-                                [gameIndex]: file,
-                              }));
-
-                              try {
-                                await uploadFile(file, gameIndex);
-                              } catch {
-                                // Error handling is done in uploadFile
-                                setSelectedFiles((prev) => ({
-                                  ...prev,
-                                  [gameIndex]: null,
-                                }));
-                              }
+                              await uploadFile(file, gameIndex);
                             }
                           }}
                           disabled={uploadingFiles[gameIndex] ?? isPending}
@@ -403,14 +408,36 @@ export function TournamentGameForm({
                           </div>
                         )}
                         {uploadedFiles[gameIndex] && (
-                          <div className="mt-2 text-sm text-green-600">
-                            ✓ Uploaded: {uploadedFiles[gameIndex]?.fileName}
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-sm text-green-600">
+                              ✓ Uploaded: {uploadedFiles[gameIndex]?.fileName}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeReplay(gameIndex)}
+                              className="h-6 px-2 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
                           </div>
                         )}
                         {form.watch(`games.${gameIndex}.recUrl`) &&
                           !uploadedFiles[gameIndex] && (
-                            <div className="mt-2 text-sm text-blue-600">
-                              ✓ Existing replay file attached
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-sm text-blue-600">
+                                ✓ Existing replay file attached
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeReplay(gameIndex)}
+                                className="h-6 px-2 text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
                             </div>
                           )}
                       </div>
