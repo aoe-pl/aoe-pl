@@ -275,15 +275,15 @@ export function TournamentGameForm({
   const removeReplay = (gameIndex: number) => {
     // Get the current recUrl to track for removal
     const currentRecUrl = form.getValues(`games.${gameIndex}.recUrl`);
-    
+
     // If there's an existing recUrl, add it to filesToRemove
     if (currentRecUrl) {
       setFilesToRemove((prev) => [...prev, currentRecUrl]);
     }
-    
+
     // Clear the recUrl in the form
     form.setValue(`games.${gameIndex}.recUrl`, undefined);
-    
+
     // Clear the uploaded file state
     setUploadedFiles((prev) => ({
       ...prev,

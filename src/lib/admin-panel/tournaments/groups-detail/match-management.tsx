@@ -107,6 +107,74 @@ export function MatchManagement({
     setManagingGamesMatch(match);
   };
 
+  const handleDownloadReplays = async (match: ExtendedTournamentMatch) => {
+    try {
+      toast.info("Preparing replay files...");
+
+      const response = await fetch(
+        `/api/tournaments/matches/${match.id}/replays`,
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.info("No replays available for this match");
+          return;
+        }
+        throw new Error("Failed to fetch replays");
+      }
+
+      // Check if we got a ZIP file or JSON response
+      const contentType = response.headers.get("content-type");
+
+      if (contentType?.includes("application/zip")) {
+        // Handle ZIP download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `match_${match.id}_replays.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast.success("Downloaded replay files as ZIP");
+      } else {
+        // Fallback to individual downloads if ZIP creation failed
+        const data = (await response.json()) as {
+          replays: Array<{
+            gameNumber: number;
+            mapName: string;
+            downloadUrl: string;
+          }>;
+        };
+
+        if (data.replays.length === 0) {
+          toast.info("No replays available for this match");
+          return;
+        }
+
+        // Download each replay file
+        for (const replay of data.replays) {
+          const link = document.createElement("a");
+          link.href = replay.downloadUrl;
+          link.download = `Game_${replay.gameNumber}_${replay.mapName}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // Add small delay between downloads
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+
+        toast.success(`Downloaded ${data.replays.length} replay files`);
+      }
+    } catch (error) {
+      console.error("Error downloading replays:", error);
+      toast.error("Failed to download replays");
+    }
+  };
+
   const handleSubmit = (data: TournamentMatchFormSchema) => {
     if (editingMatch) {
       updateMatch({
@@ -175,6 +243,7 @@ export function MatchManagement({
             onEdit={handleEditMatch}
             onDelete={handleDeleteMatch}
             onManageGames={handleManageGames}
+            onDownloadReplays={handleDownloadReplays}
             gamesCount={match.GameCount}
             isTeamBased={isTeamBased}
             isMixed={isMixed}

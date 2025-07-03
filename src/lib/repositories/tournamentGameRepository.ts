@@ -16,4 +16,23 @@ export const tournamentGameRepository = {
       orderBy: { id: "asc" },
     });
   },
+
+  async getGamesWithReplaysByMatchId(matchId: string) {
+    return db.game.findMany({
+      where: {
+        matchId,
+        recUrl: { not: null },
+      },
+      select: {
+        id: true,
+        recUrl: true,
+        map: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: { id: "asc" },
+    });
+  },
 };

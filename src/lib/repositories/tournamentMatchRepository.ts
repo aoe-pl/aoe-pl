@@ -326,8 +326,18 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.delete({ where: { id } });
   },
 
-  async manageGames(matchId: string, games: GameData[], applyScore: boolean, filesToRemove?: string[]) {
-    console.log("manageGames called with:", { matchId, games, applyScore, filesToRemove });
+  async manageGames(
+    matchId: string,
+    games: GameData[],
+    applyScore: boolean,
+    filesToRemove?: string[],
+  ) {
+    console.log("manageGames called with:", {
+      matchId,
+      games,
+      applyScore,
+      filesToRemove,
+    });
 
     const s3Service = createAoe2RecsService();
     const tempFilesToCleanup: string[] = [];
@@ -381,18 +391,22 @@ export const tournamentMatchRepository = {
         });
 
         // Process each game data
-        for (const gameData of games) {
+        for (let gameIndex = 0; gameIndex < games.length; gameIndex++) {
+          const gameData = games[gameIndex];
+          if (!gameData) continue;
+
           console.log("Processing game:", gameData);
 
           let recUrl: string | undefined = gameData.recUrl;
 
           // Handle temp file if provided
           if (gameData.tempFileKey) {
-            // Create permanent key
+            // Create permanent key with game number and timestamp
             const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-            const fileName =
-              gameData.tempFileKey.split("/").pop() ??
-              `${timestamp}-replay.mgz`;
+            const gameNumber = gameIndex + 1;
+            const originalExtension =
+              gameData.tempFileKey.split(".").pop() ?? "mgz";
+            const fileName = `game_${gameNumber}_${timestamp}.${originalExtension}`;
             const permanentKey = `tournaments/${matchId}/games/${fileName}`;
 
             // Move file from temp to permanent location

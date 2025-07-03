@@ -12,6 +12,7 @@ import {
   Hand,
   Trash2,
   Swords,
+  Download,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { ExtendedTournamentMatch } from "./match";
@@ -25,6 +26,7 @@ interface MatchCardProps {
   onEdit?: (match: ExtendedTournamentMatch) => void;
   onDelete?: (match: ExtendedTournamentMatch) => void;
   onManageGames?: (match: ExtendedTournamentMatch) => void;
+  onDownloadReplays?: (match: ExtendedTournamentMatch) => void;
   isTeamBased?: boolean;
   isMixed?: boolean;
 }
@@ -35,6 +37,7 @@ export function MatchCard({
   onEdit,
   onDelete,
   onManageGames,
+  onDownloadReplays,
   isTeamBased = false,
   isMixed = false,
 }: MatchCardProps) {
@@ -277,6 +280,17 @@ export function MatchCard({
               </CardTitle>
             </div>
             <div className="flex items-center gap-2">
+              {onDownloadReplays && gamesCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDownloadReplays(match)}
+                  className="h-8 w-8 p-0"
+                  title="Download replays"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              )}
               {onManageGames && (
                 <Button
                   variant="ghost"
