@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Eye, Trash2, Users, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
 
 type TournamentGroupListProps = {
   tournamentId: string;
@@ -111,10 +110,10 @@ export function TournamentGroupList({
 
   const getGroupColorStyle = (color?: string | null) => {
     if (!color) return {};
-    
+
     return {
       borderLeftColor: color,
-      borderLeftWidth: '4px',
+      borderLeftWidth: "4px",
     };
   };
 
@@ -185,16 +184,14 @@ export function TournamentGroupList({
         {groups.map((group) => (
           <Card
             key={group.id}
-            className="w-full min-w-[320px] sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] transition-shadow hover:shadow-md"
+            className="w-full min-w-[320px] transition-shadow hover:shadow-md sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
             style={getGroupColorStyle(group.color)}
           >
             <CardHeader className="pb-3">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-base">
-                      {group.name}
-                    </CardTitle>
+                    <CardTitle className="text-base">{group.name}</CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -225,7 +222,7 @@ export function TournamentGroupList({
                       size="sm"
                       onClick={() => handleDelete(group.id)}
                       disabled={deletionPending && deletingGroupId === group.id}
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive h-8 w-8 p-0"
                       title="Delete group"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -240,7 +237,10 @@ export function TournamentGroupList({
                     {group.isTeamBased ? "Team Based" : "Individual"}
                   </Badge>
                   {group.isMixed && (
-                    <Badge variant="default" className="text-xs">
+                    <Badge
+                      variant="default"
+                      className="text-xs"
+                    >
                       Mixed
                     </Badge>
                   )}
@@ -256,9 +256,7 @@ export function TournamentGroupList({
               {/* Description */}
               {group.description && (
                 <div className="space-y-1">
-                  <p className="text-sm">
-                    {group.description}
-                  </p>
+                  <p className="text-sm">{group.description}</p>
                 </div>
               )}
 
@@ -284,9 +282,7 @@ export function TournamentGroupList({
 
               {/* Group Info */}
               <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
-                <div>
-                  Display Order: {group.displayOrder}
-                </div>
+                <div>Display Order: {group.displayOrder}</div>
               </div>
             </CardContent>
           </Card>
