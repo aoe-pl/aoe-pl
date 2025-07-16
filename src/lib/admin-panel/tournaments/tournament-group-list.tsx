@@ -16,8 +16,9 @@ import { ErrorToast } from "@/components/ui/error-toast-content";
 import type { TournamentGroupWithParticipants } from "./tournament";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, Trash2 } from "lucide-react";
+import { Edit, Eye, Trash2, Users, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
+import { format } from "date-fns";
 
 type TournamentGroupListProps = {
   tournamentId: string;
@@ -184,26 +185,25 @@ export function TournamentGroupList({
         {groups.map((group) => (
           <Card
             key={group.id}
-            className="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
+            className="w-full min-w-[320px] sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] transition-shadow hover:shadow-md"
             style={getGroupColorStyle(group.color)}
           >
             <CardHeader className="pb-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <CardTitle className="text-base">{group.name}</CardTitle>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline">
-                    {group.matchMode?.mode ?? "No match mode"}
-                  </Badge>
-                  <Badge variant={group.isTeamBased ? "default" : "secondary"}>
-                    {group.isTeamBased ? "Team Based" : "Individual"}
-                  </Badge>
-                  {group.isMixed && <Badge variant="default">Mixed</Badge>}
-                  <div className="flex gap-1">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">
+                      {group.name}
+                    </CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       asChild
+                      className="h-8 w-8 p-0"
+                      title="View group details"
                     >
                       <Link href={`/admin/tournaments/groups/${group.id}`}>
                         <Eye className="h-4 w-4" />
@@ -214,6 +214,8 @@ export function TournamentGroupList({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEdit(group)}
+                      className="h-8 w-8 p-0"
+                      title="Edit group"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -223,27 +225,67 @@ export function TournamentGroupList({
                       size="sm"
                       onClick={() => handleDelete(group.id)}
                       disabled={deletionPending && deletingGroupId === group.id}
-                      className="text-destructive hover:text-destructive"
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      title="Delete group"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
+                <div className="flex gap-2">
+                  <Badge variant="outline">
+                    {group.matchMode?.mode ?? "No match mode"}
+                  </Badge>
+                  <Badge variant={group.isTeamBased ? "default" : "secondary"}>
+                    {group.isTeamBased ? "Team Based" : "Individual"}
+                  </Badge>
+                  {group.isMixed && (
+                    <Badge variant="default" className="text-xs">
+                      Mixed
+                    </Badge>
+                  )}
+                </div>
+                {/* Stage Info */}
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4" />
+                  <span>Stage: {group.stage.name}</span>
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {group.description && (
-                  <p className="text-muted-foreground text-sm">
+            <CardContent className="space-y-4">
+              {/* Description */}
+              {group.description && (
+                <div className="space-y-1">
+                  <p className="text-sm">
                     {group.description}
                   </p>
-                )}
-                <div className="text-muted-foreground flex flex-wrap gap-2 text-sm">
-                  <span>• Stage: {group.stage.name}</span>
-                  <span>
-                    • {group.TournamentGroupParticipant?.length} participants
-                  </span>
-                  <span>• {group.matches?.length} matches</span>
+                </div>
+              )}
+
+              {/* Group Details */}
+              <div className="space-y-2 border-t pt-3">
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="flex items-center gap-1">
+                    <Users className="text-muted-foreground h-3 w-3" />
+                    <span className="text-muted-foreground">Participants:</span>
+                    <span className="font-medium">
+                      {group.TournamentGroupParticipant?.length ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="text-muted-foreground h-3 w-3" />
+                    <span className="text-muted-foreground">Matches:</span>
+                    <span className="font-medium">
+                      {group.matches?.length ?? 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Group Info */}
+              <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
+                <div>
+                  Display Order: {group.displayOrder}
                 </div>
               </div>
             </CardContent>

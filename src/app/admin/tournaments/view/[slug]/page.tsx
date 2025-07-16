@@ -25,7 +25,7 @@ export default async function AdminTournamentsViewPage({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 md:max-w-4xl">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 md:max-w-6xl">
       <div className="flex flex-col gap-2 pt-2 pb-1">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
