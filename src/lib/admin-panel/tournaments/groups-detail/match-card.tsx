@@ -80,8 +80,10 @@ export function MatchCard({
   const hasScores = () => {
     return participants.some(
       (participant) =>
-        (participant?.wonScore !== null && participant?.wonScore !== undefined) ||
-        (participant?.lostScore !== null && participant?.lostScore !== undefined),
+        (participant?.wonScore !== null &&
+          participant?.wonScore !== undefined) ||
+        (participant?.lostScore !== null &&
+          participant?.lostScore !== undefined),
     );
   };
 
