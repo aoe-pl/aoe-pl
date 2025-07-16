@@ -32,9 +32,22 @@ export const tournamentGroupRepository = {
           include: {
             TournamentMatchParticipant: {
               include: {
-                participant: true,
+                participant: {
+                  include: {
+                    user: true,
+                    team: true,
+                  },
+                },
                 match: true,
-                team: true,
+                team: {
+                  include: {
+                    TournamentParticipant: {
+                      include: {
+                        user: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             Game: true,

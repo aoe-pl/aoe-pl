@@ -78,7 +78,6 @@ export interface RawTournamentMatch extends TournamentMatch {
     participantId: string | null;
     teamId: string | null;
     isWinner: boolean;
-    score: number | null;
     wonScore: number;
     lostScore: number;
     participant:
@@ -94,6 +93,7 @@ export interface RawTournamentMatch extends TournamentMatch {
           })[];
         })
       | null;
+    match?: TournamentMatch; // Optional nested match object from API
   }[];
   Game?: PrismaGame[];
   group?: {
