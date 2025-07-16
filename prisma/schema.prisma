@@ -485,7 +485,7 @@ model GameParticipant {
     
     // Reference to which match participant/team they represent
     matchParticipantId String
-    matchParticipant   TournamentMatchParticipant @relation(fields: [matchParticipantId], references: [id])
+    matchParticipant   TournamentMatchParticipant @relation(fields: [matchParticipantId], references: [id], onDelete: Cascade)
 }
 
 model Game {
