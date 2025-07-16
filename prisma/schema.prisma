@@ -368,6 +368,7 @@ model TournamentGroup {
     isMixed                    Boolean? // can override tournament setting
     TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
     matches                    TournamentMatch[]            @relation("GroupMatches")
+    color                      String?
 
     @@unique([stageId, name])
 }

@@ -108,6 +108,15 @@ export function TournamentGroupList({
     setIsDrawerOpen(true);
   };
 
+  const getGroupColorStyle = (color?: string | null) => {
+    if (!color) return {};
+    
+    return {
+      borderLeftColor: color,
+      borderLeftWidth: '4px',
+    };
+  };
+
   const handleSubmit = (data: {
     name: string;
     stageId: string;
@@ -116,6 +125,7 @@ export function TournamentGroupList({
     matchModeId?: string | undefined;
     isTeamBased?: boolean | undefined;
     isMixed?: boolean | undefined;
+    color?: string | undefined;
     participantIds?: string[] | undefined;
   }) => {
     console.log("data sss", data.isMixed);
@@ -126,6 +136,7 @@ export function TournamentGroupList({
       displayOrder: data.displayOrder,
       isTeamBased: data.isTeamBased,
       isMixed: data.isMixed,
+      color: data.color,
       participantIds: data.participantIds ?? [],
     };
 
@@ -174,6 +185,7 @@ export function TournamentGroupList({
           <Card
             key={group.id}
             className="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
+            style={getGroupColorStyle(group.color)}
           >
             <CardHeader className="pb-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

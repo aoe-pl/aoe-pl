@@ -73,6 +73,7 @@ export function TournamentGroupForm({
       isTeamBased: initialData?.isTeamBased ?? defaultIsTeamBased,
       isMixed: initialData?.isMixed ?? false,
       matchModeId: initialData?.matchModeId ?? defaultMatchModeId,
+      color: initialData?.color ?? "",
       participantIds:
         initialData?.TournamentGroupParticipant?.map(
           (p) => p.tournamentParticipantId,
@@ -88,6 +89,7 @@ export function TournamentGroupForm({
       isTeamBased:
         data.isTeamBased === defaultIsTeamBased ? undefined : data.isTeamBased,
       isMixed: data.isMixed === false ? undefined : data.isMixed,
+      color: data.color ?? undefined,
       participantIds: data.participantIds ?? [],
     });
   };
@@ -261,6 +263,27 @@ export function TournamentGroupForm({
                 )}
               />
             )}
+
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Color</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="color"
+                      placeholder="#000000"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Choose a color to visually distinguish this group
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
