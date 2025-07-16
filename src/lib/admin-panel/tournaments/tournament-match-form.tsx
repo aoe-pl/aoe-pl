@@ -37,7 +37,8 @@ import { SpoilerProtection } from "./groups-detail/spoiler-protection";
 type ParticipantScore = {
   id: string; // Corresponds to participantId or teamId
   name: string;
-  score: number;
+  wonScore: number;
+  lostScore: number;
   isWinner: boolean;
   isTeam: boolean;
 };
@@ -46,10 +47,16 @@ type TournamentMatchData = TournamentMatchFormSchema & {
   id?: string;
   participantScores: {
     participantId: string;
-    score: number;
+    wonScore: number;
+    lostScore: number;
     isWinner: boolean;
   }[];
-  teamScores: { teamId: string; score: number; isWinner: boolean }[];
+  teamScores: {
+    teamId: string;
+    wonScore: number;
+    lostScore: number;
+    isWinner: boolean;
+  }[];
 };
 
 interface TournamentMatchFormProps {
@@ -111,7 +118,8 @@ export function TournamentMatchForm({
       const initialScores = initialData.TournamentMatchParticipant.map((p) => ({
         id: (p.participantId ?? p.teamId)!,
         name: p.participant?.nickname ?? p.team?.name ?? "Unknown",
-        score: p.score ?? 0,
+        wonScore: p.wonScore ?? 0,
+        lostScore: p.lostScore ?? 0,
         isWinner: p.isWinner ?? false,
         isTeam: !!p.teamId,
       }));
@@ -127,7 +135,8 @@ export function TournamentMatchForm({
       return {
         id,
         name: participant?.nickname ?? "Unknown",
-        score: 0,
+        wonScore: 0,
+        lostScore: 0,
         isWinner: false,
         isTeam: false,
       };
@@ -142,20 +151,20 @@ export function TournamentMatchForm({
       return;
     }
 
-    const maxScore = Math.max(...scores.map((s) => s.score));
-    if (maxScore === 0) {
+    const maxWonScore = Math.max(...scores.map((s) => s.wonScore));
+    if (maxWonScore === 0) {
       setScores((s) => s.map((i) => ({ ...i, isWinner: false })));
       return;
     }
 
-    // All participants with the highest score are winners
+    // All participants with the highest won score are winners
     setScores((currentScores) =>
       currentScores.map((s) => ({
         ...s,
-        isWinner: s.score === maxScore && maxScore > 0,
+        isWinner: s.wonScore === maxWonScore && maxWonScore > 0,
       })),
     );
-  }, [scores.map((s) => s.score).join(",")]);
+  }, [scores.map((s) => s.wonScore).join(",")]);
 
   const handleSubmit = (data: TournamentMatchData) => {
     if (!initialData) {
@@ -189,12 +198,18 @@ export function TournamentMatchForm({
         .filter((s) => !s.isTeam)
         .map((s) => ({
           participantId: s.id,
-          score: s.score,
+          wonScore: s.wonScore,
+          lostScore: s.lostScore,
           isWinner: s.isWinner,
         })),
       teamScores: scores
         .filter((s) => s.isTeam)
-        .map((s) => ({ teamId: s.id, score: s.score, isWinner: s.isWinner })),
+        .map((s) => ({
+          teamId: s.id,
+          wonScore: s.wonScore,
+          lostScore: s.lostScore,
+          isWinner: s.isWinner,
+        })),
     };
 
     onSubmit(finalData);
@@ -219,19 +234,38 @@ export function TournamentMatchForm({
                 {pScore.isWinner && <Badge variant="default">Winner</Badge>}
               </div>
               <div className="flex items-center gap-2">
-                <FormLabel>Score:</FormLabel>
+                <FormLabel>Won:</FormLabel>
                 <SpoilerProtection isSpoiler={shouldHideScores}>
                   <Input
                     type="number"
                     min="0"
                     className="h-8 w-16 text-center"
-                    value={pScore.score}
+                    value={pScore.wonScore}
                     onChange={(e) => {
-                      const newScoreValue = parseInt(e.target.value, 10) || 0;
+                      const newWonScore = parseInt(e.target.value, 10) || 0;
                       setScores((currentScores) =>
                         currentScores.map((s) =>
                           s.id === pScore.id
-                            ? { ...s, score: newScoreValue }
+                            ? { ...s, wonScore: newWonScore }
+                            : s,
+                        ),
+                      );
+                    }}
+                  />
+                </SpoilerProtection>
+                <FormLabel>Lost:</FormLabel>
+                <SpoilerProtection isSpoiler={shouldHideScores}>
+                  <Input
+                    type="number"
+                    min="0"
+                    className="h-8 w-16 text-center"
+                    value={pScore.lostScore}
+                    onChange={(e) => {
+                      const newLostScore = parseInt(e.target.value, 10) || 0;
+                      setScores((currentScores) =>
+                        currentScores.map((s) =>
+                          s.id === pScore.id
+                            ? { ...s, lostScore: newLostScore }
                             : s,
                         ),
                       );

@@ -79,6 +79,8 @@ export interface RawTournamentMatch extends TournamentMatch {
     teamId: string | null;
     isWinner: boolean;
     score: number | null;
+    wonScore: number;
+    lostScore: number;
     participant:
       | (TournamentParticipant & {
           user: User | null;

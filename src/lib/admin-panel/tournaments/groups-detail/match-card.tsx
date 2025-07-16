@@ -80,17 +80,20 @@ export function MatchCard({
   const hasScores = () => {
     return participants.some(
       (participant) =>
-        participant?.score !== null && participant?.score !== undefined,
+        (participant?.wonScore !== null && participant?.wonScore !== undefined) ||
+        (participant?.lostScore !== null && participant?.lostScore !== undefined),
     );
   };
 
   const getParticipantScore = (participant: typeof participant1) => {
-    const score = participant?.score?.toString() ?? "0";
+    const wonScore = participant?.wonScore ?? 0;
+    const lostScore = participant?.lostScore ?? 0;
+    const scoreText = `${wonScore} - ${lostScore}`;
     const isSpoiler = shouldHideSpoilers() && hasScores();
 
     return (
       <SpoilerText
-        text={score}
+        text={scoreText}
         isSpoiler={isSpoiler}
         fallbackText="••"
         className="text-primary text-lg font-bold"

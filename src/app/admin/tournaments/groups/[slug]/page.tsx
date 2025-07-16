@@ -36,6 +36,7 @@ export default async function TournamentGroupPage({
       <div className="grid gap-6">
         <GroupParticipantsTable
           participants={group.TournamentGroupParticipant}
+          groupId={groupId}
         />
         <MatchesContainer
           matches={matches}

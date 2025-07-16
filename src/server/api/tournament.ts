@@ -279,6 +279,15 @@ export const tournamentRouter = createTRPCRouter({
       .query(async ({ input }) => {
         return tournamentGroupRepository.getGroupParticipants(input.groupId);
       }),
+    getParticipantScores: publicProcedure
+      .input(
+        z.object({
+          groupId: z.string(),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentGroupRepository.getParticipantScores(input.groupId);
+      }),
     listByTournament: publicProcedure
       .input(
         z.object({
@@ -397,7 +406,8 @@ export const tournamentRouter = createTRPCRouter({
               .array(
                 z.object({
                   participantId: z.string(),
-                  score: z.number(),
+                  wonScore: z.number().int().min(0),
+                  lostScore: z.number().int().min(0),
                   isWinner: z.boolean(),
                 }),
               )
@@ -406,7 +416,8 @@ export const tournamentRouter = createTRPCRouter({
               .array(
                 z.object({
                   teamId: z.string(),
-                  score: z.number(),
+                  wonScore: z.number().int().min(0),
+                  lostScore: z.number().int().min(0),
                   isWinner: z.boolean(),
                 }),
               )
@@ -432,7 +443,8 @@ export const tournamentRouter = createTRPCRouter({
               .array(
                 z.object({
                   participantId: z.string(),
-                  score: z.number(),
+                  wonScore: z.number().int().min(0),
+                  lostScore: z.number().int().min(0),
                   isWinner: z.boolean(),
                 }),
               )
@@ -441,7 +453,8 @@ export const tournamentRouter = createTRPCRouter({
               .array(
                 z.object({
                   teamId: z.string(),
-                  score: z.number(),
+                  wonScore: z.number().int().min(0),
+                  lostScore: z.number().int().min(0),
                   isWinner: z.boolean(),
                 }),
               )
@@ -479,7 +492,8 @@ export const tournamentRouter = createTRPCRouter({
           participantId: z.string(),
           data: z.object({
             isWinner: z.boolean().optional(),
-            score: z.number().int().min(0).optional(),
+            wonScore: z.number().int().min(0).optional(),
+            lostScore: z.number().int().min(0).optional(),
           }),
         }),
       )
@@ -497,7 +511,8 @@ export const tournamentRouter = createTRPCRouter({
           teamId: z.string(),
           data: z.object({
             isWinner: z.boolean().optional(),
-            score: z.number().int().min(0).optional(),
+            wonScore: z.number().int().min(0).optional(),
+            lostScore: z.number().int().min(0).optional(),
           }),
         }),
       )

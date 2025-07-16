@@ -15,10 +15,16 @@ export type TournamentMatchCreateData = {
   teamIds?: string[];
   participantScores?: {
     participantId: string;
-    score: number;
+    wonScore: number;
+    lostScore: number;
     isWinner: boolean;
   }[];
-  teamScores?: { teamId: string; score: number; isWinner: boolean }[];
+  teamScores?: {
+    teamId: string;
+    wonScore: number;
+    lostScore: number;
+    isWinner: boolean;
+  }[];
 };
 
 export type TournamentMatchUpdateData = Partial<TournamentMatchCreateData>;
@@ -159,7 +165,8 @@ export const tournamentMatchRepository = {
         return {
           participantId: id,
           isWinner: scoreData?.isWinner ?? false,
-          score: scoreData?.score ?? 0,
+          wonScore: scoreData?.wonScore ?? 0,
+          lostScore: scoreData?.lostScore ?? 0,
         };
       }) ?? [];
 
@@ -169,7 +176,8 @@ export const tournamentMatchRepository = {
         return {
           teamId: id,
           isWinner: scoreData?.isWinner ?? false,
-          score: scoreData?.score ?? 0,
+          wonScore: scoreData?.wonScore ?? 0,
+          lostScore: scoreData?.lostScore ?? 0,
         };
       }) ?? [];
 
@@ -257,7 +265,8 @@ export const tournamentMatchRepository = {
               participantId: scoreData.participantId,
             },
             data: {
-              score: scoreData.score,
+              wonScore: scoreData.wonScore,
+              lostScore: scoreData.lostScore,
               isWinner: scoreData.isWinner,
             },
           });
@@ -273,7 +282,8 @@ export const tournamentMatchRepository = {
               teamId: scoreData.teamId,
             },
             data: {
-              score: scoreData.score,
+              wonScore: scoreData.wonScore,
+              lostScore: scoreData.lostScore,
               isWinner: scoreData.isWinner,
             },
           });
@@ -289,7 +299,8 @@ export const tournamentMatchRepository = {
     participantId: string,
     data: {
       isWinner?: boolean;
-      score?: number;
+      wonScore?: number;
+      lostScore?: number;
     },
   ) {
     return db.tournamentMatchParticipant.update({
@@ -308,7 +319,8 @@ export const tournamentMatchRepository = {
     teamId: string,
     data: {
       isWinner?: boolean;
-      score?: number;
+      wonScore?: number;
+      lostScore?: number;
     },
   ) {
     return db.tournamentMatchParticipant.update({
@@ -448,34 +460,50 @@ export const tournamentMatchRepository = {
         if (applyScore) {
           // Calculate scores based on game wins
           const participantWins = new Map<string, number>();
-          matchParticipants.forEach((p) => participantWins.set(p.id, 0));
+          const participantLosses = new Map<string, number>();
+          matchParticipants.forEach((p) => {
+            participantWins.set(p.id, 0);
+            participantLosses.set(p.id, 0);
+          });
 
           for (const gameData of games) {
             for (const participant of gameData.participants) {
-              if (participant.isWinner && participant.matchParticipantId) {
-                const currentWins =
-                  participantWins.get(participant.matchParticipantId) ?? 0;
-                participantWins.set(
-                  participant.matchParticipantId,
-                  currentWins + 1,
-                );
+              if (participant.matchParticipantId) {
+                if (participant.isWinner) {
+                  const currentWins =
+                    participantWins.get(participant.matchParticipantId) ?? 0;
+                  participantWins.set(
+                    participant.matchParticipantId,
+                    currentWins + 1,
+                  );
+                } else {
+                  const currentLosses =
+                    participantLosses.get(participant.matchParticipantId) ?? 0;
+                  participantLosses.set(
+                    participant.matchParticipantId,
+                    currentLosses + 1,
+                  );
+                }
               }
             }
           }
 
           // Update match participant scores
           const scoreUpdatePromises = matchParticipants.map(async (p) => {
-            const score = participantWins.get(p.id) ?? 0;
+            const wonScore = participantWins.get(p.id) ?? 0;
+            const lostScore = participantLosses.get(p.id) ?? 0;
 
-            // Find the highest score among all participants
-            const maxScore = Math.max(...Array.from(participantWins.values()));
+            // Find the highest won score among all participants
+            const maxWonScore = Math.max(
+              ...Array.from(participantWins.values()),
+            );
 
-            // Set as winner if this participant has the highest score (supports multiple winners)
-            const isWinner = score === maxScore && maxScore > 0;
+            // Set as winner if this participant has the highest won score (supports multiple winners)
+            const isWinner = wonScore === maxWonScore && maxWonScore > 0;
 
             return tx.tournamentMatchParticipant.update({
               where: { id: p.id },
-              data: { score, isWinner },
+              data: { wonScore, lostScore, isWinner },
             });
           });
 

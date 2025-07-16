@@ -386,4 +386,49 @@ export const tournamentGroupRepository = {
       []
     );
   },
+
+  async getParticipantScores(groupId: string) {
+    // Get all matches in the group with their match participants
+    const matches = await db.tournamentMatch.findMany({
+      where: { groupId },
+      include: {
+        TournamentMatchParticipant: {
+          include: {
+            participant: true,
+          },
+        },
+        Game: {
+          include: {
+            participants: {
+              include: {
+                matchParticipant: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Initialize scores object
+    const scores: Record<string, { won: number; lost: number }> = {};
+
+    // Process each match
+    for (const match of matches) {
+      // First, add scores from match participants (direct scores)
+      for (const matchParticipant of match.TournamentMatchParticipant) {
+        if (matchParticipant.participantId) {
+          const participantId = matchParticipant.participantId;
+
+          // Initialize participant scores if not exists
+          scores[participantId] ??= { won: 0, lost: 0 };
+
+          // Add won and lost scores from match participant
+          scores[participantId].won += matchParticipant.wonScore;
+          scores[participantId].lost += matchParticipant.lostScore;
+        }
+      }
+    }
+
+    return scores;
+  },
 };

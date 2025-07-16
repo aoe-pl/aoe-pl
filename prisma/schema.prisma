@@ -461,7 +461,8 @@ model TournamentMatchParticipant {
     teamId        String?
     team          TournamentTeam?        @relation(fields: [teamId], references: [id])
     isWinner      Boolean                @default(false)
-    score         Int? // Optional score for the participant/team
+    wonScore      Int                    @default(0) // Number of games won
+    lostScore     Int                    @default(0) // Number of games lost
 
     // Relations for games
     gameParticipants GameParticipant[]

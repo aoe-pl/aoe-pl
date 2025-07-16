@@ -211,7 +211,8 @@ const tournamentMatchFormSchema = z.object({
     .array(
       z.object({
         participantId: z.string(),
-        score: z.number(),
+        wonScore: z.number().int().min(0),
+        lostScore: z.number().int().min(0),
         isWinner: z.boolean(),
       }),
     )
@@ -220,7 +221,8 @@ const tournamentMatchFormSchema = z.object({
     .array(
       z.object({
         teamId: z.string(),
-        score: z.number(),
+        wonScore: z.number().int().min(0),
+        lostScore: z.number().int().min(0),
         isWinner: z.boolean(),
       }),
     )
