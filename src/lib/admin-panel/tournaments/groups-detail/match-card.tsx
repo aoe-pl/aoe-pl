@@ -48,12 +48,10 @@ export function MatchCard({
     switch (status) {
       case "COMPLETED":
         return "default";
-      case "IN_PROGRESS":
+      case "PENDING":
         return "secondary";
       case "SCHEDULED":
         return "outline";
-      case "CANCELLED":
-        return "destructive";
       case "ADMIN_APPROVED":
         return "default";
       default:
@@ -153,6 +151,9 @@ export function MatchCard({
               >
                 <span className="text-sm font-medium">
                   {getParticipantName(participant)}
+                </span>
+                <span className="text-primary text-sm font-bold">
+                  {getParticipantScore(participant)}
                 </span>
               </div>
             ))}

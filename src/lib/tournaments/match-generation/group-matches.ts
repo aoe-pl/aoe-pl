@@ -71,7 +71,7 @@ export function generateNewMatches(
   return newPairs.map((pair) => ({
     participant1Id: pair.participant1Id,
     participant2Id: pair.participant2Id,
-    status: "IN_PROGRESS",
+    status: "PENDING",
     civDraftKey: "",
     mapDraftKey: "",
   }));
@@ -108,7 +108,7 @@ export function getMatchesToCreate(
   return newPairs.map((pair) => ({
     participant1Id: pair.participant1Id,
     participant2Id: pair.participant2Id,
-    status: "IN_PROGRESS",
+    status: "PENDING",
     civDraftKey: "",
     mapDraftKey: "",
   }));

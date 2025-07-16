@@ -129,7 +129,6 @@ export function TournamentGroupList({
     color?: string | undefined;
     participantIds?: string[] | undefined;
   }) => {
-    console.log("data sss", data.isMixed);
     const groupData = {
       name: data.name,
       description: data.description,

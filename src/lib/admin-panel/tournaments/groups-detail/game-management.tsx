@@ -38,15 +38,11 @@ export function GameManagement({
     },
   );
 
-  console.log("games", games);
-
   // fetch match participants
   const { data: matchParticipants } =
     api.tournaments.matches.getParticipants.useQuery({
       id: match.id,
     });
-
-  console.log("matchParticipants", matchParticipants);
 
   // Extract available users from match participants
   const availableUsers = (matchParticipants ?? []).flatMap(
@@ -91,8 +87,6 @@ export function GameManagement({
       })) ?? [],
     map: g.map ?? undefined,
   }));
-
-  console.log("availableUsers", availableUsers);
 
   return (
     <Drawer

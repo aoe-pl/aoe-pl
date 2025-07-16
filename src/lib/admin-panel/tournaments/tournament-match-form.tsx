@@ -96,7 +96,7 @@ export function TournamentMatchForm({
         : undefined,
       civDraftKey: initialData?.civDraftKey ?? "",
       mapDraftKey: initialData?.mapDraftKey ?? "",
-      status: initialData?.status ?? "SCHEDULED",
+      status: initialData?.status ?? "PENDING",
       comment: initialData?.comment ?? "",
       adminComment: initialData?.adminComment ?? "",
       participantIds:

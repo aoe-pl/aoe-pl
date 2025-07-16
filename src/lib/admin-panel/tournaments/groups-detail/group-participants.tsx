@@ -24,6 +24,12 @@ export async function GroupParticipantsTable({
     groupId,
   });
 
+  const sortedParticipants = participants.sort((a, b) => {
+    const aScore = scores[a.tournamentParticipant.id];
+    const bScore = scores[b.tournamentParticipant.id];
+    return (bScore?.won ?? 0) - (aScore?.won ?? 0);
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -41,9 +47,9 @@ export async function GroupParticipantsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {participants.map((participant) => {
+              {sortedParticipants.map((participant) => {
                 const participantScore =
-                  scores?.[participant.tournamentParticipant.id];
+                  scores[participant.tournamentParticipant.id];
                 const scoreText = participantScore
                   ? `${participantScore.won}-${participantScore.lost}`
                   : "0-0";

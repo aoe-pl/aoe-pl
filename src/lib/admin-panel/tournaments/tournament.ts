@@ -56,10 +56,9 @@ const getRegistrationModeLabel = (mode: RegistrationMode) => {
 };
 
 const matchStatusesLabels: Record<MatchStatus, string> = {
+  PENDING: "Pending",
   SCHEDULED: "Scheduled",
-  IN_PROGRESS: "In Progress",
   COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
   ADMIN_APPROVED: "Admin Approved",
 };
 
@@ -169,16 +168,12 @@ const matchStatuses: { value: MatchStatus; label: string }[] = [
     label: getMatchStatusLabel(MatchStatus.SCHEDULED),
   },
   {
-    value: MatchStatus.IN_PROGRESS,
-    label: getMatchStatusLabel(MatchStatus.IN_PROGRESS),
+    value: MatchStatus.PENDING,
+    label: getMatchStatusLabel(MatchStatus.PENDING),
   },
   {
     value: MatchStatus.COMPLETED,
     label: getMatchStatusLabel(MatchStatus.COMPLETED),
-  },
-  {
-    value: MatchStatus.CANCELLED,
-    label: getMatchStatusLabel(MatchStatus.CANCELLED),
   },
   {
     value: MatchStatus.ADMIN_APPROVED,

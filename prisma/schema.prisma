@@ -1,503 +1,455 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["driverAdapters"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// Necessary for Next auth
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? @db.Text
-    access_token             String? @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-    id                    String                  @id @default(cuid())
-    name                  String?
-    email                 String?                 @unique
-    emailVerified         DateTime?
-    image                 String?
-    color                 String?
-    adminComment          String?
-    accounts              Account[]
-    sessions              Session[]
-    userGameProfiles      UserGameProfile[]
-    userRoles             UserRole[]
-    userStreams           UserStream[]
-    tournamentSeries      TournamentSeries[]
-    TournamentParticipant TournamentParticipant[]
-    TournamentMatchStream TournamentMatchStream[]
+  id                    String                  @id @default(cuid())
+  name                  String?
+  email                 String?                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  color                 String?
+  adminComment          String?
+  accounts              Account[]
+  sessions              Session[]
+  TournamentMatchStream TournamentMatchStream[]
+  TournamentParticipant TournamentParticipant[]
+  tournamentSeries      TournamentSeries[]
+  userGameProfiles      UserGameProfile[]
+  userRoles             UserRole[]
+  userStreams           UserStream[]
 }
 
 model UserGameProfile {
-    id            String   @id @default(cuid())
-    userId        String
-    user          User     @relation(fields: [userId], references: [id])
-    platformId    String
-    platform      Platform @relation(fields: [platformId], references: [id])
-    statProfileId String // ID of aoe2 account for aoe2companion
-    mainAccount   Boolean
+  id            String   @id @default(cuid())
+  userId        String
+  platformId    String
+  statProfileId String
+  mainAccount   Boolean
+  platform      Platform @relation(fields: [platformId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
 
-    @@unique([userId, mainAccount]) // A user can only have one main account
-}
-
-enum RoleType {
-    ADMIN
-    MODERATOR
+  @@unique([userId, mainAccount])
 }
 
 model Role {
-    id             String   @id @default(cuid())
-    name           String
-    type           RoleType
-    comment        String?
-    selfAssignable Boolean
-    modAssignable  Boolean
-
-    userRoles UserRole[]
+  id             String     @id @default(cuid())
+  name           String
+  comment        String?
+  selfAssignable Boolean
+  modAssignable  Boolean
+  type           RoleType
+  userRoles      UserRole[]
 }
 
 model UserRole {
-    id         String    @id @default(cuid())
-    userId     String
-    user       User      @relation(fields: [userId], references: [id])
-    roleId     String
-    role       Role      @relation(fields: [roleId], references: [id])
-    assignedAt DateTime  @default(now())
-    expiresAt  DateTime?
-    comment    String?
+  id         String    @id @default(cuid())
+  userId     String
+  roleId     String
+  assignedAt DateTime  @default(now())
+  expiresAt  DateTime?
+  comment    String?
+  role       Role      @relation(fields: [roleId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
 
-    @@unique([userId, roleId])
+  @@unique([userId, roleId])
 }
 
 model UserStream {
-    id         String   @id @default(cuid())
-    userId     String
-    user       User     @relation(fields: [userId], references: [id])
-    platformId String
-    platform   Platform @relation(fields: [platformId], references: [id])
+  id         String   @id @default(cuid())
+  userId     String
+  platformId String
+  platform   Platform @relation(fields: [platformId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
 }
 
 model Platform {
-    id          String @id @default(cuid())
-    name        String
-    type        String // game, stream, social, etc.
-    urlTemplate String
+  id               String            @id @default(cuid())
+  name             String
+  type             String
+  urlTemplate      String
+  userGameProfiles UserGameProfile[]
+  userStreams      UserStream[]
 
-    userGameProfiles UserGameProfile[]
-    userStreams      UserStream[]
-
-    @@unique([name, type])
+  @@unique([name, type])
 }
 
 model BaseMap {
-    id           String @id @default(cuid())
-    name         String
-    description  String?
-    thumbnailUrl String?
-
-    maps Map[]
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  thumbnailUrl String?
+  maps         Map[]
 }
 
 model Map {
-    id           String @id @default(cuid())
-    name         String
-    description  String?
-    thumbnailUrl String?
-
-    baseMapId String
-    baseMap   BaseMap @relation(fields: [baseMapId], references: [id])
-    Game      Game[]
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  thumbnailUrl String?
+  baseMapId    String
+  Game         Game[]
+  baseMap      BaseMap @relation(fields: [baseMapId], references: [id])
 }
 
 model Civ {
-    id           String @id @default(cuid())
-    name         String
-    description  String
-    content      String
-    thumbnailUrl String
-    
-    gameParticipants GameParticipant[]
+  id               String            @id @default(cuid())
+  name             String
+  description      String
+  content          String
+  thumbnailUrl     String
+  gameParticipants GameParticipant[]
 }
 
 model TournamentSeries {
-    id           String       @id @default(cuid())
-    name         String
-    ownerId      String
-    owner        User         @relation(fields: [ownerId], references: [id])
-    displayOrder Int
-    description  String
-    tournament   Tournament[]
-}
-
-enum TournamentMatchModeType {
-    BEST_OF
-    PLAY_ALL
+  id           String       @id @default(cuid())
+  name         String
+  ownerId      String
+  displayOrder Int
+  description  String
+  tournament   Tournament[]
+  owner        User         @relation(fields: [ownerId], references: [id])
 }
 
 model TournamentMatchMode {
-    id              String                  @id @default(cuid())
-    mode            TournamentMatchModeType
-    gameCount       Int // Number of games in match bo7 = 7 etc.
-    tournament      Tournament[]
-    groups          TournamentGroup[]
-    TournamentMatch TournamentMatch[]
-}
-
-enum RegistrationMode {
-    INDIVIDUAL
-    TEAM
-    ADMIN
-}
-
-enum TournamentStatus {
-    PENDING
-    ACTIVE
-    FINISHED
-    CANCELLED
-}
-
-enum MatchStatus {
-    SCHEDULED
-    IN_PROGRESS
-    COMPLETED
-    CANCELLED
-    ADMIN_APPROVED
-}
-
-enum StreamStatus {
-    SCHEDULED
-    LIVE
-    COMPLETED
-    CANCELLED
-}
-
-enum ParticipantStatus {
-    REGISTERED
-    CHECKED_IN
-    DISQUALIFIED
-    WITHDRAWN
-}
-
-enum TeamStatus {
-    ACTIVE
-    DISQUALIFIED
-    WITHDRAWN
-}
-
-enum TournamentStageType {
-    GROUP
-    BRACKET
-}
-
-enum BracketType {
-    SINGLE_ELIMINATION
-    DOUBLE_ELIMINATION
+  id              String                  @id @default(cuid())
+  gameCount       Int
+  mode            TournamentMatchModeType
+  tournament      Tournament[]
+  groups          TournamentGroup[]
+  TournamentMatch TournamentMatch[]
 }
 
 model Tournament {
-    id                    String                  @id @default(cuid())
-    name                  String
-    urlKey                String
-    registrationMode      RegistrationMode
-    tournamentSeriesId    String
-    tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])
-    matchModeId           String
-    matchMode             TournamentMatchMode     @relation(fields: [matchModeId], references: [id])
-    description           String                  @db.Text
-    isTeamBased           Boolean
-    startDate             DateTime
-    endDate               DateTime?
-    participantsLimit     Int?
-    registrationStartDate DateTime?
-    registrationEndDate   DateTime?
-    status                TournamentStatus
-    isVisible             Boolean
-    sections              TournamentSection[]
-    teams                 TournamentTeam[]
-    stages                TournamentStage[]
-    TournamentParticipant TournamentParticipant[]
+  id                    String                  @id @default(cuid())
+  urlKey                String
+  registrationMode      RegistrationMode
+  tournamentSeriesId    String
+  matchModeId           String
+  description           String
+  isTeamBased           Boolean
+  startDate             DateTime
+  endDate               DateTime?
+  participantsLimit     Int?
+  registrationStartDate DateTime?
+  registrationEndDate   DateTime?
+  status                TournamentStatus
+  isVisible             Boolean
+  name                  String
+  matchMode             TournamentMatchMode     @relation(fields: [matchModeId], references: [id])
+  tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])
+  TournamentParticipant TournamentParticipant[]
+  sections              TournamentSection[]
+  stages                TournamentStage[]
+  teams                 TournamentTeam[]
 
-    @@unique([tournamentSeriesId, urlKey])
-}
-
-enum TournamentSectionType {
-    HOW_TO_START
-    RULES
-    PRIZES
-    GENERAL
+  @@unique([tournamentSeriesId, urlKey])
 }
 
 model TournamentSection {
-    id           String                @id @default(cuid())
-    tournamentId String
-    tournament   Tournament            @relation(fields: [tournamentId], references: [id])
-    type         TournamentSectionType
-    isVisible    Boolean
-    content      String?               @db.Text // markdown
+  id           String                @id @default(cuid())
+  tournamentId String
+  isVisible    Boolean
+  content      String?
+  type         TournamentSectionType
+  tournament   Tournament            @relation(fields: [tournamentId], references: [id])
 
-    @@unique([tournamentId, type])
+  @@unique([tournamentId, type])
 }
 
 model TournamentTeam {
-    id                         String                       @id @default(cuid())
-    name                       String
-    comment                    String?                      @db.Text
-    tournamentId               String
-    tournament                 Tournament                   @relation(fields: [tournamentId], references: [id])
-    status                     TeamStatus                   @default(ACTIVE)
-    rosterSizeLimit            Int?
-    seedNumber                 Int?
-    TournamentParticipant      TournamentParticipant[]
-    TournamentMatchParticipant TournamentMatchParticipant[]
+  id                         String                       @id @default(cuid())
+  name                       String
+  comment                    String?
+  tournamentId               String
+  status                     TeamStatus                   @default(ACTIVE)
+  rosterSizeLimit            Int?
+  seedNumber                 Int?
+  captainId                  String?
+  TournamentMatchParticipant TournamentMatchParticipant[]
+  TournamentParticipant      TournamentParticipant[]
+  captain                    TournamentParticipant?       @relation("TeamCaptain", fields: [captainId], references: [id])
+  tournament                 Tournament                   @relation(fields: [tournamentId], references: [id])
 
-    captainId String?
-    captain   TournamentParticipant? @relation(name: "TeamCaptain", fields: [captainId], references: [id])
-
-    @@unique([tournamentId, name])
+  @@unique([tournamentId, name])
 }
 
 model TournamentStage {
-    id           String              @id @default(cuid())
-    tournamentId String
-    tournament   Tournament          @relation(fields: [tournamentId], references: [id])
-    name         String
-    type         TournamentStageType
-    isActive     Boolean             @default(false)
-    description  String?
-
-    // For bracket stages
-    bracketType BracketType?
-    bracketSize Int? // Number of participants in bracket
-    isSeeded    Boolean      @default(true)
-
-    groups   TournamentGroup[]
-    brackets TournamentBracket[]
+  id           String              @id @default(cuid())
+  tournamentId String
+  name         String
+  type         TournamentStageType
+  isActive     Boolean             @default(false)
+  description  String?
+  bracketType  BracketType?
+  bracketSize  Int?
+  isSeeded     Boolean             @default(true)
+  brackets     TournamentBracket[]
+  groups       TournamentGroup[]
+  tournament   Tournament          @relation(fields: [tournamentId], references: [id])
 }
 
 model TournamentBracket {
-    id           String          @id @default(cuid())
-    stageId      String
-    stage        TournamentStage @relation(fields: [stageId], references: [id])
-    name         String
-    displayOrder Int
-    isActive     Boolean         @default(false)
-    startDate    DateTime?
-    endDate      DateTime?
-    description  String?         @db.Text
-
-    // Bracket configuration
-    bracketType     BracketType
-    bracketSize     Int // Number of participants in bracket
-    isSeeded        Boolean     @default(true)
-    isManualSeeding Boolean     @default(false) // If true, admin can manually set matchups
-
-    bracketNodes TournamentBracketNode[]
+  id              String                  @id @default(cuid())
+  stageId         String
+  name            String
+  displayOrder    Int
+  isActive        Boolean                 @default(false)
+  startDate       DateTime?
+  endDate         DateTime?
+  description     String?
+  bracketType     BracketType
+  bracketSize     Int
+  isSeeded        Boolean                 @default(true)
+  isManualSeeding Boolean                 @default(false)
+  stage           TournamentStage         @relation(fields: [stageId], references: [id])
+  bracketNodes    TournamentBracketNode[]
 }
 
 model TournamentBracketNode {
-    id              String                  @id @default(cuid())
-    bracketId       String
-    bracket         TournamentBracket       @relation(fields: [bracketId], references: [id])
-    round           Int // Round number in bracket
-    position        Int // Position in round
-    isWinnerBracket Boolean                 @default(true) // For double elimination
-    parentNodeId    String? // Reference to parent node in bracket
-    parentNode      TournamentBracketNode?  @relation("BracketNodeParent", fields: [parentNodeId], references: [id])
-    childNodes      TournamentBracketNode[] @relation("BracketNodeParent")
-    matchId         String?
-    match           TournamentMatch?        @relation(fields: [matchId], references: [id])
+  id              String                  @id @default(cuid())
+  bracketId       String
+  round           Int
+  position        Int
+  isWinnerBracket Boolean                 @default(true)
+  parentNodeId    String?
+  matchId         String?
+  isManualMatch   Boolean                 @default(false)
+  adminComment    String?
+  bracket         TournamentBracket       @relation(fields: [bracketId], references: [id])
+  match           TournamentMatch?        @relation(fields: [matchId], references: [id])
+  parentNode      TournamentBracketNode?  @relation("BracketNodeParent", fields: [parentNodeId], references: [id])
+  childNodes      TournamentBracketNode[] @relation("BracketNodeParent")
 
-    // Admin control fields
-    isManualMatch Boolean @default(false) // If true, this match was manually created
-    adminComment  String? @db.Text // For admin notes about this node
-
-    @@unique([bracketId, round, position])
+  @@unique([bracketId, round, position])
 }
 
 model TournamentGroup {
-    id String @id @default(cuid())
+  id                         String                       @id @default(cuid())
+  stageId                    String
+  displayOrder               Int
+  name                       String
+  description                String?
+  matchModeId                String?
+  isTeamBased                Boolean?
+  isMixed                    Boolean?
+  color                      String?
+  matchMode                  TournamentMatchMode?         @relation(fields: [matchModeId], references: [id])
+  stage                      TournamentStage              @relation(fields: [stageId], references: [id])
+  TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
+  matches                    TournamentMatch[]            @relation("GroupMatches")
 
-    stageId String
-    stage   TournamentStage @relation(fields: [stageId], references: [id])
-
-    displayOrder Int
-    name         String
-    description  String?              @db.Text
-    matchModeId  String?
-    matchMode    TournamentMatchMode? @relation(fields: [matchModeId], references: [id])
-
-    isTeamBased                Boolean? // can override tournament setting
-    // simillar to team based, but for mixed teams - Requires isTeamBased to be true
-    isMixed                    Boolean? // can override tournament setting
-    TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
-    matches                    TournamentMatch[]            @relation("GroupMatches")
-    color                      String?
-
-    @@unique([stageId, name])
+  @@unique([stageId, name])
 }
 
-// it can be a team or an individual person
 model TournamentParticipant {
-    id                         String                       @id @default(cuid())
-    tournamentId               String
-    tournament                 Tournament                   @relation(fields: [tournamentId], references: [id])
-    teamId                     String? // Optional for individual tournaments
-    team                       TournamentTeam?              @relation(fields: [teamId], references: [id])
-    userId                     String?
-    user                       User?                        @relation(fields: [userId], references: [id])
-    status                     ParticipantStatus            @default(REGISTERED)
-    seedNumber                 Int?
-    registrationDate           DateTime                     @default(now())
-    TournamentGroupParticipant TournamentGroupParticipant[]
-    TournamentMatchParticipant TournamentMatchParticipant[]
-    TournamentTeam             TournamentTeam[]             @relation("TeamCaptain")
-    nickname                   String
+  id                         String                       @id @default(cuid())
+  tournamentId               String
+  teamId                     String?
+  userId                     String?
+  status                     ParticipantStatus            @default(REGISTERED)
+  seedNumber                 Int?
+  registrationDate           DateTime                     @default(now())
+  nickname                   String
+  TournamentGroupParticipant TournamentGroupParticipant[]
+  TournamentMatchParticipant TournamentMatchParticipant[]
+  team                       TournamentTeam?              @relation(fields: [teamId], references: [id])
+  tournament                 Tournament                   @relation(fields: [tournamentId], references: [id])
+  user                       User?                        @relation(fields: [userId], references: [id])
+  TournamentTeam             TournamentTeam[]             @relation("TeamCaptain")
 
-    @@unique([tournamentId, nickname])
-    @@index([tournamentId])
+  @@unique([tournamentId, nickname])
+  @@index([tournamentId])
 }
 
 model TournamentGroupParticipant {
-    id                      String                @id @default(cuid())
-    tournamentGroupId       String
-    // when group is deleted, participants will cascade to be deleted
-    tournamentGroup         TournamentGroup       @relation("GroupParticipants", fields: [tournamentGroupId], references: [id], onDelete: Cascade)
-    tournamentParticipantId String
-    tournamentParticipant   TournamentParticipant @relation(fields: [tournamentParticipantId], references: [id])
-    displayOrder            Int
-    comment                 String?
-    seedNumber              Int?
+  id                      String                @id @default(cuid())
+  tournamentGroupId       String
+  tournamentParticipantId String
+  displayOrder            Int
+  comment                 String?
+  seedNumber              Int?
+  tournamentGroup         TournamentGroup       @relation("GroupParticipants", fields: [tournamentGroupId], references: [id], onDelete: Cascade)
+  tournamentParticipant   TournamentParticipant @relation(fields: [tournamentParticipantId], references: [id])
 
-    @@unique([tournamentGroupId, tournamentParticipantId])
+  @@unique([tournamentGroupId, tournamentParticipantId])
 }
 
 model TournamentMatch {
-    id String @id @default(cuid())
-
-    // A match must belong to either a group or be part of a bracket node
-    groupId String?
-    // when group is deleted, matches will cascade to be deleted
-    group   TournamentGroup? @relation("GroupMatches", fields: [groupId], references: [id], onDelete: Cascade)
-
-    matchDate   DateTime?
-    civDraftKey String
-    mapDraftKey String
-
-    status       MatchStatus
-    comment      String?     @db.Text
-    adminComment String?     @db.Text
-
-    // Match creation info
-    isManualMatch Boolean  @default(false) // If true, this match was manually created
-    createdBy     String? // User ID who created the match
-    createdAt     DateTime @default(now())
-
-    TournamentMatchMode        TournamentMatchMode?         @relation(fields: [tournamentMatchModeId], references: [id])
-    tournamentMatchModeId      String?
-    TournamentMatchParticipant TournamentMatchParticipant[] @relation("MatchParticipants")
-    Game                       Game[]
-    TournamentMatchStream      TournamentMatchStream[]
-    bracketNodes               TournamentBracketNode[] // Links to bracket nodes that use this match
+  id                         String                       @id @default(cuid())
+  groupId                    String?
+  matchDate                  DateTime?
+  civDraftKey                String
+  mapDraftKey                String
+  status                     MatchStatus
+  comment                    String?
+  adminComment               String?
+  isManualMatch              Boolean                      @default(false)
+  createdBy                  String?
+  createdAt                  DateTime                     @default(now())
+  tournamentMatchModeId      String?
+  Game                       Game[]
+  bracketNodes               TournamentBracketNode[]
+  group                      TournamentGroup?             @relation("GroupMatches", fields: [groupId], references: [id], onDelete: Cascade)
+  TournamentMatchMode        TournamentMatchMode?         @relation(fields: [tournamentMatchModeId], references: [id])
+  TournamentMatchParticipant TournamentMatchParticipant[] @relation("MatchParticipants")
+  TournamentMatchStream      TournamentMatchStream[]
 }
 
 model TournamentMatchStream {
-    id String @id @default(cuid())
-
-    tournamentMatchId String
-    tournamentMatch   TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
-
-    streamerId String
-    streamer   User   @relation(fields: [streamerId], references: [id])
-
-    status              StreamStatus
-    scheduledStartTime  DateTime?
-    streamUrl           String?
-    scheduledStreamLive Boolean
+  id                  String          @id @default(cuid())
+  tournamentMatchId   String
+  streamerId          String
+  status              StreamStatus
+  scheduledStartTime  DateTime?
+  streamUrl           String?
+  scheduledStreamLive Boolean
+  streamer            User            @relation(fields: [streamerId], references: [id])
+  tournamentMatch     TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
 }
 
 model TournamentMatchParticipant {
-    id            String                 @id @default(cuid())
-    matchId       String
-    // when match is deleted, participants will cascade to be deleted
-    match         TournamentMatch        @relation("MatchParticipants", fields: [matchId], references: [id], onDelete: Cascade)
-    participantId String?
-    participant   TournamentParticipant? @relation(fields: [participantId], references: [id])
-    teamId        String?
-    team          TournamentTeam?        @relation(fields: [teamId], references: [id])
-    isWinner      Boolean                @default(false)
-    wonScore      Int                    @default(0) // Number of games won
-    lostScore     Int                    @default(0) // Number of games lost
+  id               String                 @id @default(cuid())
+  matchId          String
+  participantId    String?
+  teamId           String?
+  isWinner         Boolean                @default(false)
+  lostScore        Int                    @default(0)
+  wonScore         Int                    @default(0)
+  gameParticipants GameParticipant[]
+  match            TournamentMatch        @relation("MatchParticipants", fields: [matchId], references: [id], onDelete: Cascade)
+  participant      TournamentParticipant? @relation(fields: [participantId], references: [id])
+  team             TournamentTeam?        @relation(fields: [teamId], references: [id])
 
-    // Relations for games
-    gameParticipants GameParticipant[]
-
-    @@unique([matchId, participantId])
-    @@unique([matchId, teamId])
+  @@unique([matchId, participantId])
+  @@unique([matchId, teamId])
 }
 
 model GameParticipant {
-    id      String          @id @default(cuid())
-    gameId  String
-    game    Game            @relation(fields: [gameId], references: [id], onDelete: Cascade)
-
-    // The civilization they used
-    civId String?
-    civ   Civ?   @relation(fields: [civId], references: [id])
-    
-    // Whether they won this game
-    isWinner Boolean @default(false)
-    
-    // Reference to which match participant/team they represent
-    matchParticipantId String
-    matchParticipant   TournamentMatchParticipant @relation(fields: [matchParticipantId], references: [id], onDelete: Cascade)
+  id                 String                     @id @default(cuid())
+  gameId             String
+  civId              String?
+  isWinner           Boolean                    @default(false)
+  matchParticipantId String
+  civ                Civ?                       @relation(fields: [civId], references: [id])
+  game               Game                       @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  matchParticipant   TournamentMatchParticipant @relation(fields: [matchParticipantId], references: [id], onDelete: Cascade)
 }
 
 model Game {
-    id      String          @id @default(cuid())
-    matchId String
-    match   TournamentMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  id           String            @id @default(cuid())
+  matchId      String
+  mapId        String
+  recUrl       String?
+  map          Map               @relation(fields: [mapId], references: [id])
+  match        TournamentMatch   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  participants GameParticipant[]
+}
 
-    mapId String
-    map   Map    @relation(fields: [mapId], references: [id])
+enum RoleType {
+  ADMIN
+  MODERATOR
+}
 
-    recUrl   String?  @db.Text
+enum TournamentMatchModeType {
+  BEST_OF
+  PLAY_ALL
+}
 
-    participants GameParticipant[]
+enum RegistrationMode {
+  INDIVIDUAL
+  TEAM
+  ADMIN
+}
+
+enum TournamentStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+  CANCELLED
+}
+
+enum MatchStatus {
+  PENDING
+  SCHEDULED
+  COMPLETED
+  ADMIN_APPROVED
+}
+
+enum StreamStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  REGISTERED
+  CHECKED_IN
+  DISQUALIFIED
+  WITHDRAWN
+}
+
+enum TeamStatus {
+  ACTIVE
+  DISQUALIFIED
+  WITHDRAWN
+}
+
+enum TournamentStageType {
+  GROUP
+  BRACKET
+}
+
+enum BracketType {
+  SINGLE_ELIMINATION
+  DOUBLE_ELIMINATION
+}
+
+enum TournamentSectionType {
+  HOW_TO_START
+  RULES
+  PRIZES
+  GENERAL
 }

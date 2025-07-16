@@ -187,7 +187,7 @@ export const tournamentMatchRepository = {
         matchDate: data.matchDate,
         civDraftKey: data.civDraftKey ?? "",
         mapDraftKey: data.mapDraftKey ?? "",
-        status: data.status ?? "SCHEDULED",
+        status: data.status ?? "PENDING",
         comment: data.comment,
         adminComment: data.adminComment,
         isManualMatch: data.isManualMatch ?? false,
@@ -344,13 +344,6 @@ export const tournamentMatchRepository = {
     applyScore: boolean,
     filesToRemove?: string[],
   ) {
-    console.log("manageGames called with:", {
-      matchId,
-      games,
-      applyScore,
-      filesToRemove,
-    });
-
     const s3Service = createAoe2RecsService();
     const tempFilesToCleanup: string[] = [];
     const movedFiles: { from: string; to: string }[] = [];

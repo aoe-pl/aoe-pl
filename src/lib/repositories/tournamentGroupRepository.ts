@@ -4,6 +4,7 @@ import {
   getMatchesToDelete,
   getMatchesToCreate,
 } from "@/lib/tournaments/match-generation/group-matches";
+import { MatchStatus } from "@prisma/client";
 
 export type TournamentGroupCreateData = {
   name: string;
@@ -428,8 +429,12 @@ export const tournamentGroupRepository = {
     // Initialize scores object
     const scores: Record<string, { won: number; lost: number }> = {};
 
+    const onlyApprovedMatches = matches.filter(
+      (match) => match.status === MatchStatus.ADMIN_APPROVED,
+    );
+
     // Process each match
-    for (const match of matches) {
+    for (const match of onlyApprovedMatches) {
       // First, add scores from match participants (direct scores)
       for (const matchParticipant of match.TournamentMatchParticipant) {
         if (matchParticipant.participantId) {
