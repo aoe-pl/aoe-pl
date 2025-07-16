@@ -44,6 +44,7 @@ export function TournamentGroupList({
     tournamentId,
     includeMatchMode: true,
     includeParticipants: true,
+    includeMatches: true,
   });
 
   const { mutate: createGroup, isPending: creationPending } =
