@@ -9,6 +9,15 @@ export const tournamentParticipantRepository = {
       where: { tournamentId },
       include: {
         user: options.includeUser,
+        TournamentGroupParticipant: {
+          include: {
+            tournamentGroup: {
+              include: {
+                stage: true,
+              },
+            },
+          },
+        },
       },
     });
   },
