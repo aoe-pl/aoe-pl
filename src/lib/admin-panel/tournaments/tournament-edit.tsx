@@ -34,7 +34,7 @@ export function TournamentEdit({
       tournamentSeriesId: tournament.tournamentSeriesId,
       matchModeId: tournament.matchModeId,
       registrationMode: tournament.registrationMode,
-      description: tournament.description,
+      description: tournament.description ?? undefined,
       isTeamBased: tournament.isTeamBased,
       startDate: tournament.startDate ?? undefined,
       endDate: tournament.endDate ?? undefined,

@@ -167,8 +167,8 @@ model Tournament {
   registrationMode      RegistrationMode
   tournamentSeriesId    String
   matchModeId           String
-  description           String
-  isTeamBased           Boolean
+  description           String?
+  isTeamBased           Boolean @default(false)
   startDate             DateTime
   endDate               DateTime?
   participantsLimit     Int?

@@ -3,6 +3,16 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { TournamentWithRelations } from "@/server/api/tournament";
 import { TournamentStatusBadge } from "./tournament-status-badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Edit,
+  Eye,
+  Users,
+  Calendar,
+  CalendarCheck,
+  ClockIcon,
+} from "lucide-react";
 
 export async function TournamentList() {
   const tournaments = await api.tournaments.list({
@@ -13,95 +23,146 @@ export async function TournamentList() {
   return (
     <>
       {tournaments && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {tournaments.map((tournament: TournamentWithRelations) => (
-            <div
+            <Card
               key={tournament.id}
-              className="border-border bg-card flex flex-col gap-5 rounded-2xl border p-7 shadow-lg transition hover:shadow-xl"
+              className="w-full min-w-[320px] transition-shadow hover:shadow-md sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-foreground text-xl leading-tight font-extrabold">
-                    {tournament.name ?? "Series"}
+              <CardHeader className="pb-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base">
+                        {tournament.name ?? "Tournament"}
+                      </CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="h-8 w-8 p-0"
+                        title="View tournament details"
+                      >
+                        <Link href={`/admin/tournaments/view/${tournament.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="h-8 w-8 p-0"
+                        title="Edit tournament"
+                      >
+                        <Link href={`/admin/tournaments/edit/${tournament.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <TournamentStatusBadge status={tournament.status} />
+                    <Badge variant="outline">
+                      {tournament.matchMode?.mode ?? "No match mode"}
+                    </Badge>
+                    {tournament.isTeamBased && (
+                      <Badge variant="secondary">Team Based</Badge>
+                    )}
                   </div>
                   {tournament.tournamentSeries?.name && (
-                    <div className="text-muted-foreground text-xs font-medium">
-                      {tournament.tournamentSeries?.name}
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                      <span>Series: {tournament.tournamentSeries.name}</span>
                     </div>
                   )}
                 </div>
-                <TournamentStatusBadge status={tournament.status} />
-              </div>
-
-              {tournament.description && (
-                <div
-                  title={tournament.description}
-                  className="text-muted-foreground mb-1 line-clamp-2 text-sm"
-                >
-                  {tournament.description}
-                </div>
-              )}
-
-              <div className="bg-muted/60 text-muted-foreground flex flex-col gap-1 rounded-lg px-4 py-3 text-xs">
-                <div className="flex flex-wrap gap-2">
-                  <span className="font-semibold">Participants:</span>
-                  <span>{tournament.TournamentParticipant?.length ?? 0}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="font-semibold">Start:</span>
-                  <span>
-                    {new Date(tournament.startDate).toLocaleDateString()}
-                  </span>
-                </div>
-                {tournament.endDate && (
-                  <div className="flex flex-wrap gap-2">
-                    <span className="font-semibold">End:</span>
-                    <span>
-                      {new Date(tournament.endDate).toLocaleDateString()}
-                    </span>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {tournament.description && (
+                  <div className="space-y-1">
+                    <p className="line-clamp-2 text-sm">
+                      {tournament.description}
+                    </p>
                   </div>
                 )}
-                {tournament.registrationStartDate && (
-                  <div className="flex flex-wrap gap-2">
-                    <span className="font-semibold">Registration Start:</span>
-                    <span>
-                      {new Date(
-                        tournament.registrationStartDate,
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                {tournament.registrationEndDate && (
-                  <div className="flex flex-wrap gap-2">
-                    <span className="font-semibold">Registration End:</span>
-                    <span>
-                      {new Date(
-                        tournament.registrationEndDate,
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-              </div>
 
-              <div className="mt-auto flex gap-3">
-                <Link href={`/admin/tournaments/edit/${tournament.id}`}>
-                  <Button
-                    variant="default"
-                    className="rounded-lg px-5 py-2 font-semibold"
-                  >
-                    Edit
-                  </Button>
-                </Link>
-                <Link href={`/admin/tournaments/view/${tournament.id}`}>
-                  <Button
-                    variant="outline"
-                    className="rounded-lg px-5 py-2 font-semibold"
-                  >
-                    Details
-                  </Button>
-                </Link>
-              </div>
-            </div>
+                {/* Tournament Details */}
+                <div className="space-y-2 border-t pt-3">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="flex items-center gap-1">
+                      <Users className="text-muted-foreground h-3 w-3" />
+                      <span className="text-muted-foreground">
+                        Participants:
+                      </span>
+                      <span className="font-medium">
+                        {tournament.TournamentParticipant?.length ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="text-muted-foreground h-3 w-3" />
+                      <span className="text-muted-foreground">Start:</span>
+                      <span className="font-medium">
+                        {new Date(tournament.startDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                  {(tournament.endDate ??
+                    tournament.registrationStartDate ??
+                    tournament.registrationEndDate) && (
+                    <div className="grid grid-cols-1 gap-2 text-xs">
+                      {tournament.endDate && (
+                        <div className="flex items-center gap-1">
+                          <CalendarCheck className="text-muted-foreground h-3 w-3" />
+                          <span className="text-muted-foreground">End:</span>
+                          <span className="font-medium">
+                            {new Date(tournament.endDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                      {tournament.registrationStartDate && (
+                        <div className="flex items-center gap-1">
+                          <ClockIcon className="text-muted-foreground h-3 w-3" />
+                          <span className="text-muted-foreground">
+                            Registration Start:
+                          </span>
+                          <span className="font-medium">
+                            {new Date(
+                              tournament.registrationStartDate,
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                      {tournament.registrationEndDate && (
+                        <div className="flex items-center gap-1">
+                          <ClockIcon className="text-muted-foreground h-3 w-3" />
+                          <span className="text-muted-foreground">
+                            Registration End:
+                          </span>
+                          <span className="font-medium">
+                            {new Date(
+                              tournament.registrationEndDate,
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tournament Info */}
+                <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
+                  <div>URL Key: {tournament.urlKey}</div>
+                  {tournament.participantsLimit && (
+                    <div>
+                      Limit: {tournament.participantsLimit} participants
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}

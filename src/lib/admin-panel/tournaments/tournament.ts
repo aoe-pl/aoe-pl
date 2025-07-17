@@ -79,7 +79,7 @@ const tournamentFormSchema = z
     tournamentSeriesId: z.string().min(1, "Tournament series is required"),
     matchModeId: z.string().min(1, "Match mode is required"),
     registrationMode: z.nativeEnum(RegistrationMode),
-    description: z.string().min(1, "Description is required"),
+    description: z.string().optional(),
     isTeamBased: z.boolean(),
     startDate: z.date({
       required_error: "Start date is required",

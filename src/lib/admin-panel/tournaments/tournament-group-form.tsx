@@ -86,9 +86,13 @@ export function TournamentGroupForm({
       ...data,
       matchModeId:
         data.matchModeId === defaultMatchModeId ? undefined : data.matchModeId,
-      isTeamBased:
-        data.isTeamBased === defaultIsTeamBased ? undefined : data.isTeamBased,
-      isMixed: data.isMixed === false ? undefined : data.isMixed,
+      // TODO: Add team based tournament currently we only set team based when we create mix teams!
+      // team based should be isTeamBased: data.isTeamBased === defaultTeamBased ? undefined : data.isTeamBased,
+      // because it should by default inherit from tournament team based setting!
+      // if adding it remember to update the tournament form! src/lib/admin-panel/tournaments/tournament-form.tsx
+      isTeamBased: data.isMixed,
+      // when team based are support isMixed is always false when not team based group!
+      isMixed: data.isMixed,
       color: data.color ?? undefined,
       participantIds: data.participantIds ?? [],
     });
@@ -217,7 +221,8 @@ export function TournamentGroupForm({
               )}
             />
 
-            <FormField
+            {/* TODO: Add team based tournament */}
+            {/* <FormField
               control={form.control}
               name="isTeamBased"
               render={({ field }) => (
@@ -236,33 +241,31 @@ export function TournamentGroupForm({
                     </FormDescription>
                   </div>
                 </FormItem>
+              )} */}
+            {/* /> */}
+
+            <FormField
+              control={form.control}
+              name="isMixed"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Mixed Teams</FormLabel>
+                    <FormDescription>
+                      Enable mixed teams where team compositions can change for
+                      each game. Players can be grouped into different teams for
+                      each match.
+                    </FormDescription>
+                  </div>
+                </FormItem>
               )}
             />
-
-            {form.watch("isTeamBased") && (
-              <FormField
-                control={form.control}
-                name="isMixed"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Mixed Teams</FormLabel>
-                      <FormDescription>
-                        Enable mixed teams where team compositions can change
-                        for each game. Players can be grouped into different
-                        teams for each match.
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            )}
 
             <FormField
               control={form.control}

@@ -138,7 +138,7 @@ export function TournamentForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Description (Optional)</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Enter tournament description"
@@ -423,7 +423,10 @@ export function TournamentForm({
             )}
           />
 
-          <FormField
+          {/* TODO: Add team based tournament */}
+          {/* when added remember to update the tournament group form! src/lib/admin-panel/tournaments/tournament-group-form.tsx */}
+
+          {/* <FormField
             control={form.control}
             name="isTeamBased"
             render={({ field }) => (
@@ -444,7 +447,7 @@ export function TournamentForm({
                 </FormLabel>
               </FormItem>
             )}
-          />
+          /> */}
 
           <FormField
             control={form.control}
