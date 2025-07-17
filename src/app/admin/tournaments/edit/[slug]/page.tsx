@@ -1,3 +1,11 @@
+import {
+  Breadcrumb,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumbs";
 import { TournamentEdit } from "@/lib/admin-panel/tournaments/tournament-edit";
 import { api } from "@/trpc/server";
 
@@ -15,7 +23,27 @@ export default async function AdminTournamentEditPage({
 
   return (
     <>
-      <h1 className="mb-8 text-3xl font-bold text-white">Edit Tournament</h1>
+      <div className="py-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin/tournaments">
+                Tournaments
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/admin/tournaments/view/${slug}`}>
+                {tournament.name}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Edit</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
       <div className="rounded-xl p-8 text-white">
         <TournamentEdit tournament={tournament} />
       </div>

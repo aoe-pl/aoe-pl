@@ -3,9 +3,7 @@
 import Link from "next/link";
 import {
   HomeIcon,
-  NewsIcon,
   TrophyIcon,
-  UsersIcon,
   CogIcon,
   BackspaceIcon,
 } from "@/components/icons";
@@ -32,7 +30,7 @@ export function Sidebar() {
         >
           Tournaments
         </NavItem>
-        <NavItem
+        {/* <NavItem
           href="/admin/news"
           icon={<NewsIcon />}
           active={pathname.startsWith("/admin/news")}
@@ -45,7 +43,7 @@ export function Sidebar() {
           active={pathname.startsWith("/admin/users")}
         >
           Users
-        </NavItem>
+        </NavItem> */}
         <NavItem
           href="/admin/settings"
           icon={<CogIcon />}

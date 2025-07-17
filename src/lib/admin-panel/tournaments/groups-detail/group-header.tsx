@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Gamepad, Trophy, Users } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Calendar, Gamepad, Users } from "lucide-react";
 
 export type GroupHeaderProps = {
   name: string;
@@ -16,7 +16,6 @@ export type GroupHeaderProps = {
 };
 
 export function GroupHeader({
-  name,
   isTeamBased,
   participantsCount,
   matchesCount,
@@ -30,10 +29,6 @@ export function GroupHeader({
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                <CardTitle>{name}</CardTitle>
-              </div>
               <div className="flex items-center gap-2">
                 <Badge variant="default">
                   {isTeamBased ? "Team Based" : "1v1"}

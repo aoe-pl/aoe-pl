@@ -8,6 +8,14 @@ import { TournamentStages } from "@/lib/admin-panel/tournaments/tournament-stage
 import { TournamentTabs } from "./tabs";
 import { TournamentParticipants } from "@/lib/admin-panel/tournaments/tournament-participants";
 import { TournamentGroupList } from "@/lib/admin-panel/tournaments/tournament-group-list";
+import {
+  Breadcrumb,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+} from "@/components/ui/breadcrumbs";
 
 export default async function AdminTournamentsViewPage({
   params,
@@ -26,25 +34,23 @@ export default async function AdminTournamentsViewPage({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 md:max-w-6xl">
-      <div className="flex flex-col gap-2 pt-2 pb-1">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-foreground text-2xl font-extrabold md:text-3xl">
-              {tournament.name}
-            </h1>
-            {tournament.tournamentSeries?.name && (
-              <div className="text-muted-foreground mt-1 text-sm font-medium">
-                {tournament.tournamentSeries.name}
-              </div>
-            )}
-          </div>
-          <TournamentStatusBadge status={tournament.status} />
-        </div>
-        {tournament.description && (
-          <div className="text-muted-foreground mt-2 text-base">
-            {tournament.description}
-          </div>
-        )}
+      <div className="py-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin/tournaments">
+                Tournaments
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>
+                {tournament.name}{" "}
+                <TournamentStatusBadge status={tournament.status} />
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       <TournamentTabs
@@ -66,6 +72,7 @@ export default async function AdminTournamentsViewPage({
           <TournamentInfo
             tournament={tournament}
             participants={tournament.TournamentParticipant?.length ?? 0}
+            tournamentSeries={tournament.tournamentSeries}
           />
         </TabsContent>
 
