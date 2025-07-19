@@ -12,13 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -55,7 +48,7 @@ const tournamentSeriesFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string(),
   displayOrder: z.number().int().positive(),
-  ownerId: z.string().min(1, "Owner is required"),
+  ownerId: z.string().optional(),
 });
 
 type TournamentSeriesFormData = z.infer<typeof tournamentSeriesFormSchema>;
@@ -79,8 +72,9 @@ export function TournamentSeriesSelector({
     isLoading: seriesLoading,
   } = api.tournaments.series.list.useQuery();
 
-  const { data: users = [], isLoading: usersLoading } =
-    api.users.list.useQuery();
+  // TODO: Add owner selection, for now we don't need it as there is no
+  // const { data: users = [], isLoading: usersLoading } =
+  //   api.users.list.useQuery();
 
   // tRPC mutations
   const createSeriesMutation = api.tournaments.series.create.useMutation({
@@ -93,7 +87,7 @@ export function TournamentSeriesSelector({
         name: "",
         description: "",
         displayOrder: tournamentSeries.length + 1,
-        ownerId: "",
+        ownerId: undefined,
       });
     },
     onError: (error) => {
@@ -107,7 +101,7 @@ export function TournamentSeriesSelector({
       name: "",
       description: "",
       displayOrder: tournamentSeries.length + 1,
-      ownerId: "",
+      ownerId: undefined,
     },
   });
 
@@ -254,7 +248,9 @@ export function TournamentSeriesSelector({
                   )}
                 />
 
-                <FormField
+                {/* TODO: Add owner selection, for nowe we don't need it as there is no */}
+                {/* feature connected with this field */}
+                {/* <FormField
                   control={seriesForm.control}
                   name="ownerId"
                   render={({ field }) => (
@@ -293,7 +289,7 @@ export function TournamentSeriesSelector({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
                 <FormField
                   control={seriesForm.control}

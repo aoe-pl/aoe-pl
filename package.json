@@ -23,7 +23,8 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose stop",
     "db:restart": "docker compose restart",
-    "db:logs": "docker compose logs -f"
+    "db:logs": "docker compose logs -f",
+    "fix:all": "npm run format:write && npm run lint:fix && npm run typecheck"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",

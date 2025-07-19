@@ -164,7 +164,7 @@ export const tournamentRouter = createTRPCRouter({
           name: z.string().min(1, "Name is required"),
           description: z.string(),
           displayOrder: z.number().int().positive(),
-          ownerId: z.string().min(1, "Owner is required"),
+          ownerId: z.string().optional(),
         }),
       )
       .mutation(async ({ input }) => {

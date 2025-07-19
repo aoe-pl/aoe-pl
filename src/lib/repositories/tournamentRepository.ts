@@ -80,7 +80,7 @@ export const tournamentRepository = {
     registrationMode: RegistrationMode;
     tournamentSeriesId: string;
     matchModeId: string;
-    description: string;
+    description?: string;
     isTeamBased: boolean;
     startDate: Date;
     endDate?: Date;

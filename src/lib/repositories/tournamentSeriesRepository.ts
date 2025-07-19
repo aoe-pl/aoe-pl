@@ -33,7 +33,7 @@ export const tournamentSeriesRepository = {
     name: string;
     description: string;
     displayOrder: number;
-    ownerId: string;
+    ownerId?: string;
   }) {
     return db.tournamentSeries.create({
       data,
