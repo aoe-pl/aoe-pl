@@ -1,6 +1,8 @@
 import type { TournamentWithRelations } from "@/server/api/tournament";
 import { TournamentStatus } from "./tournament";
 import { Badge } from "@/components/ui/badge";
+import { translateTournamentStatus } from "@/i18n/i18nStatuses";
+import { useTranslations } from "next-intl";
 
 const statusBadgeClasses = {
   [TournamentStatus.PENDING]: "bg-yellow-600",
@@ -14,5 +16,11 @@ export function TournamentStatusBadge({
 }: {
   status: TournamentWithRelations["status"];
 }) {
-  return <Badge className={`${statusBadgeClasses[status]}`}>{status}</Badge>;
+  const t = useTranslations("admin.tournaments");
+
+  return (
+    <Badge className={`${statusBadgeClasses[status]}`}>
+      {t(translateTournamentStatus(status))}
+    </Badge>
+  );
 }

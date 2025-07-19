@@ -9,8 +9,10 @@ import {
 } from "@/components/icons";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function Sidebar() {
+  const t = useTranslations("admin.sidebar");
   const pathname = usePathname();
 
   return (
@@ -21,35 +23,21 @@ export function Sidebar() {
           icon={<HomeIcon />}
           active={pathname === "/admin"}
         >
-          Dashboard
+          {t("dashboard")}
         </NavItem>
         <NavItem
           href="/admin/tournaments"
           icon={<TrophyIcon />}
           active={pathname.startsWith("/admin/tournaments")}
         >
-          Tournaments
+          {t("tournaments")}
         </NavItem>
-        {/* <NavItem
-          href="/admin/news"
-          icon={<NewsIcon />}
-          active={pathname.startsWith("/admin/news")}
-        >
-          News
-        </NavItem>
-        <NavItem
-          href="/admin/users"
-          icon={<UsersIcon />}
-          active={pathname.startsWith("/admin/users")}
-        >
-          Users
-        </NavItem> */}
         <NavItem
           href="/admin/settings"
           icon={<CogIcon />}
           active={pathname.startsWith("/admin/settings")}
         >
-          Settings
+          {t("settings")}
         </NavItem>
         <NavItem
           href="/"

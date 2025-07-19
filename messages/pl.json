@@ -1,0 +1,31 @@
+{
+  "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "tournaments": "Turnieje",
+      "settings": "Ustawienia"
+    },
+    "tournaments": {
+      "title": "Turnieje",
+      "create": "Dodaj turniej",
+      "participants": "Uczestnicy",
+      "start": "Start",
+      "end": "Koniec",
+      "url_key": "Klucz URL",
+      "registration_start": "Początek rejestracji",
+      "registration_end": "Koniec rejestracji",
+      "participants_limit": "Limit uczestników",
+      "status": {
+        "pending": "Nowy",
+        "active": "Aktywny",
+        "finished": "Zakończony",
+        "cancelled": "Anulowany"
+      },
+      "team_based": "Drużynowy",
+      "individual": "Indywidualny",
+      "form": {
+        "name": "Nazwa turnieju"
+      }
+    }
+  }
+}

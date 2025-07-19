@@ -230,9 +230,7 @@ export function TournamentGroupList({
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Badge variant="outline">
-                    {group.matchMode?.mode ?? "No match mode"}
-                  </Badge>
+                  <Badge variant="outline">{group.matchMode?.mode}</Badge>
                   <Badge variant={group.isTeamBased ? "default" : "secondary"}>
                     {group.isTeamBased ? "Team Based" : "Individual"}
                   </Badge>

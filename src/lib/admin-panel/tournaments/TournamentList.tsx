@@ -13,8 +13,10 @@ import {
   CalendarCheck,
   ClockIcon,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export async function TournamentList() {
+  const t = await getTranslations("admin.tournaments");
   const tournaments = await api.tournaments.list({
     sortByStatus: true,
     includeParticipants: true,
@@ -66,11 +68,13 @@ export async function TournamentList() {
                   </div>
                   <div className="flex gap-2">
                     <TournamentStatusBadge status={tournament.status} />
-                    <Badge variant="outline">
-                      {tournament.matchMode?.mode ?? "No match mode"}
-                    </Badge>
+                    {tournament.matchMode?.mode && (
+                      <Badge variant="outline">
+                        {tournament.matchMode?.mode}
+                      </Badge>
+                    )}
                     {tournament.isTeamBased && (
-                      <Badge variant="secondary">Team Based</Badge>
+                      <Badge variant="secondary">{t("team_based")}</Badge>
                     )}
                   </div>
                   {tournament.tournamentSeries?.name && (
@@ -95,7 +99,7 @@ export async function TournamentList() {
                     <div className="flex items-center gap-1">
                       <Users className="text-muted-foreground h-3 w-3" />
                       <span className="text-muted-foreground">
-                        Participants:
+                        {t("participants")}:
                       </span>
                       <span className="font-medium">
                         {tournament.TournamentParticipant?.length ?? 0}
@@ -103,7 +107,9 @@ export async function TournamentList() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="text-muted-foreground h-3 w-3" />
-                      <span className="text-muted-foreground">Start:</span>
+                      <span className="text-muted-foreground">
+                        {t("start")}:
+                      </span>
                       <span className="font-medium">
                         {new Date(tournament.startDate).toLocaleDateString()}
                       </span>
@@ -116,7 +122,9 @@ export async function TournamentList() {
                       {tournament.endDate && (
                         <div className="flex items-center gap-1">
                           <CalendarCheck className="text-muted-foreground h-3 w-3" />
-                          <span className="text-muted-foreground">End:</span>
+                          <span className="text-muted-foreground">
+                            {t("end")}:
+                          </span>
                           <span className="font-medium">
                             {new Date(tournament.endDate).toLocaleDateString()}
                           </span>
@@ -126,7 +134,7 @@ export async function TournamentList() {
                         <div className="flex items-center gap-1">
                           <ClockIcon className="text-muted-foreground h-3 w-3" />
                           <span className="text-muted-foreground">
-                            Registration Start:
+                            {t("registration_start")}:
                           </span>
                           <span className="font-medium">
                             {new Date(
@@ -139,7 +147,7 @@ export async function TournamentList() {
                         <div className="flex items-center gap-1">
                           <ClockIcon className="text-muted-foreground h-3 w-3" />
                           <span className="text-muted-foreground">
-                            Registration End:
+                            {t("registration_end")}:
                           </span>
                           <span className="font-medium">
                             {new Date(
@@ -154,10 +162,12 @@ export async function TournamentList() {
 
                 {/* Tournament Info */}
                 <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
-                  <div>URL Key: {tournament.urlKey}</div>
+                  <div>
+                    {t("url_key")}: {tournament.urlKey}
+                  </div>
                   {tournament.participantsLimit && (
                     <div>
-                      Limit: {tournament.participantsLimit} participants
+                      {t("participants_limit")}: {tournament.participantsLimit}
                     </div>
                   )}
                 </div>

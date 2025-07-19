@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { TournamentSeriesSelector } from "./tournament-series-selector";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
@@ -48,6 +49,8 @@ export function TournamentForm({
   form,
   isPending,
 }: TournamentFormProps) {
+  const t = useTranslations("admin.tournaments.form");
+
   return (
     <div className="flex flex-col gap-4">
       <Form {...form}>
@@ -60,7 +63,7 @@ export function TournamentForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tournament Name</FormLabel>
+                <FormLabel>{t("name")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter tournament name"
@@ -150,37 +153,6 @@ export function TournamentForm({
               </FormItem>
             )}
           />
-
-          {/* <FormField
-            control={form.control}
-            name="registrationMode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Registration Mode</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select registration mode" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {registrationModes.map((mode) => (
-                      <SelectItem
-                        key={mode.value}
-                        value={mode.value}
-                      >
-                        {mode.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
 
           <FormField
             control={form.control}
