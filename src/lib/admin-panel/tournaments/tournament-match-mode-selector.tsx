@@ -51,9 +51,9 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { TournamentMatchModeType } from "./tournament";
-import { 
-  formatMatchModeName, 
-  formatMatchModeDescription 
+import {
+  formatMatchModeName,
+  formatMatchModeDescription,
 } from "@/lib/helpers/match-mode";
 
 const matchModeTypes = [
@@ -85,7 +85,7 @@ export function TournamentMatchModeSelector({
 }: TournamentMatchModeSelectorProps) {
   const t = useTranslations("admin.tournaments.form.match_mode");
   const tGlobal = useTranslations();
-  
+
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -255,9 +255,7 @@ export function TournamentMatchModeSelector({
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{t("create_title")}</DrawerTitle>
-            <DrawerDescription>
-              {t("create_description")}
-            </DrawerDescription>
+            <DrawerDescription>{t("create_description")}</DrawerDescription>
           </DrawerHeader>
           <div className="px-4">
             <Form {...matchModeForm}>
@@ -277,7 +275,9 @@ export function TournamentMatchModeSelector({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t("mode_type_placeholder")} />
+                            <SelectValue
+                              placeholder={t("mode_type_placeholder")}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

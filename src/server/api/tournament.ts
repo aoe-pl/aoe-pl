@@ -161,7 +161,9 @@ export const tournamentRouter = createTRPCRouter({
     create: adminProcedure
       .input(
         z.object({
-          name: z.string().min(1, "admin.tournaments.form.series.validation.name_required"),
+          name: z
+            .string()
+            .min(1, "admin.tournaments.form.series.validation.name_required"),
           description: z.string().optional(),
           displayOrder: z.number().int().positive(),
           ownerId: z.string().optional(),

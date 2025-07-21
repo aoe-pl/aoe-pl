@@ -129,9 +129,7 @@ export function TournamentForm({
                     onChange={field.onChange}
                   />
                 </FormControl>
-                <FormDescription>
-                  {t("match_mode_description")}
-                </FormDescription>
+                <FormDescription>{t("match_mode_description")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -149,9 +147,7 @@ export function TournamentForm({
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>
-                  {t("url_key_description")}
-                </FormDescription>
+                <FormDescription>{t("url_key_description")}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -343,7 +339,9 @@ export function TournamentForm({
                         {field.value ? (
                           format(field.value, "PPP")
                         ) : (
-                          <span>{t("registration_start_date_placeholder")}</span>
+                          <span>
+                            {t("registration_start_date_placeholder")}
+                          </span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>

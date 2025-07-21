@@ -3,7 +3,7 @@ import { TournamentStatus } from "@prisma/client";
 // Tournament status formatting function
 export const formatTournamentStatusLabel = (
   status: TournamentStatus,
-  t: (key: string) => string
+  t: (key: string) => string,
 ) => {
   switch (status) {
     case TournamentStatus.PENDING:

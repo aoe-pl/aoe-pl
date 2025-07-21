@@ -154,9 +154,7 @@ export function TournamentSeriesSelector({
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {selectedSeries
-              ? selectedSeries.name
-              : t("select_placeholder")}
+            {selectedSeries ? selectedSeries.name : t("select_placeholder")}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -213,9 +211,7 @@ export function TournamentSeriesSelector({
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{t("create_title")}</DrawerTitle>
-            <DrawerDescription>
-              {t("create_description")}
-            </DrawerDescription>
+            <DrawerDescription>{t("create_description")}</DrawerDescription>
           </DrawerHeader>
           <div className="px-4">
             <Form {...seriesForm}>
