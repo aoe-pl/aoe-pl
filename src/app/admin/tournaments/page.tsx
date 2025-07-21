@@ -14,7 +14,7 @@ export default async function AdminTournamentsPage() {
       </div>
       <div className="mb-8 flex flex-col items-center justify-between md:flex-row">
         <Link href="/admin/tournaments/create">
-          <Button>{t("create")}</Button>
+          <Button>{t("create_title")}</Button>
         </Link>
       </div>
       <TournamentList />

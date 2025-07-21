@@ -1,7 +1,7 @@
 import type { TournamentWithRelations } from "@/server/api/tournament";
 import { TournamentStatus } from "./tournament";
 import { Badge } from "@/components/ui/badge";
-import { translateTournamentStatus } from "@/i18n/i18nStatuses";
+import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
 import { useTranslations } from "next-intl";
 
 const statusBadgeClasses = {
@@ -20,7 +20,7 @@ export function TournamentStatusBadge({
 
   return (
     <Badge className={`${statusBadgeClasses[status]}`}>
-      {t(translateTournamentStatus(status))}
+      {formatTournamentStatusLabel(status, t)}
     </Badge>
   );
 }

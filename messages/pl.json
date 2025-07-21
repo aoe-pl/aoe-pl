@@ -8,6 +8,7 @@
     "tournaments": {
       "title": "Turnieje",
       "create_title": "Utwórz turniej",
+      "edit_title": "Edytuj turniej",
       "participants": "Uczestnicy",
       "start": "Start",
       "end": "Koniec",
@@ -15,12 +16,6 @@
       "registration_start": "Początek rejestracji",
       "registration_end": "Koniec rejestracji",
       "participants_limit": "Limit uczestników",
-      "status": {
-        "pending": "Nowy",
-        "active": "Aktywny",
-        "finished": "Zakończony",
-        "cancelled": "Anulowany"
-      },
       "team_based": "Drużynowy",
       "individual": "Indywidualny",
       "form": {
@@ -119,6 +114,12 @@
     }
   },
   "tournaments": {
+    "status": {
+      "pending": "Nowy",
+      "active": "Aktywny",
+      "finished": "Zakończony",
+      "cancelled": "Anulowany"
+    },
     "match_mode": {
       "best_of_format": "Best of {count}",
       "play_all_format": "Play All ({count} gier)",

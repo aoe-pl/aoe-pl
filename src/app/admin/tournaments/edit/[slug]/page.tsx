@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumbs";
 import { TournamentEdit } from "@/lib/admin-panel/tournaments/tournament-edit";
 import { api } from "@/trpc/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminTournamentEditPage({
   params,
@@ -16,6 +17,7 @@ export default async function AdminTournamentEditPage({
 }) {
   const { slug } = await params;
   const tournament = await api.tournaments.get({ id: slug });
+  const t = await getTranslations("admin.tournaments");
 
   if (!tournament) {
     return <div>Tournament not found</div>;
@@ -28,7 +30,7 @@ export default async function AdminTournamentEditPage({
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/admin/tournaments">
-                Tournaments
+                {t("title")}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -39,7 +41,7 @@ export default async function AdminTournamentEditPage({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Edit</BreadcrumbPage>
+              <BreadcrumbPage>{t("edit_title")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

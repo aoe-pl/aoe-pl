@@ -9,7 +9,7 @@ import {
   FormLabel,
   Form,
 } from "@/components/ui/form";
-import { type tournamentFormSchema, tournamentStatuses } from "./tournament";
+import { type tournamentFormSchema, TournamentStatus } from "./tournament";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -35,6 +35,7 @@ import { TournamentSeriesSelector } from "./tournament-series-selector";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
@@ -50,6 +51,27 @@ export function TournamentForm({
   isPending,
 }: TournamentFormProps) {
   const t = useTranslations("admin.tournaments.form");
+  const tGlobal = useTranslations();
+
+  // Create tournament statuses with translated labels
+  const tournamentStatuses = [
+    {
+      value: TournamentStatus.PENDING,
+      label: formatTournamentStatusLabel(TournamentStatus.PENDING, tGlobal),
+    },
+    {
+      value: TournamentStatus.ACTIVE,
+      label: formatTournamentStatusLabel(TournamentStatus.ACTIVE, tGlobal),
+    },
+    {
+      value: TournamentStatus.FINISHED,
+      label: formatTournamentStatusLabel(TournamentStatus.FINISHED, tGlobal),
+    },
+    {
+      value: TournamentStatus.CANCELLED,
+      label: formatTournamentStatusLabel(TournamentStatus.CANCELLED, tGlobal),
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
