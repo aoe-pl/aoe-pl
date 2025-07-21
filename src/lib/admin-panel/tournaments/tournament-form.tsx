@@ -66,7 +66,7 @@ export function TournamentForm({
                 <FormLabel>{t("name")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter tournament name"
+                    placeholder={t("name_placeholder")}
                     {...field}
                   />
                 </FormControl>
@@ -80,7 +80,7 @@ export function TournamentForm({
             name="tournamentSeriesId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tournament Series</FormLabel>
+                <FormLabel>{t("tournament_series")}</FormLabel>
                 <FormControl>
                   <TournamentSeriesSelector
                     value={field.value}
@@ -88,7 +88,7 @@ export function TournamentForm({
                   />
                 </FormControl>
                 <FormDescription>
-                  Select the tournament series this tournament belongs to
+                  {t("tournament_series_description")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -100,7 +100,7 @@ export function TournamentForm({
             name="matchModeId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Match Mode</FormLabel>
+                <FormLabel>{t("match_mode")}</FormLabel>
                 <FormControl>
                   <TournamentMatchModeSelector
                     value={field.value}
@@ -108,7 +108,7 @@ export function TournamentForm({
                   />
                 </FormControl>
                 <FormDescription>
-                  Select the match format for tournament games
+                  {t("match_mode_description")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -120,16 +120,15 @@ export function TournamentForm({
             name="urlKey"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL Key</FormLabel>
+                <FormLabel>{t("url_key")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="tournament-url-key"
+                    placeholder={t("url_key_placeholder")}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  Used in the tournament URL. Use lowercase letters, numbers,
-                  and hyphens.
+                  {t("url_key_description")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -141,10 +140,10 @@ export function TournamentForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description (Optional)</FormLabel>
+                <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Enter tournament description"
+                    placeholder={t("description_placeholder")}
                     className="min-h-24"
                     {...field}
                   />
@@ -159,14 +158,14 @@ export function TournamentForm({
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>{t("status")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t("status_placeholder")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -190,7 +189,7 @@ export function TournamentForm({
             name="startDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Start Date</FormLabel>
+                <FormLabel>{t("start_date")}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -204,7 +203,7 @@ export function TournamentForm({
                         {field.value ? (
                           format(field.value, "PPP")
                         ) : (
-                          <span>Pick a start date</span>
+                          <span>{t("start_date_placeholder")}</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -236,7 +235,7 @@ export function TournamentForm({
             name="endDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>End Date (Optional)</FormLabel>
+                <FormLabel>{t("end_date")}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -250,7 +249,7 @@ export function TournamentForm({
                         {field.value ? (
                           format(field.value, "PPP")
                         ) : (
-                          <span>Pick an end date</span>
+                          <span>{t("end_date_placeholder")}</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -282,11 +281,11 @@ export function TournamentForm({
             name="participantsLimit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Participants Limit</FormLabel>
+                <FormLabel>{t("participants_limit")}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="32"
+                    placeholder={t("participants_limit_placeholder")}
                     {...field}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -308,7 +307,7 @@ export function TournamentForm({
             name="registrationStartDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Registration Start Date (Optional)</FormLabel>
+                <FormLabel>{t("registration_start_date")}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -322,7 +321,7 @@ export function TournamentForm({
                         {field.value ? (
                           format(field.value, "PPP")
                         ) : (
-                          <span>Pick a registration start date</span>
+                          <span>{t("registration_start_date_placeholder")}</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -354,7 +353,7 @@ export function TournamentForm({
             name="registrationEndDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Registration End Date (Optional)</FormLabel>
+                <FormLabel>{t("registration_end_date")}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -368,7 +367,7 @@ export function TournamentForm({
                         {field.value ? (
                           format(field.value, "PPP")
                         ) : (
-                          <span>Pick a registration end date</span>
+                          <span>{t("registration_end_date_placeholder")}</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -411,9 +410,9 @@ export function TournamentForm({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    Team Based
+                    {t("team_based")}
                     <FormDescription>
-                      Tournament allows team participation
+                      {t("team_based_description")}
                     </FormDescription>
                   </div>
                 </FormLabel>
@@ -434,9 +433,9 @@ export function TournamentForm({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    Visible to Public
+                    {t("visible_to_public")}
                     <FormDescription>
-                      Tournament will be visible on the website
+                      {t("visible_to_public_description")}
                     </FormDescription>
                   </div>
                 </FormLabel>
@@ -452,10 +451,10 @@ export function TournamentForm({
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Tournament...
+                {t("creating_tournament")}
               </>
             ) : (
-              "Create Tournament"
+              t("create_tournament")
             )}
           </Button>
         </form>

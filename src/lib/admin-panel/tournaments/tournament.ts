@@ -68,21 +68,25 @@ const getMatchStatusLabel = (status: MatchStatus) => {
 
 const tournamentFormSchema = z
   .object({
-    name: z.string().min(1, "Tournament name is required"),
+    name: z.string().min(1, "admin.tournaments.form.validation.name_required"),
     urlKey: z
       .string()
-      .min(1, "URL key is required")
+      .min(1, "admin.tournaments.form.validation.url_key_required")
       .regex(
         /^[a-z0-9-]+$/,
-        "URL key can only contain lowercase letters, numbers, and hyphens",
+        "admin.tournaments.form.validation.url_key_format",
       ),
-    tournamentSeriesId: z.string().min(1, "Tournament series is required"),
-    matchModeId: z.string().min(1, "Match mode is required"),
+    tournamentSeriesId: z
+      .string()
+      .min(1, "admin.tournaments.form.validation.tournament_series_required"),
+    matchModeId: z
+      .string()
+      .min(1, "admin.tournaments.form.validation.match_mode_required"),
     registrationMode: z.nativeEnum(RegistrationMode),
     description: z.string().optional(),
     isTeamBased: z.boolean(),
     startDate: z.date({
-      required_error: "Start date is required",
+      required_error: "admin.tournaments.form.validation.start_date_required",
     }),
     endDate: z.date().optional(),
     participantsLimit: z.number().int().positive().optional(),
@@ -99,7 +103,7 @@ const tournamentFormSchema = z
       return true;
     },
     {
-      message: "End date must be after start date",
+      message: "admin.tournaments.form.validation.end_date_after_start",
       path: ["endDate"],
     },
   )
@@ -111,7 +115,7 @@ const tournamentFormSchema = z
       return true;
     },
     {
-      message: "Registration end date must be after registration start date",
+      message: "admin.tournaments.form.validation.registration_end_after_start",
       path: ["registrationEndDate"],
     },
   );

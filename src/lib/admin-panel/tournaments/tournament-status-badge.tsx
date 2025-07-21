@@ -16,7 +16,7 @@ export function TournamentStatusBadge({
 }: {
   status: TournamentWithRelations["status"];
 }) {
-  const t = useTranslations("admin.tournaments");
+  const t = useTranslations();
 
   return (
     <Badge className={`${statusBadgeClasses[status]}`}>

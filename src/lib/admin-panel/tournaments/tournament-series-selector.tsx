@@ -43,11 +43,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 const tournamentSeriesFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string(),
-  displayOrder: z.number().int().positive(),
+  name: z
+    .string()
+    .min(1, "admin.tournaments.form.series.validation.name_required"),
+  description: z.string().optional(),
+  displayOrder: z
+    .number()
+    .int("admin.tournaments.form.series.validation.display_order_required")
+    .positive(
+      "admin.tournaments.form.series.validation.display_order_positive",
+    ),
   ownerId: z.string().optional(),
 });
 
@@ -62,6 +70,8 @@ export function TournamentSeriesSelector({
   value,
   onChange,
 }: TournamentSeriesSelectorProps) {
+  const t = useTranslations("admin.tournaments.form.series");
+
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -79,7 +89,7 @@ export function TournamentSeriesSelector({
   // tRPC mutations
   const createSeriesMutation = api.tournaments.series.create.useMutation({
     onSuccess: (newSeries) => {
-      toast.success("Tournament series created successfully!");
+      toast.success(t("toast.create_success"));
       void refetchSeries();
       onChange(newSeries.id);
       setDrawerOpen(false);
@@ -91,7 +101,7 @@ export function TournamentSeriesSelector({
       });
     },
     onError: (error) => {
-      toast.error(`Failed to create tournament series: ${error.message}`);
+      toast.error(`${t("toast.create_error")} ${error.message}`);
     },
   });
 
@@ -126,7 +136,7 @@ export function TournamentSeriesSelector({
         className="w-full justify-between"
       >
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading series...
+        {t("loading")}
       </Button>
     );
   }
@@ -146,15 +156,15 @@ export function TournamentSeriesSelector({
           >
             {selectedSeries
               ? selectedSeries.name
-              : "Select tournament series..."}
+              : t("select_placeholder")}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
           <Command>
-            <CommandInput placeholder="Search tournament series..." />
+            <CommandInput placeholder={t("search_placeholder")} />
             <CommandList>
-              <CommandEmpty>No tournament series found.</CommandEmpty>
+              <CommandEmpty>{t("no_series_found")}</CommandEmpty>
               <CommandGroup>
                 {tournamentSeries.map((series) => (
                   <CommandItem
@@ -187,7 +197,7 @@ export function TournamentSeriesSelector({
                   className="cursor-pointer"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Create new tournament series
+                  {t("create_button")}
                 </CommandItem>
               </CommandGroup>
             </CommandList>
@@ -202,9 +212,9 @@ export function TournamentSeriesSelector({
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Create New Tournament Series</DrawerTitle>
+            <DrawerTitle>{t("create_title")}</DrawerTitle>
             <DrawerDescription>
-              Add a new tournament series to organize your tournaments.
+              {t("create_description")}
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4">
@@ -218,10 +228,10 @@ export function TournamentSeriesSelector({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Series Name</FormLabel>
+                      <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter series name"
+                          placeholder={t("name_placeholder")}
                           {...field}
                         />
                       </FormControl>
@@ -235,10 +245,10 @@ export function TournamentSeriesSelector({
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>{t("description")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter series description"
+                          placeholder={t("description_placeholder")}
                           className="min-h-20"
                           {...field}
                         />
@@ -296,7 +306,7 @@ export function TournamentSeriesSelector({
                   name="displayOrder"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Display Order</FormLabel>
+                      <FormLabel>{t("display_order")}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -309,7 +319,7 @@ export function TournamentSeriesSelector({
                         />
                       </FormControl>
                       <FormDescription>
-                        Order in which this series appears in lists
+                        {t("display_order_description")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -326,14 +336,14 @@ export function TournamentSeriesSelector({
               {createSeriesMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {t("create_loading")}
                 </>
               ) : (
-                "Create Series"
+                t("create_button")
               )}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">{t("cancel")}</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>

@@ -145,9 +145,9 @@ model Civ {
 model TournamentSeries {
   id           String       @id @default(cuid())
   name         String
-  ownerId      String
+  ownerId      String?
   displayOrder Int
-  description  String
+  description  String?
   tournament   Tournament[]
   owner        User?         @relation(fields: [ownerId], references: [id])
 }

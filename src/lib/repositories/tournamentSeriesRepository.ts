@@ -31,7 +31,7 @@ export const tournamentSeriesRepository = {
 
   async createTournamentSeries(data: {
     name: string;
-    description: string;
+    description?: string;
     displayOrder: number;
     ownerId?: string;
   }) {

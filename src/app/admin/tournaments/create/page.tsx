@@ -7,8 +7,11 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumbs";
+import { getTranslations } from "next-intl/server";
 
-export default function CreateTournamentPage() {
+export default async function CreateTournamentPage() {
+  const t = await getTranslations("admin");
+
   return (
     <div className="flex flex-col gap-4">
       <div className="py-4">
@@ -16,12 +19,12 @@ export default function CreateTournamentPage() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/admin/tournaments">
-                Tournaments
+                {t("tournaments.title")}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Create new tournament</BreadcrumbPage>
+              <BreadcrumbPage>{t("tournaments.create_title")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

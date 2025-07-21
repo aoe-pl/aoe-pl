@@ -4,12 +4,12 @@ import { TournamentStatus } from "@/lib/admin-panel/tournaments/tournament";
 export const translateTournamentStatus = (status: TournamentStatus) => {
   switch (status) {
     case TournamentStatus.PENDING:
-      return "status.pending";
+      return "admin.tournaments.status.pending";
     case TournamentStatus.ACTIVE:
-      return "status.active";
+      return "admin.tournaments.status.active";
     case TournamentStatus.FINISHED:
-      return "status.finished";
+      return "admin.tournaments.status.finished";
     case TournamentStatus.CANCELLED:
-      return "status.cancelled";
+      return "admin.tournaments.status.cancelled";
   }
 };

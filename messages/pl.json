@@ -7,7 +7,7 @@
     },
     "tournaments": {
       "title": "Turnieje",
-      "create": "Dodaj turniej",
+      "create_title": "Utwórz turniej",
       "participants": "Uczestnicy",
       "start": "Start",
       "end": "Koniec",
@@ -24,7 +24,72 @@
       "team_based": "Drużynowy",
       "individual": "Indywidualny",
       "form": {
-        "name": "Nazwa turnieju"
+        "name": "Nazwa turnieju",
+        "name_placeholder": "Wprowadź nazwę turnieju",
+        "tournament_series": "Seria turniejowa",
+        "tournament_series_description": "Wybierz serię turniejową, do której należy ten turniej",
+        "match_mode": "Tryb meczu",
+        "match_mode_description": "Wybierz format meczu dla gier turniejowych",
+        "url_key": "Klucz URL",
+        "url_key_placeholder": "klucz-url-turnieju",
+        "url_key_description": "Używany w URL turnieju. Używaj małych liter, cyfr i myślników.",
+        "description": "Opis (Opcjonalny)",
+        "description_placeholder": "Wprowadź opis turnieju",
+        "status": "Status",
+        "status_placeholder": "Wybierz status",
+        "start_date": "Data rozpoczęcia",
+        "start_date_placeholder": "Wybierz datę rozpoczęcia",
+        "end_date": "Data zakończenia (Opcjonalna)",
+        "end_date_placeholder": "Wybierz datę zakończenia",
+        "participants_limit": "Limit uczestników",
+        "participants_limit_placeholder": "32",
+        "registration_start_date": "Data rozpoczęcia rejestracji (Opcjonalna)",
+        "registration_start_date_placeholder": "Wybierz datę rozpoczęcia rejestracji",
+        "registration_end_date": "Data zakończenia rejestracji (Opcjonalna)",
+        "registration_end_date_placeholder": "Wybierz datę zakończenia rejestracji",
+        "visible_to_public": "Widoczny publicznie",
+        "visible_to_public_description": "Turniej będzie widoczny na stronie",
+        "team_based": "Drużynowy",
+        "team_based_description": "Turniej pozwala na udział drużyn",
+        "create_tournament": "Utwórz turniej",
+        "creating_tournament": "Tworzenie turnieju...",
+        "validation": {
+          "name_required": "Nazwa turnieju jest wymagana",
+          "url_key_required": "Klucz URL jest wymagany",
+          "url_key_format": "Klucz URL może zawierać tylko małe litery, cyfry i myślniki",
+          "tournament_series_required": "Seria turniejowa jest wymagana",
+          "match_mode_required": "Tryb meczu jest wymagany",
+          "start_date_required": "Data rozpoczęcia jest wymagana",
+          "end_date_after_start": "Data zakończenia musi być po dacie rozpoczęcia",
+          "registration_end_after_start": "Data zakończenia rejestracji musi być po dacie rozpoczęcia rejestracji"
+        },
+        "series": {
+          "title": "Serie turniejowe",
+          "create_title": "Utwórz serię turniejową",
+          "create_description": "Utwórz nową serię turniejową",
+          "create_button": "Utwórz",
+          "create_loading": "Tworzenie serii turniejowej...",
+          "loading": "Ładowanie serii turniejowych...",
+          "select_placeholder": "Wybierz serię turniejową",
+          "search_placeholder": "Wyszukaj serię turniejową",
+          "no_series_found": "Nie znaleziono serii turniejowych",
+          "name": "Nazwa serii turniejowej",
+          "name_placeholder": "Wprowadź nazwę serii turniejowej",
+          "description": "Opis (Opcjonalny)",
+          "description_placeholder": "Wprowadź opis serii turniejowej",
+          "display_order": "Kolejność wyświetlania",
+          "display_order_description": "Kolejność wyświetlania serii turniejowej w listach",
+          "cancel": "Anuluj",
+          "validation": {
+            "name_required": "Nazwa serii turniejowej jest wymagana",
+            "display_order_required": "Kolejność wyświetlania jest wymagana",
+            "display_order_positive": "Kolejność wyświetlania musi być dodatnia"
+          },
+          "toast": {
+            "create_success": "Seria turniejowa została utworzona",
+            "create_error": "Nie udało się utworzyć serii turniejowej"
+          }
+        }
       }
     }
   }
