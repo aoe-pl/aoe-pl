@@ -100,7 +100,7 @@ export function TournamentForm({
             name="matchModeId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("match_mode")}</FormLabel>
+                <FormLabel>{t("match_mode_label")}</FormLabel>
                 <FormControl>
                   <TournamentMatchModeSelector
                     value={field.value}

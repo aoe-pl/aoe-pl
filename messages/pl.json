@@ -28,7 +28,7 @@
         "name_placeholder": "Wprowadź nazwę turnieju",
         "tournament_series": "Seria turniejowa",
         "tournament_series_description": "Wybierz serię turniejową, do której należy ten turniej",
-        "match_mode": "Tryb meczu",
+        "match_mode_label": "Tryb meczu",
         "match_mode_description": "Wybierz format meczu dla gier turniejowych",
         "url_key": "Klucz URL",
         "url_key_placeholder": "klucz-url-turnieju",
@@ -89,8 +89,41 @@
             "create_success": "Seria turniejowa została utworzona",
             "create_error": "Nie udało się utworzyć serii turniejowej"
           }
+        },
+        "match_mode": {
+          "loading": "Ładowanie trybów meczowych...",
+          "select_placeholder": "Wybierz tryb meczu...",
+          "clear_selection": "Wyczyść wybór",
+          "search_placeholder": "Wyszukaj tryby meczowe...",
+          "no_modes_found": "Nie znaleziono trybów meczowych.",
+          "create_button": "Utwórz nowy tryb meczu",
+          "create_title": "Utwórz nowy tryb meczu",
+          "create_description": "Określ nowy format meczu dla gier turniejowych.",
+          "mode_type": "Typ trybu meczu",
+          "mode_type_placeholder": "Wybierz typ trybu",
+          "mode_type_description": "Best Of: Pierwszy do wygrania większości wygrywa mecz. Play All: Wszystkie gry są rozgrywane niezależnie od wyniku.",
+          "best_of": "Best Of",
+          "play_all": "Play All",
+          "game_count": "Liczba gier",
+          "game_count_placeholder": "1",
+          "game_count_description": "Liczba gier w meczu (np. 3 dla Best of 3)",
+          "preview": "Podgląd",
+          "create_loading": "Tworzenie...",
+          "cancel": "Anuluj",
+          "toast": {
+            "create_success": "Tryb meczu został utworzony!",
+            "create_error": "Nie udało się utworzyć trybu meczu:"
+          }
         }
       }
+    }
+  },
+  "tournaments": {
+    "match_mode": {
+      "best_of_format": "Best of {count}",
+      "play_all_format": "Play All ({count} gier)",
+      "best_of_description": "Pierwszy do wygrania {count} gier",
+      "play_all_description": "Wszystkie {count} gier są rozgrywane"
     }
   }
 }

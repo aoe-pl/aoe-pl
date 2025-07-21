@@ -49,11 +49,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { TournamentMatchModeType } from "./tournament";
+import { 
+  formatMatchModeName, 
+  formatMatchModeDescription 
+} from "@/lib/helpers/match-mode";
 
 const matchModeTypes = [
-  { value: "BEST_OF" as const, label: "Best Of" },
-  { value: "PLAY_ALL" as const, label: "Play All" },
+  { value: "BEST_OF" as const, labelKey: "best_of" },
+  { value: "PLAY_ALL" as const, labelKey: "play_all" },
 ] as const;
 
 const tournamentMatchModeFormSchema = z.object({
@@ -78,6 +83,9 @@ export function TournamentMatchModeSelector({
   allowClear,
   defaultMatchModeId,
 }: TournamentMatchModeSelectorProps) {
+  const t = useTranslations("admin.tournaments.form.match_mode");
+  const tGlobal = useTranslations();
+  
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -91,7 +99,7 @@ export function TournamentMatchModeSelector({
   // tRPC mutations
   const createMatchModeMutation = api.tournaments.matchMode.create.useMutation({
     onSuccess: (newMatchMode) => {
-      toast.success("Match mode created successfully!");
+      toast.success(t("toast.create_success"));
       void refetchMatchModes();
       onChange(newMatchMode.id);
       setDrawerOpen(false);
@@ -101,7 +109,7 @@ export function TournamentMatchModeSelector({
       });
     },
     onError: (error) => {
-      toast.error(`Failed to create match mode: ${error.message}`);
+      toast.error(`${t("toast.create_error")} ${error.message}`);
     },
   });
 
@@ -118,23 +126,14 @@ export function TournamentMatchModeSelector({
 
   // Auto-generate name based on mode and game count
   const generateName = (mode: TournamentMatchModeType, gameCount: number) => {
-    if (mode === TournamentMatchModeType.BEST_OF) {
-      return `Best of ${gameCount}`;
-    } else {
-      return `Play All (${gameCount} games)`;
-    }
+    return formatMatchModeName(mode, gameCount, tGlobal);
   };
 
   const generateDescription = (
     mode: TournamentMatchModeType,
     gameCount: number,
   ) => {
-    if (mode === TournamentMatchModeType.BEST_OF) {
-      const toWin = Math.ceil(gameCount / 2);
-      return `First to win ${toWin} games`;
-    } else {
-      return `All ${gameCount} games are played`;
-    }
+    return formatMatchModeDescription(mode, gameCount, tGlobal);
   };
 
   const onCreateMatchMode = (data: TournamentMatchModeFormData) => {
@@ -156,7 +155,7 @@ export function TournamentMatchModeSelector({
         className="w-full justify-between"
       >
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading match modes...
+        {t("loading")}
       </Button>
     );
   }
@@ -183,7 +182,7 @@ export function TournamentMatchModeSelector({
                     selectedMatchMode.mode,
                     selectedMatchMode.gameCount,
                   )
-                : "Select match mode..."}
+                : t("select_placeholder")}
               <div className="ml-2 flex h-4 w-4 shrink-0 items-center gap-2 opacity-50">
                 <ChevronsUpDown className="h-4 w-4" />
               </div>
@@ -191,7 +190,7 @@ export function TournamentMatchModeSelector({
           </PopoverTrigger>
           {shouldShowClearButton && (
             <Button
-              title="Clear selection"
+              title={t("clear_selection")}
               type="button"
               variant="outline"
               size="icon"
@@ -203,9 +202,9 @@ export function TournamentMatchModeSelector({
         </div>
         <PopoverContent className="w-full p-0">
           <Command>
-            <CommandInput placeholder="Search match modes..." />
+            <CommandInput placeholder={t("search_placeholder")} />
             <CommandList>
-              <CommandEmpty>No match modes found.</CommandEmpty>
+              <CommandEmpty>{t("no_modes_found")}</CommandEmpty>
               <CommandGroup>
                 {matchModes.map((mode) => (
                   <CommandItem
@@ -240,7 +239,7 @@ export function TournamentMatchModeSelector({
                   className="cursor-pointer"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Create new match mode
+                  {t("create_button")}
                 </CommandItem>
               </CommandGroup>
             </CommandList>
@@ -255,9 +254,9 @@ export function TournamentMatchModeSelector({
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Create New Match Mode</DrawerTitle>
+            <DrawerTitle>{t("create_title")}</DrawerTitle>
             <DrawerDescription>
-              Define a new match format for tournament games.
+              {t("create_description")}
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4">
@@ -271,14 +270,14 @@ export function TournamentMatchModeSelector({
                   name="mode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Match Mode Type</FormLabel>
+                      <FormLabel>{t("mode_type")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select mode type" />
+                            <SelectValue placeholder={t("mode_type_placeholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -287,14 +286,13 @@ export function TournamentMatchModeSelector({
                               key={type.value}
                               value={type.value}
                             >
-                              {type.label}
+                              {t(type.labelKey)}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Best Of: First to win majority wins the match. Play All:
-                        All games are played regardless of score.
+                        {t("mode_type_description")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -306,13 +304,13 @@ export function TournamentMatchModeSelector({
                   name="gameCount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Game Count</FormLabel>
+                      <FormLabel>{t("game_count")}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min="1"
                           max="15"
-                          placeholder="1"
+                          placeholder={t("game_count_placeholder")}
                           {...field}
                           onChange={(e) =>
                             field.onChange(
@@ -322,7 +320,7 @@ export function TournamentMatchModeSelector({
                         />
                       </FormControl>
                       <FormDescription>
-                        Number of games in the match (e.g., 3 for Best of 3)
+                        {t("game_count_description")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -330,7 +328,7 @@ export function TournamentMatchModeSelector({
                 />
 
                 <div className="bg-muted rounded-md p-3">
-                  <p className="text-sm font-medium">Preview:</p>
+                  <p className="text-sm font-medium">{t("preview")}:</p>
                   <p className="text-muted-foreground text-sm">
                     {generateName(watchMode, watchGameCount)} -{" "}
                     {generateDescription(watchMode, watchGameCount)}
@@ -347,14 +345,14 @@ export function TournamentMatchModeSelector({
               {createMatchModeMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {t("create_loading")}
                 </>
               ) : (
-                "Create Match Mode"
+                t("create_button")
               )}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">{t("cancel")}</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
