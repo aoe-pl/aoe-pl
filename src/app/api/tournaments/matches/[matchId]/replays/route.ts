@@ -7,7 +7,7 @@ import JSZip from "jszip";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { matchId: string } },
+  { params }: { params: Promise<{ matchId: string }> },
 ) {
   try {
     const session = await auth();
@@ -22,7 +22,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { matchId } = params;
+    const { matchId } = await params;
 
     // Get games with replays
     const games =
