@@ -18,7 +18,24 @@
           "bracket": "Drabinka",
           "participants": "Uczestnicy"
         },
-        "edit_button": "Edytuj"
+        "edit_button": "Edytuj",
+        "info": {
+          "title": "Informacje o turnieju",
+          "series_name": "Nazwa serii",
+          "start_date": "Data rozpoczęcia",
+          "end_date": "Data zakończenia",
+          "registration_start": "Początek rejestracji",
+          "registration_end": "Koniec rejestracji",
+          "registration_mode": "Tryb rejestracji",
+          "participants": "Uczestnicy",
+          "participants_limit": "Limit uczestników",
+          "visibility": "Widoczność",
+          "visible": "Widoczny",
+          "hidden": "Ukryty",
+          "team_based": "Drużynowy",
+          "yes": "Tak",
+          "no": "Nie"
+        }
       },
       "participants": "Uczestnicy",
       "start": "Start",
@@ -136,6 +153,11 @@
       "play_all_format": "Play All ({count} gier)",
       "best_of_description": "Pierwszy do wygrania {count} gier",
       "play_all_description": "Wszystkie {count} gier są rozgrywane"
+    },
+    "registration_mode": {
+      "individual": "Indywidualny",
+      "team": "Drużynowy",
+      "admin": "Tylko admin"
     }
   }
 }
