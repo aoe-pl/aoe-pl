@@ -61,6 +61,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         ...shape.data,
         zodError:
           error.cause instanceof ZodError ? error.cause.flatten() : null,
+        code: error.code, // Preserve TRPC error code for client-side error handling
+        httpStatus: shape.data.httpStatus, // Preserve HTTP status code
       },
     };
   },
