@@ -16,6 +16,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumbs";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminTournamentsViewPage({
   params,
@@ -27,9 +28,11 @@ export default async function AdminTournamentsViewPage({
     id: slug,
     includeParticipants: true,
   });
+  const t = await getTranslations("admin.tournaments");
+  const tView = await getTranslations("admin.tournaments.view");
 
   if (!tournament) {
-    return <div className="text-destructive">Tournament not found.</div>;
+    return <div className="text-destructive">{tView("tournament_not_found")}</div>;
   }
 
   return (
@@ -39,7 +42,7 @@ export default async function AdminTournamentsViewPage({
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/admin/tournaments">
-                Tournaments
+                {t("title")}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -57,16 +60,16 @@ export default async function AdminTournamentsViewPage({
         tabKeys={["info", "stages", "groups", "bracket", "participants"]}
       >
         <TabsList className="mb-2">
-          <TabsTrigger value="info">Info</TabsTrigger>
-          <TabsTrigger value="stages">Stages</TabsTrigger>
-          <TabsTrigger value="groups">Groups</TabsTrigger>
-          <TabsTrigger value="participants">Participants</TabsTrigger>
+          <TabsTrigger value="info">{tView("tabs.info")}</TabsTrigger>
+          <TabsTrigger value="stages">{tView("tabs.stages")}</TabsTrigger>
+          <TabsTrigger value="groups">{tView("tabs.groups")}</TabsTrigger>
+          <TabsTrigger value="participants">{tView("tabs.participants")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
           <div className="py-4">
             <Link href={`/admin/tournaments/edit/${tournament.id}`}>
-              <Button size="sm">Edit</Button>
+              <Button size="sm">{tView("edit_button")}</Button>
             </Link>
           </div>
           <TournamentInfo

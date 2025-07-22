@@ -9,6 +9,17 @@
       "title": "Turnieje",
       "create_title": "Utwórz turniej",
       "edit_title": "Edytuj turniej",
+      "view": {
+        "tournament_not_found": "Nie znaleziono turnieju.",
+        "tabs": {
+          "info": "Informacje",
+          "stages": "Etapy",
+          "groups": "Grupy",
+          "bracket": "Drabinka",
+          "participants": "Uczestnicy"
+        },
+        "edit_button": "Edytuj"
+      },
       "participants": "Uczestnicy",
       "start": "Start",
       "end": "Koniec",
