@@ -32,7 +32,9 @@ export default async function AdminTournamentsViewPage({
   const tView = await getTranslations("admin.tournaments.view");
 
   if (!tournament) {
-    return <div className="text-destructive">{tView("tournament_not_found")}</div>;
+    return (
+      <div className="text-destructive">{tView("tournament_not_found")}</div>
+    );
   }
 
   return (
@@ -63,7 +65,9 @@ export default async function AdminTournamentsViewPage({
           <TabsTrigger value="info">{tView("tabs.info")}</TabsTrigger>
           <TabsTrigger value="stages">{tView("tabs.stages")}</TabsTrigger>
           <TabsTrigger value="groups">{tView("tabs.groups")}</TabsTrigger>
-          <TabsTrigger value="participants">{tView("tabs.participants")}</TabsTrigger>
+          <TabsTrigger value="participants">
+            {tView("tabs.participants")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">

@@ -20,7 +20,7 @@ export async function TournamentInfo({
   tournamentSeries: TournamentSeries;
 }) {
   const t = await getTranslations();
-  
+
   return (
     <Card className="w-full">
       <CardHeader className="pb-0">
@@ -75,7 +75,9 @@ export async function TournamentInfo({
             <span className="text-muted-foreground font-semibold">
               {t("admin.tournaments.view.info.registration_mode")}
             </span>
-            <span>{formatRegistrationModeLabel(tournament.registrationMode, t)}</span>
+            <span>
+              {formatRegistrationModeLabel(tournament.registrationMode, t)}
+            </span>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-muted-foreground font-semibold">
@@ -95,13 +97,21 @@ export async function TournamentInfo({
             <span className="text-muted-foreground font-semibold">
               {t("admin.tournaments.view.info.visibility")}
             </span>
-            <span>{tournament.isVisible ? t("admin.tournaments.view.info.visible") : t("admin.tournaments.view.info.hidden")}</span>
+            <span>
+              {tournament.isVisible
+                ? t("admin.tournaments.view.info.visible")
+                : t("admin.tournaments.view.info.hidden")}
+            </span>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-muted-foreground font-semibold">
               {t("admin.tournaments.view.info.team_based")}
             </span>
-            <span>{tournament.isTeamBased ? t("admin.tournaments.view.info.yes") : t("admin.tournaments.view.info.no")}</span>
+            <span>
+              {tournament.isTeamBased
+                ? t("admin.tournaments.view.info.yes")
+                : t("admin.tournaments.view.info.no")}
+            </span>
           </div>
         </div>
       </CardContent>
