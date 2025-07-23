@@ -53,6 +53,7 @@ export async function TournamentParticipants({
                 <TableHead>Status</TableHead>
                 <TableHead className="max-w-[200px]">Groups</TableHead>
                 <TableHead>Registration Date</TableHead>
+                <TableHead>Has user account</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,6 +91,13 @@ export async function TournamentParticipants({
                     {new Date(
                       participant.registrationDate,
                     ).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {participant.userId ? (
+                      <Badge variant="outline">Yes</Badge>
+                    ) : (
+                      <Badge variant="secondary">No</Badge>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
