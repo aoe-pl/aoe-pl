@@ -13,23 +13,31 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { TournamentGroupForm } from "./tournament-group-form";
 import { ErrorToast } from "@/components/ui/error-toast-content";
-import type { TournamentGroupWithParticipants } from "./tournament";
+import type {
+  TournamentGroupWithParticipants,
+  TournamentMatchMode,
+} from "./tournament";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Eye, Trash2, Users, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
+import { formatMatchModeName } from "@/lib/helpers/match-mode";
+import { useTranslations } from "next-intl";
 
 type TournamentGroupListProps = {
   tournamentId: string;
   defaultIsTeamBased: boolean;
   defaultMatchModeId: string;
+  defaultMatchMode: TournamentMatchMode;
 };
 
 export function TournamentGroupList({
   tournamentId,
   defaultIsTeamBased,
   defaultMatchModeId,
+  defaultMatchMode,
 }: TournamentGroupListProps) {
+  const t = useTranslations();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<
     TournamentGroupWithParticipants | undefined
@@ -173,6 +181,12 @@ export function TournamentGroupList({
     );
   }, [isLoading, handleAdd]);
 
+  const getMatchModeName = (groupMatchMode?: TournamentMatchMode | null) => {
+    const matchMode = groupMatchMode ?? defaultMatchMode;
+
+    return formatMatchModeName(matchMode.mode, matchMode.gameCount, t);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
@@ -234,7 +248,11 @@ export function TournamentGroupList({
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Badge variant="outline">{group.matchMode?.mode}</Badge>
+                    {(group.matchMode?.mode ?? defaultMatchMode) ? (
+                      <Badge variant="outline">
+                        {getMatchModeName(group.matchMode)}
+                      </Badge>
+                    ) : null}
                     <Badge
                       variant={group.isTeamBased ? "default" : "secondary"}
                     >

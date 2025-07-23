@@ -12,6 +12,7 @@ import {
   type TournamentMatch,
   type TournamentMatchParticipant,
   type Game,
+  type TournamentMatchMode,
   MatchStatus,
 } from "@prisma/client";
 import z from "zod";
@@ -275,4 +276,5 @@ export {
   type TournamentMatch,
   type TournamentMatchParticipant,
   type Game,
+  type TournamentMatchMode,
 };

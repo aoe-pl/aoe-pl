@@ -27,6 +27,7 @@ export default async function AdminTournamentsViewPage({
   const tournament = await api.tournaments.get({
     id: slug,
     includeParticipants: true,
+    includeMatchMode: true,
   });
   const t = await getTranslations("admin.tournaments");
   const tView = await getTranslations("admin.tournaments.view");
@@ -91,6 +92,7 @@ export default async function AdminTournamentsViewPage({
           <TournamentGroupList
             defaultIsTeamBased={tournament.isTeamBased}
             defaultMatchModeId={tournament.matchModeId}
+            defaultMatchMode={tournament.matchMode}
             tournamentId={tournament.id}
           />
         </TabsContent>
