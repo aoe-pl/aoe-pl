@@ -1,12 +1,29 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
 import { api } from "@/trpc/server";
 import { Button } from "@/components/ui/button";
+import { TRPCError } from "@trpc/server";
 
 export default async function Home() {
   const hello = await api.test.hello({ text: "from tRPC" });
-  const secretMessage = await api.test.getSecretMessage();
+
+  let secretMessage = null;
+
+  try {
+    secretMessage = await api.test.getSecretMessage();
+  } catch (error) {
+    if (error instanceof TRPCError) {
+      if (error.code === "UNAUTHORIZED") {
+        redirect("/api/auth/signin");
+      } else {
+        throw error;
+      }
+    } else {
+      throw error;
+    }
+  }
 
   const session = await auth();
 
