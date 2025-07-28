@@ -274,7 +274,7 @@ export function MatchCard({
   };
 
   return (
-    <Card className="w-full min-w-[350px] transition-shadow hover:shadow-md">
+    <Card className="w-full transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="space-y-2">
           <div className="flex items-center justify-between">

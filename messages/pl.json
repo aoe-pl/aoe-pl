@@ -138,6 +138,13 @@
             "create_error": "Nie udało się utworzyć trybu meczu:"
           }
         }
+      },
+      "groups": {
+        "matches": {
+          "title": "Mecze",
+          "filter_by_player": "Filtruj po graczu",
+          "all_participants": "Wszyscy uczestnicy"
+        }
       }
     }
   },
