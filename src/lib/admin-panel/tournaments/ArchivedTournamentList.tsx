@@ -5,28 +5,21 @@ import type { TournamentWithRelations } from "@/server/api/tournament";
 import { TournamentStatusBadge } from "./tournament-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Edit,
-  Eye,
-  Users,
-  Calendar,
-  CalendarCheck,
-  ClockIcon,
-} from "lucide-react";
+import { Eye, Users, Calendar, CalendarCheck, ClockIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { TournamentArchiveButton } from "./TournamentListClient";
 
-export async function TournamentList() {
+export async function ArchivedTournamentList() {
   const t = await getTranslations("admin.tournaments");
   const tournaments = await api.tournaments.list({
     sortByStatus: true,
     includeParticipants: true,
-    archived: false,
+    archived: true,
   });
 
   return (
     <>
-      {tournaments && (
+      {tournaments && tournaments.length > 0 ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {tournaments.map((tournament: TournamentWithRelations) => (
             <Card
@@ -41,39 +34,33 @@ export async function TournamentList() {
                         {tournament.name ?? "Tournament"}
                       </CardTitle>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="ite ms-center flex gap-2">
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         asChild
                         className="h-8 w-8 p-0"
-                        title="View tournament details"
+                        title={t("view")}
                       >
                         <Link href={`/admin/tournaments/view/${tournament.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="h-8 w-8 p-0"
-                        title="Edit tournament"
-                      >
-                        <Link href={`/admin/tournaments/edit/${tournament.id}`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
                       <TournamentArchiveButton
                         tournamentId={tournament.id}
-                        isArchived={false}
-                        title={t("archive")}
+                        isArchived={true}
+                        title={t("unarchive")}
                       />
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Badge
+                      variant="outline"
+                      className="border-orange-200 bg-orange-50 text-orange-700"
+                    >
+                      Archived
+                    </Badge>
                     <TournamentStatusBadge status={tournament.status} />
                     {tournament.matchMode?.mode && (
                       <Badge variant="outline">
@@ -105,7 +92,7 @@ export async function TournamentList() {
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div className="flex items-center gap-1">
                       <Users className="text-muted-foreground h-3 w-3" />
-                      <span className="text-muted-foreground">
+                      <span className="muted-foreground">
                         {t("participants")}:
                       </span>
                       <span className="font-medium">
@@ -181,6 +168,17 @@ export async function TournamentList() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="text-center">
+            <h3 className="text-muted-foreground mb-2 text-lg font-medium">
+              {t("no_archived_tournaments")}
+            </h3>
+            <p className="text-muted-foreground">
+              {t("all_archived_tournaments")}
+            </p>
+          </div>
         </div>
       )}
     </>

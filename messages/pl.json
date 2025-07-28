@@ -3,12 +3,18 @@
     "sidebar": {
       "dashboard": "Dashboard",
       "tournaments": "Turnieje",
+      "archived_tournaments": "Archiwum turniejów",
       "settings": "Ustawienia"
     },
     "tournaments": {
       "title": "Turnieje",
+      "archived_title": "Archiwum turniejów",
       "create_title": "Utwórz turniej",
       "edit_title": "Edytuj turniej",
+      "archive": "Archiwizuj",
+      "unarchive": "Przywróć z archiwum",
+      "no_archived_tournaments": "Brak zarchiwizowanych turniejów",
+      "all_archived_tournaments": "Wszystkie zarchiwizowane turnieje będą wyświetlane tutaj.",
       "view": {
         "tournament_not_found": "Nie znaleziono turnieju.",
         "tabs": {

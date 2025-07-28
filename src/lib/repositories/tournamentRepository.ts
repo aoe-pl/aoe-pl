@@ -16,14 +16,19 @@ export const tournamentRepository = {
     includeStages = false,
     includeParticipants = false,
     includeMatchMode = false,
+    archived = false,
   }: {
     sortByStatus?: boolean;
     includeTournamentSeries?: boolean;
     includeStages?: boolean;
     includeParticipants?: boolean;
     includeMatchMode?: boolean;
+    archived?: boolean;
   }) {
     const tournaments = await db.tournament.findMany({
+      where: {
+        archived: archived,
+      },
       include: {
         tournamentSeries: includeTournamentSeries,
         matchMode: includeMatchMode,
@@ -166,5 +171,17 @@ export const tournamentRepository = {
   },
   async deleteTournament(id: string) {
     return db.tournament.delete({ where: { id } });
+  },
+  async archiveTournament(id: string) {
+    return db.tournament.update({
+      where: { id },
+      data: { archived: true },
+    });
+  },
+  async unarchiveTournament(id: string) {
+    return db.tournament.update({
+      where: { id },
+      data: { archived: false },
+    });
   },
 };

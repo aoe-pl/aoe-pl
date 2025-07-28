@@ -176,6 +176,7 @@ model Tournament {
   registrationEndDate   DateTime?
   status                TournamentStatus
   isVisible             Boolean
+  archived              Boolean @default(false)
   name                  String
   matchMode             TournamentMatchMode     @relation(fields: [matchModeId], references: [id])
   tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])

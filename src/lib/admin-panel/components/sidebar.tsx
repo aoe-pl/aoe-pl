@@ -7,6 +7,7 @@ import {
   CogIcon,
   BackspaceIcon,
 } from "@/components/icons";
+import { Archive } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -28,9 +29,16 @@ export function Sidebar() {
         <NavItem
           href="/admin/tournaments"
           icon={<TrophyIcon />}
-          active={pathname.startsWith("/admin/tournaments")}
+          active={pathname === "/admin/tournaments"}
         >
           {t("tournaments")}
+        </NavItem>
+        <NavItem
+          href="/admin/tournaments/archived"
+          icon={<Archive className="h-5 w-5" />}
+          active={pathname.startsWith("/admin/tournaments/archived")}
+        >
+          {t("archived_tournaments")}
         </NavItem>
         <NavItem
           href="/admin/settings"

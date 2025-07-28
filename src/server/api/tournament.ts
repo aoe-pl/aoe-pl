@@ -52,6 +52,7 @@ export const tournamentRouter = createTRPCRouter({
           includeStages: z.boolean().optional(),
           includeParticipants: z.boolean().optional(),
           includeMatchMode: z.boolean().optional(),
+          archived: z.boolean().optional(),
         })
         .optional(),
     )
@@ -62,6 +63,7 @@ export const tournamentRouter = createTRPCRouter({
         includeStages: input?.includeStages,
         includeParticipants: input?.includeParticipants,
         includeMatchMode: input?.includeMatchMode,
+        archived: input?.archived,
       });
     }),
   get: publicProcedure
@@ -99,6 +101,16 @@ export const tournamentRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       return tournamentRepository.updateTournament(input.id, input.data);
+    }),
+  archive: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return tournamentRepository.archiveTournament(input.id);
+    }),
+  unarchive: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return tournamentRepository.unarchiveTournament(input.id);
     }),
 
   // Tournament Stages routes
