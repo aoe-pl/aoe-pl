@@ -136,9 +136,9 @@ model Map {
 model Civ {
   id               String            @id @default(cuid())
   name             String
-  description      String
-  content          String
-  thumbnailUrl     String
+  description      String?
+  content          String?
+  thumbnailUrl     String?
   gameParticipants GameParticipant[]
 }
 

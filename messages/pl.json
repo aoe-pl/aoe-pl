@@ -158,6 +158,69 @@
         "visible_label": "Widoczny etap",
         "visible_description": "Etap będzie widoczny dla użytkowników"
       }
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "page_title": "Ustawienia administratora",
+      "page_description": "Zarządzaj ustawieniami systemowymi i danymi gry",
+      "coming_soon": "Wkrótce",
+      "coming_soon_title": "Ta sekcja jest w budowie",
+      "coming_soon_description": "Ta funkcjonalność będzie dostępna wkrótce.",
+      "sections": {
+        "civilizations": "Cywilizacje",
+        "maps": "Mapy",
+        "users": "Użytkownicy",
+        "roles": "Role",
+        "system": "System"
+      },
+      "civilizations": {
+        "title": "Cywilizacje Age of Empires II",
+        "loading": "Ładowanie cywilizacji...",
+        "add_civilization": "Dodaj cywilizację",
+        "add_first_civilization": "Dodaj pierwszą cywilizację",
+        "edit_civilization": "Edytuj cywilizację",
+        "add_civilization_description": "Dodaj nową cywilizację Age of Empires II do bazy danych",
+        "edit_civilization_description": "Edytuj informacje o cywilizacji",
+        "no_civilizations": "Brak cywilizacji",
+        "no_thumbnail": "Brak miniaturki",
+        "table": {
+          "name": "Nazwa",
+          "description": "Opis",
+          "thumbnail": "Miniaturka",
+          "actions": "Akcje"
+        },
+        "form": {
+          "name": "Nazwa cywilizacji",
+          "name_placeholder": "Wprowadź nazwę cywilizacji",
+          "description": "Krótki opis",
+          "description_placeholder": "Krótki opis cywilizacji...",
+          "description_help": "Krótki opis cywilizacji wyświetlany w listach",
+          "content": "Szczegółowy opis",
+          "content_placeholder": "Szczegółowe informacje o cywilizacji, bonusy, unikalne jednostki itp...",
+          "content_help": "Szczegółowy opis cywilizacji z bonusami i unikalnymi jednostkami",
+          "thumbnail_url": "URL miniaturki",
+          "thumbnail_url_placeholder": "https://example.com/image.png",
+          "thumbnail_url_help": "URL do obrazka reprezentującego cywilizację",
+          "create": "Utwórz cywilizację",
+          "update": "Zaktualizuj cywilizację",
+          "creating": "Tworzenie...",
+          "updating": "Aktualizowanie...",
+          "cancel": "Anuluj"
+        },
+        "delete_dialog": {
+          "title": "Usuń cywilizację",
+          "description": "Czy na pewno chcesz usunąć cywilizację",
+          "warning": "Ta akcja jest nieodwracalna i usunie wszystkie powiązane dane.",
+          "cancel": "Anuluj",
+          "delete": "Usuń",
+          "deleting": "Usuwanie..."
+        },
+        "toast": {
+          "create_success": "Cywilizacja została utworzona pomyślnie",
+          "update_success": "Cywilizacja została zaktualizowana pomyślnie",
+          "delete_success": "Cywilizacja została usunięta pomyślnie"
+        }
+      }
     }
   },
   "tournaments": {

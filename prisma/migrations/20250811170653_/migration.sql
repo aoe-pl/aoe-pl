@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Civ" ALTER COLUMN "description" DROP NOT NULL,
+ALTER COLUMN "content" DROP NOT NULL,
+ALTER COLUMN "thumbnailUrl" DROP NOT NULL;
