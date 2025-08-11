@@ -161,9 +161,15 @@ export function CivilizationsList() {
                 <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px]">{t("table.name")}</TableHead>
-                      <TableHead className="min-w-[300px]">{t("table.description")}</TableHead>
-                      <TableHead className="w-[120px]">{t("table.thumbnail")}</TableHead>
+                      <TableHead className="w-[200px]">
+                        {t("table.name")}
+                      </TableHead>
+                      <TableHead className="min-w-[300px]">
+                        {t("table.description")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("table.thumbnail")}
+                      </TableHead>
                       <TableHead className="w-[100px] text-right">
                         {t("table.actions")}
                       </TableHead>
@@ -172,7 +178,9 @@ export function CivilizationsList() {
                   <TableBody>
                     {civilizations.map((civ) => (
                       <TableRow key={civ.id}>
-                        <TableCell className="font-medium">{civ.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {civ.name}
+                        </TableCell>
                         <TableCell className="max-w-xs truncate">
                           {civ.description}
                         </TableCell>
@@ -200,7 +208,9 @@ export function CivilizationsList() {
                               </Button>
                             </div>
                           ) : (
-                            <Badge variant="secondary">{t("no_thumbnail")}</Badge>
+                            <Badge variant="secondary">
+                              {t("no_thumbnail")}
+                            </Badge>
                           )}
                         </TableCell>
                         <TableCell>

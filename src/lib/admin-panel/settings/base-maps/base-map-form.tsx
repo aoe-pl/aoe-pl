@@ -71,7 +71,10 @@ export function BaseMapForm({
                 <FormItem>
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t("name_placeholder")} {...field} />
+                    <Input
+                      placeholder={t("name_placeholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>{t("name_help")}</FormDescription>
                   <FormMessage />
@@ -118,7 +121,10 @@ export function BaseMapForm({
             />
 
             <DrawerFooter className="flex-row justify-end">
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending}
+              >
                 {isPending
                   ? initialData
                     ? t("updating")

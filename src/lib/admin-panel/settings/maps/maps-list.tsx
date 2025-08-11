@@ -35,10 +35,7 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  MapForm,
-  type MapFormSchema,
-} from "./map-form";
+import { MapForm, type MapFormSchema } from "./map-form";
 import type { Map, BaseMap } from "@prisma/client";
 
 type MapWithBaseMap = Map & { baseMap: BaseMap };
@@ -167,10 +164,18 @@ export function MapsList() {
                 <Table className="min-w-[720px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[180px]">{t("table.name")}</TableHead>
-                      <TableHead className="w-[150px]">{t("table.base_map")}</TableHead>
-                      <TableHead className="min-w-[250px]">{t("table.description")}</TableHead>
-                      <TableHead className="w-[120px]">{t("table.thumbnail")}</TableHead>
+                      <TableHead className="w-[180px]">
+                        {t("table.name")}
+                      </TableHead>
+                      <TableHead className="w-[150px]">
+                        {t("table.base_map")}
+                      </TableHead>
+                      <TableHead className="min-w-[250px]">
+                        {t("table.description")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("table.thumbnail")}
+                      </TableHead>
                       <TableHead className="w-[100px] text-right">
                         {t("table.actions")}
                       </TableHead>
@@ -179,7 +184,9 @@ export function MapsList() {
                   <TableBody>
                     {maps.map((map) => (
                       <TableRow key={map.id}>
-                        <TableCell className="font-medium">{map.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {map.name}
+                        </TableCell>
                         <TableCell>
                           <Badge variant="outline">{map.baseMap.name}</Badge>
                         </TableCell>
@@ -210,7 +217,9 @@ export function MapsList() {
                               </Button>
                             </div>
                           ) : (
-                            <Badge variant="secondary">{t("no_thumbnail")}</Badge>
+                            <Badge variant="secondary">
+                              {t("no_thumbnail")}
+                            </Badge>
                           )}
                         </TableCell>
                         <TableCell>
@@ -242,7 +251,10 @@ export function MapsList() {
         </CardContent>
       </Card>
 
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Drawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+      >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>

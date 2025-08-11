@@ -35,10 +35,7 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  BaseMapForm,
-  type BaseMapFormSchema,
-} from "./base-map-form";
+import { BaseMapForm, type BaseMapFormSchema } from "./base-map-form";
 import type { BaseMap } from "@prisma/client";
 
 export function BaseMapsList() {
@@ -165,9 +162,15 @@ export function BaseMapsList() {
                 <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[200px]">{t("table.name")}</TableHead>
-                      <TableHead className="min-w-[300px]">{t("table.description")}</TableHead>
-                      <TableHead className="w-[120px]">{t("table.thumbnail")}</TableHead>
+                      <TableHead className="w-[200px]">
+                        {t("table.name")}
+                      </TableHead>
+                      <TableHead className="min-w-[300px]">
+                        {t("table.description")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("table.thumbnail")}
+                      </TableHead>
                       <TableHead className="w-[100px] text-right">
                         {t("table.actions")}
                       </TableHead>
@@ -176,7 +179,9 @@ export function BaseMapsList() {
                   <TableBody>
                     {baseMaps.map((baseMap) => (
                       <TableRow key={baseMap.id}>
-                        <TableCell className="font-medium">{baseMap.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {baseMap.name}
+                        </TableCell>
                         <TableCell className="max-w-xs truncate">
                           {baseMap.description ?? "-"}
                         </TableCell>
@@ -204,7 +209,9 @@ export function BaseMapsList() {
                               </Button>
                             </div>
                           ) : (
-                            <Badge variant="secondary">{t("no_thumbnail")}</Badge>
+                            <Badge variant="secondary">
+                              {t("no_thumbnail")}
+                            </Badge>
                           )}
                         </TableCell>
                         <TableCell>
@@ -236,7 +243,10 @@ export function BaseMapsList() {
         </CardContent>
       </Card>
 
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Drawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+      >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>

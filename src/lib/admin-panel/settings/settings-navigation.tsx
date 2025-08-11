@@ -67,32 +67,34 @@ export function SettingsNavigation({
       </CardHeader>
       <CardContent className="space-y-2 lg:space-y-2">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1 lg:space-y-0">
-        {sections.map((section) => {
-          const Icon = section.icon;
-          const isActive = activeSection === section.id;
-          const isDisabled = !["civilizations", "base-maps", "maps"].includes(section.id); // Only these are implemented for now
+          {sections.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            const isDisabled = !["civilizations", "base-maps", "maps"].includes(
+              section.id,
+            ); // Only these are implemented for now
 
-          return (
-            <Button
-              key={section.id}
-              variant={isActive ? "default" : "ghost"}
-              className="w-full justify-start text-left"
-              onClick={() => onSectionChange(section.id)}
-              disabled={isDisabled}
-            >
-              <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{section.title}</span>
-              {isDisabled && (
-                <Badge
-                  variant="secondary"
-                  className="ml-auto text-xs flex-shrink-0"
-                >
-                  {t("coming_soon")}
-                </Badge>
-              )}
-            </Button>
-          );
-        })}
+            return (
+              <Button
+                key={section.id}
+                variant={isActive ? "default" : "ghost"}
+                className="w-full justify-start text-left"
+                onClick={() => onSectionChange(section.id)}
+                disabled={isDisabled}
+              >
+                <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{section.title}</span>
+                {isDisabled && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-auto flex-shrink-0 text-xs"
+                  >
+                    {t("coming_soon")}
+                  </Badge>
+                )}
+              </Button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

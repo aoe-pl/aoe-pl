@@ -88,7 +88,7 @@ export function TournamentStagesList({
                       size="sm"
                       onClick={() => handleDeleteStage(stage)}
                       disabled={deletionPending && deletingStageId === stage.id}
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive h-8 w-8 p-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -101,7 +101,9 @@ export function TournamentStagesList({
                   <Badge variant={stage.isVisible ? "default" : "secondary"}>
                     {stage.isVisible ? t("visible") : t("hidden")}
                   </Badge>
-                  <Badge variant="outline">{getStageTypeLabel(stage.type)}</Badge>
+                  <Badge variant="outline">
+                    {getStageTypeLabel(stage.type)}
+                  </Badge>
                 </div>
               </div>
             </CardHeader>
@@ -111,7 +113,7 @@ export function TournamentStagesList({
                   {stage.description}
                 </p>
               )}
-              
+
               {/* Stage Details */}
               {stage.type === "BRACKET" && (
                 <div className="space-y-2 border-t pt-3">
@@ -119,18 +121,24 @@ export function TournamentStagesList({
                     {stage.bracketType && (
                       <div className="flex items-center gap-1">
                         <span className="text-muted-foreground">Type:</span>
-                        <span className="font-medium">{getBracketTypeLabel(stage.bracketType)}</span>
+                        <span className="font-medium">
+                          {getBracketTypeLabel(stage.bracketType)}
+                        </span>
                       </div>
                     )}
                     {stage.bracketSize && (
                       <div className="flex items-center gap-1">
                         <span className="text-muted-foreground">Size:</span>
-                        <span className="font-medium">{stage.bracketSize} participants</span>
+                        <span className="font-medium">
+                          {stage.bracketSize} participants
+                        </span>
                       </div>
                     )}
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Seeded:</span>
-                      <span className="font-medium">{stage.isSeeded ? "Yes" : "No"}</span>
+                      <span className="font-medium">
+                        {stage.isSeeded ? "Yes" : "No"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -139,7 +147,7 @@ export function TournamentStagesList({
           </Card>
         ))}
       </div>
-      
+
       <AlertDialog
         open={!!deletingStage}
         onOpenChange={(open) => {
@@ -152,8 +160,9 @@ export function TournamentStagesList({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Stage</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the stage "{deletingStage?.name}"? This action cannot be
-              undone. All groups, matches, and game data within this stage will be permanently removed.
+              Are you sure you want to delete the stage "{deletingStage?.name}"?
+              This action cannot be undone. All groups, matches, and game data
+              within this stage will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

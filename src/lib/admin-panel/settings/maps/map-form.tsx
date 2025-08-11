@@ -51,8 +51,9 @@ export function MapForm({
   isPending,
 }: MapFormProps) {
   const t = useTranslations("admin.settings.maps.form");
-  
-  const { data: baseMaps, isLoading: baseMapLoading } = api.baseMaps.list.useQuery();
+
+  const { data: baseMaps, isLoading: baseMapLoading } =
+    api.baseMaps.list.useQuery();
 
   const form = useForm<MapFormSchema>({
     resolver: zodResolver(mapFormSchema),
@@ -83,7 +84,10 @@ export function MapForm({
                 <FormItem>
                   <FormLabel>{t("name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t("name_placeholder")} {...field} />
+                    <Input
+                      placeholder={t("name_placeholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>{t("name_help")}</FormDescription>
                   <FormMessage />
@@ -109,7 +113,10 @@ export function MapForm({
                     </FormControl>
                     <SelectContent>
                       {baseMaps?.map((baseMap) => (
-                        <SelectItem key={baseMap.id} value={baseMap.id}>
+                        <SelectItem
+                          key={baseMap.id}
+                          value={baseMap.id}
+                        >
                           {baseMap.name}
                         </SelectItem>
                       ))}
@@ -160,7 +167,10 @@ export function MapForm({
             />
 
             <DrawerFooter className="flex-row justify-end">
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending}
+              >
                 {isPending
                   ? initialData
                     ? t("updating")
