@@ -17,7 +17,9 @@ export type TournamentGroupCreateData = {
   participantIds?: string[];
 };
 
-export type TournamentGroupUpdateData = Partial<TournamentGroupCreateData>;
+export type TournamentGroupUpdateData = Partial<TournamentGroupCreateData> & {
+  stageId?: string;
+};
 
 export const tournamentGroupRepository = {
   async getTournamentGroupById(id: string) {
@@ -256,6 +258,11 @@ export const tournamentGroupRepository = {
             tournamentParticipant: true,
           },
         },
+        stage: {
+          include: {
+            tournament: true,
+          },
+        },
       },
     });
 
@@ -271,34 +278,45 @@ export const tournamentGroupRepository = {
     // Get new participant IDs
     const newParticipantIds = data.participantIds ?? currentParticipantIds;
 
+    // Check if participants are exactly the same (no need to update matches)
+    const participantsChanged =
+      currentParticipantIds.length !== newParticipantIds.length ||
+      !currentParticipantIds.every((id) => newParticipantIds.includes(id));
+
     const currentMatches = currentGroup.matches.map((match) => ({
       id: match.id,
       participant1Id: match.TournamentMatchParticipant[0]?.participantId ?? "",
       participant2Id: match.TournamentMatchParticipant[1]?.participantId ?? "",
     }));
 
-    // Get matches to delete (where either participant was removed)
-    const matchesToDelete = getMatchesToDelete(
-      currentMatches,
-      newParticipantIds,
-    );
+    // Only calculate match changes if participants actually changed
+    let matchesToDelete: typeof currentMatches = [];
+    let matchesToCreate: Array<{
+      participant1Id: string;
+      participant2Id: string;
+      status: MatchStatus;
+      civDraftKey: string;
+      mapDraftKey: string;
+    }> = [];
 
-    // Get all participants for new matches
-    const allParticipants = await db.tournamentParticipant.findMany({
-      where: {
-        id: {
-          in: newParticipantIds,
+    if (participantsChanged) {
+      // Get matches to delete (where either participant was removed)
+      matchesToDelete = getMatchesToDelete(currentMatches, newParticipantIds);
+
+      // Get all participants for new matches
+      const allParticipants = await db.tournamentParticipant.findMany({
+        where: {
+          id: {
+            in: newParticipantIds,
+          },
         },
-      },
-    });
+      });
 
-    // Get matches to create
-    const matchesToCreate = getMatchesToCreate(currentMatches, allParticipants);
+      // Get matches to create
+      matchesToCreate = getMatchesToCreate(currentMatches, allParticipants);
+    }
 
-    const tournament = await db.tournament.findUnique({
-      where: { id: currentGroup.stageId },
-    });
-
+    const tournament = currentGroup.stage.tournament;
     const isTeamBased = data.isTeamBased ?? tournament?.isTeamBased;
 
     // if we change from individual -> tournament based, we need to remove all matches
@@ -313,6 +331,7 @@ export const tournamentGroupRepository = {
       data: {
         name: data.name,
         description: data.description,
+        stage: data.stageId ? { connect: { id: data.stageId } } : undefined,
         matchMode: data.matchModeId
           ? { connect: { id: data.matchModeId } }
           : undefined,
@@ -351,28 +370,30 @@ export const tournamentGroupRepository = {
         // we are not support team based registration yet
         // and for individual registration -> team based we can't generate matches
         // because we don't know the teams yet, admin need to create them manually
-        matches: isTeamBased
-          ? undefined
-          : {
-              // Delete matches where participants were removed
-              deleteMany: {
-                id: {
-                  in: matchesToDelete.map((match) => match.id),
+        // Only update matches if participants changed and not team based
+        matches:
+          isTeamBased || !participantsChanged
+            ? undefined
+            : {
+                // Delete matches where participants were removed
+                deleteMany: {
+                  id: {
+                    in: matchesToDelete.map((match) => match.id),
+                  },
                 },
+                // Create new matches for new participant combinations
+                create: matchesToCreate.map((match) => ({
+                  status: match.status,
+                  civDraftKey: match.civDraftKey,
+                  mapDraftKey: match.mapDraftKey,
+                  TournamentMatchParticipant: {
+                    create: [
+                      { participantId: match.participant1Id, isWinner: false },
+                      { participantId: match.participant2Id, isWinner: false },
+                    ],
+                  },
+                })),
               },
-              // Create new matches for new participant combinations
-              create: matchesToCreate.map((match) => ({
-                status: match.status,
-                civDraftKey: match.civDraftKey,
-                mapDraftKey: match.mapDraftKey,
-                TournamentMatchParticipant: {
-                  create: [
-                    { participantId: match.participant1Id, isWinner: false },
-                    { participantId: match.participant2Id, isWinner: false },
-                  ],
-                },
-              })),
-            },
       },
     });
   },

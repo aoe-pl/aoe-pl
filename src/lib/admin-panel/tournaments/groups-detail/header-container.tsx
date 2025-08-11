@@ -5,6 +5,7 @@ import { GroupHeader } from "./group-header";
 import type {
   TournamentGroupFormSchema,
   TournamentGroupWithParticipants,
+  TournamentStage,
 } from "../tournament";
 import {
   Drawer,
@@ -20,7 +21,7 @@ import { ErrorToast } from "@/components/ui/error-toast-content";
 import { useRouter } from "next/navigation";
 
 type HeaderContainerProps = {
-  group: TournamentGroupWithParticipants;
+  group: TournamentGroupWithParticipants & { stage: TournamentStage };
   matchesCount: number;
   matchMode: { id: string; mode: string; gameCount: number };
   tournamentId: string;
@@ -57,6 +58,8 @@ export function HeaderContainer({
     });
   }
 
+  console.log("INITIAL group", group);
+
   return (
     <>
       <GroupHeader
@@ -67,6 +70,7 @@ export function HeaderContainer({
         matchesCount={matchesCount}
         matchMode={matchMode}
         onEdit={() => setIsDrawerOpen(true)}
+        stage={group.stage}
       />
       <Drawer
         open={isDrawerOpen}

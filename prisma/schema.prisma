@@ -228,7 +228,7 @@ model TournamentStage {
   isSeeded     Boolean             @default(true)
   brackets     TournamentBracket[]
   groups       TournamentGroup[]
-  tournament   Tournament          @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament          @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   isVisible    Boolean             @default(false)
 }
 
@@ -245,7 +245,7 @@ model TournamentBracket {
   bracketSize     Int
   isSeeded        Boolean                 @default(true)
   isManualSeeding Boolean                 @default(false)
-  stage           TournamentStage         @relation(fields: [stageId], references: [id])
+  stage           TournamentStage         @relation(fields: [stageId], references: [id], onDelete: Cascade)
   bracketNodes    TournamentBracketNode[]
 }
 
@@ -259,7 +259,7 @@ model TournamentBracketNode {
   matchId         String?
   isManualMatch   Boolean                 @default(false)
   adminComment    String?
-  bracket         TournamentBracket       @relation(fields: [bracketId], references: [id])
+  bracket         TournamentBracket       @relation(fields: [bracketId], references: [id], onDelete: Cascade)
   match           TournamentMatch?        @relation(fields: [matchId], references: [id])
   parentNode      TournamentBracketNode?  @relation("BracketNodeParent", fields: [parentNodeId], references: [id])
   childNodes      TournamentBracketNode[] @relation("BracketNodeParent")
@@ -278,7 +278,7 @@ model TournamentGroup {
   isMixed                    Boolean?
   color                      String?
   matchMode                  TournamentMatchMode?         @relation(fields: [matchModeId], references: [id])
-  stage                      TournamentStage              @relation(fields: [stageId], references: [id])
+  stage                      TournamentStage              @relation(fields: [stageId], references: [id], onDelete: Cascade)
   TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
   matches                    TournamentMatch[]            @relation("GroupMatches")
 

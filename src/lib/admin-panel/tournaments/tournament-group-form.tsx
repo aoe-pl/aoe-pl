@@ -83,6 +83,7 @@ export function TournamentGroupForm({
   });
 
   const handleSubmit = (data: TournamentGroupFormSchema) => {
+    console.log("*******************", data.stageId);
     onSubmit({
       ...data,
       matchModeId:

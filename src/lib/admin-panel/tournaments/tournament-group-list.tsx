@@ -23,6 +23,16 @@ import { Edit, Eye, Trash2, Users, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { useTranslations } from "next-intl";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type TournamentGroupListProps = {
   tournamentId: string;
@@ -43,6 +53,8 @@ export function TournamentGroupList({
     TournamentGroupWithParticipants | undefined
   >();
   const [deletingGroupId, setDeletingGroupId] = useState<string | undefined>();
+  const [deletingGroup, setDeletingGroup] =
+    useState<TournamentGroupWithParticipants>();
 
   const {
     data: groups,
@@ -91,6 +103,8 @@ export function TournamentGroupList({
       },
       onSuccess: () => {
         void refetch();
+        setDeletingGroup(undefined);
+        toast.success("Group deleted successfully");
       },
       onError: (error) => {
         toast.error(<ErrorToast message={error.message} />, {
@@ -108,8 +122,14 @@ export function TournamentGroupList({
     setIsDrawerOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteGroup({ id });
+  const handleDelete = (group: TournamentGroupWithParticipants) => {
+    setDeletingGroup(group);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingGroup) {
+      deleteGroup({ id: deletingGroup.id });
+    }
   };
 
   const handleAdd = () => {
@@ -146,6 +166,7 @@ export function TournamentGroupList({
       isMixed: data.isMixed,
       color: data.color,
       participantIds: data.participantIds ?? [],
+      stageId: data.stageId,
     };
 
     if (editingGroup) {
@@ -236,7 +257,7 @@ export function TournamentGroupList({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(group.id)}
+                        onClick={() => handleDelete(group)}
                         disabled={
                           deletionPending && deletingGroupId === group.id
                         }
@@ -344,6 +365,46 @@ export function TournamentGroupList({
           />
         </DrawerContent>
       </Drawer>
+
+      <AlertDialog
+        open={!!deletingGroup}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingGroup(undefined);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Group</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the group "{deletingGroup?.name}"?
+              This action cannot be undone. All matches and game data within
+              this group will be permanently removed.
+              {deletingGroup?.TournamentGroupParticipant &&
+                deletingGroup.TournamentGroupParticipant.length > 0 && (
+                  <>
+                    <br />
+                    <br />
+                    This group contains{" "}
+                    {deletingGroup.TournamentGroupParticipant.length}{" "}
+                    participant(s).
+                  </>
+                )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deletionPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletionPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -356,6 +356,7 @@ export const tournamentRouter = createTRPCRouter({
             isMixed: z.boolean().optional(),
             color: z.string().optional(),
             participantIds: z.array(z.string()).optional(),
+            stageId: z.string().optional(),
           }),
         }),
       )
