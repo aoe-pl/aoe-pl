@@ -149,7 +149,7 @@ model TournamentSeries {
   displayOrder Int
   description  String?
   tournament   Tournament[]
-  owner        User?         @relation(fields: [ownerId], references: [id])
+  owner        User?        @relation(fields: [ownerId], references: [id])
 }
 
 model TournamentMatchMode {
@@ -168,7 +168,7 @@ model Tournament {
   tournamentSeriesId    String
   matchModeId           String
   description           String?
-  isTeamBased           Boolean @default(false)
+  isTeamBased           Boolean                 @default(false)
   startDate             DateTime
   endDate               DateTime?
   participantsLimit     Int?
@@ -176,7 +176,7 @@ model Tournament {
   registrationEndDate   DateTime?
   status                TournamentStatus
   isVisible             Boolean
-  archived              Boolean @default(false)
+  archived              Boolean                 @default(false)
   name                  String
   matchMode             TournamentMatchMode     @relation(fields: [matchModeId], references: [id])
   tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])
@@ -229,6 +229,7 @@ model TournamentStage {
   brackets     TournamentBracket[]
   groups       TournamentGroup[]
   tournament   Tournament          @relation(fields: [tournamentId], references: [id])
+  isVisible    Boolean             @default(false)
 }
 
 model TournamentBracket {

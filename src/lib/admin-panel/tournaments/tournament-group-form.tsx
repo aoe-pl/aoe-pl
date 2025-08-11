@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TournamentParticipantsSelector } from "./tournament-participants-selector";
+import { DrawerFooter } from "@/components/ui/drawer";
 
 type TournamentGroupFormProps = {
   initialData?: TournamentGroupWithParticipants;
@@ -314,7 +315,7 @@ export function TournamentGroupForm({
             />
           </div>
 
-          <div className="flex justify-end space-x-4">
+          <DrawerFooter className="flex-row justify-end">
             <Button
               type="button"
               variant="outline"
@@ -329,7 +330,7 @@ export function TournamentGroupForm({
             >
               {isPending ? "Saving..." : initialData ? "Update" : "Create"}
             </Button>
-          </div>
+          </DrawerFooter>
         </form>
       </Form>
     </ScrollArea>

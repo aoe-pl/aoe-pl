@@ -30,6 +30,7 @@ import {
   type TournamentStageFormSchema,
 } from "./tournament";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
 
 type TournamentStageData = TournamentStageFormSchema & {
   id?: string;
@@ -67,12 +68,14 @@ export function TournamentStageForm({
   stages,
   isPending,
 }: TournamentStageFormProps) {
+  const t = useTranslations("admin.tournaments.stage");
   const form = useForm<TournamentStageData>({
     defaultValues: {
       id: initialData?.id ?? "0",
       name: initialData?.name ?? "",
       type: initialData?.type ?? "GROUP",
       isActive: initialData?.isActive ?? false,
+      isVisible: initialData?.isVisible ?? false,
       description: initialData?.description ?? "",
       bracketType: initialData?.bracketType ?? "SINGLE_ELIMINATION",
       bracketSize: initialData?.bracketSize ?? 16,
@@ -302,9 +305,30 @@ export function TournamentStageForm({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="isVisible"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>{t("visible_label")}</FormLabel>
+                    <FormDescription>
+                      {t("visible_description")}
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
 
-          <DrawerFooter className="px-0">
+          <DrawerFooter className="flex-row justify-end">
             <Button
               type="submit"
               disabled={isPending}

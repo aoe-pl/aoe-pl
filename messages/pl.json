@@ -151,6 +151,12 @@
           "filter_by_player": "Filtruj po graczu",
           "all_participants": "Wszyscy uczestnicy"
         }
+      },
+      "stage": {
+        "visible": "Widoczny",
+        "hidden": "Ukryty",
+        "visible_label": "Widoczny etap",
+        "visible_description": "Etap będzie widoczny dla użytkowników"
       }
     }
   },
