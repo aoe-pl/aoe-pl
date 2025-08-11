@@ -168,6 +168,7 @@
       "coming_soon_description": "Ta funkcjonalność będzie dostępna wkrótce.",
       "sections": {
         "civilizations": "Cywilizacje",
+        "base_maps": "Mapy bazowe",
         "maps": "Mapy",
         "users": "Użytkownicy",
         "roles": "Role",
@@ -219,6 +220,108 @@
           "create_success": "Cywilizacja została utworzona pomyślnie",
           "update_success": "Cywilizacja została zaktualizowana pomyślnie",
           "delete_success": "Cywilizacja została usunięta pomyślnie"
+        }
+      },
+      "base_maps": {
+        "title": "Mapy bazowe",
+        "loading": "Ładowanie map bazowych...",
+        "add_base_map": "Dodaj mapę bazową",
+        "add_first_base_map": "Dodaj pierwszą mapę bazową",
+        "edit_base_map": "Edytuj mapę bazową",
+        "add_base_map_description": "Dodaj nową mapę bazową do systemu turniejowego",
+        "edit_base_map_description": "Edytuj informacje o mapie bazowej",
+        "no_base_maps": "Brak map bazowych",
+        "no_thumbnail": "Brak miniaturki",
+        "table": {
+          "name": "Nazwa",
+          "description": "Opis",
+          "thumbnail": "Miniaturka",
+          "actions": "Akcje"
+        },
+        "form": {
+          "name": "Nazwa mapy bazowej",
+          "name_placeholder": "Wprowadź nazwę mapy bazowej",
+          "name_help": "Unikalna nazwa mapy bazowej dla turniejów (np. ANT ARABIA)",
+          "description": "Opis",
+          "description_placeholder": "Opis mapy bazowej...",
+          "description_help": "Opis mapy bazowej wyświetlany w turniejach",
+          "thumbnail_url": "URL miniaturki",
+          "thumbnail_url_placeholder": "https://example.com/map.png",
+          "thumbnail_url_help": "URL do obrazka reprezentującego mapę",
+          "create": "Utwórz mapę bazową",
+          "update": "Zaktualizuj mapę bazową",
+          "creating": "Tworzenie...",
+          "updating": "Aktualizowanie...",
+          "cancel": "Anuluj"
+        },
+        "delete_dialog": {
+          "title": "Usuń mapę bazową",
+          "description": "Czy na pewno chcesz usunąć mapę bazową",
+          "warning": "Ta akcja jest nieodwracalna i usunie wszystkie powiązane mapy.",
+          "cancel": "Anuluj",
+          "delete": "Usuń",
+          "deleting": "Usuwanie..."
+        },
+        "toast": {
+          "create_success": "Mapa bazowa została utworzona pomyślnie",
+          "update_success": "Mapa bazowa została zaktualizowana pomyślnie",
+          "delete_success": "Mapa bazowa została usunięta pomyślnie"
+        },
+        "errors": {
+          "BASE_MAP_IN_USE": "Nie można usunąć mapy bazowej. Jest obecnie używana przez {count} map(y)."
+        }
+      },
+      "maps": {
+        "title": "Mapy gry",
+        "loading": "Ładowanie map...",
+        "add_map": "Dodaj mapę",
+        "add_first_map": "Dodaj pierwszą mapę",
+        "edit_map": "Edytuj mapę",
+        "add_map_description": "Dodaj nową mapę Age of Empires II",
+        "edit_map_description": "Edytuj informacje o mapie",
+        "no_maps": "Brak map",
+        "no_thumbnail": "Brak miniaturki",
+        "table": {
+          "name": "Nazwa",
+          "base_map": "Mapa bazowa",
+          "description": "Opis",
+          "thumbnail": "Miniaturka",
+          "actions": "Akcje"
+        },
+        "form": {
+          "name": "Nazwa mapy",
+          "name_placeholder": "Wprowadź nazwę mapy",
+          "name_help": "Oficjalna nazwa mapy z gry Age of Empires II",
+          "base_map": "Mapa bazowa",
+          "base_map_placeholder": "Wybierz mapę bazową",
+          "base_map_help": "Wybierz mapę bazową, z którą ta mapa jest powiązana",
+          "description": "Opis",
+          "description_placeholder": "Opis mapy...",
+          "description_help": "Opis mapy z informacjami o rozgrywce",
+          "thumbnail_url": "URL miniaturki",
+          "thumbnail_url_placeholder": "https://example.com/map.png",
+          "thumbnail_url_help": "URL do obrazka reprezentującego mapę",
+          "create": "Utwórz mapę",
+          "update": "Zaktualizuj mapę",
+          "creating": "Tworzenie...",
+          "updating": "Aktualizowanie...",
+          "cancel": "Anuluj"
+        },
+        "delete_dialog": {
+          "title": "Usuń mapę",
+          "description": "Czy na pewno chcesz usunąć mapę",
+          "warning": "Ta akcja jest nieodwracalna i usunie wszystkie powiązane dane.",
+          "cancel": "Anuluj",
+          "delete": "Usuń",
+          "deleting": "Usuwanie..."
+        },
+        "toast": {
+          "create_success": "Mapa została utworzona pomyślnie",
+          "update_success": "Mapa została zaktualizowana pomyślnie",
+          "delete_success": "Mapa została usunięta pomyślnie"
+        },
+        "errors": {
+          "MAP_IN_USE": "Nie można usunąć mapy. Jest obecnie używana w {count} grze(ach)."
         }
       }
     }

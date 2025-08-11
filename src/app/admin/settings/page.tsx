@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import {
   SettingsNavigation,
   CivilizationsList,
+  BaseMapsList,
+  MapsList,
 } from "@/lib/admin-panel/settings";
 
 export default function AdminSettingsPage() {
@@ -15,7 +17,10 @@ export default function AdminSettingsPage() {
     switch (activeSection) {
       case "civilizations":
         return <CivilizationsList />;
+      case "base-maps":
+        return <BaseMapsList />;
       case "maps":
+        return <MapsList />;
       case "users":
       case "roles":
       case "system":

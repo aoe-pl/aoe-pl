@@ -26,6 +26,12 @@ export function SettingsNavigation({
       href: "/admin/settings/civilizations",
     },
     {
+      id: "base-maps",
+      title: t("sections.base_maps"),
+      icon: Map,
+      href: "/admin/settings/base-maps",
+    },
+    {
       id: "maps",
       title: t("sections.maps"),
       icon: Map,
@@ -64,7 +70,7 @@ export function SettingsNavigation({
         {sections.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
-          const isDisabled = section.id !== "civilizations"; // Only civilizations is implemented for now
+          const isDisabled = !["civilizations", "base-maps", "maps"].includes(section.id); // Only these are implemented for now
 
           return (
             <Button

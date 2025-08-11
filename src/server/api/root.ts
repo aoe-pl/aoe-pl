@@ -4,6 +4,7 @@ import { tournamentRouter } from "./tournament";
 import { usersRouter } from "./users";
 import { mapRouter } from "./map";
 import { civRouter } from "./civ";
+import { baseMapRouter } from "./baseMap";
 
 /**
  * This is the primary router for your server.
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   tournaments: tournamentRouter,
   users: usersRouter,
   maps: mapRouter,
+  baseMaps: baseMapRouter,
   civs: civRouter,
 });
 
