@@ -7,7 +7,7 @@ import {
   CogIcon,
   BackspaceIcon,
 } from "@/components/icons";
-import { Archive } from "lucide-react";
+import { Archive, Video } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -39,6 +39,13 @@ export function Sidebar() {
           active={pathname.startsWith("/admin/tournaments/archived")}
         >
           {t("archived_tournaments")}
+        </NavItem>
+        <NavItem
+          href="/admin/streamers"
+          icon={<Video className="h-5 w-5" />}
+          active={pathname.startsWith("/admin/streamers")}
+        >
+          {t("streamers")}
         </NavItem>
         <NavItem
           href="/admin/settings"

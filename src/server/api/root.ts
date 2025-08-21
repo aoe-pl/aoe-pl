@@ -5,6 +5,7 @@ import { usersRouter } from "./users";
 import { mapRouter } from "./map";
 import { civRouter } from "./civ";
 import { baseMapRouter } from "./baseMap";
+import { streamerRouter } from "./streamer";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   maps: mapRouter,
   baseMaps: baseMapRouter,
   civs: civRouter,
+  streamers: streamerRouter,
 });
 
 // export type definition of API

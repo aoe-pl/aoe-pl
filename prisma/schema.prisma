@@ -45,7 +45,7 @@ model User {
   adminComment          String?
   accounts              Account[]
   sessions              Session[]
-  TournamentMatchStream TournamentMatchStream[]
+  streamer              Streamer?
   TournamentParticipant TournamentParticipant[]
   tournamentSeries      TournamentSeries[]
   userGameProfiles      UserGameProfile[]
@@ -94,6 +94,18 @@ model UserStream {
   platformId String
   platform   Platform @relation(fields: [platformId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
+}
+
+model Streamer {
+  id                    String                  @id @default(cuid())
+  userId                String?                 @unique
+  streamerName          String
+  streamerUrl           String
+  isActive              Boolean                 @default(true)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  user                  User?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  TournamentMatchStream TournamentMatchStream[]
 }
 
 model VerificationToken {
@@ -347,7 +359,7 @@ model TournamentMatchStream {
   scheduledStartTime  DateTime?
   streamUrl           String?
   scheduledStreamLive Boolean
-  streamer            User            @relation(fields: [streamerId], references: [id])
+  streamer            Streamer        @relation(fields: [streamerId], references: [id])
   tournamentMatch     TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
 }
 
