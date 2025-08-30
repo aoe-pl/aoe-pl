@@ -323,6 +323,86 @@
         "errors": {
           "MAP_IN_USE": "Nie można usunąć mapy. Jest obecnie używana w {count} grze(ach)."
         }
+      },
+      "users": {
+        "title": "Użytkownicy",
+        "loading": "Ładowanie użytkowników...",
+        "edit_user": "Edytuj użytkownika",
+        "edit_user_description": "Edytuj informacje o użytkowniku",
+        "user_details": "Szczegóły użytkownika",
+        "user_details_description": "Pełne informacje o użytkowniku",
+        "no_users": "Brak użytkowników",
+        "table": {
+          "name": "Nazwa",
+          "email": "Email",
+          "roles": "Role",
+          "tournaments": "Turnieje",
+          "streams": "Streamy",
+          "actions": "Akcje"
+        },
+        "form": {
+          "name": "Nazwa użytkownika",
+          "name_placeholder": "Wprowadź nazwę użytkownika",
+          "email": "Adres email",
+          "email_placeholder": "Wprowadź adres email",
+          "color": "Kolor użytkownika",
+          "color_placeholder": "#000000",
+          "color_help": "Kolor reprezentujący użytkownika w systemie",
+          "admin_comment": "Komentarz administratora",
+          "admin_comment_placeholder": "Komentarz widoczny tylko dla administratorów...",
+          "admin_comment_help": "Wewnętrzny komentarz administratora o użytkowniku",
+          "roles": "Role użytkownika",
+          "roles_placeholder": "Wybierz role...",
+          "roles_help": "Wybierz role przypisane do tego użytkownika",
+          "update": "Zaktualizuj użytkownika",
+          "updating": "Aktualizowanie...",
+          "cancel": "Anuluj"
+        },
+        "delete_dialog": {
+          "title": "Usuń użytkownika",
+          "description": "Czy na pewno chcesz usunąć użytkownika?",
+          "warning": "Ta akcja jest nieodwracalna i usunie wszystkie powiązane dane.",
+          "cancel": "Anuluj",
+          "delete": "Usuń",
+          "deleting": "Usuwanie..."
+        },
+        "roles": {
+          "title": "Role użytkownika",
+          "loading": "Ładowanie ról...",
+          "assign_role": "Przypisz rolę",
+          "assign_first_role": "Przypisz pierwszą rolę",
+          "no_roles": "Brak przypisanych ról",
+          "never_expires": "Nigdy nie wygasa",
+          "table": {
+            "role_name": "Nazwa roli",
+            "type": "Typ",
+            "assigned_at": "Przypisano",
+            "expires_at": "Wygasa",
+            "comment": "Komentarz",
+            "actions": "Akcje"
+          },
+          "assign_dialog": {
+            "title": "Przypisz rolę użytkownikowi",
+            "description": "Wybierz rolę do przypisania użytkownikowi",
+            "role": "Rola",
+            "select_role": "Wybierz rolę...",
+            "expires_at": "Data wygaśnięcia (opcjonalna)",
+            "expires_help": "Pozostaw puste jeśli rola ma nie wygasać",
+            "comment": "Komentarz (opcjonalny)",
+            "comment_placeholder": "Dodatkowy komentarz o przypisaniu roli...",
+            "assign": "Przypisz rolę",
+            "assigning": "Przypisywanie...",
+            "cancel": "Anuluj"
+          },
+          "toast": {
+            "assign_success": "Rola została przypisana pomyślnie",
+            "remove_success": "Rola została usunięta pomyślnie"
+          }
+        },
+        "toast": {
+          "update_success": "Użytkownik został zaktualizowany pomyślnie",
+          "delete_success": "Użytkownik został usunięty pomyślnie"
+        }
       }
     }
   },

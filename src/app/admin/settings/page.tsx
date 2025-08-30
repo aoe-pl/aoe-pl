@@ -7,6 +7,7 @@ import {
   CivilizationsList,
   BaseMapsList,
   MapsList,
+  UsersList,
 } from "@/lib/admin-panel/settings";
 
 export default function AdminSettingsPage() {
@@ -22,6 +23,7 @@ export default function AdminSettingsPage() {
       case "maps":
         return <MapsList />;
       case "users":
+        return <UsersList />;
       case "roles":
       case "system":
         return (

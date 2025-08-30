@@ -6,6 +6,8 @@ export { BaseMapsList } from "./base-maps/base-maps-list";
 export { BaseMapForm } from "./base-maps/base-map-form";
 export { MapsList } from "./maps/maps-list";
 export { MapForm } from "./maps/map-form";
+export { UsersList } from "./users/users-list";
+export { UserForm } from "./users/user-form";
 
 // Types
 export type { SettingsSection } from "./types";

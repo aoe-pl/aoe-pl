@@ -5,6 +5,7 @@ import { usersRouter } from "./users";
 import { mapRouter } from "./map";
 import { civRouter } from "./civ";
 import { baseMapRouter } from "./baseMap";
+import { rolesRouter } from "./roles";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   maps: mapRouter,
   baseMaps: baseMapRouter,
   civs: civRouter,
+  roles: rolesRouter,
 });
 
 // export type definition of API

@@ -70,7 +70,7 @@ export function SettingsNavigation({
           {sections.map((section) => {
             const Icon = section.icon;
             const isActive = activeSection === section.id;
-            const isDisabled = !["civilizations", "base-maps", "maps"].includes(
+            const isDisabled = !["civilizations", "base-maps", "maps", "users"].includes(
               section.id,
             ); // Only these are implemented for now
 
