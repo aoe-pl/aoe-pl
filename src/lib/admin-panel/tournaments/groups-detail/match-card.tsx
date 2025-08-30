@@ -87,8 +87,7 @@ export function MatchCard({
 
   const getParticipantScore = (participant: typeof participant1) => {
     const wonScore = participant?.wonScore ?? 0;
-    const lostScore = participant?.lostScore ?? 0;
-    const scoreText = `${wonScore} - ${lostScore}`;
+    const scoreText = wonScore.toString();
     const isSpoiler = shouldHideSpoilers() && hasScores();
 
     return (
