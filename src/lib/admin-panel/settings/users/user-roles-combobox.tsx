@@ -52,7 +52,10 @@ export function UserRolesCombobox({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={setOpen}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -118,18 +121,18 @@ export function UserRolesCombobox({
                       onChange(newValue);
                     }}
                   >
-                    <div className="flex items-center w-full">
+                    <div className="flex w-full items-center">
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",
-                          value.includes(role.id)
-                            ? "opacity-100"
-                            : "opacity-0",
+                          value.includes(role.id) ? "opacity-100" : "opacity-0",
                         )}
                       />
                       <span className="flex-1">{role.name}</span>
                       <Badge
-                        variant={role.type === "ADMIN" ? "default" : "secondary"}
+                        variant={
+                          role.type === "ADMIN" ? "default" : "secondary"
+                        }
                         className="ml-2 text-xs"
                       >
                         {role.type}

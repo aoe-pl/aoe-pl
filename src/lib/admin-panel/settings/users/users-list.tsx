@@ -30,19 +30,12 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
-import { 
-  Edit, 
-  Trash2, 
-  Eye
-} from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  UserForm,
-  type UserFormSchema,
-} from "./user-form";
+import { UserForm, type UserFormSchema } from "./user-form";
 import { UserDetailView } from "./user-detail-view";
 import type { User } from "@prisma/client";
 
@@ -81,10 +74,10 @@ export function UsersList() {
 
   const { data: userDetails } = api.users.getWithDetails.useQuery(
     { id: viewingUser! },
-    { 
+    {
       enabled: !!viewingUser,
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   const { mutate: updateUser, isPending: updatePending } =
@@ -149,7 +142,6 @@ export function UsersList() {
     setEditingUser(undefined);
   };
 
-
   if (isLoading) {
     return (
       <Card>
@@ -171,9 +163,7 @@ export function UsersList() {
         <CardContent>
           {!users || users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                {t("no_users")}
-              </p>
+              <p className="text-muted-foreground mb-4">{t("no_users")}</p>
             </div>
           ) : (
             <div className="rounded-md border">
@@ -207,7 +197,7 @@ export function UsersList() {
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             {user.color && (
-                              <div 
+                              <div
                                 className="h-3 w-3 rounded-full border"
                                 style={{ backgroundColor: user.color }}
                               />
@@ -219,36 +209,51 @@ export function UsersList() {
                           {user.email ?? "No Email"}
                         </TableCell>
                         <TableCell className="text-center">
-                          <div className="flex flex-wrap gap-1 justify-center">
+                          <div className="flex flex-wrap justify-center gap-1">
                             {user.userRoles.length > 0 ? (
                               <>
                                 {user.userRoles.map((userRole) => (
                                   <Badge
                                     key={userRole.role.id}
-                                    variant={userRole.role.type === "ADMIN" ? "default" : "secondary"}
+                                    variant={
+                                      userRole.role.type === "ADMIN"
+                                        ? "default"
+                                        : "secondary"
+                                    }
                                     className="text-xs"
                                   >
                                     {userRole.role.name}
                                   </Badge>
                                 ))}
                                 {user._count.userRoles > 3 && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
                                     +{user._count.userRoles - 3}
                                   </Badge>
                                 )}
                               </>
                             ) : (
-                              <span className="text-muted-foreground text-xs">-</span>
+                              <span className="text-muted-foreground text-xs">
+                                -
+                              </span>
                             )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {user._count.TournamentParticipant}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {user._count.userStreams}
                           </Badge>
                         </TableCell>
@@ -295,12 +300,8 @@ export function UsersList() {
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>
-              {t("edit_user")}
-            </DrawerTitle>
-            <DrawerDescription>
-              {t("edit_user_description")}
-            </DrawerDescription>
+            <DrawerTitle>{t("edit_user")}</DrawerTitle>
+            <DrawerDescription>{t("edit_user_description")}</DrawerDescription>
           </DrawerHeader>
           <UserForm
             initialData={editingUser}
@@ -323,11 +324,11 @@ export function UsersList() {
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>
-              {t("user_details")}
-            </DrawerTitle>
+            <DrawerTitle>{t("user_details")}</DrawerTitle>
             <DrawerDescription>
-              {userDetails?.name ?? userDetails?.email ?? t("user_details_description")}
+              {userDetails?.name ??
+                userDetails?.email ??
+                t("user_details_description")}
             </DrawerDescription>
           </DrawerHeader>
           {userDetails && <UserDetailView user={userDetails} />}

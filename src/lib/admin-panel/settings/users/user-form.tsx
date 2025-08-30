@@ -47,15 +47,16 @@ export function UserForm({
   isPending,
 }: UserFormProps) {
   const t = useTranslations("admin.settings.users.form");
-  
+
   // Get user's current roles
-  const { data: userRoles, refetch: refetchRoles } = api.roles.getUserRoles.useQuery(
-    { userId: initialData?.id ?? "" },
-    { 
-      enabled: !!initialData?.id,
-      refetchOnMount: true,
-    }
-  );
+  const { data: userRoles, refetch: refetchRoles } =
+    api.roles.getUserRoles.useQuery(
+      { userId: initialData?.id ?? "" },
+      {
+        enabled: !!initialData?.id,
+        refetchOnMount: true,
+      },
+    );
 
   const form = useForm<UserFormSchema>({
     resolver: zodResolver(userFormSchema),
@@ -71,7 +72,10 @@ export function UserForm({
   // Update roleIds when userRoles data loads
   useEffect(() => {
     if (userRoles) {
-      form.setValue("roleIds", userRoles.map(ur => ur.roleId));
+      form.setValue(
+        "roleIds",
+        userRoles.map((ur) => ur.roleId),
+      );
     }
   }, [userRoles, form]);
 

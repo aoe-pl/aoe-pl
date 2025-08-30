@@ -51,36 +51,38 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
 
   // Queries
   const { data: allRoles, isLoading: rolesLoading } = api.roles.list.useQuery();
-  const { 
-    data: userRoles, 
-    refetch: refetchUserRoles, 
-    isLoading: userRolesLoading 
+  const {
+    data: userRoles,
+    refetch: refetchUserRoles,
+    isLoading: userRolesLoading,
   } = api.roles.getUserRoles.useQuery({ userId });
 
   // Mutations
-  const { mutate: assignRole, isPending: assignPending } = api.roles.assignRole.useMutation({
-    onSuccess: () => {
-      void refetchUserRoles();
-      setIsDialogOpen(false);
-      setSelectedRoleId("");
-      setExpiresAt("");
-      setComment("");
-      toast.success(t("toast.assign_success"));
-    },
-    onError: (error) => {
-      toast.error(<ErrorToast message={error.message} />);
-    },
-  });
+  const { mutate: assignRole, isPending: assignPending } =
+    api.roles.assignRole.useMutation({
+      onSuccess: () => {
+        void refetchUserRoles();
+        setIsDialogOpen(false);
+        setSelectedRoleId("");
+        setExpiresAt("");
+        setComment("");
+        toast.success(t("toast.assign_success"));
+      },
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+      },
+    });
 
-  const { mutate: removeRole, isPending: removePending } = api.roles.removeRole.useMutation({
-    onSuccess: () => {
-      void refetchUserRoles();
-      toast.success(t("toast.remove_success"));
-    },
-    onError: (error) => {
-      toast.error(<ErrorToast message={error.message} />);
-    },
-  });
+  const { mutate: removeRole, isPending: removePending } =
+    api.roles.removeRole.useMutation({
+      onSuccess: () => {
+        void refetchUserRoles();
+        toast.success(t("toast.remove_success"));
+      },
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+      },
+    });
 
   const handleAssignRole = () => {
     if (!selectedRoleId) return;
@@ -103,8 +105,9 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
   };
 
   // Get available roles (not already assigned)
-  const assignedRoleIds = userRoles?.map(ur => ur.roleId) ?? [];
-  const availableRoles = allRoles?.filter(role => !assignedRoleIds.includes(role.id)) ?? [];
+  const assignedRoleIds = userRoles?.map((ur) => ur.roleId) ?? [];
+  const availableRoles =
+    allRoles?.filter((role) => !assignedRoleIds.includes(role.id)) ?? [];
 
   if (rolesLoading || userRolesLoading) {
     return (
@@ -123,7 +126,10 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
           <div className="flex items-center justify-between">
             <CardTitle>{t("title")}</CardTitle>
             {availableRoles.length > 0 && (
-              <Button onClick={() => setIsDialogOpen(true)} size="sm">
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                size="sm"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 {t("assign_role")}
               </Button>
@@ -133,9 +139,7 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
         <CardContent>
           {!userRoles || userRoles.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                {t("no_roles")}
-              </p>
+              <p className="text-muted-foreground mb-4">{t("no_roles")}</p>
               {availableRoles.length > 0 && (
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
@@ -153,7 +157,9 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
                     <TableHead>{t("table.assigned_at")}</TableHead>
                     <TableHead>{t("table.expires_at")}</TableHead>
                     <TableHead>{t("table.comment")}</TableHead>
-                    <TableHead className="w-[100px] text-right">{t("table.actions")}</TableHead>
+                    <TableHead className="w-[100px] text-right">
+                      {t("table.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -163,15 +169,17 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
                         {userRole.role.name}
                       </TableCell>
                       <TableCell>
-                        <Badge 
-                          variant={userRole.role.type === "ADMIN" ? "default" : "secondary"}
+                        <Badge
+                          variant={
+                            userRole.role.type === "ADMIN"
+                              ? "default"
+                              : "secondary"
+                          }
                         >
                           {userRole.role.type}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {formatDate(userRole.assignedAt)}
-                      </TableCell>
+                      <TableCell>{formatDate(userRole.assignedAt)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {userRole.expiresAt ? (
@@ -180,7 +188,9 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
                               {formatDate(userRole.expiresAt)}
                             </>
                           ) : (
-                            <span className="text-muted-foreground">{t("never_expires")}</span>
+                            <span className="text-muted-foreground">
+                              {t("never_expires")}
+                            </span>
                           )}
                         </div>
                       </TableCell>
@@ -210,7 +220,10 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
       </Card>
 
       {/* Assign Role Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("assign_dialog.title")}</DialogTitle>
@@ -220,18 +233,28 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">{t("assign_dialog.role")}</label>
-              <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+              <label className="text-sm font-medium">
+                {t("assign_dialog.role")}
+              </label>
+              <Select
+                value={selectedRoleId}
+                onValueChange={setSelectedRoleId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("assign_dialog.select_role")} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableRoles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
+                    <SelectItem
+                      key={role.id}
+                      value={role.id}
+                    >
                       <div className="flex items-center gap-2">
                         <span>{role.name}</span>
-                        <Badge 
-                          variant={role.type === "ADMIN" ? "default" : "secondary"}
+                        <Badge
+                          variant={
+                            role.type === "ADMIN" ? "default" : "secondary"
+                          }
                           className="text-xs"
                         >
                           {role.type}
@@ -242,22 +265,26 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium">{t("assign_dialog.expires_at")}</label>
+              <label className="text-sm font-medium">
+                {t("assign_dialog.expires_at")}
+              </label>
               <Input
                 type="date"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {t("assign_dialog.expires_help")}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-medium">{t("assign_dialog.comment")}</label>
+              <label className="text-sm font-medium">
+                {t("assign_dialog.comment")}
+              </label>
               <Textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -280,7 +307,9 @@ export function UserRolesSelector({ userId }: UserRolesSelectorProps) {
               onClick={handleAssignRole}
               disabled={!selectedRoleId || assignPending}
             >
-              {assignPending ? t("assign_dialog.assigning") : t("assign_dialog.assign")}
+              {assignPending
+                ? t("assign_dialog.assigning")
+                : t("assign_dialog.assign")}
             </Button>
           </DialogFooter>
         </DialogContent>

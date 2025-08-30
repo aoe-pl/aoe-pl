@@ -25,7 +25,12 @@ export const rolesRepository = {
     });
   },
 
-  async assignRoleToUser(userId: string, roleId: string, expiresAt?: Date, comment?: string) {
+  async assignRoleToUser(
+    userId: string,
+    roleId: string,
+    expiresAt?: Date,
+    comment?: string,
+  ) {
     // Check if role is already assigned
     const existingAssignment = await db.userRole.findUnique({
       where: {
@@ -64,7 +69,12 @@ export const rolesRepository = {
     });
   },
 
-  async updateUserRoleExpiration(userId: string, roleId: string, expiresAt?: Date, comment?: string) {
+  async updateUserRoleExpiration(
+    userId: string,
+    roleId: string,
+    expiresAt?: Date,
+    comment?: string,
+  ) {
     return db.userRole.update({
       where: {
         userId_roleId: {

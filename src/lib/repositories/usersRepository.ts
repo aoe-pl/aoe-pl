@@ -86,13 +86,17 @@ export const usersRepository = {
     });
   },
 
-  async updateUser(id: string, data: {
-    name?: string;
-    email?: string;
-    color?: string;
-    adminComment?: string;
-    roleIds?: string[];
-  }, currentUserId?: string) {
+  async updateUser(
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
+      color?: string;
+      adminComment?: string;
+      roleIds?: string[];
+    },
+    currentUserId?: string,
+  ) {
     // Handle roles update separately if provided
     if (data.roleIds !== undefined) {
       return db.$transaction(async (tx) => {
@@ -112,33 +116,44 @@ export const usersRepository = {
           where: { userId: id },
           select: { roleId: true },
         });
-        const currentRoleIds = currentRoles.map(ur => ur.roleId);
+        const currentRoleIds = currentRoles.map((ur) => ur.roleId);
 
         // Calculate roles to add and remove
         const newRoleIds = data.roleIds ?? [];
-        const rolesToAdd = newRoleIds.filter(roleId => !currentRoleIds.includes(roleId));
-        const rolesToRemove = currentRoleIds.filter(roleId => !newRoleIds.includes(roleId));
+        const rolesToAdd = newRoleIds.filter(
+          (roleId) => !currentRoleIds.includes(roleId),
+        );
+        const rolesToRemove = currentRoleIds.filter(
+          (roleId) => !newRoleIds.includes(roleId),
+        );
 
         // If currentUserId is provided, validate permissions for role changes
-        if (currentUserId && (rolesToAdd.length > 0 || rolesToRemove.length > 0)) {
+        if (
+          currentUserId &&
+          (rolesToAdd.length > 0 || rolesToRemove.length > 0)
+        ) {
           // Check if current user is admin
           const currentUserRoles = await tx.userRole.findMany({
             where: { userId: currentUserId },
             include: { role: true },
           });
-          const hasAdminRole = currentUserRoles.some(ur => ur.role.type === "ADMIN");
-          
+          const hasAdminRole = currentUserRoles.some(
+            (ur) => ur.role.type === "ADMIN",
+          );
+
           if (!hasAdminRole) {
             // For non-admin users, check if all roles being added/removed are modAssignable
             const affectedRoleIds = [...rolesToAdd, ...rolesToRemove];
             const affectedRoles = await tx.role.findMany({
               where: { id: { in: affectedRoleIds } },
             });
-            
-            const nonModAssignableRoles = affectedRoles.filter(role => !role.modAssignable);
+
+            const nonModAssignableRoles = affectedRoles.filter(
+              (role) => !role.modAssignable,
+            );
             if (nonModAssignableRoles.length > 0) {
               throw new Error(
-                `You don't have permission to modify these roles: ${nonModAssignableRoles.map(r => r.name).join(', ')}`
+                `You don't have permission to modify these roles: ${nonModAssignableRoles.map((r) => r.name).join(", ")}`,
               );
             }
           }
@@ -157,7 +172,7 @@ export const usersRepository = {
         // Add new roles
         if (rolesToAdd.length > 0) {
           await tx.userRole.createMany({
-            data: rolesToAdd.map(roleId => ({
+            data: rolesToAdd.map((roleId) => ({
               userId: id,
               roleId,
             })),

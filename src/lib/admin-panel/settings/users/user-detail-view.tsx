@@ -11,14 +11,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  User, 
-  Mail, 
-  Trophy, 
-  Video,
-  ExternalLink
-} from "lucide-react";
-import type { User as UserType, UserRole, Role, UserStream, Platform, TournamentParticipant } from "@prisma/client";
+import { User, Mail, Trophy, Video, ExternalLink } from "lucide-react";
+import type {
+  User as UserType,
+  UserRole,
+  Role,
+  UserStream,
+  Platform,
+  TournamentParticipant,
+} from "@prisma/client";
 
 type UserWithDetails = UserType & {
   userRoles: (UserRole & { role: Role })[];
@@ -42,7 +43,6 @@ interface UserDetailViewProps {
 }
 
 export function UserDetailView({ user }: UserDetailViewProps) {
-
   const formatDate = (date: Date | null) => {
     if (!date) return "Not set";
     return new Date(date).toLocaleDateString();
@@ -55,14 +55,12 @@ export function UserDetailView({ user }: UserDetailViewProps) {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
                 <User className="h-6 w-6" />
               </div>
               <div>
-                <CardTitle>
-                  {user.name ?? "No Name"}
-                </CardTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CardTitle>{user.name ?? "No Name"}</CardTitle>
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Mail className="h-3 w-3" />
                   {user.email ?? "No Email"}
                 </div>
@@ -74,7 +72,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
               <div>
                 <div className="text-sm font-medium">Color</div>
                 <div className="flex items-center gap-2">
-                  <div 
+                  <div
                     className="h-4 w-4 rounded border"
                     style={{ backgroundColor: user.color }}
                   />
@@ -82,7 +80,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                 </div>
               </div>
             )}
-            
+
             {user.adminComment && (
               <div>
                 <div className="text-sm font-medium">Admin Comment</div>
@@ -108,18 +106,23 @@ export function UserDetailView({ user }: UserDetailViewProps) {
             {user.userStreams.length > 0 ? (
               <div className="space-y-2">
                 {user.userStreams.map((stream) => (
-                  <div key={stream.id} className="flex items-center justify-between rounded border p-3">
+                  <div
+                    key={stream.id}
+                    className="flex items-center justify-between rounded border p-3"
+                  >
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline">
-                        {stream.platform.name}
-                      </Badge>
+                      <Badge variant="outline">{stream.platform.name}</Badge>
                       <span className="text-sm">{stream.platform.type}</span>
                     </div>
                     {stream.platform.urlTemplate && (
-                      <Button variant="ghost" size="sm" asChild>
-                        <a 
-                          href={stream.platform.urlTemplate} 
-                          target="_blank" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={stream.platform.urlTemplate}
+                          target="_blank"
                           rel="noopener noreferrer"
                         >
                           <ExternalLink className="h-3 w-3" />
@@ -130,11 +133,12 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No streaming platforms configured</p>
+              <p className="text-muted-foreground text-sm">
+                No streaming platforms configured
+              </p>
             )}
           </CardContent>
         </Card>
-
 
         {/* Tournament Participations */}
         <Card>
@@ -159,17 +163,23 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                     {user.TournamentParticipant.map((participation) => (
                       <TableRow key={participation.id}>
                         <TableCell>
-                          <Button variant="link" className="h-auto p-0" asChild>
-                            <a href={`/admin/tournaments/${participation.tournament.id}`}>
+                          <Button
+                            variant="link"
+                            className="h-auto p-0"
+                            asChild
+                          >
+                            <a
+                              href={`/admin/tournaments/${participation.tournament.id}`}
+                            >
                               {participation.tournament.name}
                             </a>
                           </Button>
                         </TableCell>
                         <TableCell>
-                          <Badge 
+                          <Badge
                             variant={
-                              participation.tournament.status === "ACTIVE" 
-                                ? "default" 
+                              participation.tournament.status === "ACTIVE"
+                                ? "default"
                                 : "secondary"
                             }
                           >
@@ -185,12 +195,16 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                 </Table>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No tournament participations</p>
+              <p className="text-muted-foreground text-sm">
+                No tournament participations
+              </p>
             )}
-            
-            {user._count.TournamentParticipant > user.TournamentParticipant.length && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                Showing {user.TournamentParticipant.length} of {user._count.TournamentParticipant} participations
+
+            {user._count.TournamentParticipant >
+              user.TournamentParticipant.length && (
+              <p className="text-muted-foreground mt-2 text-xs">
+                Showing {user.TournamentParticipant.length} of{" "}
+                {user._count.TournamentParticipant} participations
               </p>
             )}
           </CardContent>
