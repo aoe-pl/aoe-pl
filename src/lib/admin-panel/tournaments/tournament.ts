@@ -209,6 +209,7 @@ const tournamentMatchFormSchema = z.object({
   adminComment: z.string().optional(),
   participantIds: z.array(z.string()).optional(),
   teamIds: z.array(z.string()).optional(),
+  streamerIds: z.array(z.string()).optional(),
   participantScores: z
     .array(
       z.object({

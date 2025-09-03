@@ -26,6 +26,7 @@ import { type TournamentMatchFormSchema, matchStatuses } from "./tournament";
 import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import { Calendar24 } from "@/components/ui/calendar-24";
 import { TournamentParticipantsSelector } from "./tournament-participants-selector";
+import { StreamerSelector } from "./streamer-selector";
 import { api } from "@/trpc/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -87,6 +88,9 @@ export function TournamentMatchForm({
     { enabled: !!(groupId ?? initialData?.groupId) },
   );
 
+  const { data: streamers = [], isLoading: streamersLoading } =
+    api.streamers.list.useQuery();
+
   const form = useForm<TournamentMatchData>({
     defaultValues: {
       id: initialData?.id ?? "",
@@ -107,6 +111,8 @@ export function TournamentMatchForm({
         initialData?.TournamentMatchParticipant.filter((p) => p.teamId).map(
           (p) => p.teamId!,
         ) ?? [],
+      streamerIds:
+        initialData?.TournamentMatchStream?.map((s) => s.streamerId) ?? [],
       participantScores: [],
       teamScores: [],
     },
@@ -436,6 +442,28 @@ export function TournamentMatchForm({
                 )}
               />
             )}
+
+            <FormField
+              control={form.control}
+              name="streamerIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Streamers</FormLabel>
+                  <FormControl>
+                    <StreamerSelector
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      streamers={streamers}
+                      isLoading={streamersLoading}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Select streamers who will broadcast this match
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {scores.length > 0 && renderScoreInputs()}
 

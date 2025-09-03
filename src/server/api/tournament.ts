@@ -418,6 +418,7 @@ export const tournamentRouter = createTRPCRouter({
             adminComment: z.string().optional(),
             participantIds: z.array(z.string()).optional(),
             teamIds: z.array(z.string()).optional(),
+            streamerIds: z.array(z.string()).optional(),
             isManualMatch: z.boolean().default(false),
             participantScores: z
               .array(
@@ -456,6 +457,7 @@ export const tournamentRouter = createTRPCRouter({
             status: z.nativeEnum(MatchStatus).optional(),
             comment: z.string().optional(),
             adminComment: z.string().optional(),
+            streamerIds: z.array(z.string()).optional(),
             participantScores: z
               .array(
                 z.object({

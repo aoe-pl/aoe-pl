@@ -2,6 +2,7 @@ import type {
   TournamentMatch,
   TournamentMatchParticipant,
   TournamentParticipant,
+  TournamentMatchStream,
   Game as PrismaGame,
   GameParticipant,
   User,
@@ -50,6 +51,14 @@ export interface MatchParticipantWithUser extends TournamentMatchParticipant {
 
 export interface ExtendedTournamentMatch extends TournamentMatch {
   TournamentMatchParticipant: ExtendedTournamentMatchParticipant[];
+  TournamentMatchStream?: (TournamentMatchStream & {
+    streamer: {
+      id: string;
+      streamerName: string;
+      streamerUrl: string;
+      isActive: boolean;
+    };
+  })[];
   GameCount: number;
   group: {
     id: string;

@@ -13,6 +13,7 @@ export type TournamentMatchCreateData = {
   isManualMatch?: boolean;
   participantIds?: string[];
   teamIds?: string[];
+  streamerIds?: string[];
   participantScores?: {
     participantId: string;
     wonScore: number;
@@ -89,6 +90,11 @@ export const tournamentMatchRepository = {
             gameParticipants: true,
           },
         },
+        TournamentMatchStream: {
+          include: {
+            streamer: true,
+          },
+        },
         Game: {
           include: {
             map: true,
@@ -138,6 +144,11 @@ export const tournamentMatchRepository = {
             gameParticipants: true,
           },
         },
+        TournamentMatchStream: {
+          include: {
+            streamer: true,
+          },
+        },
         Game: {
           include: {
             map: true,
@@ -154,7 +165,6 @@ export const tournamentMatchRepository = {
       orderBy: { createdAt: "asc" },
     });
   },
-
   async createTournamentMatch(data: TournamentMatchCreateData) {
     // Create participant data with scores and winners
     const participantData =
@@ -181,20 +191,43 @@ export const tournamentMatchRepository = {
         };
       }) ?? [];
 
-    return db.tournamentMatch.create({
-      data: {
-        groupId: data.groupId,
-        matchDate: data.matchDate,
-        civDraftKey: data.civDraftKey ?? "",
-        mapDraftKey: data.mapDraftKey ?? "",
-        status: data.status ?? "PENDING",
-        comment: data.comment,
-        adminComment: data.adminComment,
-        isManualMatch: data.isManualMatch ?? false,
-        TournamentMatchParticipant: {
-          create: [...participantData, ...teamData],
-        },
+    // Create streamer data
+    const streamerData =
+      data.streamerIds && data.streamerIds.length > 0
+        ? data.streamerIds.map((streamerId) => ({
+            streamerId,
+            status: "SCHEDULED" as const,
+            scheduledStreamLive: true,
+          }))
+        : [];
+
+    const baseCreateData = {
+      groupId: data.groupId,
+      matchDate: data.matchDate,
+      civDraftKey: data.civDraftKey ?? "",
+      mapDraftKey: data.mapDraftKey ?? "",
+      status: data.status ?? "PENDING",
+      comment: data.comment,
+      adminComment: data.adminComment,
+      isManualMatch: data.isManualMatch ?? false,
+      TournamentMatchParticipant: {
+        create: [...participantData, ...teamData],
       },
+    };
+
+    // Only add TournamentMatchStream if there are streamers to create
+    const createData =
+      streamerData.length > 0
+        ? {
+            ...baseCreateData,
+            TournamentMatchStream: {
+              create: streamerData,
+            },
+          }
+        : baseCreateData;
+
+    return db.tournamentMatch.create({
+      data: createData,
       include: {
         TournamentMatchParticipant: {
           include: {
@@ -205,6 +238,11 @@ export const tournamentMatchRepository = {
               },
             },
             team: true,
+          },
+        },
+        TournamentMatchStream: {
+          include: {
+            streamer: true,
           },
         },
       },
@@ -253,6 +291,11 @@ export const tournamentMatchRepository = {
               team: true,
             },
           },
+          TournamentMatchStream: {
+            include: {
+              streamer: true,
+            },
+          },
         },
       });
 
@@ -286,6 +329,28 @@ export const tournamentMatchRepository = {
               lostScore: scoreData.lostScore,
               isWinner: scoreData.isWinner,
             },
+          });
+        }
+      }
+
+      // Update streamers if provided
+      if (data.streamerIds !== undefined) {
+        // First, delete all existing streamers for this match
+        await tx.tournamentMatchStream.deleteMany({
+          where: { tournamentMatchId: id },
+        });
+
+        // Then create new streamer assignments
+        if (data.streamerIds && data.streamerIds.length > 0) {
+          const streamerAssignments = data.streamerIds.map((streamerId) => ({
+            tournamentMatchId: id,
+            streamerId,
+            status: "SCHEDULED" as const,
+            scheduledStreamLive: true,
+          }));
+
+          await tx.tournamentMatchStream.createMany({
+            data: streamerAssignments,
           });
         }
       }

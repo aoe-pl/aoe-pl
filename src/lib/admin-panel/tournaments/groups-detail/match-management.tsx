@@ -177,7 +177,7 @@ export function MatchManagement({
 
   const handleSubmit = (data: TournamentMatchFormSchema) => {
     if (editingMatch) {
-      updateMatch({
+      const updateData = {
         id: editingMatch.id,
         data: {
           matchDate: data.matchDate,
@@ -186,12 +186,14 @@ export function MatchManagement({
           status: data.status,
           comment: data.comment,
           adminComment: data.adminComment,
+          streamerIds: data.streamerIds,
           participantScores: data.participantScores,
           teamScores: data.teamScores,
         },
-      });
+      };
+      updateMatch(updateData);
     } else {
-      createMatch({
+      const createData = {
         data: {
           groupId,
           matchDate: data.matchDate,
@@ -202,11 +204,13 @@ export function MatchManagement({
           adminComment: data.adminComment,
           participantIds: data.participantIds,
           teamIds: data.teamIds,
+          streamerIds: data.streamerIds,
           isManualMatch: true,
           participantScores: data.participantScores,
           teamScores: data.teamScores,
         },
-      });
+      };
+      createMatch(createData);
     }
   };
 
