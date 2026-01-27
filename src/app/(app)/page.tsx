@@ -3,8 +3,10 @@ import { FeaturedNews } from "@/components/home/featured-news";
 import { TopPlayers, TopPlayersLoading } from "@/components/home/top-players";
 import { UpcomingMatches } from "@/components/home/upcoming-matches";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function Home() {
+  const t = useTranslations("home.hero");
   return (
     <div className="bg-background text-foreground min-h-screen">
       <header className="relative overflow-hidden pt-20">
@@ -28,7 +30,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-6xl px-4 py-16">
           <div className="mb-8 text-center">
             <h1 className="text-foreground mb-4 text-4xl font-bold text-balance drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
-              Age of Empires 2
+              {t("title")}
             </h1>
             <div className="mb-6 flex items-center justify-center gap-3">
               <div
@@ -36,7 +38,7 @@ export default function Home() {
                 aria-hidden="true"
               />
               <span className="text-primary text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
-                Polska Społeczność
+                {t("subtitle")}
               </span>
               <div
                 className="from-primary to-accent h-1 w-12 bg-gradient-to-l"

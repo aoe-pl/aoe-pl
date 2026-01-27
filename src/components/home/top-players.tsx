@@ -1,22 +1,27 @@
 import { Medal, Loader2 } from "lucide-react";
 import { getTopPolishPlayers } from "@/lib/helpers/aoe2-api";
+import { useTranslations } from "next-intl";
 
 export function TopPlayersLoading() {
+  const t = useTranslations("home.top_players");
+
   return (
     <div className="panel">
       <div className="panel-header flex items-center gap-2">
         <Medal className="h-5 w-5" />
-        Top 10 Polskich Graczy
+        {t("title")}
       </div>
       <div className="flex items-center justify-center py-12">
         <Loader2 className="text-accent h-8 w-8 animate-spin" />
-        <span className="text-muted-foreground ml-3">Ładowanie graczy...</span>
+        <span className="text-muted-foreground ml-3">{t("loading")}</span>
       </div>
     </div>
   );
 }
 
 export async function TopPlayers() {
+  const t = useTranslations("home.top_players");
+
   try {
     const players = await getTopPolishPlayers(10);
 
@@ -24,7 +29,7 @@ export async function TopPlayers() {
       <div className="panel">
         <div className="panel-header flex items-center gap-2">
           <Medal className="h-5 w-5 text-white" />
-          Top 10 Polskich Graczy
+          {t("title")}
         </div>
 
         <div className="space-y-3">
@@ -53,13 +58,15 @@ export async function TopPlayers() {
                       {player.name}
                     </div>
                     <div className="text-muted-foreground text-xs">
-                      {player.wins} zwycięstw
+                      {t("wins", { count: player.wins })}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-accent font-bold">{player.rating}</div>
-                  <div className="text-muted-foreground text-xs">MMR</div>
+                  <div className="text-muted-foreground text-xs">
+                    {t("mmr")}
+                  </div>
                 </div>
               </div>
             );
@@ -73,10 +80,10 @@ export async function TopPlayers() {
       <div className="panel">
         <div className="panel-header flex items-center gap-2">
           <Medal className="h-5 w-5" />
-          Top 10 Polskich Graczy
+          {t("title")}
         </div>
         <div className="text-muted-foreground py-12 text-center">
-          Nie udało się załadować graczy
+          {t("error")}
         </div>
       </div>
     );

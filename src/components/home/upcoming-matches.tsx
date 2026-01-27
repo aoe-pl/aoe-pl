@@ -1,4 +1,5 @@
 import { Sword, Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const mockUpcomingMatches = [
   {
@@ -20,11 +21,13 @@ const mockUpcomingMatches = [
 ];
 
 export function UpcomingMatches() {
+  const t = useTranslations("home.upcoming_matches");
+
   return (
     <div className="panel">
       <div className="panel-header flex items-center gap-2">
         <Sword className="h-5 w-5" />
-        Nadchodzące Mecze
+        {t("title")}
       </div>
 
       <div className="space-y-3">
