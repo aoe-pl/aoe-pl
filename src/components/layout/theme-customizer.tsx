@@ -1,0 +1,134 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+const DEFAULT_COLORS = {
+  primary: "#e85d4d",
+  accent: "#f07c5f",
+};
+
+export function ThemeCustomizer() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState(DEFAULT_COLORS.primary);
+  const [accentColor, setAccentColor] = useState(DEFAULT_COLORS.accent);
+
+  useEffect(() => {
+    const savedPrimary = localStorage.getItem("theme-primary");
+    const savedAccent = localStorage.getItem("theme-accent");
+
+    if (savedPrimary) {
+      setPrimaryColor(savedPrimary);
+      applyColor("--primary", savedPrimary);
+    }
+    if (savedAccent) {
+      setAccentColor(savedAccent);
+      applyColor("--accent", savedAccent);
+    }
+  }, []);
+
+  const applyColor = (variable: string, hexColor: string) => {
+    document.documentElement.style.setProperty(variable, hexColor);
+  };
+
+  const handlePrimaryChange = (value: string) => {
+    setPrimaryColor(value);
+    applyColor("--primary", value);
+    localStorage.setItem("theme-primary", value);
+  };
+
+  const handleAccentChange = (value: string) => {
+    setAccentColor(value);
+    applyColor("--accent", value);
+    localStorage.setItem("theme-accent", value);
+  };
+
+  const resetColors = () => {
+    document.documentElement.style.removeProperty("--primary");
+    document.documentElement.style.removeProperty("--accent");
+    localStorage.removeItem("theme-primary");
+    localStorage.removeItem("theme-accent");
+
+    setPrimaryColor(DEFAULT_COLORS.primary);
+    setAccentColor(DEFAULT_COLORS.accent);
+  };
+
+  return (
+    <Popover
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className="fixed right-4 bottom-4 z-50 h-12 w-12 rounded-full shadow-lg"
+        >
+          <Palette className="h-5 w-5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-80"
+        align="end"
+      >
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Dostosuj kolory</h3>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Kolor główny (Primary)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={primaryColor}
+                onChange={(e) => handlePrimaryChange(e.target.value)}
+                className="h-10 w-20 cursor-pointer rounded border"
+              />
+              <div className="text-muted-foreground flex-1 font-mono text-xs">
+                {primaryColor}
+              </div>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              Przyciski, akcenty główne
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Kolor akcentu (Accent)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={accentColor}
+                onChange={(e) => handleAccentChange(e.target.value)}
+                className="h-10 w-20 cursor-pointer rounded border"
+              />
+              <div className="text-muted-foreground flex-1 font-mono text-xs">
+                {accentColor}
+              </div>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              Nagłówki, wyróżnienia tekstu
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={resetColors}
+          >
+            Przywróć domyślne
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}

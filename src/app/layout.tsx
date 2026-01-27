@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { auth } from "@/server/auth";
 import { Navigation } from "@/components/layout/navigation";
+import { ThemeCustomizer } from "@/components/layout/theme-customizer";
 
 export const metadata: Metadata = {
   title: "AoE2 - Polska",
@@ -35,6 +36,7 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </NextIntlClientProvider>
+        <ThemeCustomizer />
       </body>
     </html>
   );
