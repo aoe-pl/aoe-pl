@@ -5,10 +5,11 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 import { auth } from "@/server/auth";
 import { Navigation } from "@/components/layout/navigation";
 import { ThemeCustomizer } from "@/components/layout/theme-customizer";
+import { api } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "AoE2 - Polska",
@@ -24,7 +25,9 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
+  const messages = await getMessages();
   const session = await auth();
+  const isAdmin = session ? await api.users.isAdmin() : false;
 
   return (
     <html
@@ -32,11 +35,14 @@ export default async function RootLayout({
       className={`${geist.variable} dark bg-background text-foreground`}
     >
       <body>
-        <Navigation session={session} />
-        <NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>
+          <Navigation
+            session={session}
+            isAdmin={isAdmin}
+          />
           <TRPCReactProvider>{children}</TRPCReactProvider>
+          <ThemeCustomizer />
         </NextIntlClientProvider>
-        <ThemeCustomizer />
       </body>
     </html>
   );

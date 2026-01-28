@@ -1,4 +1,14 @@
 {
+  "navigation": {
+    "site_name": "AoE2 Polska",
+    "home": "Główna",
+    "news": "Wiadomości",
+    "tournaments": "Turnieje",
+    "admin": "Admin",
+    "logged_in_as": "Zalogowano jako",
+    "logout": "Wyloguj",
+    "login": "Zaloguj się"
+  },
   "home": {
     "hero": {
       "title": "Age of Empires 2",
