@@ -37,15 +37,12 @@ export function ThemeCustomizer() {
     document.documentElement.style.setProperty(variable, hexColor);
   };
 
-  const handlePrimaryChange = (value: string) => {
+  const handleColorChange = (value: string) => {
     setPrimaryColor(value);
-    applyColor("--primary", value);
-    localStorage.setItem("theme-primary", value);
-  };
-
-  const handleAccentChange = (value: string) => {
     setAccentColor(value);
+    applyColor("--primary", value);
     applyColor("--accent", value);
+    localStorage.setItem("theme-primary", value);
     localStorage.setItem("theme-accent", value);
   };
 
@@ -78,46 +75,19 @@ export function ThemeCustomizer() {
         align="end"
       >
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Dostosuj kolory</h3>
-
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Kolor główny (Primary)
-            </label>
+            <label className="text-sm font-medium">Kolor</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={primaryColor}
-                onChange={(e) => handlePrimaryChange(e.target.value)}
+                onChange={(e) => handleColorChange(e.target.value)}
                 className="h-10 w-20 cursor-pointer rounded border"
               />
               <div className="text-muted-foreground flex-1 font-mono text-xs">
                 {primaryColor}
               </div>
             </div>
-            <p className="text-muted-foreground text-xs">
-              Przyciski, akcenty główne
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Kolor akcentu (Accent)
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={accentColor}
-                onChange={(e) => handleAccentChange(e.target.value)}
-                className="h-10 w-20 cursor-pointer rounded border"
-              />
-              <div className="text-muted-foreground flex-1 font-mono text-xs">
-                {accentColor}
-              </div>
-            </div>
-            <p className="text-muted-foreground text-xs">
-              Nagłówki, wyróżnienia tekstu
-            </p>
           </div>
 
           <Button
