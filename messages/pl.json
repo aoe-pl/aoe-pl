@@ -1,4 +1,35 @@
 {
+  "navigation": {
+    "site_name": "AoE2 Polska",
+    "home": "Główna",
+    "news": "Wiadomości",
+    "tournaments": "Turnieje",
+    "admin": "Admin",
+    "logged_in_as": "Zalogowano jako",
+    "logout": "Wyloguj",
+    "login": "Zaloguj się"
+  },
+  "home": {
+    "hero": {
+      "title": "Age of Empires 2",
+      "subtitle": "Polska Społeczność"
+    },
+    "news": {
+      "title": "Newsy",
+      "all_news_button": "Wszystkie wiadomości",
+      "hours_ago": "{hours, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}"
+    },
+    "upcoming_matches": {
+      "title": "Nadchodzące Mecze"
+    },
+    "top_players": {
+      "title": "Top 10 Polskich Graczy",
+      "loading": "Ładowanie graczy...",
+      "error": "Nie udało się załadować graczy",
+      "wins": "{count} zwycięstw",
+      "mmr": "MMR"
+    }
+  },
   "admin": {
     "sidebar": {
       "dashboard": "Dashboard",

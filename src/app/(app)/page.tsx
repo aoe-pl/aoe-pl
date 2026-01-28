@@ -1,82 +1,62 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { FeaturedNews } from "@/components/home/featured-news";
+import { TopPlayers, TopPlayersLoading } from "@/components/home/top-players";
+import { UpcomingMatches } from "@/components/home/upcoming-matches";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 
-import { auth } from "@/server/auth";
-import { api } from "@/trpc/server";
-import { Button } from "@/components/ui/button";
-import { TRPCError } from "@trpc/server";
-
-export default async function Home() {
-  const hello = await api.test.hello({ text: "from tRPC" });
-
-  let secretMessage = null;
-
-  try {
-    secretMessage = await api.test.getSecretMessage();
-  } catch (error) {
-    if (error instanceof TRPCError) {
-      if (error.code === "UNAUTHORIZED") {
-        redirect("/api/auth/signin");
-      } else {
-        throw error;
-      }
-    } else {
-      throw error;
-    }
-  }
-
-  const session = await auth();
-
+export default function Home() {
+  const t = useTranslations("home.hero");
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-2xl text-white">
-            {hello ? hello.greeting : "Loading tRPC query..."}
-          </p>
+    <div className="bg-background text-foreground min-h-screen">
+      <header className="relative overflow-hidden pt-20">
+        <Image
+          src="/aoe2-bg.png"
+          alt=""
+          fill
+          priority
+          className="object-cover object-[center_30%]"
+          quality={75}
+        />
+        <div className="from-background/80 via-background/60 to-background absolute inset-0 bg-gradient-to-b via-50%" />
+        <div className="from-background absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t to-transparent" />
 
-          <div className="flex flex-col items-center justify-center gap-4">
-            <p className="text-center text-2xl text-white">
-              {session && <span>Logged in as {session.user?.name}</span>}
-            </p>
-            <Link
-              href={session ? "/api/auth/signout" : "/api/auth/signin"}
-              className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-            >
-              {session ? "Sign out" : "Sign in"}
-            </Link>
+        <div className="relative mx-auto max-w-6xl px-4 py-16">
+          <div className="mb-8 text-center">
+            <h1 className="text-foreground mb-4 text-4xl font-bold text-balance drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
+              {t("title")}
+            </h1>
+            <div className="mb-6 flex items-center justify-center gap-3">
+              <div
+                className="from-primary to-accent h-1 w-12 bg-gradient-to-r"
+                aria-hidden="true"
+              />
+              <span className="text-primary text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
+                {t("subtitle")}
+              </span>
+              <div
+                className="from-primary to-accent h-1 w-12 bg-gradient-to-l"
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </div>
-        <Button>Test</Button>
-        {session?.user && <p>{secretMessage}</p>}
-      </div>
-    </main>
+      </header>
+
+      <main className="mx-auto -mt-4 max-w-6xl px-4 py-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <section className="space-y-8 lg:col-span-2">
+            <FeaturedNews />
+            <UpcomingMatches />
+          </section>
+
+          <aside>
+            <Suspense fallback={<TopPlayersLoading />}>
+              <TopPlayers />
+            </Suspense>
+          </aside>
+        </div>
+      </main>
+    </div>
   );
 }

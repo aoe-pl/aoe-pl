@@ -17,7 +17,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="bg-sidebar text-sidebar-foreground fixed top-0 left-0 z-40 flex h-full w-16 min-w-[64px] flex-col transition-all duration-300 md:w-64">
+    <aside className="bg-sidebar text-sidebar-foreground fixed top-24 left-0 z-40 flex h-[calc(100vh-6rem)] w-16 min-w-[64px] flex-col transition-all duration-300 md:w-64">
       <nav className="flex flex-1 flex-col overflow-y-auto">
         <NavItem
           href="/admin"
