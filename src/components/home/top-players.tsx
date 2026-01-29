@@ -1,5 +1,5 @@
 import { Medal, Loader2 } from "lucide-react";
-import { getTopPolishPlayers } from "@/lib/helpers/aoe2-api";
+import { api } from "@/trpc/server";
 import { useTranslations } from "next-intl";
 
 export function TopPlayersLoading() {
@@ -23,7 +23,7 @@ export async function TopPlayers() {
   const t = useTranslations("home.top_players");
 
   try {
-    const players = await getTopPolishPlayers(10);
+    const players = await api.leaderboard.getTopPolishPlayers({ count: 10 });
 
     return (
       <div className="panel">

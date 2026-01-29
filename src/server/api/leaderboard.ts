@@ -1,4 +1,7 @@
-interface Aoe2Player {
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+
+interface LeaderboardPlayer {
   leaderboardId: string;
   profileId: number;
   name: string;
@@ -11,15 +14,17 @@ interface Aoe2Player {
   streak: number;
 }
 
-interface Aoe2LeaderboardResponse {
-  players: Aoe2Player[];
+interface LeaderboardResponse {
+  players: LeaderboardPlayer[];
   total: number;
   page: number;
   perPage: number;
 }
 
-export async function getTopPolishPlayers(count = 10): Promise<Aoe2Player[]> {
-  const polishPlayers: Aoe2Player[] = [];
+async function fetchTopPolishPlayers(
+  count: number,
+): Promise<LeaderboardPlayer[]> {
+  const polishPlayers: LeaderboardPlayer[] = [];
   const maxPages = 20;
 
   let page = 1;
@@ -44,7 +49,7 @@ export async function getTopPolishPlayers(count = 10): Promise<Aoe2Player[]> {
         break;
       }
 
-      const data = (await response.json()) as Aoe2LeaderboardResponse;
+      const data = (await response.json()) as LeaderboardResponse;
       const polishFromPage = data.players.filter((p) => p.country === "pl");
 
       polishPlayers.push(...polishFromPage);
@@ -63,4 +68,14 @@ export async function getTopPolishPlayers(count = 10): Promise<Aoe2Player[]> {
   return polishPlayers.slice(0, count);
 }
 
-export type { Aoe2Player };
+export const leaderboardRouter = createTRPCRouter({
+  getTopPolishPlayers: publicProcedure
+    .input(
+      z.object({
+        count: z.number().min(1).max(50).default(10),
+      }),
+    )
+    .query(async ({ input }) => {
+      return fetchTopPolishPlayers(input.count);
+    }),
+});
