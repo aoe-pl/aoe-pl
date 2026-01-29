@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { storage } from "@/lib/local-storage";
 
 const DEFAULT_COLORS = {
   primary: "#e85d4d",
@@ -20,8 +21,8 @@ export function ThemeCustomizer() {
   const [accentColor, setAccentColor] = useState(DEFAULT_COLORS.accent);
 
   useEffect(() => {
-    const savedPrimary = localStorage.getItem("theme-primary");
-    const savedAccent = localStorage.getItem("theme-accent");
+    const savedPrimary = storage.getItem("themePrimary");
+    const savedAccent = storage.getItem("themeAccent");
 
     if (savedPrimary) {
       setPrimaryColor(savedPrimary);
@@ -42,15 +43,15 @@ export function ThemeCustomizer() {
     setAccentColor(value);
     applyColor("--primary", value);
     applyColor("--accent", value);
-    localStorage.setItem("theme-primary", value);
-    localStorage.setItem("theme-accent", value);
+    storage.setItem("themePrimary", value);
+    storage.setItem("themeAccent", value);
   };
 
   const resetColors = () => {
     document.documentElement.style.removeProperty("--primary");
     document.documentElement.style.removeProperty("--accent");
-    localStorage.removeItem("theme-primary");
-    localStorage.removeItem("theme-accent");
+    storage.removeItem("themePrimary");
+    storage.removeItem("themeAccent");
 
     setPrimaryColor(DEFAULT_COLORS.primary);
     setAccentColor(DEFAULT_COLORS.accent);
