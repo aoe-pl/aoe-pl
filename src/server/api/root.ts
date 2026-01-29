@@ -6,6 +6,7 @@ import { mapRouter } from "./map";
 import { civRouter } from "./civ";
 import { baseMapRouter } from "./baseMap";
 import { rolesRouter } from "./roles";
+import { leaderboardRouter } from "./leaderboard";
 
 /**
  * This is the primary router for your server.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   baseMaps: baseMapRouter,
   civs: civRouter,
   roles: rolesRouter,
+  leaderboard: leaderboardRouter,
 });
 
 // export type definition of API
