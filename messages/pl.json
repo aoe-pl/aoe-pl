@@ -20,7 +20,10 @@
       "hours_ago": "{hours, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}"
     },
     "upcoming_matches": {
-      "title": "Nadchodzące Mecze"
+      "title": "Nadchodzące Mecze",
+      "loading": "Ładowanie meczów...",
+      "no_matches": "Brak zaplanowanych meczów",
+      "vs": "vs"
     },
     "top_players": {
       "title": "Top 10 Polskich Graczy",
