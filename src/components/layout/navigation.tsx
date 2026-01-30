@@ -36,7 +36,7 @@ export function Navigation({ session, isAdmin }: NavigationProps) {
             href="/"
             className="group flex items-center gap-3"
           >
-            <div className="group-hover:shadow-primary/50 flex h-12 w-12 transform items-center justify-center overflow-hidden rounded-lg shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg shadow-lg">
               <Image
                 src="/logo.png"
                 alt="AoE2 Polska Logo"
@@ -129,7 +129,7 @@ function DesktopNavigation({
 
       <Button
         asChild
-        className="from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground hover:shadow-primary/50 ml-4 transform bg-gradient-to-r font-semibold shadow-lg transition-all duration-300 hover:scale-105"
+        className="text-primary-foreground ml-4 font-semibold shadow-lg"
       >
         <Link href={session ? "/api/auth/signout" : "/api/auth/signin"}>
           {session ? t("logout") : t("login")}
@@ -208,7 +208,7 @@ function MobileMenu({
 
         <Button
           asChild
-          className="from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground mx-4 bg-gradient-to-r font-semibold shadow-lg"
+          className="text-primary-foreground bg-primary mx-4 font-semibold"
         >
           <Link
             href={session ? "/api/auth/signout" : "/api/auth/signin"}
