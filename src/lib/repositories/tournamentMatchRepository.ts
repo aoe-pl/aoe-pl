@@ -1,6 +1,47 @@
 import { db } from "@/server/db";
-import type { MatchStatus } from "@prisma/client";
+import type { MatchStatus, Prisma } from "@prisma/client";
 import { createAoe2RecsService } from "@/lib/storage";
+
+const upcomingMatchesInclude = {
+  TournamentMatchParticipant: {
+    include: {
+      participant: {
+        include: {
+          user: true,
+          team: true,
+        },
+      },
+      team: {
+        include: {
+          TournamentParticipant: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  group: {
+    include: {
+      matchMode: true,
+      stage: {
+        include: {
+          tournament: {
+            include: {
+              matchMode: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  TournamentMatchMode: true,
+} satisfies Prisma.TournamentMatchInclude;
+
+export type UpcomingMatch = Prisma.TournamentMatchGetPayload<{
+  include: typeof upcomingMatchesInclude;
+}>;
 
 export type TournamentMatchCreateData = {
   groupId?: string;
@@ -42,6 +83,66 @@ export type GameData = {
 };
 
 export const tournamentMatchRepository = {
+  async getUpcomingMatches(): Promise<UpcomingMatch[]> {
+    const now = new Date();
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59);
+
+    // Get all matches today
+    const todayMatches = await db.tournamentMatch.findMany({
+      where: {
+        matchDate: {
+          gte: now,
+          lte: endOfToday,
+        },
+        status: {
+          in: ["PENDING", "SCHEDULED"],
+        },
+        group: {
+          stage: {
+            tournament: {
+              status: "ACTIVE",
+              isVisible: true,
+            },
+          },
+        },
+      },
+      include: upcomingMatchesInclude,
+      orderBy: { matchDate: "asc" },
+    });
+
+    // Get future matches (up to 5 minus today's count)
+    const futureMatchesLimit = Math.max(0, 5 - todayMatches.length);
+
+    if (futureMatchesLimit === 0) {
+      return todayMatches;
+    }
+
+    const futureMatches = await db.tournamentMatch.findMany({
+      where: {
+        matchDate: {
+          gt: endOfToday,
+        },
+        status: {
+          in: ["PENDING", "SCHEDULED"],
+        },
+        group: {
+          stage: {
+            tournament: {
+              status: "ACTIVE",
+              isVisible: true,
+            },
+          },
+        },
+      },
+      include: upcomingMatchesInclude,
+      orderBy: { matchDate: "asc" },
+      take: futureMatchesLimit,
+    });
+
+    return todayMatches.concat(futureMatches);
+  },
+
   async getMatchParticipants(id: string) {
     return db.tournamentMatchParticipant.findMany({
       where: { matchId: id },

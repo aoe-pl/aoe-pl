@@ -1,27 +1,46 @@
-import { Sword, Clock } from "lucide-react";
-import { useTranslations } from "next-intl";
+"use client";
 
-const mockUpcomingMatches = [
-  {
-    id: 1,
-    player1: "amon",
-    player2: "Shashlyk",
-    time: "Dziś o 19:00",
-    tournament: "Red Ants 1",
-    bestOf: "5",
-  },
-  {
-    id: 2,
-    player1: "GwizdeK",
-    player2: "aNNekeG",
-    time: "Jutro o 18:30",
-    tournament: "Purple Ants",
-    bestOf: "9",
-  },
-];
+import { Sword, Clock } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { api } from "@/trpc/react";
+import { isBrightColor } from "@/lib/utils";
+import { formatMatchModeName } from "@/lib/helpers/match-mode";
 
 export function UpcomingMatches() {
   const t = useTranslations("home.upcoming_matches");
+  const tGlobal = useTranslations();
+  const locale = useLocale();
+  const { data: matches, isLoading } =
+    api.tournaments.matches.upcoming.useQuery();
+
+  if (isLoading) {
+    return (
+      <div className="panel">
+        <div className="panel-header flex items-center gap-2">
+          <Sword className="h-5 w-5" />
+          {t("title")}
+        </div>
+        <div className="text-muted-foreground p-4 text-center text-sm">
+          {t("loading")}
+        </div>
+      </div>
+    );
+  }
+
+  // If no matches are found
+  if (!matches || matches.length === 0) {
+    return (
+      <div className="panel">
+        <div className="panel-header flex items-center gap-2">
+          <Sword className="h-5 w-5" />
+          {t("title")}
+        </div>
+        <div className="text-muted-foreground p-4 text-center text-sm">
+          {t("no_matches")}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="panel">
@@ -30,41 +49,91 @@ export function UpcomingMatches() {
         {t("title")}
       </div>
 
-      <div className="space-y-3">
-        {mockUpcomingMatches.map((match) => (
-          <div
-            key={match.id}
-            className="bg-background/50 border-border/50 hover:border-accent/50 rounded-lg border p-4 transition-colors"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="text-foreground text-sm font-semibold">
-                    {match.player1}
-                  </div>
-                  <span className="text-muted-foreground text-xs">vs</span>
-                  <div className="text-foreground text-sm font-semibold">
-                    {match.player2}
-                  </div>
-                </div>
+      <div className="space-y-2">
+        {matches.map((match) => {
+          const group = match.group?.name;
 
-                <div className="text-muted-foreground mb-2 flex items-center gap-2 text-xs">
-                  <Clock className="h-3 w-3" />
-                  <span>{match.time}</span>
-                </div>
+          const matchMode =
+            match.TournamentMatchMode ??
+            match.group?.matchMode ??
+            match.group?.stage?.tournament?.matchMode;
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="bg-primary/20 text-accent rounded px-2 py-1 text-xs">
-                    {match.tournament}
+          if (matchMode == null) return null;
+
+          const matchModeText = formatMatchModeName(
+            matchMode.mode,
+            matchMode.gameCount,
+            (key, params) => tGlobal(key, params),
+          );
+
+          const tournament = match.group?.stage?.tournament?.name;
+          const participants = match.TournamentMatchParticipant;
+          const groupColor = match.group?.color;
+
+          const player1 =
+            participants[0]?.participant?.user?.name ??
+            participants[0]?.team?.name ??
+            "TBD";
+
+          const player2 =
+            participants[1]?.participant?.user?.name ??
+            participants[1]?.team?.name ??
+            "TBD";
+
+          const timeText = match.matchDate
+            ? match.matchDate.toLocaleString(locale, {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "";
+
+          const tagStyle =
+            "bg-secondary/40 text-foreground/80 rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap";
+
+          return (
+            <div
+              key={match.id}
+              className="bg-background/50 border-border/50 rounded-lg border p-3 transition-colors"
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <span className="text-foreground text-sm font-semibold">
+                  {player1}
+                </span>
+                <span className="text-muted-foreground text-xs">{t("vs")}</span>
+                <span className="text-foreground text-sm font-semibold">
+                  {player2}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {timeText && (
+                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <Clock className="h-3 w-3" />
+                    <span className="whitespace-nowrap">{timeText}</span>
+                  </div>
+                )}
+
+                {tournament && <span className={tagStyle}>{tournament}</span>}
+
+                {group && (
+                  <span
+                    className="rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap"
+                    style={{
+                      backgroundColor: groupColor!,
+                      color: isBrightColor(groupColor!) ? "black" : "white",
+                    }}
+                  >
+                    {group}
                   </span>
-                  <span className="bg-secondary/40 text-foreground/80 rounded px-2 py-1 text-xs">
-                    Bo{match.bestOf}
-                  </span>
-                </div>
+                )}
+
+                <span className={tagStyle}>{matchModeText}</span>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

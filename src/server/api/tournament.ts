@@ -374,6 +374,9 @@ export const tournamentRouter = createTRPCRouter({
   }),
 
   matches: createTRPCRouter({
+    upcoming: publicProcedure.query(async () => {
+      return tournamentMatchRepository.getUpcomingMatches();
+    }),
     list: publicProcedure
       .input(
         z.object({
