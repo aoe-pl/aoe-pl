@@ -1,6 +1,7 @@
 import { Flame, ArrowRight } from "lucide-react";
 import { Button } from "../ui";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 // Mock data - will be replaced with real news from database
 const mockNews = [
@@ -70,9 +71,14 @@ export function FeaturedNews() {
           ),
         )}
 
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground w-full gap-2">
-          {t("all_news_button")}
-          <ArrowRight className="h-4 w-4" />
+        <Button
+          asChild
+          className="bg-primary hover:bg-primary/90 text-primary-foreground w-full gap-2"
+        >
+          <Link href="/news">
+            {t("all_news_button")}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
     </div>
