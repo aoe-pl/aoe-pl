@@ -458,5 +458,39 @@
       "team": "Drużynowy",
       "admin": "Tylko admin"
     }
+  },
+  "news": {
+    "detail": {
+      "not_found": "Nie znaleziono wiadomości",
+      "back_to_list": "Wróć do listy"
+    },
+    "dialog": {
+      "add_title": "Dodaj wiadomość",
+      "edit_title": "Edytuj wiadomość",
+      "delete_title": "Czy na pewno?",
+      "delete_description": "Tej operacji nie można cofnąć. Wiadomość zostanie trwale usunięta.",
+      "delete_confirm": "Usuń",
+      "delete_cancel": "Anuluj",
+      "validation": {
+        "title_required": "Tytuł jest wymagany",
+        "content_required": "Treść jest wymagana"
+      },
+      "form": {
+        "title_label": "Tytuł",
+        "title_placeholder": "Tytuł wiadomości",
+        "description_label": "Krótki opis",
+        "description_placeholder": "Krótki opis widoczny na liście (opcjonalnie)",
+        "content_label": "Treść",
+        "content_placeholder": "Pełna treść wiadomości",
+        "featured_label": "Wyróżniona wiadomość",
+        "featured_description": "Wyróżnione wiadomości pojawiają się na górze listy.",
+        "submit_add": "Dodaj wiadomość",
+        "submit_save": "Zapisz zmiany"
+      },
+      "success": {
+        "added": "Wiadomość dodana",
+        "updated": "Wiadomość zaktualizowana"
+      }
+    }
   }
 }

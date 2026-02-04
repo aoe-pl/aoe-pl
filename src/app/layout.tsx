@@ -10,6 +10,7 @@ import { auth } from "@/server/auth";
 import { Navigation } from "@/components/layout/navigation";
 import { ThemeCustomizer } from "@/components/layout/theme-customizer";
 import { api } from "@/trpc/server";
+import { NewsProvider } from "@/lib/store/news-store";
 
 export const metadata: Metadata = {
   title: "AoE2 - Polska",
@@ -40,7 +41,9 @@ export default async function RootLayout({
             session={session}
             isAdmin={isAdmin}
           />
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <NewsProvider>
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+          </NewsProvider>
           <ThemeCustomizer />
         </NextIntlClientProvider>
       </body>
