@@ -5,10 +5,10 @@ import { initialNews, type NewsPost } from "@/lib/mock-news";
 
 interface NewsState {
   posts: NewsPost[];
-  addPost: (post: Omit<NewsPost, "id" | "createdAt" | "updatedAt">) => void;
+  addPost: (post: Omit<NewsPost, "id" | "createdAt">) => void;
   updatePost: (
     id: string,
-    post: Partial<Omit<NewsPost, "id" | "createdAt" | "updatedAt">>,
+    post: Partial<Omit<NewsPost, "id" | "createdAt">>,
   ) => void;
   deletePost: (id: string) => void;
   getPost: (id: string) => NewsPost | undefined;
@@ -21,30 +21,23 @@ const NewsContext = createContext<NewsState | null>(null);
 
 export function NewsProvider({ children }: { children: React.ReactNode }) {
   const [posts, setPosts] = useState<NewsPost[]>(initialNews);
+  const [nextId, setNextId] = useState(initialNews.length + 1);
 
-  const addPost = (post: Omit<NewsPost, "id" | "createdAt" | "updatedAt">) => {
-    setPosts((prev) => [
-      {
-        id: Math.random().toString(36).substring(7),
-        ...post,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      ...prev,
-    ]);
+  const addPost = (post: Omit<NewsPost, "id" | "createdAt">) => {
+    const newPost = {
+      id: nextId.toString(),
+      ...post,
+      createdAt: new Date().toISOString(),
+    };
+    setPosts((prev) => [newPost, ...prev]);
+    setNextId((prev) => prev + 1);
   };
 
   const updatePost = (
     id: string,
-    post: Partial<Omit<NewsPost, "id" | "createdAt" | "updatedAt">>,
+    post: Partial<Omit<NewsPost, "id" | "createdAt">>,
   ) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, ...post, updatedAt: new Date().toISOString() }
-          : p,
-      ),
-    );
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...post } : p)));
   };
 
   const deletePost = (id: string) => {
