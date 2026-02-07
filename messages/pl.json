@@ -17,6 +17,7 @@
     "news": {
       "title": "Najnowsze wiadomości",
       "all_news_button": "Wszystkie wiadomości",
+      "no_news": "Brak wiadomości",
       "hours_ago": "{hours, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}"
     },
     "upcoming_matches": {
@@ -460,6 +461,7 @@
     }
   },
   "news": {
+    "title": "Wiadomości",
     "detail": {
       "not_found": "Nie znaleziono wiadomości",
       "back_to_list": "Wróć do listy",

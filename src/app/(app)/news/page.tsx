@@ -4,7 +4,7 @@ import { auth } from "@/server/auth";
 import { api } from "@/trpc/server";
 
 export default async function NewsPage() {
-  const t = await getTranslations("home.news");
+  const t = await getTranslations("news");
   const session = await auth();
   const isAdmin = session ? await api.users.isAdmin() : false;
 
