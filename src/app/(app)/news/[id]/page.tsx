@@ -6,6 +6,12 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
+
+const MDPreview = dynamic(
+  () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
+  { ssr: false },
+);
 
 export default function NewsDetailClient() {
   const t = useTranslations("news.detail");
@@ -49,8 +55,11 @@ export default function NewsDetailClient() {
 
         <h1 className="mb-6 text-4xl font-bold">{newsItem.title}</h1>
 
-        <div className="text-foreground/90 leading-relaxed whitespace-pre-wrap">
-          {newsItem.content}
+        <div
+          className="leading-relaxed"
+          data-color-mode="dark"
+        >
+          <MDPreview source={newsItem.content} />
         </div>
       </article>
     </div>

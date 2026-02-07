@@ -482,8 +482,8 @@
         "description_placeholder": "Krótki opis widoczny na liście (opcjonalnie)",
         "content_label": "Treść",
         "content_placeholder": "Pełna treść wiadomości",
-        "featured_label": "Wyróżniona wiadomość",
-        "featured_description": "Wyróżnione wiadomości pojawiają się na górze listy.",
+        "featured_label": "Przypięta wiadomość",
+        "featured_description": "Przypięte wiadomości pojawiają się na górze listy.",
         "submit_add": "Dodaj wiadomość",
         "submit_save": "Zapisz zmiany"
       },

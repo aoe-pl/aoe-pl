@@ -5,6 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 import {
   Form,
   FormControl,
@@ -110,7 +113,7 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{id ? t("edit_title") : t("add_title")}</DialogTitle>
         </DialogHeader>
@@ -161,11 +164,17 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
                 <FormItem>
                   <FormLabel>{t("form.content_label")}</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder={t("form.content_placeholder")}
-                      className="min-h-[150px]"
-                      {...field}
-                    />
+                    <div
+                      data-color-mode="dark"
+                      className="[&_.w-md-editor]:!bg-background [&_.w-md-editor]:!border-border [&_.w-md-editor-toolbar]:!bg-background/50 [&_.wmde-markdown]:!bg-background [&_.w-md-editor-text]:!bg-background [&_.w-md-editor-text-pre]:!bg-background"
+                    >
+                      <MDEditor
+                        value={field.value}
+                        onChange={(val) => field.onChange(val ?? "")}
+                        preview="edit"
+                        height={300}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
