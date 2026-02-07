@@ -3,11 +3,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
-
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Form,
   FormControl,
@@ -28,9 +28,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 const formSchema = z.object({
   title: z.string().min(1, "news.dialog.validation.title_required"),
@@ -39,15 +38,17 @@ const formSchema = z.object({
   featured: z.boolean(),
 });
 
-type FormValues = {
-  title: string;
-  description?: string;
-  content: string;
-  featured: boolean;
+type FormValues = z.infer<typeof formSchema>;
+
+const defaultValues: FormValues = {
+  title: "",
+  description: "",
+  content: "",
+  featured: false,
 };
 
 interface NewsDialogProps {
-  id?: string; // If provided, we are editing
+  id?: string;
   trigger?: React.ReactNode;
 }
 
@@ -55,40 +56,19 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
   const t = useTranslations("news.dialog");
   const [open, setOpen] = useState(false);
   const { addPost, updatePost, getPost } = useNewsStore();
-  const postToEdit = id ? getPost(id) : undefined;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      content: "",
-      featured: false,
-    },
+    defaultValues: defaultValues,
   });
 
-  // Reset form when dialog opens or id changes
   useEffect(() => {
     if (!open) return;
 
-    if (postToEdit) {
-      form.reset({
-        title: postToEdit.title,
-        description: postToEdit.description,
-        content: postToEdit.content,
-        featured: postToEdit.featured,
-      });
+    const postToEdit = id ? getPost(id) : undefined;
 
-      return;
-    }
-
-    form.reset({
-      title: "",
-      description: "",
-      content: "",
-      featured: false,
-    });
-  }, [open, postToEdit, form]);
+    form.reset(postToEdit ?? defaultValues);
+  }, [open, id, getPost, form]);
 
   function onSubmit(values: FormValues) {
     if (id) {
@@ -96,7 +76,6 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
     } else {
       addPost(values);
     }
-
     setOpen(false);
   }
 
