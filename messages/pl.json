@@ -15,7 +15,7 @@
       "subtitle": "Polska Społeczność"
     },
     "news": {
-      "title": "Wiadomości",
+      "title": "Najnowsze wiadomości",
       "all_news_button": "Wszystkie wiadomości",
       "hours_ago": "{hours, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}"
     },

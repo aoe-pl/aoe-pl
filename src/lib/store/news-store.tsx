@@ -55,7 +55,7 @@ export function NewsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useNewsStore() {
+export function useNewsStore(): NewsState {
   const context = useContext(NewsContext);
   if (!context) {
     throw new Error("useNewsStore must be used within a NewsProvider");
