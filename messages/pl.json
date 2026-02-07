@@ -462,7 +462,9 @@
   "news": {
     "detail": {
       "not_found": "Nie znaleziono wiadomości",
-      "back_to_list": "Wróć do listy"
+      "back_to_list": "Wróć do listy",
+      "edit": "Edytuj",
+      "delete": "Usuń"
     },
     "dialog": {
       "add_title": "Dodaj wiadomość",
