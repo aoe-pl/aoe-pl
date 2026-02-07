@@ -15,8 +15,9 @@
       "subtitle": "Polska Społeczność"
     },
     "news": {
-      "title": "Newsy",
+      "title": "Najnowsze wiadomości",
       "all_news_button": "Wszystkie wiadomości",
+      "no_news": "Brak wiadomości",
       "hours_ago": "{hours, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}"
     },
     "upcoming_matches": {
@@ -460,6 +461,39 @@
       "individual": "Indywidualny",
       "team": "Drużynowy",
       "admin": "Tylko admin"
+    }
+  },
+  "news": {
+    "title": "Wiadomości",
+    "detail": {
+      "not_found": "Nie znaleziono wiadomości",
+      "back_to_list": "Wróć do listy",
+      "edit": "Edytuj",
+      "delete": "Usuń"
+    },
+    "dialog": {
+      "add_title": "Dodaj wiadomość",
+      "edit_title": "Edytuj wiadomość",
+      "delete_title": "Czy na pewno?",
+      "delete_description": "Tej operacji nie można cofnąć. Wiadomość zostanie trwale usunięta.",
+      "delete_confirm": "Usuń",
+      "delete_cancel": "Anuluj",
+      "validation": {
+        "title_required": "Tytuł jest wymagany",
+        "content_required": "Treść jest wymagana"
+      },
+      "form": {
+        "title_label": "Tytuł",
+        "title_placeholder": "Tytuł wiadomości",
+        "description_label": "Krótki opis",
+        "description_placeholder": "Krótki opis widoczny na liście (opcjonalnie)",
+        "content_label": "Treść",
+        "content_placeholder": "Pełna treść wiadomości",
+        "featured_label": "Przypięta wiadomość",
+        "featured_description": "Przypięte wiadomości pojawiają się na górze listy.",
+        "submit_add": "Dodaj wiadomość",
+        "submit_save": "Zapisz zmiany"
+      }
     }
   }
 }
