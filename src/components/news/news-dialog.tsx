@@ -93,11 +93,10 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
   function onSubmit(values: FormValues) {
     if (id) {
       updatePost(id, values);
-      toast.success(t("success.updated"));
     } else {
       addPost(values);
-      toast.success(t("success.added"));
     }
+
     setOpen(false);
   }
 

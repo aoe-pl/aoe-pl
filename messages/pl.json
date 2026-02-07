@@ -488,10 +488,6 @@
         "featured_description": "Przypięte wiadomości pojawiają się na górze listy.",
         "submit_add": "Dodaj wiadomość",
         "submit_save": "Zapisz zmiany"
-      },
-      "success": {
-        "added": "Wiadomość dodana",
-        "updated": "Wiadomość zaktualizowana"
       }
     }
   }
