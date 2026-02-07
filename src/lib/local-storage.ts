@@ -2,8 +2,7 @@
  * Centralized localStorage keys
  */
 const storageKeys = {
-  themePrimary: "theme-primary",
-  themeAccent: "theme-accent",
+  themeColor: "theme-color",
 } as const;
 
 type StorageKey = keyof typeof storageKeys;

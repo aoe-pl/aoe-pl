@@ -32,6 +32,9 @@
       "error": "Nie udało się załadować graczy",
       "wins": "{count} zwycięstw",
       "mmr": "MMR"
+    },
+    "theme_customizer": {
+      "select_theme_color": "Wybierz kolor motywu"
     }
   },
   "admin": {
