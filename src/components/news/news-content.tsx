@@ -18,7 +18,7 @@ export function NewsContent({ news }: NewsContentProps) {
     <article className="prose prose-zinc max-w-none">
       <div className="mb-4 flex items-center gap-4">
         <Calendar className="h-3 w-3" />
-        {new Date(news.createdAt).toLocaleDateString()}
+        {new Date(news.createdAt).toLocaleDateString("pl-PL")}
       </div>
 
       <h1 className="mb-6 text-4xl font-bold">{news.title}</h1>

@@ -465,6 +465,8 @@
   },
   "news": {
     "title": "Wiadomości",
+    "search_placeholder": "Szukaj...",
+    "no_results": "Brak wyników wyszukiwania.",
     "detail": {
       "not_found": "Nie znaleziono wiadomości",
       "back_to_list": "Wróć do listy",
