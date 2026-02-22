@@ -9,28 +9,30 @@ export default function Home() {
   const t = useTranslations("home.hero");
   return (
     <div className="bg-background text-foreground min-h-screen">
-      <HeroBackground />
-
-      <div className="-mt-64 pt-24 pb-8 text-center">
-        <h1 className="text-foreground mb-4 text-4xl font-bold text-balance drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
-          {t("title")}
-        </h1>
-        <div className="mb-6 flex items-center justify-center gap-3">
-          <div
-            className="from-primary to-accent h-1 w-16 bg-gradient-to-r drop-shadow-md"
-            aria-hidden="true"
-          />
-          <span className="text-primary text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
-            {t("subtitle")}
-          </span>
-          <div
-            className="from-primary to-accent h-1 w-16 bg-gradient-to-l drop-shadow-md"
-            aria-hidden="true"
-          />
+      <HeroBackground>
+        <div className="relative mx-auto max-w-6xl px-4 py-16">
+          <div className="mb-8 text-center">
+            <h1 className="text-foreground mb-4 text-4xl font-bold text-balance drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
+              {t("title")}
+            </h1>
+            <div className="mb-6 flex items-center justify-center gap-3">
+              <div
+                className="from-primary to-accent h-1 w-12 bg-gradient-to-r"
+                aria-hidden="true"
+              />
+              <span className="text-primary text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
+                {t("subtitle")}
+              </span>
+              <div
+                className="from-primary to-accent h-1 w-12 bg-gradient-to-l"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      </HeroBackground>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto -mt-14 max-w-6xl px-4 py-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <section className="space-y-8 lg:col-span-2">
             <FeaturedNews />
