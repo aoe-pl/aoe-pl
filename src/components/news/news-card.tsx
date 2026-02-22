@@ -24,7 +24,9 @@ export function NewsCard({ news }: NewsCardProps) {
           )}
 
           <div className={`flex gap-2 text-xs font-semibold text-white`}>
-            <span>📅 {new Date(news.createdAt).toLocaleDateString()}</span>
+            <span>
+              📅 {new Date(news.createdAt).toLocaleDateString("pl-PL")}
+            </span>
           </div>
         </div>
       </div>
