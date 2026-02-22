@@ -63,6 +63,12 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
   });
 
   useEffect(() => {
+    if (!open) {
+      document.body.style.overflow = "";
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (!open) return;
 
     const postToEdit = id ? getPost(id) : undefined;
