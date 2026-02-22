@@ -19,10 +19,6 @@ export default async function NewsPage() {
             className="from-primary to-accent h-1 w-12 bg-gradient-to-r"
             aria-hidden="true"
           />
-          <div
-            className="from-primary to-accent h-1 w-12 bg-gradient-to-l"
-            aria-hidden="true"
-          />
         </div>
       </div>
       <NewsList isAdmin={isAdmin} />

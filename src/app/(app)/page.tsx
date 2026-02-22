@@ -17,14 +17,14 @@ export default function Home() {
         </h1>
         <div className="mb-6 flex items-center justify-center gap-3">
           <div
-            className="from-primary to-accent h-1 w-12 bg-gradient-to-r"
+            className="from-primary to-accent h-1 w-16 bg-gradient-to-r drop-shadow-md"
             aria-hidden="true"
           />
           <span className="text-primary text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
             {t("subtitle")}
           </span>
           <div
-            className="from-primary to-accent h-1 w-12 bg-gradient-to-l"
+            className="from-primary to-accent h-1 w-16 bg-gradient-to-l drop-shadow-md"
             aria-hidden="true"
           />
         </div>
