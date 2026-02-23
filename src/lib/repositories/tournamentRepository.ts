@@ -79,6 +79,40 @@ export const tournamentRepository = {
       },
     });
   },
+  async getTournamentBySeriesAndUrlKey(
+    seriesId: string,
+    urlKey: string,
+    {
+      includeGroups = false,
+      includeStages = false,
+      includeParticipants = false,
+      includeMatchMode = false,
+      includeBrackets = false,
+    }: {
+      includeGroups?: boolean;
+      includeStages?: boolean;
+      includeParticipants?: boolean;
+      includeMatchMode?: boolean;
+      includeBrackets?: boolean;
+    } = {},
+  ) {
+    return db.tournament.findFirst({
+      where: { tournamentSeriesId: seriesId, urlKey },
+      include: {
+        tournamentSeries: true,
+        matchMode: includeMatchMode,
+        stages: includeStages
+          ? {
+              include: {
+                groups: includeGroups,
+                brackets: includeBrackets,
+              },
+            }
+          : undefined,
+        TournamentParticipant: includeParticipants,
+      },
+    });
+  },
   async createTournament(data: {
     name: string;
     urlKey: string;

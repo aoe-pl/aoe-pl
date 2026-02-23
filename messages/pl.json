@@ -445,6 +445,13 @@
     }
   },
   "tournaments": {
+    "title": "Turnieje",
+    "series_label": "Serie turniejów",
+    "all_series": "Wszystkie turnieje",
+    "section_active": "Trwające turnieje",
+    "section_upcoming": "Nadchodzące turnieje",
+    "section_finished": "Zakończone turnieje",
+    "no_tournaments": "Brak turniejów do wyświetlenia.",
     "status": {
       "pending": "Nowy",
       "active": "Aktywny",
@@ -461,6 +468,20 @@
       "individual": "Indywidualny",
       "team": "Drużynowy",
       "admin": "Tylko admin"
+    },
+    "detail": {
+      "not_found": "Nie znaleziono turnieju.",
+      "nav": {
+        "section_label": "Turniej",
+        "information": "Informacje",
+        "registration": "Rejestracja",
+        "awards": "Nagrody",
+        "first_steps": "Pierwsze kroki",
+        "calendar": "Terminarz",
+        "groups": "Grupy",
+        "players": "Gracze",
+        "rules": "Zasady"
+      }
     }
   },
   "news": {

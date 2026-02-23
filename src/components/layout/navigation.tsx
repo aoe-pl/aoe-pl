@@ -25,7 +25,7 @@ export function Navigation({ session, isAdmin }: NavigationProps) {
   const navItems = [
     { label: t("home"), href: "/" },
     { label: t("news"), href: "/news" },
-    { label: t("tournaments"), href: "#" },
+    { label: t("tournaments"), href: "/tournaments" },
   ];
 
   return (
