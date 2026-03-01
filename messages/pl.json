@@ -60,7 +60,8 @@
           "stages": "Etapy",
           "groups": "Grupy",
           "bracket": "Drabinka",
-          "participants": "Uczestnicy"
+          "participants": "Uczestnicy",
+          "sections": "Sekcje"
         },
         "edit_button": "Edytuj",
         "info": {
@@ -195,6 +196,51 @@
         "hidden": "Ukryty",
         "visible_label": "Widoczny etap",
         "visible_description": "Etap będzie widoczny dla użytkowników"
+      },
+      "sections": {
+        "loading": "Ładowanie...",
+        "save_changes": "Zapisz zmiany",
+        "create_section": "Utwórz sekcję",
+        "remove": "Usuń",
+        "cancel": "Anuluj",
+        "no_sections": "Brak sekcji. Dodaj sekcje predefiniowane lub utwórz własną.",
+        "create_predefined": "Dodaj sekcje predefiniowane",
+        "add_section": "Dodaj sekcję",
+        "add_special_section": "Dodaj stronę specjalną",
+        "special_badge": "Specjalna",
+        "section_title_label": "Tytuł",
+        "confirm_delete": {
+          "title": "Usuń sekcję",
+          "description": "Czy na pewno chcesz usunąć \"{name}\"? Tej operacji nie można cofnąć."
+        },
+        "error": {
+          "reserved_slug": "Ta nazwa jest zarezerwowana.",
+          "slug_taken": "Sekcja o tej nazwie już istnieje."
+        },
+        "predefined_titles": {
+          "information": "Informacje",
+          "registration": "Rejestracja",
+          "first-steps": "Pierwsze kroki",
+          "awards": "Nagrody",
+          "calendar": "Terminarz",
+          "groups": "Grupy",
+          "rules": "Zasady",
+          "essentials": "Niezbędnik",
+          "matches": "Mecze",
+          "players": "Gracze"
+        },
+        "dialog": {
+          "create_title": "Nowa sekcja",
+          "create_description": "Utwórz własną stronę dla turnieju. Identyfikator URL pojawi się w adresie strony.",
+          "special_title": "Dodaj stronę specjalną",
+          "special_description": "Strony specjalne zawierają dedykowane komponenty (np. tabelę grup, listę meczów). Wybierz stronę do dodania."
+        },
+        "toast": {
+          "saved": "Sekcja {name} zapisana.",
+          "removed": "Sekcja {name} usunięta.",
+          "created": "Sekcja utworzona.",
+          "predefined_created": "{count, plural, one {Dodano # sekcję.} few {Dodano # sekcje.} other {Dodano # sekcji.}}"
+        }
       }
     },
     "settings": {
@@ -480,7 +526,9 @@
         "calendar": "Terminarz",
         "groups": "Grupy",
         "players": "Gracze",
-        "rules": "Zasady"
+        "rules": "Zasady",
+        "essentials": "Niezbędnik",
+        "matches": "Mecze"
       }
     }
   },

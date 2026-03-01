@@ -1,13 +1,10 @@
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import {
   TournamentNav,
   TournamentNavMobile,
   type TournamentNavLink,
 } from "@/components/tournaments/tournament-nav";
-import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
-import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
-import { slugify } from "@/lib/utils";
+import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
+import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
 
 export default async function TournamentDetailLayout({
   children,
@@ -17,35 +14,20 @@ export default async function TournamentDetailLayout({
   params: Promise<{ seriesSlug: string; urlKey: string }>;
 }) {
   const { seriesSlug, urlKey } = await params;
-  const t = await getTranslations("tournaments.detail");
 
-  const allSeries = await tournamentSeriesRepository.getTournamentSeries();
-  const series = allSeries.find((s) => slugify(s.name) === seriesSlug);
-
-  if (!series) notFound();
-
-  const tournament = await tournamentRepository.getTournamentBySeriesAndUrlKey(
-    series.id,
-    urlKey,
-    { includeMatchMode: true },
-  );
-
-  if (!tournament) {
-    notFound();
-  }
+  const tournament = await getTournamentOrNotFound(seriesSlug, urlKey, {
+    includeMatchMode: true,
+  });
 
   const base = `/tournaments/${seriesSlug}/${urlKey}`;
 
-  const links: TournamentNavLink[] = [
-    { href: `${base}/information`, label: t("nav.information") },
-    { href: `${base}/registration`, label: t("nav.registration") },
-    { href: `${base}/awards`, label: t("nav.awards") },
-    { href: `${base}/first-steps`, label: t("nav.first_steps") },
-    { href: `${base}/calendar`, label: t("nav.calendar") },
-    { href: `${base}/groups`, label: t("nav.groups") },
-    { href: `${base}/rules`, label: t("nav.rules") },
-    { href: `${base}/players`, label: t("nav.players") },
-  ];
+  const sections = await tournamentSectionRepository.getSectionsByTournamentId(
+    tournament.id,
+  );
+
+  const links: TournamentNavLink[] = sections
+    .filter((s) => s.isVisible)
+    .map((s) => ({ href: `${base}/${s.slug}`, label: s.title }));
 
   return (
     <>

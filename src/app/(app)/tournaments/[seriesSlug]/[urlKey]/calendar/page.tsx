@@ -1,11 +1,24 @@
-import { getTranslations } from "next-intl/server";
+import { TournamentSectionContent } from "@/components/tournaments/tournament-section-content";
+import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
 
-export default async function TournamentCalendarPage() {
-  const t = await getTranslations("tournaments.detail.nav");
+export default async function TournamentCalendarPage({
+  params,
+}: {
+  params: Promise<{ seriesSlug: string; urlKey: string }>;
+}) {
+  const { seriesSlug, urlKey } = await params;
+
+  const { section } = await getTournamentPageData(
+    seriesSlug,
+    urlKey,
+    "calendar",
+  );
 
   return (
     <div className="space-y-4">
-      <h2 className="text-foreground text-2xl font-bold">{t("calendar")}</h2>
+      {section?.content && (
+        <TournamentSectionContent content={section.content} />
+      )}
     </div>
   );
 }

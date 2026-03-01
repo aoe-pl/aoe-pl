@@ -16,7 +16,6 @@ import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatc
 import {
   tournamentFormSchema,
   tournamentStageFormSchema,
-  tournamentSectionFormSchema,
 } from "@/lib/admin-panel/tournaments/tournament";
 import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
 import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
@@ -92,7 +91,15 @@ export const tournamentRouter = createTRPCRouter({
   create: adminProcedure
     .input(tournamentFormSchema)
     .mutation(async ({ input }) => {
-      return tournamentRepository.createTournament(input);
+      const tournament = await tournamentRepository.createTournament(input);
+
+      await tournamentSectionRepository.createSection({
+        tournamentId: tournament.id,
+        title: "Informacje",
+        slug: "information",
+        displayOrder: 0,
+      });
+      return tournament;
     }),
   update: adminProcedure
     .input(
@@ -567,38 +574,78 @@ export const tournamentRouter = createTRPCRouter({
           input.tournamentId,
         );
       }),
+
     create: adminProcedure
       .input(
         z.object({
           tournamentId: z.string(),
-          data: tournamentSectionFormSchema,
+          title: z.string().min(1),
+          slug: z
+            .string()
+            .min(1)
+            .regex(/^[a-z0-9-]+$/),
+          content: z.string().optional(),
+          displayOrder: z.number().int().min(0).optional(),
         }),
       )
       .mutation(async ({ input }) => {
+        const { tournamentId, ...data } = input;
         return tournamentSectionRepository.createSection({
-          tournamentId: input.tournamentId,
-          type: input.data.type,
-          content: input.data.content,
-          isVisible: input.data.isVisible,
+          tournamentId,
+          ...data,
         });
       }),
+
     update: adminProcedure
       .input(
         z.object({
           id: z.string(),
-          data: tournamentSectionFormSchema.pick({
-            content: true,
-            isVisible: true,
-          }),
+          title: z.string().min(1).optional(),
+          content: z.string().optional(),
+          isVisible: z.boolean().optional(),
         }),
       )
       .mutation(async ({ input }) => {
-        return tournamentSectionRepository.updateSection(input.id, input.data);
+        const { id, ...data } = input;
+        return tournamentSectionRepository.updateSection(id, data);
       }),
+
     delete: adminProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentSectionRepository.deleteSection(input.id);
+      }),
+
+    createPredefined: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          sections: z.array(z.object({ slug: z.string(), title: z.string() })),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const titleMap = Object.fromEntries(
+          input.sections.map((s) => [s.slug, s.title]),
+        );
+        return tournamentSectionRepository.createPredefinedSections(
+          input.tournamentId,
+          titleMap,
+        );
+      }),
+
+    reorder: adminProcedure
+      .input(
+        z.object({
+          updates: z.array(
+            z.object({
+              id: z.string(),
+              displayOrder: z.number().int().min(0),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentSectionRepository.reorderSections(input.updates);
       }),
   }),
 });

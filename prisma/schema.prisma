@@ -189,14 +189,16 @@ model Tournament {
 }
 
 model TournamentSection {
-  id           String                @id @default(cuid())
+  id           String     @id @default(cuid())
   tournamentId String
-  isVisible    Boolean
+  isVisible    Boolean    @default(true)
   content      String?
-  type         TournamentSectionType
-  tournament   Tournament            @relation(fields: [tournamentId], references: [id])
+  title        String
+  slug         String
+  displayOrder Int        @default(0)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
-  @@unique([tournamentId, type])
+  @@unique([tournamentId, slug])
 }
 
 model TournamentTeam {
@@ -447,11 +449,4 @@ enum TournamentStageType {
 enum BracketType {
   SINGLE_ELIMINATION
   DOUBLE_ELIMINATION
-}
-
-enum TournamentSectionType {
-  HOW_TO_START
-  RULES
-  PRIZES
-  GENERAL
 }
