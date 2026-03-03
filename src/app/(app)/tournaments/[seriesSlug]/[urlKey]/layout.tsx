@@ -5,6 +5,8 @@ import {
 } from "@/components/tournaments/tournament-nav";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { predefinedTournamentSections } from "@/lib/tournaments/section-constants";
+import { getTranslations, getLocale } from "next-intl/server";
 
 export default async function TournamentDetailLayout({
   children,
@@ -19,6 +21,9 @@ export default async function TournamentDetailLayout({
     includeMatchMode: true,
   });
 
+  const tNav = await getTranslations("tournaments.detail.nav");
+  const locale = await getLocale();
+
   const base = `/tournaments/${seriesSlug}/${urlKey}`;
 
   const sections = await tournamentSectionRepository.getSectionsByTournamentId(
@@ -27,7 +32,12 @@ export default async function TournamentDetailLayout({
 
   const links: TournamentNavLink[] = sections
     .filter((s) => s.isVisible)
-    .map((s) => ({ href: `${base}/${s.slug}`, label: s.title }));
+    .map((s) => ({
+      href: `${base}/${s.slug}`,
+      label: predefinedTournamentSections.some((ps) => ps.slug === s.slug)
+        ? tNav(s.slug.replaceAll("-", "_"))
+        : (s.translations.find((tr) => tr.locale === locale)?.title ?? s.slug),
+    }));
 
   return (
     <>

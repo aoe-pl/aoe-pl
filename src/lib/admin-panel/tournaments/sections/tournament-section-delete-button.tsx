@@ -23,7 +23,7 @@ export function TournamentSectionDeleteButton({
         <Button
           variant="ghost"
           size="icon"
-          className="text-destructive hover:text-destructive h-7 w-7"
+          className="text-destructive hover:text-destructive"
           disabled={disabled}
           type="button"
         >

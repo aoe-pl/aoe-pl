@@ -41,6 +41,8 @@ export async function getTournamentPageData(
     sectionSlug,
   );
 
+  if (!section) notFound();
+
   if (section && !section.isVisible) notFound();
 
   return { tournament, section };

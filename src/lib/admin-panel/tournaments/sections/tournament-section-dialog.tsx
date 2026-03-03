@@ -32,6 +32,7 @@ import {
   createSectionSchema,
   type CreateSectionSchema,
 } from "./tournament-section-types";
+import { locales } from "@/lib/locales";
 
 interface TournamentSectionDialogProps {
   tournamentId: string;
@@ -75,7 +76,11 @@ export function TournamentSectionDialog({
       form.setError("title", { message: t("error.slug_taken") });
       return;
     }
-    createSection({ tournamentId, title: values.title, slug });
+    createSection({
+      tournamentId,
+      slug,
+      translations: [{ locale: locales.default, title: values.title }],
+    });
   }
 
   return (

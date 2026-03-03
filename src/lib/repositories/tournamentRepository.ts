@@ -153,6 +153,13 @@ export const tournamentRepository = {
             id: data.tournamentSeriesId,
           },
         },
+        sections: {
+          create: [
+            {
+              slug: "information",
+            },
+          ],
+        },
       },
     });
   },

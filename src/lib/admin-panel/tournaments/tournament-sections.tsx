@@ -4,14 +4,11 @@ import { useState, useEffect } from "react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import type { TournamentSection } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { Accordion } from "@/components/ui/accordion";
-import {
-  predefinedTournamentSections,
-  specialTournamentSectionSlugs,
-} from "@/lib/tournaments/section-constants";
+import { specialTournamentSectionSlugs } from "@/lib/tournaments/section-constants";
+import type { SectionWithTranslations } from "./sections/tournament-section-types";
 import { TournamentSectionCard } from "./sections/tournament-section-card";
 import { TournamentSpecialSectionCard } from "./sections/tournament-special-section-card";
 import { TournamentSpecialSectionDialog } from "./sections/tournament-special-section-dialog";
@@ -26,7 +23,7 @@ export function TournamentSections({ tournamentId }: { tournamentId: string }) {
     refetch,
   } = api.tournaments.sections.list.useQuery({ tournamentId });
 
-  const [ordered, setOrdered] = useState<TournamentSection[]>([]);
+  const [ordered, setOrdered] = useState<SectionWithTranslations[]>([]);
 
   useEffect(() => {
     if (sections) setOrdered(sections);
@@ -52,8 +49,11 @@ export function TournamentSections({ tournamentId }: { tournamentId: string }) {
   function moveSection(index: number, direction: "up" | "down") {
     const next = [...ordered];
     const swapWith = direction === "up" ? index - 1 : index + 1;
+
     [next[index], next[swapWith]] = [next[swapWith]!, next[index]!];
+
     const updated = next.map((s, i) => ({ ...s, displayOrder: i }));
+
     setOrdered(updated);
     reorder({
       updates: updated.map((s) => ({ id: s.id, displayOrder: s.displayOrder })),
@@ -75,10 +75,6 @@ export function TournamentSections({ tournamentId }: { tournamentId: string }) {
           onClick={() =>
             createPredefined({
               tournamentId,
-              sections: predefinedTournamentSections.map((s) => ({
-                slug: s.slug,
-                title: t(`predefined_titles.${s.slug}`),
-              })),
             })
           }
         >
@@ -102,31 +98,24 @@ export function TournamentSections({ tournamentId }: { tournamentId: string }) {
 
       {hasSections && (
         <Accordion type="multiple">
-          {ordered.map((section, index) =>
-            specialTournamentSectionSlugs.has(section.slug) ? (
-              <TournamentSpecialSectionCard
+          {ordered.map((section, index) => {
+            const Card = specialTournamentSectionSlugs.has(section.slug)
+              ? TournamentSpecialSectionCard
+              : TournamentSectionCard;
+
+            return (
+              <Card
                 key={section.id}
                 section={section}
-                isFirst={index === 0}
+                isFirst={index === 1}
                 isLast={index === ordered.length - 1}
                 movePending={reorderPending}
                 onMoveUp={() => moveSection(index, "up")}
                 onMoveDown={() => moveSection(index, "down")}
                 onSaved={() => void refetch()}
               />
-            ) : (
-              <TournamentSectionCard
-                key={section.id}
-                section={section}
-                isFirst={index === 0}
-                isLast={index === ordered.length - 1}
-                movePending={reorderPending}
-                onMoveUp={() => moveSection(index, "up")}
-                onMoveDown={() => moveSection(index, "down")}
-                onSaved={() => void refetch()}
-              />
-            ),
-          )}
+            );
+          })}
         </Accordion>
       )}
     </div>

@@ -91,15 +91,7 @@ export const tournamentRouter = createTRPCRouter({
   create: adminProcedure
     .input(tournamentFormSchema)
     .mutation(async ({ input }) => {
-      const tournament = await tournamentRepository.createTournament(input);
-
-      await tournamentSectionRepository.createSection({
-        tournamentId: tournament.id,
-        title: "Informacje",
-        slug: "information",
-        displayOrder: 0,
-      });
-      return tournament;
+      return tournamentRepository.createTournament(input);
     }),
   update: adminProcedure
     .input(
@@ -579,13 +571,18 @@ export const tournamentRouter = createTRPCRouter({
       .input(
         z.object({
           tournamentId: z.string(),
-          title: z.string().min(1),
           slug: z
             .string()
             .min(1)
             .regex(/^[a-z0-9-]+$/),
-          content: z.string().optional(),
           displayOrder: z.number().int().min(0).optional(),
+          translations: z.array(
+            z.object({
+              locale: z.string(),
+              title: z.string().min(1),
+              content: z.string().optional(),
+            }),
+          ),
         }),
       )
       .mutation(async ({ input }) => {
@@ -600,9 +597,16 @@ export const tournamentRouter = createTRPCRouter({
       .input(
         z.object({
           id: z.string(),
-          title: z.string().min(1).optional(),
-          content: z.string().optional(),
           isVisible: z.boolean().optional(),
+          translations: z
+            .array(
+              z.object({
+                locale: z.string(),
+                title: z.string().optional(),
+                content: z.string().optional(),
+              }),
+            )
+            .optional(),
         }),
       )
       .mutation(async ({ input }) => {
@@ -620,16 +624,11 @@ export const tournamentRouter = createTRPCRouter({
       .input(
         z.object({
           tournamentId: z.string(),
-          sections: z.array(z.object({ slug: z.string(), title: z.string() })),
         }),
       )
       .mutation(async ({ input }) => {
-        const titleMap = Object.fromEntries(
-          input.sections.map((s) => [s.slug, s.title]),
-        );
         return tournamentSectionRepository.createPredefinedSections(
           input.tournamentId,
-          titleMap,
         );
       }),
 

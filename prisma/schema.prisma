@@ -189,16 +189,26 @@ model Tournament {
 }
 
 model TournamentSection {
-  id           String     @id @default(cuid())
+  id           String                         @id @default(cuid())
   tournamentId String
-  isVisible    Boolean    @default(true)
-  content      String?
-  title        String
+  isVisible    Boolean                        @default(true)
   slug         String
-  displayOrder Int        @default(0)
-  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  displayOrder Int                            @default(0)
+  tournament   Tournament                     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  translations TournamentSectionTranslation[]
 
   @@unique([tournamentId, slug])
+}
+
+model TournamentSectionTranslation {
+  id        String            @id @default(cuid())
+  sectionId String
+  locale    String
+  title     String
+  content   String?
+  section   TournamentSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, locale])
 }
 
 model TournamentTeam {

@@ -19,6 +19,7 @@ import {
   predefinedTournamentSections,
   specialTournamentSectionSlugs,
 } from "@/lib/tournaments/section-constants";
+import { locales } from "@/lib/locales";
 
 interface TournamentSpecialSectionDialogProps {
   tournamentId: string;
@@ -82,8 +83,13 @@ export function TournamentSpecialSectionDialog({
                 createSection({
                   tournamentId,
                   slug: s.slug,
-                  title: t(`predefined_titles.${s.slug}`),
                   displayOrder: s.displayOrder,
+                  translations: [
+                    {
+                      locale: locales.default,
+                      title: t(`predefined_titles.${s.slug}`),
+                    },
+                  ],
                 })
               }
             >

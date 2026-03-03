@@ -7,6 +7,7 @@ import type { Session } from "next-auth";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 interface NavigationProps {
   session: Session | null;
@@ -118,6 +119,8 @@ function DesktopNavigation({
         </Link>
       )}
 
+      <LanguageSwitcher />
+
       {session && (
         <span className="text-foreground/70 ml-2 hidden text-sm lg:inline">
           {t("logged_in_as")}{" "}
@@ -205,6 +208,10 @@ function MobileMenu({
             </span>
           </div>
         )}
+
+        <div className="px-4">
+          <LanguageSwitcher />
+        </div>
 
         <Button
           asChild
