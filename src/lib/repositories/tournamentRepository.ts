@@ -9,6 +9,14 @@ const statusOrder = {
   [TournamentStatus.CANCELLED]: 3,
 };
 
+export interface TournamentQueryOptions {
+  includeGroups?: boolean;
+  includeStages?: boolean;
+  includeParticipants?: boolean;
+  includeMatchMode?: boolean;
+  includeBrackets?: boolean;
+}
+
 export const tournamentRepository = {
   async getTournaments({
     sortByStatus,
@@ -88,13 +96,7 @@ export const tournamentRepository = {
       includeParticipants = false,
       includeMatchMode = false,
       includeBrackets = false,
-    }: {
-      includeGroups?: boolean;
-      includeStages?: boolean;
-      includeParticipants?: boolean;
-      includeMatchMode?: boolean;
-      includeBrackets?: boolean;
-    } = {},
+    }: TournamentQueryOptions = {},
   ) {
     return db.tournament.findFirst({
       where: { tournamentSeriesId: seriesId, urlKey },

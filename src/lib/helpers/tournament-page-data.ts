@@ -3,15 +3,12 @@ import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { slugify } from "@/lib/utils";
-
-type TournamentOptions = Parameters<
-  typeof tournamentRepository.getTournamentBySeriesAndUrlKey
->[2];
+import type { TournamentQueryOptions } from "@/lib/repositories/tournamentRepository";
 
 export async function getTournamentOrNotFound(
   seriesSlug: string,
   urlKey: string,
-  options?: TournamentOptions,
+  options?: TournamentQueryOptions,
 ) {
   const allSeries = await tournamentSeriesRepository.getTournamentSeries();
   const series = allSeries.find((s) => slugify(s.name) === seriesSlug);
