@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Converts text into a URL friendly slug by lowercasing, removing accents, and replacing special characters with hyphens.
+ */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
