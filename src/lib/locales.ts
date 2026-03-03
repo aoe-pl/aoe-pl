@@ -1,5 +1,5 @@
 // To add a new locale, append the `list` array.
-// Make sure to add a JSON translation file for that locale as well (src/messages).
+// Make sure to add a JSON translation file for that locale as well (/messages dir).
 
 const list = [
   { code: "pl" as const, flag: "🇵🇱", label: "Polski" },
