@@ -1,9 +1,14 @@
 import { getRequestConfig } from "next-intl/server";
+import { cookies } from "next/headers";
+import { locales } from "@/lib/locales";
 
 export default getRequestConfig(async () => {
-  // Provide a static locale, fetch a user setting,
-  // read from `cookies()`, `headers()`, etc.
-  const locale = "pl";
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get(locales.key)?.value;
+
+  const isSupported = locales.list.some((l) => l.code === rawLocale);
+
+  const locale = rawLocale && isSupported ? rawLocale : locales.default;
 
   return {
     locale,

@@ -22,6 +22,7 @@ import { tournamentParticipantRepository } from "@/lib/repositories/tournamentPa
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
+import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 
 const gameSchema = z.object({
   mapId: z.string(),
@@ -554,6 +555,96 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ matchId: z.string() }))
       .query(async ({ input }) => {
         return tournamentGameRepository.getGamesByMatchId(input.matchId);
+      }),
+  }),
+
+  sections: createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentSectionRepository.getSectionsByTournamentId(
+          input.tournamentId,
+        );
+      }),
+
+    create: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          slug: z
+            .string()
+            .min(1)
+            .regex(/^[a-z0-9-]+$/),
+          displayOrder: z.number().int().min(0).optional(),
+          translations: z.array(
+            z.object({
+              locale: z.string(),
+              title: z.string().min(1),
+              content: z.string().optional(),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const { tournamentId, ...data } = input;
+        return tournamentSectionRepository.createSection({
+          tournamentId,
+          ...data,
+        });
+      }),
+
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          isVisible: z.boolean().optional(),
+          translations: z
+            .array(
+              z.object({
+                locale: z.string(),
+                title: z.string().optional(),
+                content: z.string().optional(),
+              }),
+            )
+            .optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return tournamentSectionRepository.updateSection(id, data);
+      }),
+
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentSectionRepository.deleteSection(input.id);
+      }),
+
+    createPredefined: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentSectionRepository.createPredefinedSections(
+          input.tournamentId,
+        );
+      }),
+
+    reorder: adminProcedure
+      .input(
+        z.object({
+          updates: z.array(
+            z.object({
+              id: z.string(),
+              displayOrder: z.number().int().min(0),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentSectionRepository.reorderSections(input.updates);
       }),
   }),
 });

@@ -8,6 +8,7 @@ import { TournamentStages } from "@/lib/admin-panel/tournaments/tournament-stage
 import { TournamentTabs } from "./tabs";
 import { TournamentParticipants } from "@/lib/admin-panel/tournaments/tournament-participants";
 import { TournamentGroupList } from "@/lib/admin-panel/tournaments/tournament-group-list";
+import { TournamentSections } from "@/lib/admin-panel/tournaments/tournament-sections";
 import {
   Breadcrumb,
   BreadcrumbPage,
@@ -60,7 +61,14 @@ export default async function AdminTournamentsViewPage({
       </div>
 
       <TournamentTabs
-        tabKeys={["info", "stages", "groups", "bracket", "participants"]}
+        tabKeys={[
+          "info",
+          "stages",
+          "groups",
+          "bracket",
+          "participants",
+          "sections",
+        ]}
       >
         <TabsList className="mb-2">
           <TabsTrigger value="info">{tView("tabs.info")}</TabsTrigger>
@@ -69,6 +77,7 @@ export default async function AdminTournamentsViewPage({
           <TabsTrigger value="participants">
             {tView("tabs.participants")}
           </TabsTrigger>
+          <TabsTrigger value="sections">{tView("tabs.sections")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -103,6 +112,10 @@ export default async function AdminTournamentsViewPage({
 
         <TabsContent value="participants">
           <TournamentParticipants tournamentId={tournament.id} />
+        </TabsContent>
+
+        <TabsContent value="sections">
+          <TournamentSections tournamentId={tournament.id} />
         </TabsContent>
       </TournamentTabs>
     </div>

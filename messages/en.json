@@ -1,0 +1,570 @@
+{
+  "navigation": {
+    "site_name": "AoE2 Poland",
+    "home": "Home",
+    "news": "News",
+    "tournaments": "Tournaments",
+    "admin": "Admin",
+    "logged_in_as": "Logged in as",
+    "logout": "Log out",
+    "login": "Log in"
+  },
+  "home": {
+    "hero": {
+      "title": "Age of Empires 2",
+      "subtitle": "Polish Community"
+    },
+    "news": {
+      "title": "Latest News",
+      "all_news_button": "All news",
+      "no_news": "No news",
+      "hours_ago": "{hours, plural, one {# hour ago} other {# hours ago}}"
+    },
+    "upcoming_matches": {
+      "title": "Upcoming Matches",
+      "loading": "Loading matches...",
+      "no_matches": "No scheduled matches",
+      "vs": "vs"
+    },
+    "top_players": {
+      "title": "Top 10 Polish Players",
+      "loading": "Loading players...",
+      "error": "Failed to load players",
+      "wins": "{count} wins",
+      "mmr": "MMR"
+    },
+    "theme_customizer": {
+      "select_theme_color": "Select theme color"
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "tournaments": "Tournaments",
+      "archived_tournaments": "Archived tournaments",
+      "settings": "Settings"
+    },
+    "tournaments": {
+      "title": "Tournaments",
+      "archived_title": "Archived tournaments",
+      "create_title": "Create tournament",
+      "edit_title": "Edit tournament",
+      "archive": "Archive",
+      "unarchive": "Restore from archive",
+      "no_archived_tournaments": "No archived tournaments",
+      "all_archived_tournaments": "All archived tournaments will be displayed here.",
+      "view": {
+        "tournament_not_found": "Tournament not found.",
+        "tabs": {
+          "info": "Info",
+          "stages": "Stages",
+          "groups": "Groups",
+          "bracket": "Bracket",
+          "participants": "Participants",
+          "sections": "Sections"
+        },
+        "edit_button": "Edit",
+        "info": {
+          "title": "Tournament information",
+          "series_name": "Series name",
+          "start_date": "Start date",
+          "end_date": "End date",
+          "registration_start": "Registration start",
+          "registration_end": "Registration end",
+          "registration_mode": "Registration mode",
+          "participants": "Participants",
+          "participants_limit": "Participants limit",
+          "visibility": "Visibility",
+          "visible": "Visible",
+          "hidden": "Hidden",
+          "team_based": "Team-based",
+          "yes": "Yes",
+          "no": "No"
+        }
+      },
+      "participants": "Participants",
+      "start": "Start",
+      "end": "End",
+      "url_key": "URL key",
+      "registration_start": "Registration start",
+      "registration_end": "Registration end",
+      "participants_limit": "Participants limit",
+      "team_based": "Team-based",
+      "individual": "Individual",
+      "form": {
+        "name": "Tournament name",
+        "name_placeholder": "Enter tournament name",
+        "tournament_series": "Tournament series",
+        "tournament_series_description": "Select the tournament series this tournament belongs to",
+        "match_mode_label": "Match mode",
+        "match_mode_description": "Select the match format for tournament games",
+        "url_key": "URL key",
+        "url_key_placeholder": "tournament-url-key",
+        "url_key_description": "Used in the tournament URL. Use lowercase letters, numbers and hyphens.",
+        "description": "Description (Optional)",
+        "description_placeholder": "Enter tournament description",
+        "status": "Status",
+        "status_placeholder": "Select status",
+        "start_date": "Start date",
+        "start_date_placeholder": "Select start date",
+        "end_date": "End date (Optional)",
+        "end_date_placeholder": "Select end date",
+        "participants_limit": "Participants limit",
+        "participants_limit_placeholder": "32",
+        "registration_start_date": "Registration start date (Optional)",
+        "registration_start_date_placeholder": "Select registration start date",
+        "registration_end_date": "Registration end date (Optional)",
+        "registration_end_date_placeholder": "Select registration end date",
+        "visible_to_public": "Visible to public",
+        "visible_to_public_description": "The tournament will be visible on the website",
+        "team_based": "Team-based",
+        "team_based_description": "The tournament allows team participation",
+        "create_tournament": "Create tournament",
+        "creating_tournament": "Creating tournament...",
+        "validation": {
+          "name_required": "Tournament name is required",
+          "url_key_required": "URL key is required",
+          "url_key_format": "URL key can only contain lowercase letters, numbers and hyphens",
+          "tournament_series_required": "Tournament series is required",
+          "match_mode_required": "Match mode is required",
+          "start_date_required": "Start date is required",
+          "end_date_after_start": "End date must be after start date",
+          "registration_end_after_start": "Registration end date must be after registration start date"
+        },
+        "series": {
+          "title": "Tournament series",
+          "create_title": "Create tournament series",
+          "create_description": "Create a new tournament series",
+          "create_button": "Create",
+          "create_loading": "Creating tournament series...",
+          "loading": "Loading tournament series...",
+          "select_placeholder": "Select tournament series",
+          "search_placeholder": "Search tournament series",
+          "no_series_found": "No tournament series found",
+          "name": "Tournament series name",
+          "name_placeholder": "Enter tournament series name",
+          "description": "Description (Optional)",
+          "description_placeholder": "Enter tournament series description",
+          "display_order": "Display order",
+          "display_order_description": "The display order of the tournament series in lists",
+          "cancel": "Cancel",
+          "validation": {
+            "name_required": "Tournament series name is required",
+            "display_order_required": "Display order is required",
+            "display_order_positive": "Display order must be positive"
+          },
+          "toast": {
+            "create_success": "Tournament series created successfully",
+            "create_error": "Failed to create tournament series"
+          }
+        },
+        "match_mode": {
+          "loading": "Loading match modes...",
+          "select_placeholder": "Select match mode...",
+          "clear_selection": "Clear selection",
+          "search_placeholder": "Search match modes...",
+          "no_modes_found": "No match modes found.",
+          "create_button": "Create new match mode",
+          "create_title": "Create new match mode",
+          "create_description": "Define a new match format for tournament games.",
+          "mode_type": "Match mode type",
+          "mode_type_placeholder": "Select mode type",
+          "mode_type_description": "Best Of: First to win the majority wins the match. Play All: All games are played regardless of the score.",
+          "best_of": "Best Of",
+          "play_all": "Play All",
+          "game_count": "Game count",
+          "game_count_placeholder": "1",
+          "game_count_description": "Number of games in the match (e.g. 3 for Best of 3)",
+          "preview": "Preview",
+          "create_loading": "Creating...",
+          "cancel": "Cancel",
+          "toast": {
+            "create_success": "Match mode created successfully!",
+            "create_error": "Failed to create match mode:"
+          }
+        }
+      },
+      "groups": {
+        "matches": {
+          "title": "Matches",
+          "filter_by_player": "Filter by player",
+          "all_participants": "All participants"
+        }
+      },
+      "stage": {
+        "visible": "Visible",
+        "hidden": "Hidden",
+        "visible_label": "Visible stage",
+        "visible_description": "The stage will be visible to users"
+      },
+      "sections": {
+        "loading": "Loading...",
+        "save_changes": "Save changes",
+        "create_section": "Create section",
+        "remove": "Remove",
+        "cancel": "Cancel",
+        "no_sections": "No sections. Add predefined sections or create your own.",
+        "create_predefined": "Add predefined sections",
+        "add_section": "Add section",
+        "add_special_section": "Add special page",
+        "special_badge": "Special",
+        "section_title_label": "Title",
+        "confirm_delete": {
+          "title": "Delete section",
+          "description": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
+        },
+        "error": {
+          "reserved_slug": "This name is reserved.",
+          "slug_taken": "A section with this name already exists."
+        },
+        "predefined_titles": {
+          "information": "Information",
+          "registration": "Registration",
+          "first-steps": "First steps",
+          "awards": "Awards",
+          "calendar": "Schedule",
+          "groups": "Groups",
+          "rules": "Rules",
+          "essentials": "Essentials",
+          "matches": "Matches",
+          "players": "Players"
+        },
+        "dialog": {
+          "create_title": "New section",
+          "create_description": "Create a custom page for the tournament. The URL identifier will appear in the page address.",
+          "special_title": "Add special page",
+          "special_description": "Special pages contain dedicated components (e.g. group table, match list). Select a page to add."
+        },
+        "toast": {
+          "saved": "Section {name} saved.",
+          "removed": "Section {name} deleted.",
+          "created": "Section created.",
+          "predefined_created": "{count, plural, one {Added # section.} other {Added # sections.}}"
+        }
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "page_title": "Admin settings",
+      "page_description": "Manage system settings and game data",
+      "coming_soon": "Coming soon",
+      "coming_soon_title": "This section is under construction",
+      "coming_soon_description": "This feature will be available soon.",
+      "sections": {
+        "civilizations": "Civilizations",
+        "base_maps": "Base maps",
+        "maps": "Ant League - Maps",
+        "users": "Users",
+        "roles": "Roles",
+        "system": "System"
+      },
+      "civilizations": {
+        "title": "Age of Empires II Civilizations",
+        "loading": "Loading civilizations...",
+        "add_civilization": "Add civilization",
+        "add_first_civilization": "Add first civilization",
+        "edit_civilization": "Edit civilization",
+        "add_civilization_description": "Add a new Age of Empires II civilization to the database",
+        "edit_civilization_description": "Edit civilization information",
+        "no_civilizations": "No civilizations",
+        "no_thumbnail": "No thumbnail",
+        "table": {
+          "name": "Name",
+          "description": "Description",
+          "thumbnail": "Thumbnail",
+          "actions": "Actions"
+        },
+        "form": {
+          "name": "Civilization name",
+          "name_placeholder": "Enter civilization name",
+          "description": "Short description",
+          "description_placeholder": "Short description of the civilization...",
+          "description_help": "Short description of the civilization displayed in lists",
+          "content": "Detailed description",
+          "content_placeholder": "Detailed information about the civilization, bonuses, unique units etc...",
+          "content_help": "Detailed description of the civilization with bonuses and unique units",
+          "thumbnail_url": "Thumbnail URL",
+          "thumbnail_url_placeholder": "https://example.com/image.png",
+          "thumbnail_url_help": "URL to the image representing the civilization",
+          "create": "Create civilization",
+          "update": "Update civilization",
+          "creating": "Creating...",
+          "updating": "Updating...",
+          "cancel": "Cancel"
+        },
+        "delete_dialog": {
+          "title": "Delete civilization",
+          "description": "Are you sure you want to delete the civilization",
+          "warning": "This action is irreversible and will delete all associated data.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "deleting": "Deleting..."
+        },
+        "toast": {
+          "create_success": "Civilization created successfully",
+          "update_success": "Civilization updated successfully",
+          "delete_success": "Civilization deleted successfully"
+        }
+      },
+      "base_maps": {
+        "title": "Base maps",
+        "loading": "Loading base maps...",
+        "add_base_map": "Add base map",
+        "add_first_base_map": "Add first base map",
+        "edit_base_map": "Edit base map",
+        "add_base_map_description": "Add a new base map to the tournament system",
+        "edit_base_map_description": "Edit base map information",
+        "no_base_maps": "No base maps",
+        "no_thumbnail": "No thumbnail",
+        "table": {
+          "name": "Name",
+          "description": "Description",
+          "thumbnail": "Thumbnail",
+          "actions": "Actions"
+        },
+        "form": {
+          "name": "Base map name",
+          "name_placeholder": "Enter base map name",
+          "name_help": "Unique name of the base map for tournaments (e.g. ANT ARABIA)",
+          "description": "Description",
+          "description_placeholder": "Base map description...",
+          "description_help": "Description of the base map displayed in tournaments",
+          "thumbnail_url": "Thumbnail URL",
+          "thumbnail_url_placeholder": "https://example.com/map.png",
+          "thumbnail_url_help": "URL to the image representing the map",
+          "create": "Create base map",
+          "update": "Update base map",
+          "creating": "Creating...",
+          "updating": "Updating...",
+          "cancel": "Cancel"
+        },
+        "delete_dialog": {
+          "title": "Delete base map",
+          "description": "Are you sure you want to delete the base map",
+          "warning": "This action is irreversible and will delete all associated maps.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "deleting": "Deleting..."
+        },
+        "toast": {
+          "create_success": "Base map created successfully",
+          "update_success": "Base map updated successfully",
+          "delete_success": "Base map deleted successfully"
+        },
+        "errors": {
+          "BASE_MAP_IN_USE": "Cannot delete base map. It is currently used by {count} map(s)."
+        }
+      },
+      "maps": {
+        "title": "Game maps",
+        "loading": "Loading maps...",
+        "add_map": "Add map",
+        "add_first_map": "Add first map",
+        "edit_map": "Edit map",
+        "add_map_description": "Add a new Age of Empires II map",
+        "edit_map_description": "Edit map information",
+        "no_maps": "No maps",
+        "no_thumbnail": "No thumbnail",
+        "table": {
+          "name": "Name",
+          "base_map": "Base map",
+          "description": "Description",
+          "thumbnail": "Thumbnail",
+          "actions": "Actions"
+        },
+        "form": {
+          "name": "Map name",
+          "name_placeholder": "Enter map name",
+          "name_help": "Official map name from the Age of Empires II game",
+          "base_map": "Base map",
+          "base_map_placeholder": "Select base map",
+          "base_map_help": "Select the base map this map is associated with",
+          "description": "Description",
+          "description_placeholder": "Map description...",
+          "description_help": "Map description with gameplay information",
+          "thumbnail_url": "Thumbnail URL",
+          "thumbnail_url_placeholder": "https://example.com/map.png",
+          "thumbnail_url_help": "URL to the image representing the map",
+          "create": "Create map",
+          "update": "Update map",
+          "creating": "Creating...",
+          "updating": "Updating...",
+          "cancel": "Cancel"
+        },
+        "delete_dialog": {
+          "title": "Delete map",
+          "description": "Are you sure you want to delete the map",
+          "warning": "This action is irreversible and will delete all associated data.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "deleting": "Deleting..."
+        },
+        "toast": {
+          "create_success": "Map created successfully",
+          "update_success": "Map updated successfully",
+          "delete_success": "Map deleted successfully"
+        },
+        "errors": {
+          "MAP_IN_USE": "Cannot delete map. It is currently used in {count} game(s)."
+        }
+      },
+      "users": {
+        "title": "Users",
+        "loading": "Loading users...",
+        "edit_user": "Edit user",
+        "edit_user_description": "Edit user information",
+        "user_details": "User details",
+        "user_details_description": "Full user information",
+        "no_users": "No users",
+        "table": {
+          "name": "Name",
+          "email": "Email",
+          "roles": "Roles",
+          "tournaments": "Tournaments",
+          "streams": "Streams",
+          "actions": "Actions"
+        },
+        "form": {
+          "name": "Username",
+          "name_placeholder": "Enter username",
+          "email": "Email address",
+          "email_placeholder": "Enter email address",
+          "color": "User color",
+          "color_placeholder": "#000000",
+          "color_help": "Color representing the user in the system",
+          "admin_comment": "Admin comment",
+          "admin_comment_placeholder": "Comment visible to admins only...",
+          "admin_comment_help": "Internal admin comment about the user",
+          "roles": "User roles",
+          "roles_placeholder": "Select roles...",
+          "roles_help": "Select roles assigned to this user",
+          "update": "Update user",
+          "updating": "Updating...",
+          "cancel": "Cancel"
+        },
+        "delete_dialog": {
+          "title": "Delete user",
+          "description": "Are you sure you want to delete the user?",
+          "warning": "This action is irreversible and will delete all associated data.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "deleting": "Deleting..."
+        },
+        "roles": {
+          "title": "User roles",
+          "loading": "Loading roles...",
+          "assign_role": "Assign role",
+          "assign_first_role": "Assign first role",
+          "no_roles": "No roles assigned",
+          "never_expires": "Never expires",
+          "table": {
+            "role_name": "Role name",
+            "type": "Type",
+            "assigned_at": "Assigned",
+            "expires_at": "Expires",
+            "comment": "Comment",
+            "actions": "Actions"
+          },
+          "assign_dialog": {
+            "title": "Assign role to user",
+            "description": "Select a role to assign to the user",
+            "role": "Role",
+            "select_role": "Select role...",
+            "expires_at": "Expiry date (optional)",
+            "expires_help": "Leave empty if the role should never expire",
+            "comment": "Comment (optional)",
+            "comment_placeholder": "Additional comment about the role assignment...",
+            "assign": "Assign role",
+            "assigning": "Assigning...",
+            "cancel": "Cancel"
+          },
+          "toast": {
+            "assign_success": "Role assigned successfully",
+            "remove_success": "Role removed successfully"
+          }
+        },
+        "toast": {
+          "update_success": "User updated successfully",
+          "delete_success": "User deleted successfully"
+        }
+      }
+    }
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "series_label": "Tournament series",
+    "all_series": "All tournaments",
+    "section_active": "Active tournaments",
+    "section_upcoming": "Upcoming tournaments",
+    "section_finished": "Finished tournaments",
+    "no_tournaments": "No tournaments to display.",
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "finished": "Finished",
+      "cancelled": "Cancelled"
+    },
+    "match_mode": {
+      "best_of_format": "Best of {count}",
+      "play_all_format": "Play All ({count} games)",
+      "best_of_description": "First to win {count} games",
+      "play_all_description": "All {count} games are played"
+    },
+    "registration_mode": {
+      "individual": "Individual",
+      "team": "Team",
+      "admin": "Admin only"
+    },
+    "detail": {
+      "not_found": "Tournament not found.",
+      "nav": {
+        "section_label": "Tournament",
+        "information": "Information",
+        "registration": "Registration",
+        "awards": "Awards",
+        "first_steps": "First steps",
+        "calendar": "Schedule",
+        "groups": "Groups",
+        "players": "Players",
+        "rules": "Rules",
+        "essentials": "Essentials",
+        "matches": "Matches"
+      }
+    }
+  },
+  "news": {
+    "title": "News",
+    "search_placeholder": "Search...",
+    "no_results": "No search results.",
+    "detail": {
+      "not_found": "News not found",
+      "back_to_list": "Back to list",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add news",
+      "edit_title": "Edit news",
+      "delete_title": "Are you sure?",
+      "delete_description": "This action cannot be undone. The news will be permanently deleted.",
+      "delete_confirm": "Delete",
+      "delete_cancel": "Cancel",
+      "validation": {
+        "title_required": "Title is required",
+        "content_required": "Content is required"
+      },
+      "form": {
+        "title_label": "Title",
+        "title_placeholder": "News title",
+        "description_label": "Short description",
+        "description_placeholder": "Short description visible in the list (optional)",
+        "content_label": "Content",
+        "content_placeholder": "Full news content",
+        "featured_label": "Featured news",
+        "featured_description": "Featured news appears at the top of the list.",
+        "submit_add": "Add news",
+        "submit_save": "Save changes"
+      }
+    }
+  }
+}

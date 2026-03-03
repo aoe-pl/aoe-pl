@@ -11,6 +11,7 @@ import {
   type TournamentGroupParticipant,
   type TournamentMatch,
   type TournamentMatchParticipant,
+  type TournamentSection,
   type Game,
   type TournamentMatchMode,
   MatchStatus,
@@ -276,6 +277,7 @@ export {
   type TournamentGroupParticipant,
   type TournamentMatch,
   type TournamentMatchParticipant,
+  type TournamentSection,
   type Game,
   type TournamentMatchMode,
 };

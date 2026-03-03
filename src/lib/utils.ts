@@ -5,6 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Converts text into a URL friendly slug by lowercasing, removing accents, and replacing special characters with hyphens.
+ */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export const getIsProductionEnv = () => {
   return process.env.NODE_ENV === "production";
 };

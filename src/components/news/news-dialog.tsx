@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -20,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MarkdownEditorField } from "@/components/ui/markdown-editor-field";
 import { useNewsStore } from "@/lib/store/news-store";
 import {
   Dialog,
@@ -28,8 +28,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 const formSchema = z.object({
   title: z.string().min(1, "news.dialog.validation.title_required"),
@@ -137,28 +135,10 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
               )}
             />
 
-            <FormField
+            <MarkdownEditorField
               control={form.control}
               name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("form.content_label")}</FormLabel>
-                  <FormControl>
-                    <div
-                      data-color-mode="dark"
-                      className="[&_.w-md-editor]:!bg-background [&_.w-md-editor]:!border-border [&_.w-md-editor-toolbar]:!bg-background/50 [&_.wmde-markdown]:!bg-background [&_.w-md-editor-text]:!bg-background [&_.w-md-editor-text-pre]:!bg-background"
-                    >
-                      <MDEditor
-                        value={field.value}
-                        onChange={(val) => field.onChange(val ?? "")}
-                        preview="edit"
-                        height={300}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label={t("form.content_label")}
             />
 
             <FormField
