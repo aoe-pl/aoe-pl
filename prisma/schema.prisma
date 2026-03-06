@@ -50,7 +50,9 @@ model User {
   tournamentSeries      TournamentSeries[]
   userGameProfiles      UserGameProfile[]
   userRoles             UserRole[]
-  userStreams           UserStream[]  newsPosts             NewsPost[]}
+  userStreams            UserStream[]
+  newsPosts             NewsPost[]
+}
 
 model UserGameProfile {
   id            String   @id @default(cuid())
