@@ -1,12 +1,13 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
+import { baseMapRouter } from "./baseMap";
+import { civRouter } from "./civ";
+import { leaderboardRouter } from "./leaderboard";
+import { mapRouter } from "./map";
+import { newsRouter } from "./news";
+import { rolesRouter } from "./roles";
 import { testRouter } from "./test";
 import { tournamentRouter } from "./tournament";
 import { usersRouter } from "./users";
-import { mapRouter } from "./map";
-import { civRouter } from "./civ";
-import { baseMapRouter } from "./baseMap";
-import { rolesRouter } from "./roles";
-import { leaderboardRouter } from "./leaderboard";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   civs: civRouter,
   roles: rolesRouter,
   leaderboard: leaderboardRouter,
+  news: newsRouter,
 });
 
 // export type definition of API
