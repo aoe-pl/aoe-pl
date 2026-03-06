@@ -9,7 +9,7 @@ export function NewsCard({ news }: NewsCardProps) {
 
   const cardStyle = isFeatured
     ? "rounded-xl border p-4 from-primary/20 to-accent/10 border-primary/30 bg-gradient-to-br"
-    : "rounded-xl border p-4 bg-card/50 border-border/50 hover:border-primary/50 hover:shadow-lg";
+    : "rounded-xl border p-4 bg-accent-foreground border-border hover:border-primary/50 hover:shadow-lg";
 
   return (
     <div className={`${cardStyle}`}>

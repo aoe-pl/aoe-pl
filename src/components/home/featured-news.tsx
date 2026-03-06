@@ -1,11 +1,11 @@
 "use client";
 
-import { Flame, ArrowRight } from "lucide-react";
-import { Button } from "../ui";
+import { useNewsStore } from "@/lib/store/news-store";
+import { ArrowRight, Flame } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useNewsStore } from "@/lib/store/news-store";
 import { NewsCard } from "../news/news-card";
+import { Button } from "../ui";
 
 export function FeaturedNews() {
   const t = useTranslations("home.news");

@@ -20,7 +20,7 @@ export default async function TournamentSectionPage({
     section.translations.find((tr) => tr.locale === locale)?.content ?? "";
 
   return (
-    <div className="space-y-4">
+    <div className={`${content.length ? "panel" : ""} space-y-4`}>
       <TournamentSectionContent content={content} />
     </div>
   );

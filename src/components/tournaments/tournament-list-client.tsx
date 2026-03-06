@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useLocale } from "next-intl";
 import type { TournamentWithRelations } from "@/server/api/tournament";
-import { SeriesSidebar } from "./series-sidebar";
+import { useLocale } from "next-intl";
+import { useMemo, useState } from "react";
 import { SeriesSelect } from "./series-select";
+import { SeriesSidebar } from "./series-sidebar";
 import { TournamentSections } from "./tournament-sections";
 
 interface Series {
@@ -56,17 +56,20 @@ export function TournamentListClient({
         seriesLabel={labels.seriesLabel}
         onSelect={setSelectedSeriesId}
       />
-      <div className="min-w-0 flex-1">
-        <SeriesSelect
-          navLinks={navLinks}
-          selectedSeriesId={selectedSeriesId}
-          seriesLabel={labels.seriesLabel}
-          onSelect={setSelectedSeriesId}
-        />
-        <TournamentSections
-          tournaments={filtered}
-          labels={labels}
-        />
+
+      <div className="panel min-w-0 flex-1">
+        <div className="min-w-0 flex-1">
+          <SeriesSelect
+            navLinks={navLinks}
+            selectedSeriesId={selectedSeriesId}
+            seriesLabel={labels.seriesLabel}
+            onSelect={setSelectedSeriesId}
+          />
+          <TournamentSections
+            tournaments={filtered}
+            labels={labels}
+          />
+        </div>
       </div>
     </div>
   );

@@ -3,10 +3,10 @@ import {
   TournamentNavMobile,
   type TournamentNavLink,
 } from "@/components/tournaments/tournament-nav";
-import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { predefinedTournamentSections } from "@/lib/tournaments/section-constants";
-import { getTranslations, getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function TournamentDetailLayout({
   children,
