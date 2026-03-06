@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -10,6 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 export interface TournamentNavLink {
   href: string;
@@ -31,7 +31,7 @@ export function TournamentNav({ links }: TournamentNavProps) {
   const active = useActiveLink(links);
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="panel flex flex-col gap-1">
       {links.map((link) => {
         const isActive = active?.href === link.href;
         return (

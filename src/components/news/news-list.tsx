@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useNewsStore } from "@/lib/store/news-store";
-import Link from "next/link";
-import { NewsDialog } from "@/components/news/news-dialog";
 import { NewsCard } from "@/components/news/news-card";
+import { NewsDialog } from "@/components/news/news-dialog";
 import { Input } from "@/components/ui/input";
+import { useNewsStore } from "@/lib/store/news-store";
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
 
 export function NewsList({ isAdmin }: { isAdmin: boolean }) {
   const { posts } = useNewsStore();
@@ -23,7 +23,7 @@ export function NewsList({ isAdmin }: { isAdmin: boolean }) {
     .filter((news) => news.title.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <>
+    <div className="panel">
       <div className={`mb-6 flex gap-3 ${isAdmin ? "justify-between" : ""}`}>
         <div className="relative w-full max-w-sm">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -51,6 +51,6 @@ export function NewsList({ isAdmin }: { isAdmin: boolean }) {
           ))
         )}
       </div>
-    </>
+    </div>
   );
 }
