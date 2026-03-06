@@ -50,8 +50,7 @@ model User {
   tournamentSeries      TournamentSeries[]
   userGameProfiles      UserGameProfile[]
   userRoles             UserRole[]
-  userStreams           UserStream[]
-}
+  userStreams           UserStream[]  newsPosts             NewsPost[]}
 
 model UserGameProfile {
   id            String   @id @default(cuid())
@@ -140,6 +139,28 @@ model Civ {
   content          String?
   thumbnailUrl     String?
   gameParticipants GameParticipant[]
+}
+
+model NewsPost {
+  id           String                @id @default(cuid())
+  featured     Boolean               @default(false)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  authorId     String?
+  author       User?                 @relation(fields: [authorId], references: [id])
+  translations NewsPostTranslation[]
+}
+
+model NewsPostTranslation {
+  id          String   @id @default(cuid())
+  newsPostId  String
+  locale      String
+  title       String
+  description String?
+  content     String
+  newsPost    NewsPost @relation(fields: [newsPostId], references: [id], onDelete: Cascade)
+
+  @@unique([newsPostId, locale])
 }
 
 model TournamentSeries {
