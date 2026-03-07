@@ -38,6 +38,7 @@ export function TournamentNav({ links }: TournamentNavProps) {
           <Link
             key={link.href}
             href={link.href}
+            replace
             className={cn(
               "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               isActive
@@ -60,7 +61,7 @@ export function TournamentNavMobile({ links }: TournamentNavProps) {
   return (
     <Select
       value={active?.href ?? links[0]?.href}
-      onValueChange={(href) => router.push(href)}
+      onValueChange={(href) => router.replace(href)}
     >
       <SelectTrigger className="w-full">
         <SelectValue />
