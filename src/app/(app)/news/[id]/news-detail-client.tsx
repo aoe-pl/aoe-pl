@@ -3,7 +3,6 @@
 import { NewsAdminActions } from "@/components/news/news-admin-actions";
 import { NewsContent } from "@/components/news/news-content";
 import { Button } from "@/components/ui/button";
-import { locales } from "@/lib/locales";
 import { api } from "@/trpc/react";
 import { ArrowLeft } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -34,10 +33,7 @@ export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
     );
   }
 
-  const tr =
-    post.translations.find((tr) => tr.locale === locale) ??
-    post.translations.find((tr) => tr.locale === locales.default) ??
-    post.translations[0];
+  const tr = post.translations.find((tr) => tr.locale === locale);
 
   const newsItem = {
     id: post.id,
