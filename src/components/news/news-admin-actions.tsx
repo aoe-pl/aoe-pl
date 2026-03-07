@@ -3,10 +3,12 @@
 import { NewsDialog } from "@/components/news/news-dialog";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { useNewsStore } from "@/lib/store/news-store";
+import { ErrorToast } from "@/components/ui/error-toast-content";
+import { api } from "@/trpc/react";
 import { Pencil, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface NewsAdminActionsProps {
   newsId: string;
@@ -15,13 +17,16 @@ interface NewsAdminActionsProps {
 export function NewsAdminActions({ newsId }: NewsAdminActionsProps) {
   const t = useTranslations("news.detail");
   const tDialog = useTranslations("news.dialog");
-  const { deletePost } = useNewsStore();
   const router = useRouter();
+  const utils = api.useUtils();
 
-  const handleDelete = () => {
-    deletePost(newsId);
-    router.push("/news");
-  };
+  const { mutate: deletePost, isPending } = api.news.delete.useMutation({
+    onSuccess: async () => {
+      await utils.news.list.invalidate();
+      router.push("/news");
+    },
+    onError: (error) => toast.error(<ErrorToast message={error.message} />),
+  });
 
   return (
     <div className="flex gap-2">
@@ -37,7 +42,10 @@ export function NewsAdminActions({ newsId }: NewsAdminActionsProps) {
 
       <ConfirmDialog
         trigger={
-          <Button variant="destructive">
+          <Button
+            variant="destructive"
+            disabled={isPending}
+          >
             <Trash className="mr-2 h-4 w-4" />
             {t("delete")}
           </Button>
@@ -46,7 +54,7 @@ export function NewsAdminActions({ newsId }: NewsAdminActionsProps) {
         description={tDialog("delete_description")}
         cancelLabel={tDialog("delete_cancel")}
         confirmLabel={tDialog("delete_confirm")}
-        onConfirm={handleDelete}
+        onConfirm={() => deletePost({ id: newsId })}
         confirmClassName=""
       />
     </div>

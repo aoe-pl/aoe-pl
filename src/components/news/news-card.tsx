@@ -1,4 +1,11 @@
-import type { NewsPost } from "@/lib/mock-news";
+export interface NewsPost {
+  id: string;
+  featured: boolean;
+  createdAt: Date | string;
+  title: string;
+  description?: string | null;
+  content: string;
+}
 
 interface NewsCardProps {
   news: NewsPost;

@@ -3,14 +3,13 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
-import { TRPCReactProvider } from "@/trpc/react";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
-import { auth } from "@/server/auth";
 import { Navigation } from "@/components/layout/navigation";
 import { ThemeCustomizer } from "@/components/layout/theme-customizer";
+import { auth } from "@/server/auth";
+import { TRPCReactProvider } from "@/trpc/react";
 import { api } from "@/trpc/server";
-import { NewsProvider } from "@/lib/store/news-store";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "AoE2 - Polska",
@@ -41,9 +40,7 @@ export default async function RootLayout({
             session={session}
             isAdmin={isAdmin}
           />
-          <NewsProvider>
-            <TRPCReactProvider>{children}</TRPCReactProvider>
-          </NewsProvider>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
           <ThemeCustomizer />
         </NextIntlClientProvider>
       </body>

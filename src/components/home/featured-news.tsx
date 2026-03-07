@@ -1,23 +1,32 @@
 "use client";
 
-import { useNewsStore } from "@/lib/store/news-store";
+import { api } from "@/trpc/react";
 import { ArrowRight, Flame } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { NewsCard } from "../news/news-card";
 import { Button } from "../ui";
 
+/**
+ * Featured news for home page.
+ */
 export function FeaturedNews() {
   const t = useTranslations("home.news");
-  const { posts } = useNewsStore(); // TODO Fetch posts from database when connected
+  const locale = useLocale();
+  const { data: posts = [] } = api.news.list.useQuery();
 
-  const featuredPosts = [...posts]
-    .sort((a, b) => {
-      if (a.featured && !b.featured) return -1;
-      if (!a.featured && b.featured) return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    })
-    .slice(0, 3);
+  const featuredPosts = posts.slice(0, 3).map((post) => {
+    const tr = post.translations.find((tr) => tr.locale === locale);
+
+    return {
+      id: post.id,
+      featured: post.featured,
+      createdAt: post.createdAt,
+      title: tr?.title ?? "",
+      description: tr?.description,
+      content: tr?.content ?? "",
+    };
+  });
 
   return (
     <div className="panel">

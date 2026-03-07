@@ -536,6 +536,7 @@
     "title": "News",
     "search_placeholder": "Search...",
     "no_results": "No search results.",
+    "no_posts": "No news posts yet.",
     "detail": {
       "not_found": "News not found",
       "back_to_list": "Back to list",
