@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export function NewsList({ isAdmin }: { isAdmin: boolean }) {
-  const { data: posts = [], refetch } = api.news.list.useQuery();
+  const { data: posts = [] } = api.news.list.useQuery();
   const t = useTranslations("news");
   const locale = useLocale();
   const [query, setQuery] = useState("");
