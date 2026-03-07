@@ -58,13 +58,12 @@ const defaultValues: FormValues = {
 interface NewsDialogProps {
   id?: string;
   trigger?: React.ReactNode;
-  onSaved?: () => void;
 }
 
 /**
  *  Dialog for creating/editing news posts, used in both the news list and news detail pages
  */
-export function NewsDialog({ id, trigger, onSaved }: NewsDialogProps) {
+export function NewsDialog({ id, trigger }: NewsDialogProps) {
   const t = useTranslations("news.dialog");
   const [open, setOpen] = useState(false);
   const [activeLocale, setActiveLocale] = useState<Locale>(locales.default);
@@ -114,7 +113,6 @@ export function NewsDialog({ id, trigger, onSaved }: NewsDialogProps) {
         form.reset(defaultValues);
 
         setOpen(false);
-        onSaved?.();
       },
       onError: (error) => toast.error(<ErrorToast message={error.message} />),
     });
@@ -127,7 +125,6 @@ export function NewsDialog({ id, trigger, onSaved }: NewsDialogProps) {
         if (id) await utils.news.getById.invalidate({ id });
 
         setOpen(false);
-        onSaved?.();
       },
       onError: (error) => toast.error(<ErrorToast message={error.message} />),
     });
