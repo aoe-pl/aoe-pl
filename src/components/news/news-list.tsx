@@ -3,22 +3,30 @@
 import { NewsCard } from "@/components/news/news-card";
 import { NewsDialog } from "@/components/news/news-dialog";
 import { Input } from "@/components/ui/input";
-import { useNewsStore } from "@/lib/store/news-store";
+import { api } from "@/trpc/react";
 import { Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
 export function NewsList({ isAdmin }: { isAdmin: boolean }) {
-  const { posts } = useNewsStore();
+  const { data: posts = [], refetch } = api.news.list.useQuery();
   const t = useTranslations("news");
+  const locale = useLocale();
   const [query, setQuery] = useState("");
 
-  const filteredNews = [...posts]
-    .sort((a, b) => {
-      if (a.featured && !b.featured) return -1;
-      if (!a.featured && b.featured) return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  const filteredNews = posts
+    .map((post) => {
+      const tr = post.translations.find((tr) => tr.locale === locale);
+
+      return {
+        id: post.id,
+        featured: post.featured,
+        createdAt: post.createdAt,
+        title: tr?.title ?? "",
+        description: tr?.description,
+        content: tr?.content ?? "",
+      };
     })
     .filter((news) => news.title.toLowerCase().includes(query.toLowerCase()));
 

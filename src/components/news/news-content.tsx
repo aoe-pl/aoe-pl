@@ -1,6 +1,6 @@
 "use client";
 
-import type { NewsPost } from "@/lib/mock-news";
+import type { NewsPost } from "@/components/news/news-card";
 import { Calendar } from "lucide-react";
 import dynamic from "next/dynamic";
 

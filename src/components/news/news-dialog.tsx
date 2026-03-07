@@ -1,12 +1,15 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ErrorToast } from "@/components/ui/error-toast-content";
 import {
   Form,
   FormControl,
@@ -17,47 +20,68 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { MarkdownEditorField } from "@/components/ui/markdown-editor-field";
-import { useNewsStore } from "@/lib/store/news-store";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { locales, type Locale } from "@/lib/locales";
+import { api } from "@/trpc/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const translationSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  content: z.string().min(1),
+});
 
 const formSchema = z.object({
-  title: z.string().min(1, "news.dialog.validation.title_required"),
-  description: z.string().optional(),
-  content: z.string().min(1, "news.dialog.validation.content_required"),
   featured: z.boolean(),
+  translations: z.record(z.string(), translationSchema),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
+function makeDefaultTranslations() {
+  return Object.fromEntries(
+    locales.supported.map((locale) => [
+      locale,
+      { title: "", description: "", content: "" },
+    ]),
+  );
+}
+
 const defaultValues: FormValues = {
-  title: "",
-  description: "",
-  content: "",
   featured: false,
+  translations: makeDefaultTranslations(),
 };
 
 interface NewsDialogProps {
   id?: string;
   trigger?: React.ReactNode;
+  onSaved?: () => void;
 }
 
-export function NewsDialog({ id, trigger }: NewsDialogProps) {
+/**
+ *  Dialog for creating/editing news posts, used in both the news list and news detail pages
+ */
+export function NewsDialog({ id, trigger, onSaved }: NewsDialogProps) {
   const t = useTranslations("news.dialog");
   const [open, setOpen] = useState(false);
-  const { addPost, updatePost, getPost } = useNewsStore();
+  const [activeLocale, setActiveLocale] = useState<Locale>(locales.default);
+  const utils = api.useUtils();
+
+  const { data: existingPost } = api.news.getById.useQuery(
+    { id: id! },
+    { enabled: !!id },
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues,
+    defaultValues,
   });
 
   useEffect(() => {
@@ -66,17 +90,63 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
       return;
     }
 
-    const postToEdit = id ? getPost(id) : undefined;
-    form.reset(postToEdit ?? defaultValues);
-  }, [open, id, getPost, form]);
+    if (existingPost) {
+      const translations = Object.fromEntries(
+        locales.supported.map((locale) => {
+          const tr = existingPost.translations.find((t) => t.locale === locale);
+          return [
+            locale,
+            {
+              title: tr?.title ?? "",
+              description: tr?.description ?? "",
+              content: tr?.content ?? "",
+            },
+          ];
+        }),
+      );
+      form.reset({ featured: existingPost.featured, translations });
+    } else {
+      form.reset(defaultValues);
+    }
+  }, [open, existingPost, form]);
+
+  const { mutate: createPost, isPending: createPending } =
+    api.news.create.useMutation({
+      onSuccess: async () => {
+        await utils.news.list.invalidate();
+
+        form.reset(defaultValues);
+
+        setOpen(false);
+        onSaved?.();
+      },
+      onError: (error) => toast.error(<ErrorToast message={error.message} />),
+    });
+
+  const { mutate: updatePost, isPending: updatePending } =
+    api.news.update.useMutation({
+      onSuccess: async () => {
+        await utils.news.list.invalidate();
+
+        if (id) await utils.news.getById.invalidate({ id });
+
+        setOpen(false);
+        onSaved?.();
+      },
+      onError: (error) => toast.error(<ErrorToast message={error.message} />),
+    });
+
+  const isPending = createPending || updatePending;
 
   function onSubmit(values: FormValues) {
+    const translations = Object.entries(values.translations).map(
+      ([locale, data]) => ({ locale, ...data }),
+    );
     if (id) {
-      updatePost(id, values);
+      updatePost({ id, featured: values.featured, translations });
     } else {
-      addPost(values);
+      createPost({ featured: values.featured, translations });
     }
-    setOpen(false);
   }
 
   return (
@@ -100,47 +170,71 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6"
           >
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("form.title_label")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("form.title_placeholder")}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Buttons for each supported language */}
+            <div className="flex gap-1">
+              {locales.supported.map((locale) => (
+                <Button
+                  key={locale}
+                  type="button"
+                  variant={activeLocale === locale ? "default" : "secondary"}
+                  size="sm"
+                  onClick={() => setActiveLocale(locale)}
+                >
+                  {locale.toUpperCase()}
+                </Button>
+              ))}
+            </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("form.description_label")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t("form.description_placeholder")}
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Fields for each supported language */}
+            {locales.supported.map((locale) => (
+              <div
+                key={locale}
+                className={activeLocale === locale ? "space-y-4" : "hidden"}
+              >
+                <FormField
+                  control={form.control}
+                  name={`translations.${locale}.title`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("form.title_label")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("form.title_placeholder")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <MarkdownEditorField
-              control={form.control}
-              name="content"
-              label={t("form.content_label")}
-            />
+                <FormField
+                  control={form.control}
+                  name={`translations.${locale}.description`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("form.description_label")}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={t("form.description_placeholder")}
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <MarkdownEditorField
+                  control={form.control}
+                  name={`translations.${locale}.content`}
+                  label={t("form.content_label")}
+                />
+              </div>
+            ))}
+
+            {/* Pinned news field */}
             <FormField
               control={form.control}
               name="featured"
@@ -152,7 +246,7 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
+                  <div className="space-y-1">
                     <FormLabel>{t("form.featured_label")}</FormLabel>
                     <FormDescription>
                       {t("form.featured_description")}
@@ -165,6 +259,7 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
             <Button
               type="submit"
               className="w-full"
+              disabled={isPending}
             >
               {id ? t("form.submit_save") : t("form.submit_add")}
             </Button>

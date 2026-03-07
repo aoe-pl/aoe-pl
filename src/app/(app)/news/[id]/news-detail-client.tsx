@@ -3,9 +3,10 @@
 import { NewsAdminActions } from "@/components/news/news-admin-actions";
 import { NewsContent } from "@/components/news/news-content";
 import { Button } from "@/components/ui/button";
-import { useNewsStore } from "@/lib/store/news-store";
+import { locales } from "@/lib/locales";
+import { api } from "@/trpc/react";
 import { ArrowLeft } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface NewsDetailContentProps {
@@ -15,11 +16,10 @@ interface NewsDetailContentProps {
 
 export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
   const t = useTranslations("news.detail");
-  const { getPost } = useNewsStore();
+  const locale = useLocale();
+  const { data: post } = api.news.getById.useQuery({ id });
 
-  const newsItem = getPost(id);
-
-  if (!newsItem) {
+  if (!post) {
     return (
       <div className="container mx-auto px-4 py-8 pt-24 text-center">
         <h1 className="text-2xl font-bold">{t("not_found")}</h1>
@@ -33,6 +33,20 @@ export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
       </div>
     );
   }
+
+  const tr =
+    post.translations.find((tr) => tr.locale === locale) ??
+    post.translations.find((tr) => tr.locale === locales.default) ??
+    post.translations[0];
+
+  const newsItem = {
+    id: post.id,
+    featured: post.featured,
+    createdAt: post.createdAt,
+    title: tr?.title ?? "",
+    description: tr?.description,
+    content: tr?.content ?? "",
+  };
 
   return (
     <div className="container mx-auto mt-10 max-w-3xl px-4 py-8 pt-24">
