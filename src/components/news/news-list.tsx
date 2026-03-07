@@ -47,7 +47,7 @@ export function NewsList({ isAdmin }: { isAdmin: boolean }) {
 
       <div className="grid gap-6">
         {filteredNews.length === 0 ? (
-          <p className="py-12 text-center">{t("no_results")}</p>
+          <p className="py-12 text-center">{query ? t("no_results") : t("no_posts")}</p>
         ) : (
           filteredNews.map((news) => (
             <Link
