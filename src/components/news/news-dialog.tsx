@@ -33,9 +33,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const translationSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, "news.dialog.validation.title_required"),
   description: z.string().optional(),
-  content: z.string().min(1),
+  content: z.string().min(1, "news.dialog.validation.content_required"),
 });
 
 const formSchema = z.object({
@@ -172,17 +172,29 @@ export function NewsDialog({ id, trigger, onSaved }: NewsDialogProps) {
           >
             {/* Buttons for each supported language */}
             <div className="flex gap-1">
-              {locales.supported.map((locale) => (
-                <Button
-                  key={locale}
-                  type="button"
-                  variant={activeLocale === locale ? "default" : "secondary"}
-                  size="sm"
-                  onClick={() => setActiveLocale(locale)}
-                >
-                  {locale.toUpperCase()}
-                </Button>
-              ))}
+              {locales.supported.map((locale) => {
+                const hasError = !!form.formState.errors.translations?.[locale];
+
+                return (
+                  <Button
+                    key={locale}
+                    type="button"
+                    variant={activeLocale === locale ? "default" : "secondary"}
+                    size="sm"
+                    className={
+                      hasError && activeLocale !== locale
+                        ? "border-destructive text-destructive"
+                        : ""
+                    }
+                    onClick={() => setActiveLocale(locale)}
+                  >
+                    {locale.toUpperCase()}
+                    {hasError && activeLocale !== locale && (
+                      <span className="bg-destructive ml-1 h-1.5 w-1.5 rounded-full" />
+                    )}
+                  </Button>
+                );
+              })}
             </div>
 
             {/* Fields for each supported language */}
