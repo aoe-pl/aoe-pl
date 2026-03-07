@@ -1,8 +1,7 @@
 "use client";
-
 import type { TournamentWithRelations } from "@/server/api/tournament";
 import { useLocale } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SeriesSelect } from "./series-select";
 import { SeriesSidebar } from "./series-sidebar";
 import { TournamentSections } from "./tournament-sections";
@@ -25,13 +24,34 @@ interface TournamentListClientProps {
   };
 }
 
+const tournamentSeriesFilterKey = "tournament-series-filter";
+
 export function TournamentListClient({
   tournaments,
   series,
   labels,
 }: TournamentListClientProps) {
-  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
   const locale = useLocale();
+
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(tournamentSeriesFilterKey);
+
+    if (saved) {
+      setSelectedSeriesId(saved);
+    }
+  }, []);
+
+  const handleSelect = (id: string | null) => {
+    setSelectedSeriesId(id);
+
+    if (id) {
+      sessionStorage.setItem(tournamentSeriesFilterKey, id);
+    } else {
+      sessionStorage.removeItem(tournamentSeriesFilterKey);
+    }
+  };
 
   const filtered = selectedSeriesId
     ? tournaments.filter((t) => t.tournamentSeriesId === selectedSeriesId)
@@ -54,7 +74,7 @@ export function TournamentListClient({
         navLinks={navLinks}
         selectedSeriesId={selectedSeriesId}
         seriesLabel={labels.seriesLabel}
-        onSelect={setSelectedSeriesId}
+        onSelect={handleSelect}
       />
 
       <div className="panel min-w-0 flex-1">
@@ -63,7 +83,7 @@ export function TournamentListClient({
             navLinks={navLinks}
             selectedSeriesId={selectedSeriesId}
             seriesLabel={labels.seriesLabel}
-            onSelect={setSelectedSeriesId}
+            onSelect={handleSelect}
           />
           <TournamentSections
             tournaments={filtered}
