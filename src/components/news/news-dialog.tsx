@@ -45,18 +45,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-function makeDefaultTranslations() {
-  return Object.fromEntries(
+const defaultValues: FormValues = {
+  featured: false,
+  translations: Object.fromEntries(
     locales.supported.map((locale) => [
       locale,
       { title: "", description: "", content: "" },
     ]),
-  );
-}
-
-const defaultValues: FormValues = {
-  featured: false,
-  translations: makeDefaultTranslations(),
+  ),
 };
 
 interface NewsDialogProps {
