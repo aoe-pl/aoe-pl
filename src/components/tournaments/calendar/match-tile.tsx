@@ -40,7 +40,7 @@ export function MatchTile({
       {/* Verified checkmark */}
       {isVerified && (
         <Check
-          className="absolute -bottom-1 -left-1.5 h-4 w-4 text-green-500"
+          className="absolute -bottom-1 left-0 h-4 w-4 text-green-500"
           strokeWidth={5}
           aria-label="Verified"
         />
