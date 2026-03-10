@@ -567,5 +567,25 @@
         "submit_save": "Zapisz zmiany"
       }
     }
+  },
+  "tournament": {
+    "calendar": {
+      "today": "Dziś",
+      "month": "Miesiąc",
+      "week": "Tydzień",
+      "matches_count": "{visible}/{total} meczów",
+      "matches": "{count, plural, one {# mecz} few {# mecze} other {# meczów}}",
+      "no_matches_on_day": "Brak meczów w tym dniu.",
+      "no_matches_on_day_filtered": "Brak meczów w tym dniu (z aktywnymi filtrami).",
+      "no_matches_this_week": "Brak zaplanowanych meczów w tym tygodniu.",
+      "filters": {
+        "groups": "Grupy",
+        "players": "Gracze",
+        "search_players": "Szukaj graczy\u2026",
+        "no_players_found": "Nie znaleziono graczy.",
+        "clear_all": "Wyczyść wszystko",
+        "remove_filter": "Usuń filtr {name}"
+      }
+    }
   }
 }

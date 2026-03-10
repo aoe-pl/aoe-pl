@@ -49,15 +49,15 @@ export default async function TournamentDetailLayout({
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="mx-auto max-w-7xl px-4 py-10">
         {/* Mobile dropdown */}
         <div className="mb-6 md:hidden">
           <TournamentNavMobile links={links} />
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex gap-6">
           {/* Desktop sidebar */}
-          <aside className="hidden w-52 shrink-0 md:block">
+          <aside className="hidden w-40 shrink-0 md:block">
             <div className="sticky top-24">
               <TournamentNav links={links} />
             </div>

@@ -1,6 +1,9 @@
 // To add a new locale, append the `list` array.
 // Make sure to add a JSON translation file for that locale as well (/messages dir).
 
+// Lang code should match the locale code used in Next.js routing (e.g. "en", "pl")
+// otherwise some locale-sensitive features (like calendar labels) may fall back to the default locale.
+
 const list = [
   { code: "pl" as const, flag: "🇵🇱", label: "Polski" },
   { code: "en" as const, flag: "🇬🇧", label: "English" },

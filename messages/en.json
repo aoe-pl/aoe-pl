@@ -567,5 +567,25 @@
         "submit_save": "Save changes"
       }
     }
+  },
+  "tournament": {
+    "calendar": {
+      "today": "Today",
+      "month": "Month",
+      "week": "Week",
+      "matches_count": "{visible}/{total} matches",
+      "matches": "{count, plural, one {# match} other {# matches}}",
+      "no_matches_on_day": "No matches on this day.",
+      "no_matches_on_day_filtered": "No matches on this day (with active filters).",
+      "no_matches_this_week": "No matches scheduled this week.",
+      "filters": {
+        "groups": "Groups",
+        "players": "Players",
+        "search_players": "Search players\u2026",
+        "no_players_found": "No players found.",
+        "clear_all": "Clear all",
+        "remove_filter": "Remove {name} filter"
+      }
+    }
   }
 }
