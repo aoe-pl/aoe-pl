@@ -46,6 +46,9 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
     for (const row of rows) {
       if (!row.group || !row.matchDate) continue;
 
+      // Theoretically date can be set for pending matches, but we don't want to display them in calendar.
+      if (row.status === "PENDING") continue;
+
       if (!groupMap.has(row.group.id)) {
         groupMap.set(row.group.id, {
           id: row.group.id,

@@ -40,10 +40,14 @@ function getSlotName(
 }
 
 function getStatusLabel(row: MatchListRow): string {
+  if (row.status === "PENDING") return "";
+
   if (row.matchDate)
     return format(new Date(row.matchDate), "dd MMM yyyy, HH:mm");
+
   if (row.status === "COMPLETED" || row.status === "ADMIN_APPROVED")
     return "Completed";
+
   return "Date TBD";
 }
 
