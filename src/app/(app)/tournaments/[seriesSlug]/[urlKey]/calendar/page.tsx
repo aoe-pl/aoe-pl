@@ -1,6 +1,9 @@
-import { TournamentSectionContent } from "@/components/tournaments/tournament-section-content";
-import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
-import { getLocale } from "next-intl/server";
+import {
+  TournamentCalendar,
+  type TournamentMatchRow,
+} from "@/components/tournaments/calendar/tournament-calendar";
+import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 
 export default async function TournamentCalendarPage({
   params,
@@ -8,20 +11,20 @@ export default async function TournamentCalendarPage({
   params: Promise<{ seriesSlug: string; urlKey: string }>;
 }) {
   const { seriesSlug, urlKey } = await params;
-  const locale = await getLocale();
+  const tournament = await getTournamentOrNotFound(seriesSlug, urlKey);
 
-  const { section } = await getTournamentPageData(
-    seriesSlug,
-    urlKey,
-    "calendar",
-  );
+  const matches = (await tournamentMatchRepository.getCalendarMatches(
+    tournament.id,
+  )) as TournamentMatchRow[];
 
-  const content =
-    section?.translations.find((tr) => tr.locale === locale)?.content ?? "";
+  const base = `/tournaments/${seriesSlug}/${urlKey}`;
 
   return (
-    <div className="space-y-4">
-      {content && <TournamentSectionContent content={content} />}
+    <div className="panel">
+      <TournamentCalendar
+        matches={matches}
+        matchUrlBase={`${base}/matches`}
+      />
     </div>
   );
 }

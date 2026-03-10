@@ -1,6 +1,6 @@
+import { createAoe2RecsService } from "@/lib/storage";
 import { db } from "@/server/db";
 import type { MatchStatus, Prisma } from "@prisma/client";
-import { createAoe2RecsService } from "@/lib/storage";
 
 const upcomingMatchesInclude = {
   TournamentMatchParticipant: {
@@ -636,5 +636,52 @@ export const tournamentMatchRepository = {
 
       throw error;
     }
+  },
+
+  async getMatchesByTournamentId(tournamentId: string) {
+    return db.tournamentMatch.findMany({
+      where: {
+        group: {
+          stage: {
+            tournamentId,
+          },
+        },
+      },
+      include: {
+        group: true,
+        TournamentMatchParticipant: {
+          include: {
+            participant: {
+              include: { user: true },
+            },
+            team: true,
+          },
+        },
+      },
+      orderBy: { matchDate: "asc" },
+    });
+  },
+
+  async getCalendarMatches(tournamentId: string) {
+    return db.tournamentMatch.findMany({
+      where: {
+        group: {
+          stage: {
+            tournamentId,
+          },
+        },
+      },
+      include: {
+        group: true,
+        TournamentMatchParticipant: {
+          include: {
+            participant: true,
+            team: true,
+          },
+        },
+        TournamentMatchStream: true,
+      },
+      orderBy: { matchDate: "asc" },
+    });
   },
 };
