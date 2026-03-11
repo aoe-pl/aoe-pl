@@ -1,28 +1,30 @@
-import { z } from "zod";
-import {
-  adminProcedure,
-  createTRPCRouter,
-  publicProcedure,
-} from "@/server/api/trpc";
-import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
-import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
-import { TournamentMatchModeType, MatchStatus } from "@prisma/client";
-import type {
-  Tournament,
-  TournamentSeries,
-  TournamentParticipant,
-} from "@prisma/client";
-import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
 import {
   tournamentFormSchema,
   tournamentStageFormSchema,
 } from "@/lib/admin-panel/tournaments/tournament";
-import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
-import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
-import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
-import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
+import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
+import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
+import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
+import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
+import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
+import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
+import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
+import type {
+  Tournament,
+  TournamentParticipant,
+  TournamentSeries,
+} from "@prisma/client";
+import { MatchStatus, TournamentMatchModeType } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 const gameSchema = z.object({
   mapId: z.string(),
@@ -256,6 +258,35 @@ export const tournamentRouter = createTRPCRouter({
             includeUser: input.includeUser,
           },
         );
+      }),
+
+    register: protectedProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.session.user.id;
+        const nickname = ctx.session.user.name!;
+
+        const existing =
+          await tournamentParticipantRepository.findByUserAndTournament(
+            userId,
+            input.tournamentId,
+          );
+
+        if (existing) {
+          throw new TRPCError({ code: "CONFLICT" });
+        }
+
+        return tournamentParticipantRepository.registerParticipant(
+          input.tournamentId,
+          userId,
+          nickname,
+        );
+      }),
+
+    remove: adminProcedure
+      .input(z.object({ participantId: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentParticipantRepository.deleteById(input.participantId);
       }),
   }),
 
