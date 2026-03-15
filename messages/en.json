@@ -241,8 +241,24 @@
           "created": "Section created.",
           "predefined_created": "{count, plural, one {Added # section.} other {Added # sections.}}"
         }
+      },
+      "participant_details": {
+        "nickname": "Nick",
+        "status": "Status",
+        "groups": "Groups",
+        "registration_date": "Registration date",
+        "has_user_account": "Has user account",
+        "yes": "Yes",
+        "no": "No",
+        "actions": "Actions",
+        "delete": "Delete",
+        "delete_title": "Are you sure?",
+        "delete_description": "This action cannot be undone.",
+        "delete_confirm": "Delete",
+        "delete_cancel": "Cancel"
       }
     },
+
     "settings": {
       "title": "Settings",
       "page_title": "Admin settings",
@@ -515,6 +531,13 @@
       "team": "Team",
       "admin": "Admin only"
     },
+    "registration": {
+      "already_registered": "You are already registered for this tournament.",
+      "register": "Register",
+      "registering": "Registering...",
+      "register_success": "You have successfully registered for the tournament.",
+      "must_be_logged_in": "You must be logged in to register for the tournament."
+    },
     "detail": {
       "not_found": "Tournament not found.",
       "nav": {
@@ -581,11 +604,23 @@
       "filters": {
         "groups": "Groups",
         "players": "Players",
-        "search_players": "Search players\u2026",
+        "search_players": "Search players",
         "no_players_found": "No players found.",
         "clear_all": "Clear all",
         "remove_filter": "Remove {name} filter"
       }
+    },
+    "players": {
+      "nickname": "Nickname",
+      "in_groups": "Groups",
+      "no_players": "No registered players."
+    },
+    "matches": {
+      "no_matches": "No upcoming matches",
+      "date": "Date",
+      "group": "Group",
+      "player": "Player",
+      "search_players_or_group": "Search player or group"
     }
   }
 }

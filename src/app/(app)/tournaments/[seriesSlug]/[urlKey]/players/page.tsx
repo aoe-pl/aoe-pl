@@ -1,6 +1,6 @@
-import { TournamentSectionContent } from "@/components/tournaments/tournament-section-content";
-import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
-import { getLocale } from "next-intl/server";
+import { TournamentPlayerList } from "@/components/tournaments/players/tournament-player-list";
+import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
 
 export default async function TournamentPlayersPage({
   params,
@@ -8,20 +8,18 @@ export default async function TournamentPlayersPage({
   params: Promise<{ seriesSlug: string; urlKey: string }>;
 }) {
   const { seriesSlug, urlKey } = await params;
-  const locale = await getLocale();
 
-  const { section } = await getTournamentPageData(
-    seriesSlug,
-    urlKey,
-    "players",
-  );
+  const tournament = await getTournamentOrNotFound(seriesSlug, urlKey);
 
-  const content =
-    section?.translations.find((tr) => tr.locale === locale)?.content ?? "";
+  const tournamentParticipants =
+    await tournamentParticipantRepository.getTournamentParticipants(
+      tournament.id,
+      { includeUser: false },
+    );
 
   return (
-    <div className="space-y-4">
-      {content && <TournamentSectionContent content={content} />}
+    <div className="panel space-y-4">
+      <TournamentPlayerList tournamentParticipants={tournamentParticipants} />
     </div>
   );
 }

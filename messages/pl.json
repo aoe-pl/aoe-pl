@@ -241,6 +241,21 @@
           "created": "Sekcja utworzona.",
           "predefined_created": "{count, plural, one {Dodano # sekcję.} few {Dodano # sekcje.} other {Dodano # sekcji.}}"
         }
+      },
+      "participant_details": {
+        "nickname": "Nick",
+        "status": "Status",
+        "groups": "Grupy",
+        "registration_date": "Data rejestracji",
+        "has_user_account": "Posiada konto",
+        "yes": "Tak",
+        "no": "Nie",
+        "actions": "Akcje",
+        "delete": "Usuń",
+        "delete_title": "Czy na pewno?",
+        "delete_description": "Tej operacji nie można cofnąć.",
+        "delete_confirm": "Usuń",
+        "delete_cancel": "Anuluj"
       }
     },
     "settings": {
@@ -515,6 +530,13 @@
       "team": "Drużynowy",
       "admin": "Tylko admin"
     },
+    "registration": {
+      "already_registered": "Jesteś już zapisany na ten turniej.",
+      "register": "Zarejestruj się",
+      "registering": "Rejestrowanie...",
+      "register_success": "Pomyślnie zarejestrowano na turniej.",
+      "must_be_logged_in": "Musisz być zalogowany, aby zarejestrować się na turniej."
+    },
     "detail": {
       "not_found": "Nie znaleziono turnieju.",
       "nav": {
@@ -581,11 +603,23 @@
       "filters": {
         "groups": "Grupy",
         "players": "Gracze",
-        "search_players": "Szukaj graczy\u2026",
+        "search_players": "Szukaj graczy",
         "no_players_found": "Nie znaleziono graczy.",
         "clear_all": "Wyczyść wszystko",
         "remove_filter": "Usuń filtr {name}"
       }
+    },
+    "players": {
+      "nickname": "Nick",
+      "in_groups": "W grupach",
+      "no_players": "Brak zarejestrowanych graczy."
+    },
+    "matches": {
+      "no_matches": "Brak zaplanowanych meczów.",
+      "date": "Data",
+      "group": "Grupa",
+      "player": "Gracz",
+      "search_players_or_group": "Szukaj gracza lub grupy"
     }
   }
 }

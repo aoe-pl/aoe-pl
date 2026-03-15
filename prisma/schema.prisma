@@ -348,7 +348,7 @@ model TournamentGroupParticipant {
   comment                 String?
   seedNumber              Int?
   tournamentGroup         TournamentGroup       @relation("GroupParticipants", fields: [tournamentGroupId], references: [id], onDelete: Cascade)
-  tournamentParticipant   TournamentParticipant @relation(fields: [tournamentParticipantId], references: [id])
+  tournamentParticipant   TournamentParticipant @relation(fields: [tournamentParticipantId], references: [id], onDelete: Cascade)
 
   @@unique([tournamentGroupId, tournamentParticipantId])
 }

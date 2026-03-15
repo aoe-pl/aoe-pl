@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { isBrightColor } from "@/lib/utils";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 export interface MatchListRow {
@@ -57,6 +58,8 @@ interface MatchListProps {
 }
 
 export function MatchList({ matches, matchUrlBase }: MatchListProps) {
+  const t = useTranslations("tournament.matches");
+
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date-asc");
 
@@ -101,7 +104,7 @@ export function MatchList({ matches, matchUrlBase }: MatchListProps) {
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
-          placeholder="Search players or group…"
+          placeholder={t("search_players_or_group")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="sm:max-w-xs"
@@ -114,16 +117,16 @@ export function MatchList({ matches, matchUrlBase }: MatchListProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date-asc">Date ↑</SelectItem>
-            <SelectItem value="date-desc">Date ↓</SelectItem>
-            <SelectItem value="group">Group</SelectItem>
-            <SelectItem value="player">Player</SelectItem>
+            <SelectItem value="date-asc"> {t("date")} ↑</SelectItem>
+            <SelectItem value="date-desc">{t("date")} ↓</SelectItem>
+            <SelectItem value="group">{t("group")}</SelectItem>
+            <SelectItem value="player">{t("player")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No matches found.</p>
+        <p className="text-muted-foreground text-sm">{t("no_matches")}</p>
       ) : (
         <div className="divide-y rounded-md border">
           {filtered.map((match) => {

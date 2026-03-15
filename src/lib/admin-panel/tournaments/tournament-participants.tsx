@@ -1,3 +1,7 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -6,18 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { RemoveParticipantButton } from "@/lib/admin-panel/tournaments/remove-participant-button";
 import { api } from "@/trpc/server";
-import Link from "next/link";
 import type {
-  TournamentParticipant,
-  TournamentGroupParticipant,
   TournamentGroup,
+  TournamentGroupParticipant,
+  TournamentParticipant,
   TournamentStage,
 } from "@prisma/client";
+import Link from "next/link";
 
 type TournamentParticipantsProps = {
   tournamentId: string;
@@ -54,6 +55,7 @@ export async function TournamentParticipants({
                 <TableHead className="max-w-[200px]">Groups</TableHead>
                 <TableHead>Registration Date</TableHead>
                 <TableHead>Has user account</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,6 +100,9 @@ export async function TournamentParticipants({
                     ) : (
                       <Badge variant="secondary">No</Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <RemoveParticipantButton participantId={participant.id} />
                   </TableCell>
                 </TableRow>
               ))}
