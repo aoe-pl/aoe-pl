@@ -32,17 +32,13 @@ interface PlayerStats {
   totalScore: number;
 }
 
-const playerStatMap = new Map<string, PlayerStats>();
-
 export function GroupLeaderboardTable({ group, matches }: Props) {
-  playerStatMap.clear();
-
-  const players: PlayerStats[] = [];
+  const playerMap = new Map<string, PlayerStats>();
 
   group.TournamentGroupParticipant.forEach((p) => {
-    players.push({
+    playerMap.set(p.tournamentParticipantId, {
       playerId: p.tournamentParticipantId,
-      playerName: "",
+      playerName: "", // initially empty as group doesn't have this data.
       matchesPlayed: 0,
       matchesWon: 0,
       matchesLost: 0,
@@ -50,29 +46,32 @@ export function GroupLeaderboardTable({ group, matches }: Props) {
     });
   });
 
-  // TODO: This can be optimized if the API returns player names in the group participants, so we don't have to loop through all matches to get them.
-  matches.forEach((m) => {
-    m.TournamentMatchParticipant.forEach((p) => {
-      const playerObj = players.find((pl) => pl.playerId === p.participantId)!;
+  for (const match of matches) {
+    for (const participant of match.TournamentMatchParticipant) {
+      const player = playerMap.get(participant.participantId!);
 
-      playerObj.playerName = p.participant?.nickname ?? "";
+      if (!player) continue;
 
-      // We don't add any non approved scores.
-      if (m.status !== "ADMIN_APPROVED") return;
-
-      if (p.isWinner) {
-        playerObj.matchesWon++;
-      } else {
-        playerObj.matchesLost++;
+      if (participant.participant?.nickname) {
+        player.playerName = participant.participant.nickname;
       }
 
-      playerObj.matchesPlayed++;
-      playerObj.totalScore += p.wonScore;
-    });
-  });
+      // Only update stats for approved matches
+      if (match.status !== "ADMIN_APPROVED") continue;
 
-  // Sort players by total score
-  players.sort((a, b) => b.totalScore - a.totalScore);
+      player.matchesPlayed++;
+      if (participant.isWinner) {
+        player.matchesWon++;
+      } else {
+        player.matchesLost++;
+      }
+      player.totalScore += participant.wonScore;
+    }
+  }
+
+  const players = Array.from(playerMap.values()).sort(
+    (a, b) => b.totalScore - a.totalScore,
+  );
 
   return (
     <Card className="w-full text-center">
