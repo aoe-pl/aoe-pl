@@ -7,33 +7,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { AppRouter } from "@/server/api/root";
-import type { inferProcedureOutput } from "@trpc/server";
+import type {
+  LeaderboardPlayerStats,
+  TournamentGroup,
+  TournamentMatchData,
+} from "./types/types";
 
-type Group = inferProcedureOutput<
-  AppRouter["tournaments"]["groups"]["listByTournament"]
->[number];
-
-type MatchData = inferProcedureOutput<
-  AppRouter["tournaments"]["matches"]["list"]
->;
-
-interface Props {
-  group: Group;
-  matches: MatchData;
-}
-
-interface PlayerStats {
-  playerId: string;
-  playerName: string;
-  matchesPlayed: number;
-  matchesWon: number;
-  matchesLost: number;
-  totalScore: number;
-}
+type Props = {
+  group: TournamentGroup;
+  matches: TournamentMatchData;
+};
 
 export function GroupLeaderboardTable({ group, matches }: Props) {
-  const playerMap = new Map<string, PlayerStats>();
+  const playerMap = new Map<string, LeaderboardPlayerStats>();
 
   group.TournamentGroupParticipant.forEach((p) => {
     playerMap.set(p.tournamentParticipantId, {

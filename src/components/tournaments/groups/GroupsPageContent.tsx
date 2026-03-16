@@ -1,22 +1,12 @@
 "use client";
 
-import type { AppRouter } from "@/server/api/root";
-import type { inferProcedureOutput } from "@trpc/server";
 import { useState } from "react";
 import { GroupLeaderboardTable } from "./GroupLeaderboardTable";
 import { GroupSelectionView } from "./GroupSelectionView";
-
-type Groups = inferProcedureOutput<
-  AppRouter["tournaments"]["groups"]["listByTournament"]
->;
-
-interface GroupMatches {
-  groupId: string;
-  matches: inferProcedureOutput<AppRouter["tournaments"]["matches"]["list"]>;
-}
+import type { GroupMatches, TournamentGroups } from "./types/types";
 
 type Props = {
-  groups: Groups;
+  groups: TournamentGroups;
   groupMatches: GroupMatches[];
 };
 
