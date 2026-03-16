@@ -610,6 +610,7 @@
       }
     },
     "groups": {
+      "no_groups": "Brak grup do wyświetlenia.",
       "rank": "Pozycja",
       "player": "Gracz",
       "played": "Rozegrane",

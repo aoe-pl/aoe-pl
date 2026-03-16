@@ -617,6 +617,7 @@
       "no_players": "No registered players."
     },
     "groups": {
+      "no_groups": "No groups to display.",
       "rank": "Rank",
       "player": "Player",
       "played": "Played",
