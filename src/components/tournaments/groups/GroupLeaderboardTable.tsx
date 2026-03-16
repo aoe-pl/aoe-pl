@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTranslations } from "next-intl";
 import type {
   LeaderboardPlayerStats,
   TournamentGroup,
@@ -19,6 +20,8 @@ type Props = {
 };
 
 export function GroupLeaderboardTable({ group, matches }: Props) {
+  const t = useTranslations("tournament.groups");
+
   const playerMap = new Map<string, LeaderboardPlayerStats>();
 
   group.TournamentGroupParticipant.forEach((p) => {
@@ -62,18 +65,18 @@ export function GroupLeaderboardTable({ group, matches }: Props) {
   return (
     <Card className="w-full text-center">
       <CardHeader>
-        <CardTitle>{group.name} Leaderboard</CardTitle>
+        <CardTitle>{group.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow className="[&>th]:text-center">
-              <TableHead>Rank</TableHead>
-              <TableHead>Player</TableHead>
-              <TableHead>Played</TableHead>
-              <TableHead>Won</TableHead>
-              <TableHead>Lost</TableHead>
-              <TableHead>Total Score</TableHead>
+              <TableHead>{t("rank")}</TableHead>
+              <TableHead>{t("player")}</TableHead>
+              <TableHead>{t("played")}</TableHead>
+              <TableHead>{t("won")}</TableHead>
+              <TableHead>{t("lost")}</TableHead>
+              <TableHead>{t("total_score")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
