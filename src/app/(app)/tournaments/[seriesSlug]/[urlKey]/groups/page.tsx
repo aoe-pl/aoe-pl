@@ -1,12 +1,11 @@
 import { GroupsPageContent } from "@/components/tournaments/groups/GroupsPageContent";
+import type { TournamentMatchData } from "@/components/tournaments/groups/types/types";
 import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
-import type { AppRouter } from "@/server/api/root";
 import { api } from "@/trpc/server";
-import type { inferProcedureOutput } from "node_modules/@trpc/server/dist/unstable-core-do-not-import.d-BxnV2Pug.mjs";
 
 interface GroupMatches {
   groupId: string;
-  matches: inferProcedureOutput<AppRouter["tournaments"]["matches"]["list"]>;
+  matches: TournamentMatchData;
 }
 
 export default async function TournamentGroupsPage({
