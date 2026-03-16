@@ -7,16 +7,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { AppRouter } from "@/server/api/root";
+import type { inferProcedureOutput } from "@trpc/server";
+
+type Group = inferProcedureOutput<
+  AppRouter["tournaments"]["groups"]["listByTournament"]
+>[number];
 
 interface Props {
-  group: string | null;
+  data: Group;
 }
 
-export function GroupLeaderboardTable({ group }: Props) {
+export function GroupLeaderboardTable({ data }: Props) {
+  // TODO: Get player match data, calculate wins/losses/score for all matches
+  // also group data has group names and player IDs, but no player names..
+
   return (
     <Card className="w-full text-center">
       <CardHeader>
-        <CardTitle>Group Leaderboard</CardTitle>
+        <CardTitle>{data.name} Leaderboard</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -31,14 +40,18 @@ export function GroupLeaderboardTable({ group }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>1</TableCell>
-              <TableCell>abc</TableCell>
-              <TableCell>1</TableCell>
-              <TableCell>1</TableCell>
-              <TableCell>0</TableCell>
-              <TableCell>3</TableCell>
-            </TableRow>
+            {data.TournamentGroupParticipant.map((p) => {
+              return (
+                <TableRow key={p.id}>
+                  <TableCell>1</TableCell>
+                  <TableCell>{p.id}</TableCell>
+                  <TableCell>1</TableCell>
+                  <TableCell>1</TableCell>
+                  <TableCell>0</TableCell>
+                  <TableCell>3</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>

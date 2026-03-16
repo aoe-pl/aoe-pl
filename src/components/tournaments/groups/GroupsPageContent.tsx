@@ -17,6 +17,8 @@ type Props = {
 export function GroupsPageContent({ groups }: Props) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
+  const selectedGroupData = groups.find((g) => g.id === selectedGroup);
+
   return (
     <>
       <GroupSelectionView
@@ -24,7 +26,7 @@ export function GroupsPageContent({ groups }: Props) {
         selectedGroup={selectedGroup}
         onSelectGroup={setSelectedGroup}
       />
-      <GroupLeaderboardTable group={selectedGroup} />
+      {selectedGroupData && <GroupLeaderboardTable data={selectedGroupData} />}
     </>
   );
 }
