@@ -1,6 +1,12 @@
-import { TournamentSectionContent } from "@/components/tournaments/tournament-section-content";
+import { GroupsPageContent } from "@/components/tournaments/groups/GroupsPageContent";
+import type { TournamentMatchData } from "@/components/tournaments/groups/types/types";
 import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
-import { getLocale } from "next-intl/server";
+import { api } from "@/trpc/server";
+
+interface GroupMatches {
+  groupId: string;
+  matches: TournamentMatchData;
+}
 
 export default async function TournamentGroupsPage({
   params,
@@ -8,16 +14,30 @@ export default async function TournamentGroupsPage({
   params: Promise<{ seriesSlug: string; urlKey: string }>;
 }) {
   const { seriesSlug, urlKey } = await params;
-  const locale = await getLocale();
-
   const { section } = await getTournamentPageData(seriesSlug, urlKey, "groups");
 
-  const content =
-    section?.translations.find((tr) => tr.locale === locale)?.content ?? "";
+  const groups = await api.tournaments.groups.listByTournament({
+    tournamentId: section.tournamentId,
+    includeMatches: true,
+    includeParticipants: true,
+    includeMatchMode: true,
+  });
+
+  const matches: GroupMatches[] = [];
+
+  for (const g of groups) {
+    const matchesForGroup = await api.tournaments.matches.list({
+      groupId: g.id,
+    });
+    matches.push({ groupId: g.id, matches: matchesForGroup });
+  }
 
   return (
-    <div className="space-y-4">
-      {content && <TournamentSectionContent content={content} />}
+    <div className="panel space-y-4">
+      <GroupsPageContent
+        groups={groups}
+        groupMatches={matches}
+      />
     </div>
   );
 }

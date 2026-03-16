@@ -609,6 +609,15 @@
         "remove_filter": "Usuń filtr {name}"
       }
     },
+    "groups": {
+      "no_groups": "Brak grup do wyświetlenia.",
+      "rank": "Pozycja",
+      "player": "Gracz",
+      "played": "Rozegrane",
+      "won": "Wygrane",
+      "lost": "Przegrane",
+      "total_score": "Suma punktów"
+    },
     "players": {
       "nickname": "Nick",
       "in_groups": "W grupach",
