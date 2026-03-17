@@ -8,34 +8,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTranslations } from "next-intl";
-import type {
-  LeaderboardPlayerStats,
-  TournamentGroup,
-  TournamentMatchData,
-} from "./types/types";
+import type { GroupPageData } from "./types/types";
 
-type Props = {
-  group: TournamentGroup;
-  matches: TournamentMatchData;
-};
+interface LeaderboardPlayerStats {
+  playerId: string;
+  playerName: string;
+  matchesPlayed: number;
+  matchesWon: number;
+  matchesLost: number;
+  totalScore: number;
+}
 
-export function GroupLeaderboardTable({ group, matches }: Props) {
+export function GroupLeaderboardTable({
+  groupData,
+}: {
+  groupData: GroupPageData;
+}) {
   const t = useTranslations("tournament.groups");
 
   const playerMap = new Map<string, LeaderboardPlayerStats>();
 
-  group.TournamentGroupParticipant.forEach((p) => {
-    playerMap.set(p.tournamentParticipantId, {
-      playerId: p.tournamentParticipantId,
-      playerName: "", // initially empty as group doesn't have this data.
+  for (const player of groupData.players) {
+    playerMap.set(player.id, {
+      playerId: player.id,
+      playerName: player.name,
       matchesPlayed: 0,
       matchesWon: 0,
       matchesLost: 0,
       totalScore: 0,
     });
-  });
+  }
 
-  for (const match of matches) {
+  for (const match of groupData.matches) {
     for (const participant of match.TournamentMatchParticipant) {
       const player = playerMap.get(participant.participantId!);
 
@@ -65,7 +69,7 @@ export function GroupLeaderboardTable({ group, matches }: Props) {
   return (
     <Card className="w-full text-center">
       <CardHeader>
-        <CardTitle>{group.name}</CardTitle>
+        <CardTitle>{groupData.groupName}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

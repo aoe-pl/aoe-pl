@@ -3,37 +3,37 @@
 import { Button } from "@/components/ui";
 import { Card } from "@/components/ui/card";
 import { isBrightColor } from "@/lib/utils";
-import type { TournamentGroups } from "./types/types";
+import type { GroupPageData } from "./types/types";
 
 type Props = {
-  groups: TournamentGroups;
+  groupsData: GroupPageData[];
   selectedGroup: string | null;
   onSelectGroup: (group: string) => void;
 };
 
 export function GroupSelectionView({
-  groups,
+  groupsData,
   selectedGroup,
   onSelectGroup,
 }: Props) {
   return (
     <Card className="flex w-full flex-row flex-wrap items-center justify-center gap-2">
-      {groups.map((g) => {
-        const color = g.color!;
+      {groupsData.map((g) => {
+        const color = g.groupColor;
         const labelColor = isBrightColor(color) ? "#000" : "#fff";
 
         return (
           <Button
-            key={g.id}
+            key={g.groupId}
             className={`text-md p-5 font-bold ${
-              g.id === selectedGroup ? "ring-2 ring-stone-300" : ""
+              g.groupId === selectedGroup ? "ring-2 ring-stone-300" : ""
             } hover:ring-2 hover:ring-stone-300`}
             style={
               color ? { backgroundColor: color, color: labelColor } : undefined
             }
-            onClick={() => onSelectGroup(g.id)}
+            onClick={() => onSelectGroup(g.groupId)}
           >
-            {g.name}
+            {g.groupName}
           </Button>
         );
       })}
