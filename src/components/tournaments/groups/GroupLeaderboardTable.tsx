@@ -39,20 +39,18 @@ export function GroupLeaderboardTable({
     });
   }
 
-  for (const match of groupData.matches) {
+  const approvedMatches = groupData.matches.filter(
+    (m) => m.status === "ADMIN_APPROVED",
+  );
+
+  for (const match of approvedMatches) {
     for (const participant of match.TournamentMatchParticipant) {
       const player = playerMap.get(participant.participantId!);
 
       if (!player) continue;
 
-      if (participant.participant?.nickname) {
-        player.playerName = participant.participant.nickname;
-      }
-
-      // Only update stats for approved matches
-      if (match.status !== "ADMIN_APPROVED") continue;
-
       player.matchesPlayed++;
+
       if (participant.isWinner) {
         player.matchesWon++;
       } else {
