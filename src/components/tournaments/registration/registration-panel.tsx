@@ -68,7 +68,7 @@ export function RegistrationPanel({
     for (const field of fields) {
       const val = formData[field.id];
 
-      if (field.required && (val === undefined || val === null || val === "")) {
+      if (field.required && (val == null || val === "")) {
         newErrors[field.id] = t("field_required_error");
       } else if (
         field.type === "NUMBER" &&

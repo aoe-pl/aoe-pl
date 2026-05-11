@@ -333,7 +333,7 @@ export const tournamentRouter = createTRPCRouter({
           .filter((f) => f.required)
           .filter((f) => {
             const val = input.formData?.[f.id];
-            return val === undefined || val === null || val === "";
+            return val == null || val === "";
           });
 
         if (missingRequired.length > 0) {
