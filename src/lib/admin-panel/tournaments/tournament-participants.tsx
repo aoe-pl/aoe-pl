@@ -68,7 +68,7 @@ export async function TournamentParticipants({
             </TableHeader>
             <TableBody>
               {participants.map((participant) => {
-                const data =
+                const participantRegData =
                   participant.registrationData &&
                   typeof participant.registrationData === "object" &&
                   !Array.isArray(participant.registrationData)
@@ -121,7 +121,7 @@ export async function TournamentParticipants({
                     <TableCell>
                       <ParticipantDataDialog
                         participantId={participant.id}
-                        registrationData={data}
+                        registrationData={participantRegData}
                         registrationFields={registrationFields}
                         locale={locale}
                       />
