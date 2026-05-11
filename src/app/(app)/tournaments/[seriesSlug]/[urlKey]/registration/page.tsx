@@ -29,7 +29,7 @@ export default async function TournamentRegistrationPage({
     : null;
 
   return (
-    <div className="space-y-4">
+    <div className="panel space-y-4">
       {content && <TournamentSectionContent content={content} />}
 
       <RegistrationPanel

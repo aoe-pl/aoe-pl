@@ -203,10 +203,11 @@ model Tournament {
   name                  String
   matchMode             TournamentMatchMode     @relation(fields: [matchModeId], references: [id])
   tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])
-  TournamentParticipant TournamentParticipant[]
-  sections              TournamentSection[]
-  stages                TournamentStage[]
-  teams                 TournamentTeam[]
+  TournamentParticipant    TournamentParticipant[]
+  sections                 TournamentSection[]
+  stages                   TournamentStage[]
+  teams                    TournamentTeam[]
+  registrationFields       TournamentRegistrationField[]
 
   @@unique([tournamentSeriesId, urlKey])
 }
@@ -320,6 +321,28 @@ model TournamentGroup {
   @@unique([stageId, name])
 }
 
+model TournamentRegistrationField {
+  id           String                                   @id @default(cuid())
+  tournamentId String
+  type         RegistrationFieldType
+  required     Boolean                                  @default(false)
+  displayOrder Int                                      @default(0)
+  tournament   Tournament                               @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  translations TournamentRegistrationFieldTranslation[]
+
+  @@index([tournamentId])
+}
+
+model TournamentRegistrationFieldTranslation {
+  id      String                      @id @default(cuid())
+  fieldId String
+  locale  String
+  label   String
+  field   TournamentRegistrationField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@unique([fieldId, locale])
+}
+
 model TournamentParticipant {
   id                         String                       @id @default(cuid())
   tournamentId               String
@@ -329,6 +352,7 @@ model TournamentParticipant {
   seedNumber                 Int?
   registrationDate           DateTime                     @default(now())
   nickname                   String
+  registrationData           Json?
   TournamentGroupParticipant TournamentGroupParticipant[]
   TournamentMatchParticipant TournamentMatchParticipant[]
   team                       TournamentTeam?              @relation(fields: [teamId], references: [id])
@@ -422,6 +446,12 @@ model Game {
   map          Map               @relation(fields: [mapId], references: [id])
   match        TournamentMatch   @relation(fields: [matchId], references: [id], onDelete: Cascade)
   participants GameParticipant[]
+}
+
+enum RegistrationFieldType {
+  STRING
+  NUMBER
+  BOOLEAN
 }
 
 enum RoleType {

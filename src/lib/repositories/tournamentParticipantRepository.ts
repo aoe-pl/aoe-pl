@@ -32,6 +32,7 @@ export const tournamentParticipantRepository = {
     tournamentId: string,
     userId: string,
     nickname: string,
+    registrationData: Record<string, string | number | boolean> = {},
   ) {
     return db.tournamentParticipant.create({
       data: {
@@ -39,6 +40,7 @@ export const tournamentParticipantRepository = {
         userId,
         nickname,
         status: "REGISTERED",
+        registrationData,
       },
     });
   },
@@ -46,6 +48,16 @@ export const tournamentParticipantRepository = {
   async deleteByUserAndTournament(userId: string, tournamentId: string) {
     return db.tournamentParticipant.deleteMany({
       where: { userId, tournamentId },
+    });
+  },
+
+  async updateRegistrationData(
+    participantId: string,
+    registrationData: Record<string, string | number | boolean>,
+  ) {
+    return db.tournamentParticipant.update({
+      where: { id: participantId },
+      data: { registrationData },
     });
   },
 

@@ -12,6 +12,7 @@ export const predefinedTournamentSections = [
 ] as const;
 
 export const specialTournamentSectionSlugs = new Set([
+  "registration",
   "calendar",
   "groups",
   "matches",

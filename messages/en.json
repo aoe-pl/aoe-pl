@@ -240,6 +240,37 @@
           "removed": "Section {name} deleted.",
           "created": "Section created.",
           "predefined_created": "{count, plural, one {Added # section.} other {Added # sections.}}"
+        },
+        "registration": {
+          "fields_description": "Define additional fields that participants must fill out when registering.",
+          "no_fields": "No registration fields defined.",
+          "add_field": "Add field",
+          "save": "Save",
+          "cancel": "Cancel",
+          "remove": "Remove",
+          "required_badge": "Required",
+          "field_label": "Label",
+          "field_label_placeholder": "e.g. AoE2Companion URL",
+          "field_type_label": "Type",
+          "field_required": "Required",
+          "field_type": {
+            "string": "Text",
+            "number": "Number",
+            "boolean": "Yes / No"
+          },
+          "dialog": {
+            "create_title": "Add registration field",
+            "edit_title": "Edit registration field"
+          },
+          "confirm_delete": {
+            "title": "Delete field",
+            "description": "Are you sure you want to delete the field \"{label}\"? Existing answers will remain stored but will no longer be displayed."
+          },
+          "toast": {
+            "field_created": "Field added.",
+            "field_saved": "Field saved.",
+            "field_removed": "Field \"{label}\" removed."
+          }
         }
       },
       "participant_details": {
@@ -258,7 +289,6 @@
         "delete_cancel": "Cancel"
       }
     },
-
     "settings": {
       "title": "Settings",
       "page_title": "Admin settings",
@@ -536,7 +566,10 @@
       "register": "Register",
       "registering": "Registering...",
       "register_success": "You have successfully registered for the tournament.",
-      "must_be_logged_in": "You must be logged in to register for the tournament."
+      "must_be_logged_in": "You must be logged in to register for the tournament.",
+      "field_required_error": "This field is required.",
+      "field_number_error": "This field must be a valid number.",
+      "field_text_max_length_error": "Maximum 60 characters reached."
     },
     "detail": {
       "not_found": "Tournament not found.",
@@ -591,7 +624,6 @@
       }
     }
   },
-
   "tournament": {
     "calendar": {
       "today": "Today",

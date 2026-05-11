@@ -7,6 +7,7 @@ import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRep
 import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
+import { tournamentRegistrationFieldRepository } from "@/lib/repositories/tournamentRegistrationFieldRepository";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
@@ -22,7 +23,11 @@ import type {
   TournamentParticipant,
   TournamentSeries,
 } from "@prisma/client";
-import { MatchStatus, TournamentMatchModeType } from "@prisma/client";
+import {
+  MatchStatus,
+  RegistrationFieldType,
+  TournamentMatchModeType,
+} from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -261,7 +266,14 @@ export const tournamentRouter = createTRPCRouter({
       }),
 
     register: protectedProcedure
-      .input(z.object({ tournamentId: z.string() }))
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          formData: z
+            .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+            .optional(),
+        }),
+      )
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
         const nickname = ctx.session.user.name!;
@@ -276,10 +288,73 @@ export const tournamentRouter = createTRPCRouter({
           throw new TRPCError({ code: "CONFLICT" });
         }
 
+        const fields = await tournamentRegistrationFieldRepository.list(
+          input.tournamentId,
+        );
+
+        const validFieldIds = new Set(fields.map((f) => f.id));
+
+        for (const [key, val] of Object.entries(input.formData ?? {})) {
+          if (!validFieldIds.has(key)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Unknown field: ${key}`,
+            });
+          }
+
+          const field = fields.find((f) => f.id === key)!;
+
+          if (field.type === "NUMBER" && typeof val !== "number") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Field ${key} must be a number`,
+            });
+          }
+
+          if (field.type === "BOOLEAN" && typeof val !== "boolean") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Field ${key} must be a boolean`,
+            });
+          }
+
+          if (
+            field.type === "STRING" &&
+            (typeof val !== "string" || val.length > 60)
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Field ${key} must be a string of at most 60 characters`,
+            });
+          }
+        }
+
+        const missingRequired = fields
+          .filter((f) => f.required)
+          .filter((f) => {
+            const val = input.formData?.[f.id];
+            return val === undefined || val === null || val === "";
+          });
+
+        if (missingRequired.length > 0) {
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message: `Missing required fields: ${missingRequired
+              .map(
+                (f) =>
+                  f.translations[0]?.label ??
+                  f.translations.find((t) => t.locale === "en")?.label ??
+                  f.id,
+              )
+              .join(", ")}`,
+          });
+        }
+
         return tournamentParticipantRepository.registerParticipant(
           input.tournamentId,
           userId,
           nickname,
+          input.formData ?? {},
         );
       }),
 
@@ -287,6 +362,23 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ participantId: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentParticipantRepository.deleteById(input.participantId);
+      }),
+
+    updateRegistrationData: adminProcedure
+      .input(
+        z.object({
+          participantId: z.string(),
+          registrationData: z.record(
+            z.string(),
+            z.union([z.string(), z.number(), z.boolean()]),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentParticipantRepository.updateRegistrationData(
+          input.participantId,
+          input.registrationData,
+        );
       }),
   }),
 
@@ -676,6 +768,67 @@ export const tournamentRouter = createTRPCRouter({
       )
       .mutation(async ({ input }) => {
         return tournamentSectionRepository.reorderSections(input.updates);
+      }),
+  }),
+
+  registrationFields: createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentRegistrationFieldRepository.list(input.tournamentId);
+      }),
+
+    create: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          translations: z.array(
+            z.object({ locale: z.string(), label: z.string().min(1) }),
+          ),
+          type: z.nativeEnum(RegistrationFieldType),
+          required: z.boolean(),
+          displayOrder: z.number().int().min(0).optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentRegistrationFieldRepository.create(input);
+      }),
+
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          translations: z
+            .array(z.object({ locale: z.string(), label: z.string().min(1) }))
+            .optional(),
+          type: z.nativeEnum(RegistrationFieldType).optional(),
+          required: z.boolean().optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return tournamentRegistrationFieldRepository.update(id, data);
+      }),
+
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentRegistrationFieldRepository.delete(input.id);
+      }),
+
+    reorder: adminProcedure
+      .input(
+        z.object({
+          updates: z.array(
+            z.object({
+              id: z.string(),
+              displayOrder: z.number().int().min(0),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentRegistrationFieldRepository.reorder(input.updates);
       }),
   }),
 });
