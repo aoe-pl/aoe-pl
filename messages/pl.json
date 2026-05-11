@@ -240,6 +240,37 @@
           "removed": "Sekcja {name} usunięta.",
           "created": "Sekcja utworzona.",
           "predefined_created": "{count, plural, one {Dodano # sekcję.} few {Dodano # sekcje.} other {Dodano # sekcji.}}"
+        },
+        "registration": {
+          "fields_description": "Dodatkowe pola, które uczestnicy muszą wypełnić podczas rejestracji.",
+          "no_fields": "Brak zdefiniowanych pól rejestracji.",
+          "add_field": "Dodaj pole",
+          "save": "Zapisz",
+          "cancel": "Anuluj",
+          "remove": "Usuń",
+          "required_badge": "Wymagane",
+          "field_label": "Etykieta",
+          "field_label_placeholder": "np. link do profilu AoE2Companion",
+          "field_type_label": "Typ",
+          "field_required": "Wymagane",
+          "field_type": {
+            "string": "Tekst",
+            "number": "Liczba",
+            "boolean": "Tak / Nie"
+          },
+          "dialog": {
+            "create_title": "Dodaj pole rejestracji",
+            "edit_title": "Edytuj pole rejestracji"
+          },
+          "confirm_delete": {
+            "title": "Usuń pole",
+            "description": "Czy na pewno chcesz usunąć pole \"{label}\"? Istniejące odpowiedzi pozostaną zapisane, ale nie będą wyświetlane."
+          },
+          "toast": {
+            "field_created": "Pole dodane.",
+            "field_saved": "Pole zapisane.",
+            "field_removed": "Pole \"{label}\" usunięte."
+          }
         }
       },
       "participant_details": {
@@ -535,7 +566,10 @@
       "register": "Zarejestruj się",
       "registering": "Rejestrowanie...",
       "register_success": "Pomyślnie zarejestrowano na turniej.",
-      "must_be_logged_in": "Musisz być zalogowany, aby zarejestrować się na turniej."
+      "must_be_logged_in": "Musisz być zalogowany, aby zarejestrować się na turniej.",
+      "field_required_error": "To pole jest wymagane.",
+      "field_number_error": "To pole musi być prawidłową liczbą.",
+      "field_text_max_length_error": "Osiągnięto limit 60 znaków."
     },
     "detail": {
       "not_found": "Nie znaleziono turnieju.",

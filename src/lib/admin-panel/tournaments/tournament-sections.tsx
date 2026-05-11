@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { api } from "@/trpc/react";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { ErrorToast } from "@/components/ui/error-toast-content";
-import { Accordion } from "@/components/ui/accordion";
 import { specialTournamentSectionSlugs } from "@/lib/tournaments/section-constants";
-import type { SectionWithTranslations } from "./sections/tournament-section-types";
+import { api } from "@/trpc/react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { TournamentRegistrationSectionCard } from "./sections/registration/tournament-registration-section-card";
 import { TournamentSectionCard } from "./sections/tournament-section-card";
+import { TournamentSectionDialog } from "./sections/tournament-section-dialog";
+import type { SectionWithTranslations } from "./sections/tournament-section-types";
 import { TournamentSpecialSectionCard } from "./sections/tournament-special-section-card";
 import { TournamentSpecialSectionDialog } from "./sections/tournament-special-section-dialog";
-import { TournamentSectionDialog } from "./sections/tournament-section-dialog";
 
 export function TournamentSections({ tournamentId }: { tournamentId: string }) {
   const t = useTranslations("admin.tournaments.sections");
@@ -99,9 +100,12 @@ export function TournamentSections({ tournamentId }: { tournamentId: string }) {
       {hasSections && (
         <Accordion type="multiple">
           {ordered.map((section, index) => {
-            const Card = specialTournamentSectionSlugs.has(section.slug)
-              ? TournamentSpecialSectionCard
-              : TournamentSectionCard;
+            const Card =
+              section.slug === "registration"
+                ? TournamentRegistrationSectionCard
+                : specialTournamentSectionSlugs.has(section.slug)
+                  ? TournamentSpecialSectionCard
+                  : TournamentSectionCard;
 
             return (
               <Card

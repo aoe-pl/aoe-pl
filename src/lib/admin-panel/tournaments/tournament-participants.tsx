@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ParticipantDataDialog } from "@/lib/admin-panel/tournaments/participant-data-dialog";
 import { RemoveParticipantButton } from "@/lib/admin-panel/tournaments/remove-participant-button";
 import { api } from "@/trpc/server";
 import type {
@@ -18,6 +19,7 @@ import type {
   TournamentParticipant,
   TournamentStage,
 } from "@prisma/client";
+import { getLocale } from "next-intl/server";
 import Link from "next/link";
 
 type TournamentParticipantsProps = {
@@ -35,10 +37,15 @@ type ParticipantWithGroups = TournamentParticipant & {
 export async function TournamentParticipants({
   tournamentId,
 }: TournamentParticipantsProps) {
-  const participants = (await api.tournaments.participants.list({
-    tournamentId,
-    includeUser: true,
-  })) as ParticipantWithGroups[];
+  const locale = await getLocale();
+
+  const [participants, registrationFields] = await Promise.all([
+    api.tournaments.participants.list({
+      tournamentId,
+      includeUser: true,
+    }) as Promise<ParticipantWithGroups[]>,
+    api.tournaments.registrationFields.list({ tournamentId }),
+  ]);
 
   return (
     <Card>
@@ -55,57 +62,76 @@ export async function TournamentParticipants({
                 <TableHead className="max-w-[200px]">Groups</TableHead>
                 <TableHead>Registration Date</TableHead>
                 <TableHead>Has user account</TableHead>
+                <TableHead>Data</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {participants.map((participant) => (
-                <TableRow key={participant.id}>
-                  <TableCell>{participant.nickname}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{participant.status}</Badge>
-                  </TableCell>
-                  <TableCell className="max-w-[100px]">
-                    <div className="flex flex-wrap gap-1 overflow-y-auto">
-                      {participant.TournamentGroupParticipant.length > 0 ? (
-                        participant.TournamentGroupParticipant.map(
-                          (groupParticipant) => (
-                            <Link
-                              key={groupParticipant.id}
-                              href={`/admin/tournaments/groups/${groupParticipant.tournamentGroup.id}`}
-                            >
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-xs"
+              {participants.map((participant) => {
+                const participantRegData =
+                  participant.registrationData &&
+                  typeof participant.registrationData === "object" &&
+                  !Array.isArray(participant.registrationData)
+                    ? (participant.registrationData as Record<string, unknown>)
+                    : {};
+
+                return (
+                  <TableRow key={participant.id}>
+                    <TableCell>{participant.nickname}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{participant.status}</Badge>
+                    </TableCell>
+                    <TableCell className="max-w-[100px]">
+                      <div className="flex flex-wrap gap-1 overflow-y-auto">
+                        {participant.TournamentGroupParticipant.length > 0 ? (
+                          participant.TournamentGroupParticipant.map(
+                            (groupParticipant) => (
+                              <Link
+                                key={groupParticipant.id}
+                                href={`/admin/tournaments/groups/${groupParticipant.tournamentGroup.id}`}
                               >
-                                {groupParticipant.tournamentGroup.name}
-                              </Button>
-                            </Link>
-                          ),
-                        )
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs"
+                                >
+                                  {groupParticipant.tournamentGroup.name}
+                                </Button>
+                              </Link>
+                            ),
+                          )
+                        ) : (
+                          <Badge variant="secondary">No groups assigned</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(
+                        participant.registrationDate,
+                      ).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {participant.userId ? (
+                        <Badge variant="outline">Yes</Badge>
                       ) : (
-                        <Badge variant="secondary">No groups assigned</Badge>
+                        <Badge variant="secondary">No</Badge>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(
-                      participant.registrationDate,
-                    ).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {participant.userId ? (
-                      <Badge variant="outline">Yes</Badge>
-                    ) : (
-                      <Badge variant="secondary">No</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <RemoveParticipantButton participantId={participant.id} />
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+
+                    <TableCell>
+                      <ParticipantDataDialog
+                        participantId={participant.id}
+                        registrationData={participantRegData}
+                        registrationFields={registrationFields}
+                        locale={locale}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <RemoveParticipantButton participantId={participant.id} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </ScrollArea>
