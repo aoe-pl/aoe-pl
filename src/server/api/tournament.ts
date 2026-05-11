@@ -340,12 +340,7 @@ export const tournamentRouter = createTRPCRouter({
           throw new TRPCError({
             code: "UNPROCESSABLE_CONTENT",
             message: `Missing required fields: ${missingRequired
-              .map(
-                (f) =>
-                  f.translations[0]?.label ??
-                  f.translations.find((t) => t.locale === "en")?.label ??
-                  f.id,
-              )
+              .map((f) => f.translations[0]?.label)
               .join(", ")}`,
           });
         }
