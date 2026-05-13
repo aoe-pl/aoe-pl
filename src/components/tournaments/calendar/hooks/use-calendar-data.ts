@@ -23,7 +23,7 @@ interface MatchRowGroup {
   color: string | null;
 }
 interface MatchRowParticipant {
-  participant: { id: string; nickname: string } | null;
+  participant: { id: string; nickname: string; userId: string | null } | null;
   team: { id: string; name: string } | null;
 }
 interface MatchRowStream {
@@ -34,6 +34,7 @@ interface CalendarData {
   calendarMatches: CalendarMatch[];
   calendarGroups: CalendarGroup[];
   calendarPlayers: CalendarPlayer[];
+  pendingRows: TournamentMatchRow[];
 }
 
 /** Maps db rows to the calendar types */
@@ -42,12 +43,17 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
     const groupMap = new Map<string, CalendarGroup>();
     const playerMap = new Map<string, CalendarPlayer>();
     const mapped: CalendarMatch[] = [];
+    const pendingRows: TournamentMatchRow[] = [];
 
     for (const row of rows) {
-      if (!row.group || !row.matchDate) continue;
+      if (!row.group) continue;
 
-      // Theoretically date can be set for pending matches, but we don't want to display them in calendar.
-      if (row.status === "PENDING") continue;
+      if (row.status === "PENDING") {
+        pendingRows.push(row);
+        continue;
+      }
+
+      if (!row.matchDate) continue;
 
       if (!groupMap.has(row.group.id)) {
         groupMap.set(row.group.id, {
@@ -109,6 +115,7 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
       calendarMatches: mapped,
       calendarGroups: Array.from(groupMap.values()),
       calendarPlayers: Array.from(playerMap.values()),
+      pendingRows,
     };
   }, [rows]);
 }

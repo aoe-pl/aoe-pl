@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { ChevronDownIcon } from "lucide-react";
 import { format } from "date-fns";
+import { ChevronDownIcon } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -21,6 +21,8 @@ interface Calendar24Props {
   onTimeChange?: (time: string) => void;
   disabled?: boolean;
   className?: string;
+  dateLabel?: string;
+  timeLabel?: string;
 }
 
 export function Calendar24({
@@ -30,6 +32,8 @@ export function Calendar24({
   onTimeChange,
   disabled = false,
   className,
+  dateLabel = "Date",
+  timeLabel = "Time",
 }: Calendar24Props) {
   const [open, setOpen] = React.useState(false);
 
@@ -63,7 +67,7 @@ export function Calendar24({
           htmlFor="date-picker"
           className="px-1"
         >
-          Date
+          {dateLabel}
         </Label>
         <Popover
           open={open}
@@ -101,7 +105,7 @@ export function Calendar24({
           htmlFor="time-picker"
           className="px-1"
         >
-          Time
+          {timeLabel}
         </Label>
         <Input
           type="time"

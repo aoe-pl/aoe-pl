@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { CalendarFilters } from "./calendar-filters";
 import { CalendarToolbar } from "./calendar-toolbar";
 import type { TournamentMatchRow } from "./hooks/use-calendar-data";
@@ -7,6 +10,7 @@ import { useCalendarData } from "./hooks/use-calendar-data";
 import { useCalendarFilters } from "./hooks/use-calendar-filters";
 import { useCalendarNav } from "./hooks/use-calendar-nav";
 import { MonthView } from "./month-view";
+import { ScheduleMatchDialog } from "./schedule-match-dialog";
 import { SelectedDayPanel } from "./selected-day-panel";
 import { WeekView } from "./week-view";
 
@@ -15,13 +19,18 @@ export type { TournamentMatchRow } from "./hooks/use-calendar-data";
 interface TournamentCalendarProps {
   matches: TournamentMatchRow[];
   matchUrlBase: string;
+  userId: string | null;
+  isAdmin: boolean;
 }
 
 export function TournamentCalendar({
   matches,
   matchUrlBase,
+  userId,
+  isAdmin,
 }: TournamentCalendarProps) {
-  const { calendarMatches, calendarGroups, calendarPlayers } =
+  const router = useRouter();
+  const { calendarMatches, calendarGroups, calendarPlayers, pendingRows } =
     useCalendarData(matches);
 
   const {
@@ -47,6 +56,31 @@ export function TournamentCalendar({
     goToToday,
     handleDaySelect,
   } = useCalendarNav();
+
+  const [schedulingMatch, setSchedulingMatch] = useState<{
+    match: TournamentMatchRow;
+    defaultDate: Date;
+  } | null>(null);
+
+  const { mutate: unschedule } =
+    api.tournaments.matches.unscheduleMatch.useMutation({
+      onSuccess: () => router.refresh(),
+    });
+
+  function handleScheduleMatch(match: TournamentMatchRow, date: Date) {
+    setSchedulingMatch({ match, defaultDate: date });
+  }
+
+  function handleRescheduleMatch(match: TournamentMatchRow) {
+    setSchedulingMatch({
+      match,
+      defaultDate: match.matchDate ?? new Date(),
+    });
+  }
+
+  function handleCancelMatch(match: TournamentMatchRow) {
+    unschedule({ id: match.id });
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -87,10 +121,12 @@ export function TournamentCalendar({
           groups={calendarGroups}
           players={calendarPlayers}
           matchUrlBase={matchUrlBase}
+          selectedDay={selectedDay}
+          onDaySelect={handleDaySelect}
         />
       </div>
 
-      {selectedDay && view === "month" && (
+      {selectedDay && (
         <SelectedDayPanel
           selectedDay={selectedDay}
           matches={filteredMatches}
@@ -98,6 +134,21 @@ export function TournamentCalendar({
           players={calendarPlayers}
           isFiltered={isFiltered}
           matchUrlBase={matchUrlBase}
+          pendingRows={pendingRows}
+          tournamentMatchRows={matches}
+          userId={userId}
+          isAdmin={isAdmin}
+          onScheduleMatch={handleScheduleMatch}
+          onRescheduleMatch={handleRescheduleMatch}
+          onCancelMatch={handleCancelMatch}
+        />
+      )}
+
+      {schedulingMatch && (
+        <ScheduleMatchDialog
+          match={schedulingMatch.match}
+          defaultDate={schedulingMatch.defaultDate}
+          onClose={() => setSchedulingMatch(null)}
         />
       )}
     </div>
