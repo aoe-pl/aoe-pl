@@ -12,12 +12,14 @@ import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
 import { tournamentStagesRepository } from "@/lib/repositories/tournamentStagesRepository";
+import { usersRepository } from "@/lib/repositories/usersRepository";
 import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { db } from "@/server/db";
 import type {
   Tournament,
   TournamentParticipant,
@@ -666,6 +668,59 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentMatchRepository.deleteTournamentMatch(input.id);
+      }),
+
+    // Secure match scheduling for participants. Only admins or participants of the match can schedule or unschedule it.
+    scheduleMatch: protectedProcedure
+      .input(z.object({ id: z.string(), matchDate: z.date() }))
+      .mutation(async ({ input, ctx }) => {
+        const match = await db.tournamentMatch.findUnique({
+          where: { id: input.id },
+          include: {
+            TournamentMatchParticipant: { include: { participant: true } },
+          },
+        });
+
+        if (!match) throw new TRPCError({ code: "NOT_FOUND" });
+
+        const admin = await usersRepository.isUserAdmin(ctx.session.user.id);
+        const isParticipant = match.TournamentMatchParticipant.some(
+          (p) => p.participant?.userId === ctx.session.user.id,
+        );
+
+        if (!admin && !isParticipant)
+          throw new TRPCError({ code: "FORBIDDEN" });
+
+        return tournamentMatchRepository.updateTournamentMatch(input.id, {
+          status: MatchStatus.SCHEDULED,
+          matchDate: input.matchDate,
+        });
+      }),
+
+    unscheduleMatch: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const match = await db.tournamentMatch.findUnique({
+          where: { id: input.id },
+          include: {
+            TournamentMatchParticipant: { include: { participant: true } },
+          },
+        });
+
+        if (!match) throw new TRPCError({ code: "NOT_FOUND" });
+
+        const admin = await usersRepository.isUserAdmin(ctx.session.user.id);
+        const isParticipant = match.TournamentMatchParticipant.some(
+          (p) => p.participant?.userId === ctx.session.user.id,
+        );
+
+        if (!admin && !isParticipant)
+          throw new TRPCError({ code: "FORBIDDEN" });
+
+        return db.tournamentMatch.update({
+          where: { id: input.id },
+          data: { status: MatchStatus.PENDING, matchDate: null },
+        });
       }),
   }),
   games: createTRPCRouter({

@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { useLocale } from "next-intl";
 import { buildWeekDays, getMatchesForDay } from "./calendar-utils";
 import { getDateFnsLocale } from "./locale-utils";
@@ -11,6 +11,8 @@ interface WeekViewProps {
   groups: CalendarGroup[];
   players: CalendarPlayer[];
   matchUrlBase: string;
+  selectedDay?: Date | null;
+  onDaySelect?: (day: Date) => void;
 }
 
 export function WeekView({
@@ -19,6 +21,8 @@ export function WeekView({
   groups,
   players,
   matchUrlBase,
+  selectedDay,
+  onDaySelect,
 }: WeekViewProps) {
   const locale = getDateFnsLocale(useLocale());
   const days = buildWeekDays(currentWeekStart);
@@ -38,10 +42,12 @@ export function WeekView({
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b">
         {days.map((day) => {
+          const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
           return (
             <div
               key={day.toISOString()}
-              className="py-2 text-center"
+              className={`py-2 text-center ${isSelected ? "bg-primary/5 ring-primary/40 ring-1 ring-inset" : "hover:bg-muted/50"}`}
+              onClick={() => onDaySelect?.(day)}
             >
               <p className="text-muted-foreground py-2 text-center text-sm font-semibold tracking-wide uppercase">
                 {format(day, "EEEE", { locale })}

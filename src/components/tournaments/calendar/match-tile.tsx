@@ -1,4 +1,4 @@
-import { cn, isBrightColor } from "@/lib/utils";
+import { isBrightColor } from "@/lib/utils";
 import { format } from "date-fns";
 import { Check } from "lucide-react";
 import Link from "next/link";
@@ -74,13 +74,8 @@ export function MatchTile({
     </>
   );
 
-  const sharedClass = cn(
-    "relative w-full rounded-md border px-2.5 py-1.5",
-    "hover:scale-[1.02] active:scale-[0.98]",
-  );
-
   const sharedProps = {
-    className: sharedClass,
+    className: "relative w-full rounded-md border px-2.5 py-1.5",
     style: sharedStyle,
     title: `${player1.nickname} vs ${player2.nickname} — ${group.name}`,
   };
