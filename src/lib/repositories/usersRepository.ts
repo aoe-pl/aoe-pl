@@ -46,6 +46,52 @@ export const usersRepository = {
     });
   },
 
+  async getOwnProfile(userId: string) {
+    return db.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        aoe2companionUrl: true,
+        adminComment: true,
+        userRoles: {
+          select: {
+            id: true,
+            assignedAt: true,
+            expiresAt: true,
+            role: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+          },
+        },
+        TournamentParticipant: {
+          select: {
+            id: true,
+            nickname: true,
+            registrationDate: true,
+            status: true,
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                urlKey: true,
+                status: true,
+                tournamentSeries: {
+                  select: { name: true },
+                },
+              },
+            },
+          },
+          orderBy: { registrationDate: "desc" },
+        },
+      },
+    });
+  },
+
   async getUserWithDetails(id: string) {
     return db.user.findUnique({
       where: { id },
@@ -83,6 +129,22 @@ export const usersRepository = {
           },
         },
       },
+    });
+  },
+
+  async updateOwnAoe2CompanionUrl(userId: string, url: string | null) {
+    return db.user.update({
+      where: { id: userId },
+      data: { aoe2companionUrl: url },
+      select: { id: true, aoe2companionUrl: true },
+    });
+  },
+
+  async updateAdminNote(userId: string, note: string | null) {
+    return db.user.update({
+      where: { id: userId },
+      data: { adminComment: note },
+      select: { id: true, adminComment: true },
     });
   },
 

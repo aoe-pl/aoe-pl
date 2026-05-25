@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui";
-import type { Session } from "next-auth";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { Button } from "@/components/ui";
+import { Menu, X } from "lucide-react";
+import type { Session } from "next-auth";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 interface NavigationProps {
   session: Session | null;
@@ -109,6 +109,16 @@ function DesktopNavigation({
         </Link>
       ))}
 
+      {session && (
+        <Link
+          href="/profile"
+          className={navLinkClass}
+        >
+          {t("profile")}
+          <div className={underlineClass} />
+        </Link>
+      )}
+
       {isAdmin && (
         <Link
           href="/admin"
@@ -189,6 +199,16 @@ function MobileMenu({
             {item.label}
           </Link>
         ))}
+
+        {session && (
+          <Link
+            href="/profile"
+            className="text-foreground/80 hover:text-accent hover:bg-accent/10 rounded-md px-4 py-2 text-base font-semibold transition-colors"
+            onClick={onClose}
+          >
+            {t("profile")}
+          </Link>
+        )}
 
         {isAdmin && (
           <Link

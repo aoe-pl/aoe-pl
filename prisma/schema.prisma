@@ -43,6 +43,7 @@ model User {
   image                 String?
   color                 String?
   adminComment          String?
+  aoe2companionUrl      String?
   accounts              Account[]
   sessions              Session[]
   TournamentMatchStream TournamentMatchStream[]
