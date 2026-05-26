@@ -686,7 +686,6 @@
     }
   },
   "profile": {
-    "unnamed": "(no name)",
     "roles": {
       "title": "Roles",
       "expired": "expired",
@@ -697,7 +696,7 @@
       "remove_success": "Role removed.",
       "remove_role": "Remove role",
       "remove_confirm_title": "Remove role",
-      "remove_confirm_description": "Remove the \"{{role}}\" role? This action cannot be undone.",
+      "remove_confirm_description": "Remove the \"{role}\" role? This action cannot be undone.",
       "remove_confirm": "Remove",
       "remove_cancel": "Cancel"
     },

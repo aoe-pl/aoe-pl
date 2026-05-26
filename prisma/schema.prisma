@@ -37,6 +37,7 @@ model Session {
 
 model User {
   id                    String                  @id @default(cuid())
+  playerNumber          Int                     @unique @default(autoincrement())
   name                  String?
   email                 String?                 @unique
   emailVerified         DateTime?
@@ -380,6 +381,7 @@ model TournamentGroupParticipant {
 
 model TournamentMatch {
   id                         String                       @id @default(cuid())
+  matchNumber                Int                          @unique @default(autoincrement())
   groupId                    String?
   matchDate                  DateTime?
   civDraftKey                String

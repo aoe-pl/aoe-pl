@@ -1,3 +1,4 @@
+import { PlayerLink } from "@/components/player-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,6 +14,7 @@ import type { GroupPageData } from "./types/types";
 interface LeaderboardPlayerStats {
   playerId: string;
   playerName: string;
+  playerNumber: number;
   matchesPlayed: number;
   matchesWon: number;
   matchesLost: number;
@@ -32,6 +34,7 @@ export function GroupLeaderboardTable({
     playerMap.set(player.id, {
       playerId: player.id,
       playerName: player.name,
+      playerNumber: player.playerNumber,
       matchesPlayed: 0,
       matchesWon: 0,
       matchesLost: 0,
@@ -86,7 +89,12 @@ export function GroupLeaderboardTable({
               return (
                 <TableRow key={p.playerId}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{p.playerName}</TableCell>
+                  <TableCell>
+                    <PlayerLink
+                      playerNumber={p.playerNumber}
+                      name={p.playerName}
+                    />
+                  </TableCell>
                   <TableCell>{p.matchesPlayed} </TableCell>
                   <TableCell>{p.matchesWon}</TableCell>
                   <TableCell>{p.matchesLost}</TableCell>

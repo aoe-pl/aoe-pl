@@ -89,7 +89,7 @@ export function WeekView({
                         group={group}
                         player1={p1}
                         player2={p2}
-                        href={`${matchUrlBase}/${m.id}`}
+                        href={`${matchUrlBase}/${m.matchNumber}`}
                       />
                     );
                   })}

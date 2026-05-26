@@ -35,6 +35,7 @@ export default async function TournamentGroupsPage({
       players: participants.map((p) => ({
         id: p.id,
         name: p.nickname,
+        playerNumber: p.user!.playerNumber,
       })),
     });
   }

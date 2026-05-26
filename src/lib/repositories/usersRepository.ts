@@ -5,6 +5,7 @@ export const usersRepository = {
     return db.user.findMany({
       select: {
         id: true,
+        playerNumber: true,
         name: true,
         email: true,
         emailVerified: true,
@@ -46,11 +47,12 @@ export const usersRepository = {
     });
   },
 
-  async getOwnProfile(userId: string) {
+  async getPublicProfile(playerNumber: number) {
     return db.user.findUnique({
-      where: { id: userId },
+      where: { playerNumber },
       select: {
         id: true,
+        playerNumber: true,
         name: true,
         aoe2companionUrl: true,
         adminComment: true,

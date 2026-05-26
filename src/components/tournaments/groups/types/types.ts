@@ -13,5 +13,6 @@ export interface GroupPageData {
   players: {
     id: string;
     name: string;
+    playerNumber: number;
   }[];
 }

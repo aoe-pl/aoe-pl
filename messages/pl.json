@@ -696,7 +696,7 @@
       "remove_success": "Rola została usunięta.",
       "remove_role": "Usuń rolę",
       "remove_confirm_title": "Usuń rolę",
-      "remove_confirm_description": "Usunąć rolę \"{{role}}\"? Tej operacji nie można cofnąć.",
+      "remove_confirm_description": "Usunąć rolę \"{role}\"? Tej operacji nie można cofnąć.",
       "remove_confirm": "Usuń",
       "remove_cancel": "Anuluj"
     },

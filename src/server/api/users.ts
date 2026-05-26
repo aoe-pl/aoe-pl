@@ -5,6 +5,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { db } from "@/server/db";
 import { z } from "zod";
 
 const updateUserSchema = z.object({
@@ -24,6 +25,12 @@ export const usersRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return usersRepository.getUserById(input.id);
+    }),
+
+  getPublicProfile: publicProcedure
+    .input(z.object({ playerNumber: z.number().int() }))
+    .query(async ({ input }) => {
+      return usersRepository.getPublicProfile(input.playerNumber);
     }),
 
   getWithDetails: adminProcedure
@@ -69,7 +76,10 @@ export const usersRouter = createTRPCRouter({
   }),
 
   getOwnProfile: protectedProcedure.query(async ({ ctx }) => {
-    return usersRepository.getOwnProfile(ctx.session.user.id);
+    return db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { id: true, playerNumber: true },
+    });
   }),
 
   updateOwnAoe2CompanionUrl: protectedProcedure
@@ -81,7 +91,7 @@ export const usersRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return usersRepository.updateOwnAoe2CompanionUrl(
         ctx.session.user.id,
-        input.url || null,
+        input.url ?? null,
       );
     }),
 
