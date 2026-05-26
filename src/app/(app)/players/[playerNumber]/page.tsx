@@ -2,7 +2,7 @@ import { ProfileAdminNoteSection } from "@/components/profile/profile-admin-note
 import { ProfileAoe2CompanionSection } from "@/components/profile/profile-aoe2companion-section";
 import { ProfileRolesSection } from "@/components/profile/profile-roles-section";
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
-import { auth } from "@/server/auth";
+import { getIsAdmin, getSession } from "@/lib/session";
 import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
 
@@ -15,15 +15,15 @@ export default async function PlayerProfilePage({
   const playerNumberInt = Number(playerNumber);
   if (!Number.isInteger(playerNumberInt) || playerNumberInt <= 0) notFound();
 
-  const [profile, session] = await Promise.all([
+  const [profile, isAdmin] = await Promise.all([
     api.users.getPublicProfile({ playerNumber: playerNumberInt }),
-    auth(),
+    getIsAdmin(),
   ]);
 
   if (!profile) notFound();
 
+  const session = await getSession();
   const isOwnProfile = session?.user?.id === profile.id;
-  const isAdmin = await api.users.isAdmin();
   const availableRoles = isAdmin ? await api.roles.list() : [];
 
   return (

@@ -293,17 +293,10 @@ export const usersRepository = {
   },
 
   async isUserAdmin(userId: string) {
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: {
-        userRoles: {
-          select: {
-            role: true,
-          },
-        },
-      },
+    const adminRole = await db.userRole.findFirst({
+      where: { userId, role: { type: "ADMIN" } },
+      select: { userId: true },
     });
-
-    return user?.userRoles.some((ur) => ur.role.type === "ADMIN") ?? false;
+    return adminRole !== null;
   },
 };

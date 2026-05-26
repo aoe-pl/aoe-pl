@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { rolesRepository } from "@/lib/repositories/rolesRepository";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
+import { z } from "zod";
 
 const assignRoleSchema = z.object({
   userId: z.string(),
@@ -17,24 +17,8 @@ const updateRoleSchema = z.object({
 });
 
 export const rolesRouter = createTRPCRouter({
-  list: adminProcedure.query(async ({ ctx }) => {
-    const allRoles = await rolesRepository.getAllRoles();
-
-    // Check if current user is admin
-    if (!ctx.session?.user?.id) {
-      return allRoles.filter((role) => role.modAssignable);
-    }
-
-    const isUserAdmin = await rolesRepository.getUserRoles(ctx.session.user.id);
-    const hasAdminRole = isUserAdmin.some((ur) => ur.role.type === "ADMIN");
-
-    // If user is admin, show all roles
-    if (hasAdminRole) {
-      return allRoles;
-    }
-
-    // If user is moderator, only show roles that are modAssignable
-    return allRoles.filter((role) => role.modAssignable);
+  list: adminProcedure.query(async () => {
+    return rolesRepository.getAllRoles();
   }),
 
   getUserRoles: adminProcedure
