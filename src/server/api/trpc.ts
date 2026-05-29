@@ -11,9 +11,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { getIsProductionEnv } from "@/lib/utils";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { getIsProductionEnv } from "@/lib/utils";
 
 // Simple in-memory cache for user roles (you might want to use Redis in production)
 const userRolesCache = new Map<
@@ -124,26 +124,12 @@ async function isUserAdmin(userId: string): Promise<boolean> {
     return cached.isAdmin;
   }
 
-  // Fetch fresh data from database
-  const userWithRoles = await db.user.findUnique({
-    where: { id: userId },
-    include: {
-      userRoles: {
-        include: {
-          role: true,
-        },
-      },
-    },
+  const adminRole = await db.userRole.findFirst({
+    where: { userId, role: { type: "ADMIN" } },
+    select: { userId: true },
   });
 
-  // Handle case where user is not found
-  if (!userWithRoles) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  const isAdmin = userWithRoles.userRoles.some(
-    (ur) => ur.role?.type === "ADMIN",
-  );
+  const isAdmin = adminRole !== null;
 
   // Cache the result
   userRolesCache.set(userId, { isAdmin, timestamp: now });

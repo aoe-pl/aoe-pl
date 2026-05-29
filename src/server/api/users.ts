@@ -1,10 +1,12 @@
-import { z } from "zod";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  adminProcedure,
-} from "@/server/api/trpc";
 import { usersRepository } from "@/lib/repositories/usersRepository";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
+import { db } from "@/server/db";
+import { z } from "zod";
 
 const updateUserSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
@@ -23,6 +25,12 @@ export const usersRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return usersRepository.getUserById(input.id);
+    }),
+
+  getPublicProfile: publicProcedure
+    .input(z.object({ playerNumber: z.number().int() }))
+    .query(async ({ input }) => {
+      return usersRepository.getPublicProfile(input.playerNumber);
     }),
 
   getWithDetails: adminProcedure
@@ -66,4 +74,30 @@ export const usersRouter = createTRPCRouter({
 
     return usersRepository.isUserAdmin(ctx.session.user.id);
   }),
+
+  getOwnProfile: protectedProcedure.query(async ({ ctx }) => {
+    return db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { id: true, playerNumber: true },
+    });
+  }),
+
+  updateOwnAoe2CompanionUrl: protectedProcedure
+    .input(
+      z.object({
+        url: z.string().url("Invalid URL").optional().or(z.literal("")),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return usersRepository.updateOwnAoe2CompanionUrl(
+        ctx.session.user.id,
+        input.url ?? null,
+      );
+    }),
+
+  updateAdminNote: adminProcedure
+    .input(z.object({ userId: z.string(), note: z.string() }))
+    .mutation(async ({ input }) => {
+      return usersRepository.updateAdminNote(input.userId, input.note || null);
+    }),
 });

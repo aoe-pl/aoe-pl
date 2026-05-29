@@ -5,9 +5,8 @@ import { Geist } from "next/font/google";
 
 import { Navigation } from "@/components/layout/navigation";
 import { ThemeCustomizer } from "@/components/layout/theme-customizer";
-import { auth } from "@/server/auth";
+import { getIsAdmin, getSession } from "@/lib/session";
 import { TRPCReactProvider } from "@/trpc/react";
-import { api } from "@/trpc/server";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 
@@ -26,8 +25,8 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   const messages = await getMessages();
-  const session = await auth();
-  const isAdmin = session ? await api.users.isAdmin() : false;
+  const session = await getSession();
+  const isAdmin = session ? await getIsAdmin() : false;
 
   return (
     <html

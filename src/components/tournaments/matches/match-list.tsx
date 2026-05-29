@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 export interface MatchListRow {
   id: string;
+  matchNumber: number;
   matchDate: Date | null;
   status: "PENDING" | "SCHEDULED" | "COMPLETED" | "ADMIN_APPROVED";
   group: { id: string; name: string; color: string | null } | null;
@@ -142,7 +143,7 @@ export function MatchList({ matches, matchUrlBase }: MatchListProps) {
             return (
               <Link
                 key={match.id}
-                href={`${matchUrlBase}/${match.id}`}
+                href={`${matchUrlBase}/${match.matchNumber}`}
                 className="hover:bg-muted/50 flex w-full items-center gap-4 px-4 py-3 text-left transition-colors"
               >
                 <span className="min-w-0 flex-1 font-medium">

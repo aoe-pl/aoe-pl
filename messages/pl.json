@@ -4,6 +4,7 @@
     "home": "Główna",
     "news": "Wiadomości",
     "tournaments": "Turnieje",
+    "profile": "Profil",
     "admin": "Admin",
     "logged_in_as": "Zalogowano jako",
     "logout": "Wyloguj",
@@ -682,6 +683,44 @@
       "group": "Grupa",
       "player": "Gracz",
       "search_players_or_group": "Szukaj gracza lub grupy"
+    }
+  },
+  "profile": {
+    "roles": {
+      "title": "Role",
+      "expired": "wygasła",
+      "none": "Brak przypisanych ról.",
+      "add_role": "Dodaj rolę",
+      "add_role_placeholder": "Wybierz rolę...",
+      "assign_success": "Rola została przypisana.",
+      "remove_success": "Rola została usunięta.",
+      "remove_role": "Usuń rolę",
+      "remove_confirm_title": "Usuń rolę",
+      "remove_confirm_description": "Usunąć rolę \"{role}\"? Tej operacji nie można cofnąć.",
+      "remove_confirm": "Usuń",
+      "remove_cancel": "Anuluj"
+    },
+    "aoe2companion": {
+      "title": "AoE2Companion",
+      "none": "Brak powiązanego profilu AoE2Companion.",
+      "placeholder": "https://aoe2companion.com/players/...",
+      "save_success": "Link AoE2Companion został zapisany."
+    },
+    "tournaments": {
+      "title": "Historia turniejów",
+      "tournament": "Turniej",
+      "nickname": "Nick",
+      "status": "Status",
+      "registered": "Data rejestracji",
+      "none": "Brak udziałów w turniejach."
+    },
+    "admin_note": {
+      "title": "Notatka admina",
+      "none": "Brak notatki.",
+      "placeholder": "Wewnętrzna notatka o użytkowniku...",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "save_success": "Notatka została zapisana."
     }
   }
 }

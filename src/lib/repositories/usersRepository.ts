@@ -5,12 +5,14 @@ export const usersRepository = {
     return db.user.findMany({
       select: {
         id: true,
+        playerNumber: true,
         name: true,
         email: true,
         emailVerified: true,
         image: true,
         color: true,
         adminComment: true,
+        aoe2companionUrl: true,
         userRoles: {
           select: {
             role: {
@@ -42,6 +44,53 @@ export const usersRepository = {
         id: true,
         name: true,
         email: true,
+      },
+    });
+  },
+
+  async getPublicProfile(playerNumber: number) {
+    return db.user.findUnique({
+      where: { playerNumber },
+      select: {
+        id: true,
+        playerNumber: true,
+        name: true,
+        aoe2companionUrl: true,
+        adminComment: true,
+        userRoles: {
+          select: {
+            id: true,
+            assignedAt: true,
+            expiresAt: true,
+            role: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+          },
+        },
+        TournamentParticipant: {
+          select: {
+            id: true,
+            nickname: true,
+            registrationDate: true,
+            status: true,
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                urlKey: true,
+                status: true,
+                tournamentSeries: {
+                  select: { name: true },
+                },
+              },
+            },
+          },
+          orderBy: { registrationDate: "desc" },
+        },
       },
     });
   },
@@ -83,6 +132,22 @@ export const usersRepository = {
           },
         },
       },
+    });
+  },
+
+  async updateOwnAoe2CompanionUrl(userId: string, url: string | null) {
+    return db.user.update({
+      where: { id: userId },
+      data: { aoe2companionUrl: url },
+      select: { id: true, aoe2companionUrl: true },
+    });
+  },
+
+  async updateAdminNote(userId: string, note: string | null) {
+    return db.user.update({
+      where: { id: userId },
+      data: { adminComment: note },
+      select: { id: true, adminComment: true },
     });
   },
 
@@ -229,17 +294,10 @@ export const usersRepository = {
   },
 
   async isUserAdmin(userId: string) {
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: {
-        userRoles: {
-          select: {
-            role: true,
-          },
-        },
-      },
+    const adminRole = await db.userRole.findFirst({
+      where: { userId, role: { type: "ADMIN" } },
+      select: { userId: true },
     });
-
-    return user?.userRoles.some((ur) => ur.role.type === "ADMIN") ?? false;
+    return adminRole !== null;
   },
 };

@@ -10,6 +10,7 @@ import {
 
 export interface TournamentMatchRow {
   id: string;
+  matchNumber: number;
   matchDate: Date | null;
   status: "PENDING" | "SCHEDULED" | "COMPLETED" | "ADMIN_APPROVED";
   group: MatchRowGroup | null;
@@ -101,6 +102,7 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
 
       mapped.push({
         id: row.id,
+        matchNumber: row.matchNumber,
         groupId: row.group.id,
         date: row.matchDate,
         player1Id: p1.id,

@@ -17,6 +17,7 @@ export interface CalendarPlayer {
 
 export interface CalendarMatch {
   id: string;
+  matchNumber: number;
   groupId: string;
   date: Date;
   player1Id: string;

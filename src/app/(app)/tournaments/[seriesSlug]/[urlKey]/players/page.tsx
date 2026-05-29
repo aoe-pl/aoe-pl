@@ -14,7 +14,7 @@ export default async function TournamentPlayersPage({
   const tournamentParticipants =
     await tournamentParticipantRepository.getTournamentParticipants(
       tournament.id,
-      { includeUser: false },
+      { includeUser: true },
     );
 
   return (

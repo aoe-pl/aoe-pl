@@ -4,6 +4,7 @@
     "home": "Home",
     "news": "News",
     "tournaments": "Tournaments",
+    "profile": "Profile",
     "admin": "Admin",
     "logged_in_as": "Logged in as",
     "logout": "Log out",
@@ -682,6 +683,44 @@
       "group": "Group",
       "player": "Player",
       "search_players_or_group": "Search player or group"
+    }
+  },
+  "profile": {
+    "roles": {
+      "title": "Roles",
+      "expired": "expired",
+      "none": "No roles assigned.",
+      "add_role": "Add role",
+      "add_role_placeholder": "Select a role...",
+      "assign_success": "Role assigned.",
+      "remove_success": "Role removed.",
+      "remove_role": "Remove role",
+      "remove_confirm_title": "Remove role",
+      "remove_confirm_description": "Remove the \"{role}\" role? This action cannot be undone.",
+      "remove_confirm": "Remove",
+      "remove_cancel": "Cancel"
+    },
+    "aoe2companion": {
+      "title": "AoE2Companion",
+      "none": "No AoE2Companion profile linked.",
+      "placeholder": "https://aoe2companion.com/players/...",
+      "save_success": "AoE2Companion link saved."
+    },
+    "tournaments": {
+      "title": "Tournament History",
+      "tournament": "Tournament",
+      "nickname": "Nickname",
+      "status": "Status",
+      "registered": "Registered",
+      "none": "No tournament participations."
+    },
+    "admin_note": {
+      "title": "Admin note",
+      "none": "No note.",
+      "placeholder": "Internal note about this user...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "save_success": "Note saved."
     }
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { PlayerLink } from "@/components/player-link";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -41,7 +42,12 @@ export function TournamentPlayerList({
       <TableBody>
         {tournamentParticipants.map((player) => (
           <TableRow key={player.id}>
-            <TableCell className="font-medium">{player.nickname}</TableCell>
+            <TableCell className="font-medium">
+              <PlayerLink
+                playerNumber={player.user?.playerNumber}
+                name={player.nickname}
+              />
+            </TableCell>
             <TableCell className="flex gap-1">
               {player.TournamentGroupParticipant.map((gp) => (
                 <Badge

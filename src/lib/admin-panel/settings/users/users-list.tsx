@@ -1,18 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PlayerLink } from "@/components/player-link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,43 +11,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
-import { Edit, Trash2, Eye } from "lucide-react";
-import { api } from "@/trpc/react";
-import { toast } from "sonner";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserForm, type UserFormSchema } from "./user-form";
-import { UserDetailView } from "./user-detail-view";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { api } from "@/trpc/react";
 import type { User } from "@prisma/client";
-
-type UserWithCounts = {
-  id: string;
-  name: string | null;
-  email: string | null;
-  emailVerified: Date | null;
-  image: string | null;
-  color: string | null;
-  adminComment: string | null;
-  userRoles: Array<{
-    role: {
-      id: string;
-      name: string;
-      type: string;
-    };
-  }>;
-  _count: {
-    userRoles: number;
-    TournamentParticipant: number;
-    userStreams: number;
-  };
-};
+import { Edit, Eye, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
+import { UserDetailView } from "./user-detail-view";
+import { UserForm, type UserFormSchema } from "./user-form";
 
 export function UsersList() {
   const t = useTranslations("admin.settings.users");
@@ -192,7 +171,7 @@ export function UsersList() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user: UserWithCounts) => (
+                    {users.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
@@ -202,7 +181,11 @@ export function UsersList() {
                                 style={{ backgroundColor: user.color }}
                               />
                             )}
-                            {user.name ?? "No Name"}
+                            <PlayerLink
+                              playerNumber={user.playerNumber}
+                              name={user.name!}
+                              key={user.id}
+                            ></PlayerLink>
                           </div>
                         </TableCell>
                         <TableCell className="max-w-xs truncate">

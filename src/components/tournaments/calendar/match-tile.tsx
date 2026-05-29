@@ -74,7 +74,7 @@ export function MatchTile({
     </>
   );
 
-  const sharedProps = {
+  const props = {
     className: "relative w-full rounded-md border px-2.5 py-1.5",
     style: sharedStyle,
     title: `${player1.nickname} vs ${player2.nickname} — ${group.name}`,
@@ -83,7 +83,7 @@ export function MatchTile({
   return (
     <Link
       href={href}
-      {...sharedProps}
+      {...props}
     >
       {content}
     </Link>

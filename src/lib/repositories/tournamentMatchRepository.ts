@@ -215,6 +215,55 @@ export const tournamentMatchRepository = {
     });
   },
 
+  async getTournamentMatchByNumber(matchNumber: number) {
+    return db.tournamentMatch.findUnique({
+      where: { matchNumber },
+      include: {
+        TournamentMatchParticipant: {
+          include: {
+            participant: {
+              include: {
+                user: true,
+                team: true,
+              },
+            },
+            team: {
+              include: {
+                TournamentParticipant: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+            gameParticipants: true,
+          },
+        },
+        Game: {
+          include: {
+            map: true,
+            participants: {
+              include: {
+                civ: true,
+                matchParticipant: true,
+              },
+            },
+          },
+        },
+        group: {
+          include: {
+            stage: {
+              include: {
+                tournament: true,
+              },
+            },
+          },
+        },
+        TournamentMatchMode: true,
+      },
+    });
+  },
+
   async getMatchesByGroupId(groupId: string) {
     return db.tournamentMatch.findMany({
       where: { groupId },

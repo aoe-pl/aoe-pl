@@ -54,7 +54,7 @@ export function ScheduledMatchCard({
         group={group}
         player1={player1}
         player2={player2}
-        href={`${matchUrlBase}/${match.id}`}
+        href={`${matchUrlBase}/${match.matchNumber}`}
       />
       {canAct && (
         <DropdownMenu>
@@ -72,6 +72,7 @@ export function ScheduledMatchCard({
               onClick={() => {
                 onReschedule({
                   id: match.id,
+                  matchNumber: match.matchNumber,
                   matchDate: match.date,
                   status: "SCHEDULED",
                   group: { id: group.id, name: group.name, color: group.color },
@@ -125,6 +126,7 @@ export function ScheduledMatchCard({
                       onClick={() => {
                         onCancel({
                           id: match.id,
+                          matchNumber: match.matchNumber,
                           matchDate: match.date,
                           status: "SCHEDULED",
                           group: null,
