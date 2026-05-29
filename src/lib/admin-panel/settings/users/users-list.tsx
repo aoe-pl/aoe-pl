@@ -1,5 +1,6 @@
 "use client";
 
+import { PlayerLink } from "@/components/player-link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,34 +35,10 @@ import { api } from "@/trpc/react";
 import type { User } from "@prisma/client";
 import { Edit, Eye, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { UserDetailView } from "./user-detail-view";
 import { UserForm, type UserFormSchema } from "./user-form";
-
-type UserWithCounts = {
-  id: string;
-  playerNumber: number;
-  name: string | null;
-  email: string | null;
-  emailVerified: Date | null;
-  image: string | null;
-  color: string | null;
-  adminComment: string | null;
-  userRoles: Array<{
-    role: {
-      id: string;
-      name: string;
-      type: string;
-    };
-  }>;
-  _count: {
-    userRoles: number;
-    TournamentParticipant: number;
-    userStreams: number;
-  };
-};
 
 export function UsersList() {
   const t = useTranslations("admin.settings.users");
@@ -194,7 +171,7 @@ export function UsersList() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user: UserWithCounts) => (
+                    {users.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
@@ -204,13 +181,11 @@ export function UsersList() {
                                 style={{ backgroundColor: user.color }}
                               />
                             )}
-                            <Link
-                              href={`/players/${user.playerNumber}`}
-                              className="hover:underline"
-                              target="_blank"
-                            >
-                              {user.name ?? "No Name"}
-                            </Link>
+                            <PlayerLink
+                              playerNumber={user.playerNumber}
+                              name={user.name!}
+                              key={user.id}
+                            ></PlayerLink>
                           </div>
                         </TableCell>
                         <TableCell className="max-w-xs truncate">

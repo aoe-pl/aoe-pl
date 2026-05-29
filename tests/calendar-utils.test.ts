@@ -16,6 +16,7 @@ function makeMatch(date: Date, id = "m1"): CalendarMatch {
     date,
     player1Id: "p1",
     player2Id: "p2",
+    matchNumber: 1,
     status: CalendarMatchStatus.Scheduled,
   };
 }

@@ -12,6 +12,7 @@ export const usersRepository = {
         image: true,
         color: true,
         adminComment: true,
+        aoe2companionUrl: true,
         userRoles: {
           select: {
             role: {
