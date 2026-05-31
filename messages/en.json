@@ -31,8 +31,7 @@
       "title": "Top 10 Polish Players",
       "loading": "Loading players...",
       "error": "Failed to load players",
-      "wins": "{count} wins",
-      "mmr": "MMR"
+      "wins": "{count} wins"
     },
     "theme_customizer": {
       "select_theme_color": "Select theme color"

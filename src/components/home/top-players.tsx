@@ -1,5 +1,7 @@
-import { Medal, Loader2 } from "lucide-react";
+import { TopPlayersFilterDialog } from "@/components/home/top-players-filter-dialog";
+import { getIsAdmin } from "@/lib/session";
 import { api } from "@/trpc/server";
+import { Loader2, Medal } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function TopPlayersLoading() {
@@ -19,8 +21,12 @@ export function TopPlayersLoading() {
   );
 }
 
+/**
+ * Component to display the top Polish players on the home page.
+ */
 export async function TopPlayers() {
   const t = useTranslations("home.top_players");
+  const isAdmin = await getIsAdmin();
 
   try {
     const players = await api.leaderboard.getTopPolishPlayers({ count: 10 });
@@ -29,10 +35,11 @@ export async function TopPlayers() {
       <div className="panel">
         <div className="panel-header flex items-center gap-2">
           <Medal className="h-5 w-5 text-white" />
-          {t("title")}
+          <span className="flex-1">{t("title")}</span>
+          {isAdmin && <TopPlayersFilterDialog />}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {players.map((player, index) => {
             const rank = index + 1;
 
@@ -64,9 +71,6 @@ export async function TopPlayers() {
                 </div>
                 <div className="text-right">
                   <div className="text-accent font-bold">{player.rating}</div>
-                  <div className="text-muted-foreground text-xs">
-                    {t("mmr")}
-                  </div>
                 </div>
               </div>
             );

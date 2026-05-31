@@ -1,5 +1,10 @@
+import {
+  adminProcedure,
+  createTRPCRouter,
+  publicProcedure,
+} from "@/server/api/trpc";
+import { db } from "@/server/db";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
 interface LeaderboardPlayer {
   leaderboardId: string;
@@ -76,6 +81,64 @@ export const leaderboardRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      return fetchTopPolishPlayers(input.count);
+      const filters = await db.leaderboardPlayerFilter.findMany({
+        select: { profileId: true, name: true },
+      });
+
+      const players = await fetchTopPolishPlayers(input.count + filters.length);
+
+      const filtered = players.filter((p) => !isPlayerFiltered(p, filters));
+
+      return filtered.slice(0, input.count);
+    }),
+
+  getPlayerFilters: adminProcedure.query(async () => {
+    return db.leaderboardPlayerFilter.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+  }),
+
+  addPlayerFilter: adminProcedure
+    .input(
+      z
+        .object({
+          profileId: z.number().int().positive().optional(),
+          name: z.string().min(1).optional(),
+        })
+        .refine((d) => d.profileId !== undefined || d.name !== undefined, {
+          message: "Must provide profileId or name",
+        }),
+    )
+    .mutation(async ({ input }) => {
+      return db.leaderboardPlayerFilter.create({
+        data: {
+          profileId: input.profileId ?? null,
+          name: input.name ?? null,
+        },
+      });
+    }),
+
+  removePlayerFilter: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return db.leaderboardPlayerFilter.delete({ where: { id: input.id } });
     }),
 });
+
+// Check if player is in filters list. We don't want to list those in the top players list.
+function isPlayerFiltered(
+  player: LeaderboardPlayer,
+  filters: { profileId: number | null; name: string | null }[],
+): boolean {
+  return filters.some((f) => {
+    if (f.profileId !== null && f.profileId === player.profileId) {
+      return true;
+    }
+
+    if (f.name !== null && f.name.toLowerCase() === player.name.toLowerCase()) {
+      return true;
+    }
+
+    return false;
+  });
+}

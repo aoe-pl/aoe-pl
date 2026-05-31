@@ -31,8 +31,7 @@
       "title": "Top 10 Polskich Graczy",
       "loading": "Ładowanie graczy...",
       "error": "Nie udało się załadować graczy",
-      "wins": "{count} zwycięstw",
-      "mmr": "MMR"
+      "wins": "{count} zwycięstw"
     },
     "theme_customizer": {
       "select_theme_color": "Wybierz kolor motywu"
