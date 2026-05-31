@@ -145,6 +145,13 @@ model Civ {
   gameParticipants GameParticipant[]
 }
 
+model LeaderboardPlayerFilter {
+  id        String   @id @default(cuid())
+  profileId Int?
+  name      String?
+  createdAt DateTime @default(now())
+}
+
 model NewsPost {
   id           String                @id @default(cuid())
   featured     Boolean               @default(false)
