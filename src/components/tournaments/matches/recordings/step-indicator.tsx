@@ -10,7 +10,11 @@ interface StepIndicatorProps {
   steps: GameStep[];
 }
 
-export function StepIndicator({ totalGames, currentStep, steps }: StepIndicatorProps) {
+export function StepIndicator({
+  totalGames,
+  currentStep,
+  steps,
+}: StepIndicatorProps) {
   const totalSteps = totalGames + 1;
 
   return (
