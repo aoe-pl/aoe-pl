@@ -14,9 +14,14 @@ const exampleRecord: ParsedRecording[] = [
     fileName: "example_game1.aoe2record",
     player1: "PlayerOne",
     player2: "PlayerTwo",
+    civ1: "Britons",
+    civ2: "Franks",
     map: "Arabia",
     length: "13:37",
     date: "2026-06-15",
+    winner: 1,
+    guid: "example-guid",
+    restored: false,
   },
 ];
 
@@ -59,10 +64,13 @@ export function RecordingsTable({
               <TableRow
                 key={i}
                 className="italic opacity-40"
-                title="Example data — replace with real parser output"
               >
-                <TableCell>{r.player1}</TableCell>
-                <TableCell>{r.player2}</TableCell>
+                <TableCell>
+                  {r.player1} - {r.civ1}
+                </TableCell>
+                <TableCell>
+                  {r.player2} - {r.civ2}
+                </TableCell>
                 <TableCell>{r.map}</TableCell>
                 <TableCell>{r.length}</TableCell>
                 <TableCell>{r.date}</TableCell>
@@ -71,8 +79,12 @@ export function RecordingsTable({
 
           {recordings.map((r, i) => (
             <TableRow key={i}>
-              <TableCell>{r.player1}</TableCell>
-              <TableCell>{r.player2}</TableCell>
+              <TableCell>
+                {r.player1} - {r.civ1}
+              </TableCell>
+              <TableCell>
+                {r.player2} - {r.civ2}
+              </TableCell>
               <TableCell>{r.map}</TableCell>
               <TableCell>{r.length}</TableCell>
               <TableCell>{r.date}</TableCell>

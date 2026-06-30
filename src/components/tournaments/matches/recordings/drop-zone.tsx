@@ -13,12 +13,17 @@ import {
 interface DropZoneProps {
   onFiles: (files: File[]) => void | Promise<void>;
   existingCount: number;
+  disabled?: boolean;
 }
 
 /**
  * Drop zone for files. Supports drag-and-drop and click-to-select.
  */
-export function DropZone({ onFiles, existingCount }: DropZoneProps) {
+export function DropZone({
+  onFiles,
+  existingCount,
+  disabled = false,
+}: DropZoneProps) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -26,42 +31,52 @@ export function DropZone({ onFiles, existingCount }: DropZoneProps) {
     async (e: DragEvent) => {
       e.preventDefault();
       setDragging(false);
+
+      if (disabled) return;
+
       const files = Array.from(e.dataTransfer.files);
 
       if (files.length) await onFiles(files);
     },
-    [onFiles],
+    [onFiles, disabled],
   );
 
   const handleChange = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
+      if (disabled) return;
+
       const files = Array.from(e.target.files ?? []);
 
       if (files.length) await onFiles(files);
 
       e.target.value = "";
     },
-    [onFiles],
+    [onFiles, disabled],
   );
 
   return (
     <div
       role="button"
-      tabIndex={0}
+      tabIndex={disabled ? -1 : 0}
       aria-label="Drop recordings here or click to select"
-      onClick={() => inputRef.current?.click()}
-      onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
+      aria-disabled={disabled}
+      onClick={() => !disabled && inputRef.current?.click()}
+      onKeyDown={(e) =>
+        !disabled && e.key === "Enter" && inputRef.current?.click()
+      }
       onDragOver={(e) => {
         e.preventDefault();
-        setDragging(true);
+        if (!disabled) setDragging(true);
       }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors select-none",
-        dragging
-          ? "border-primary bg-primary/5"
-          : "border-border hover:border-primary/50 hover:bg-accent/30",
+        "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors select-none",
+        disabled
+          ? "border-border cursor-not-allowed opacity-50"
+          : dragging
+            ? "border-primary bg-primary/5 cursor-pointer"
+            : "border-border hover:border-primary/50 hover:bg-accent/30 cursor-pointer",
       )}
     >
       <UploadCloudIcon className="text-muted-foreground size-8" />
