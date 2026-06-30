@@ -1,5 +1,6 @@
 import { PlayerLink } from "@/components/player-link";
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
+import { RecordingsUploadDialog } from "@/components/tournaments/matches/recordings-upload-dialog";
 import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { format } from "date-fns";
@@ -45,20 +46,30 @@ export default async function TournamentMatchPage({
     : "Date TBD";
 
   const groupName = match.group?.name ?? "—";
+  const gameCount = match.TournamentMatchMode?.gameCount ?? 5;
 
   return (
     <div className="panel space-y-4">
-      <h1 className="text-2xl font-bold">
-        <PlayerLink
-          name={player1Name}
-          playerNumber={player1Number}
-        />{" "}
-        <span className="text-muted-foreground">vs</span>{" "}
-        <PlayerLink
-          name={player2Name}
-          playerNumber={player2Number}
-        />
-      </h1>
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="text-2xl font-bold">
+          <PlayerLink
+            name={player1Name}
+            playerNumber={player1Number}
+          />{" "}
+          <span className="text-muted-foreground">vs</span>{" "}
+          <PlayerLink
+            name={player2Name}
+            playerNumber={player2Number}
+          />
+        </h1>
+        <div className="flex gap-2">
+          <RecordingsUploadDialog
+            player1Name={player1Name}
+            player2Name={player2Name}
+            gameCount={gameCount}
+          />
+        </div>
+      </div>
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
         <dt className="text-muted-foreground">Date</dt>
         <dd>{dateLabel}</dd>
