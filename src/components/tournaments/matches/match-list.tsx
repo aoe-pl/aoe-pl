@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+
 export interface MatchListRow {
   id: string;
   matchNumber: number;
