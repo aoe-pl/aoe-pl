@@ -1,5 +1,24 @@
-// Types for the mgz library output
-// Excludes gaia, objects, file, actions, inputs, and various match settings.
+/** Data parsed from a single .aoe2record file. */
+export interface ParsedRecording {
+  fileName: string;
+  player1: string;
+  player2: string;
+  profileId1: number;
+  profileId2: number;
+  civ1: string;
+  civ2: string;
+  civId1: number;
+  civId2: number;
+  map: string;
+  mapId: number;
+  length: string;
+  date: string;
+  winner: 1 | 2 | null;
+  guid: string;
+  restored: boolean;
+}
+
+// ─── mgz library types ────────────────────────────────────────────────────────
 
 export interface MgzPlayer {
   number: number;
@@ -14,7 +33,7 @@ export interface MgzPlayer {
   team_id: number[];
   winner: boolean;
   eapm: number;
-  rate_snapshot: number /** ELO rating at time of match */;
+  rate_snapshot: number;
 }
 
 export interface MgzMap {
@@ -25,10 +44,9 @@ export interface MgzMap {
 export interface MgzUptime {
   timestamp: string /** "0:09:05.675000" */;
   age: "FEUDAL_AGE" | "CASTLE_AGE" | "IMPERIAL_AGE";
-  player: number; // player id
+  player: number;
 }
 
-/** Parsed output from the mgz library. Excludes gaia, objects, file, actions, inputs, and various match settings. */
 export interface MgzMatch {
   players: MgzPlayer[];
   teams: number[][];
@@ -36,17 +54,17 @@ export interface MgzMatch {
   uptimes: MgzUptime[];
   duration: string;
   timestamp: string;
-  guid: string; // game unique id
+  guid: string;
   completed: boolean;
   restored: boolean;
   restored_at: string;
-  rated: boolean; // whether it's a ranked match
-  type: string /** e.g. "Random Map" */;
+  rated: boolean;
+  type: string;
   starting_age: "Dark" | "Feudal" | "Castle" | "Imperial";
   version: "DE";
   game_version: string;
   hidden_civs: boolean;
-  lobby: string; // lobby name
+  lobby: string;
 }
 
 export interface UploadRecsPayload {

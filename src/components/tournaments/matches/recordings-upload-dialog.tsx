@@ -2,6 +2,7 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -9,32 +10,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { RecordingParser } from "@/lib/recording-parser/RecordingParser";
 import { Loader2Icon, UploadCloudIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ConfirmStep } from "./recordings/confirm-step";
 import { DropZone } from "./recordings/drop-zone";
-import { RecordingsTable } from "./recordings/recordings-table";
-import { StepIndicator } from "./recordings/step-indicator";
 import {
   buildInitialSteps,
   computeScores,
-  trimSubSeconds,
   validateRestoredGame,
   winsNeeded,
-  type GameStep,
-} from "./recordings/types";
-import { initializePyodide, parseRecording } from "./rec-parser";
+} from "./recordings/helpers";
+import { RecordingsTable } from "./recordings/recordings-table";
+import { StepIndicator } from "./recordings/step-indicator";
+import type { GameStep } from "./recordings/types";
 
 export interface RecordingsUploadDialogProps {
   player1Name: string;
   player2Name: string;
   gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
+  isAdmin?: boolean;
 }
 
 export function RecordingsUploadDialog({
   player1Name,
   player2Name,
   gameCount = 5,
+  isAdmin = false,
 }: RecordingsUploadDialogProps) {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -45,6 +47,9 @@ export function RecordingsUploadDialog({
   const [pyodideError, setPyodideError] = useState<string | null>(null);
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [strictValidation, setStrictValidation] = useState(true);
+
+  const parser = useMemo(() => new RecordingParser(), []);
 
   const totalSteps = gameCount + 1;
   const isConfirmStep = currentStep === gameCount;
@@ -54,58 +59,49 @@ export function RecordingsUploadDialog({
     if (!open || pyodideReady) return;
 
     setPyodideError(null);
-    initializePyodide()
+    parser
+      .initialize()
       .then(() => setPyodideReady(true))
       .catch((err: unknown) =>
         setPyodideError(
           err instanceof Error ? err.message : "Failed to load Pyodide",
         ),
       );
-  }, [open, pyodideReady]);
+  }, [open, pyodideReady, parser]);
 
   const handleFiles = useCallback(
     async (newFiles: File[]) => {
+      const invalidFiles = newFiles.filter(
+        (f) => !f.name.endsWith(".aoe2record"),
+      );
+      if (invalidFiles.length > 0) {
+        setParseError(
+          `Invalid file type: ${invalidFiles.map((f) => f.name).join(", ")}. Only .aoe2record files are accepted.`,
+        );
+        return;
+      }
+
       setParsing(true);
       setParseError(null);
 
       try {
         const parsedResults = await Promise.all(
-          newFiles.map(async (file) => {
-            const parsed = await parseRecording(file);
-
-            return { file, parsed };
-          }),
+          newFiles.map((file) => parser.parse(file)),
         );
 
         setSteps((prev) => {
           const next = [...prev];
           const step = { ...next[currentStep]! };
 
-          const newRecordings = parsedResults.map(({ file, parsed }) => {
-            const winnerIdx = parsed.players.findIndex((p) => p.winner);
-            const winner: 1 | 2 | null =
-              winnerIdx === 0 ? 1 : winnerIdx === 1 ? 2 : null;
-
-            return {
-              fileName: file.name,
-              player1: parsed.players[0]?.name ?? "",
-              player2: parsed.players[1]?.name ?? "",
-              civ1: parsed.players[0]?.civilization ?? "",
-              civ2: parsed.players[1]?.civilization ?? "",
-              map: parsed.map.name,
-              length: trimSubSeconds(parsed.duration),
-              date: parsed.timestamp
-                ? new Date(parsed.timestamp).toISOString().slice(0, 10)
-                : "",
-              winner,
-              guid: parsed.guid,
-              restored: parsed.restored,
-            };
-          });
-
           step.files = [...step.files, ...newFiles];
-          step.recordings = [...step.recordings, ...newRecordings];
-          step.validationError = validateRestoredGame(step.recordings);
+          step.recordings = [...step.recordings, ...parsedResults];
+
+          if (strictValidation) {
+            step.validationError = validateRestoredGame(step.recordings);
+          } else {
+            step.validationError = null;
+          }
+
           next[currentStep] = step;
 
           const [p1Wins, p2Wins] = computeScores(next);
@@ -128,7 +124,7 @@ export function RecordingsUploadDialog({
         setParsing(false);
       }
     },
-    [currentStep, gameCount],
+    [currentStep, gameCount, strictValidation, parser],
   );
 
   const handleClearStep = useCallback(() => {
@@ -146,19 +142,14 @@ export function RecordingsUploadDialog({
   }, [currentStep]);
 
   const handleNext = () => {
-    // Jump over any auto-skipped steps to reach the confirm step.
     let next = currentStep + 1;
-
     while (next < gameCount && steps[next]?.skipped) next++;
-
     if (next <= totalSteps - 1) setCurrentStep(next);
   };
 
   const handleBack = () => {
     let prev = currentStep - 1;
-
     while (prev > 0 && steps[prev]?.skipped) prev--;
-
     setCurrentStep(prev);
   };
 
@@ -178,6 +169,7 @@ export function RecordingsUploadDialog({
   };
 
   const hasValidationErrors = steps.some((s) => s.validationError !== null);
+  const hasNoFiles = steps.every((s) => s.files.length === 0);
   const canGoNext =
     !parsing &&
     (currentGameStep?.files.length ?? 0) > 0 &&
@@ -198,7 +190,7 @@ export function RecordingsUploadDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[90vh] max-w-[72rem] flex-col gap-6 overflow-y-auto">
+      <DialogContent className="flex max-h-[90vh] max-w-[96rem] flex-col gap-6 overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Upload Game Recordings (mgz)</DialogTitle>
           <p className="text-muted-foreground text-sm">
@@ -282,34 +274,56 @@ export function RecordingsUploadDialog({
               />
             )}
 
-            <div className="flex justify-end gap-2">
-              {currentStep > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBack}
-                >
-                  Back
-                </Button>
+            <div className="flex items-center justify-between gap-2">
+              {!isConfirmStep && isAdmin && (
+                <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-xs select-none">
+                  <Checkbox
+                    checked={strictValidation}
+                    onCheckedChange={(v) => setStrictValidation(!!v)}
+                  />
+                  Validate files
+                </label>
               )}
-              {!isConfirmStep ? (
-                canGoNext && (
+              <div className="flex flex-1 justify-end gap-2">
+                {currentStep > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBack}
+                  >
+                    Back
+                  </Button>
+                )}
+                {!isConfirmStep ? (
+                  canGoNext ? (
+                    <Button
+                      size="sm"
+                      onClick={handleNext}
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    !parsing &&
+                    !currentGameStep?.files.length && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleNext}
+                      >
+                        Skip
+                      </Button>
+                    )
+                  )
+                ) : (
                   <Button
                     size="sm"
-                    onClick={handleNext}
+                    onClick={handleSubmit}
+                    disabled={hasValidationErrors || hasNoFiles}
                   >
-                    Next
+                    Confirm &amp; Submit
                   </Button>
-                )
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={handleSubmit}
-                  disabled={hasValidationErrors}
-                >
-                  Confirm &amp; Submit
-                </Button>
-              )}
+                )}
+              </div>
             </div>
           </>
         )}

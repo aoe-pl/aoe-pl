@@ -6,7 +6,15 @@ import createNextIntlPlugin from "next-intl/plugin";
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  webpack(webpackConfig) {
+    webpackConfig.experiments = {
+      ...webpackConfig.experiments,
+      asyncWebAssembly: true,
+    };
+    return webpackConfig;
+  },
+};
 
 const withNextIntl = createNextIntlPlugin();
 export default withNextIntl(config);
