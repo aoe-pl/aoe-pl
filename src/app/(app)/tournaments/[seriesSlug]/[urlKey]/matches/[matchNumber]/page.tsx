@@ -3,6 +3,8 @@ import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils
 import { RecordingsUploadDialog } from "@/components/tournaments/matches/recordings-upload-dialog";
 import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
+import { usersRepository } from "@/lib/repositories/usersRepository";
+import { auth } from "@/server/auth";
 import { format } from "date-fns";
 import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -14,13 +16,18 @@ export default async function TournamentMatchPage({
 }) {
   const { seriesSlug, urlKey, matchNumber } = await params;
 
-  const [, match, locale] = await Promise.all([
+  const [, match, locale, session] = await Promise.all([
     getTournamentOrNotFound(seriesSlug, urlKey),
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
     getLocale(),
+    auth(),
   ]);
 
   if (!match) notFound();
+
+  const isAdmin = session?.user?.id
+    ? await usersRepository.isUserAdmin(session.user.id)
+    : false;
 
   const dateFnsLocale = getDateFnsLocale(locale);
 
@@ -67,6 +74,7 @@ export default async function TournamentMatchPage({
             player1Name={player1Name}
             player2Name={player2Name}
             gameCount={gameCount}
+            isAdmin={isAdmin}
           />
         </div>
       </div>

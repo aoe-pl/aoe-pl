@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { ParsedRecording } from "./types";
+import type { ParsedRecording } from "@/lib/recording-parser/types";
 
 // example data to show players what the table will look like before they upload any recordings
 const exampleRecord: ParsedRecording[] = [
@@ -14,9 +14,14 @@ const exampleRecord: ParsedRecording[] = [
     fileName: "example_game1.aoe2record",
     player1: "PlayerOne",
     player2: "PlayerTwo",
+    profileId1: 0,
+    profileId2: 0,
     civ1: "Britons",
     civ2: "Franks",
+    civId1: 1,
+    civId2: 2,
     map: "Arabia",
+    mapId: 9,
     length: "13:37",
     date: "2026-06-15",
     winner: 1,
