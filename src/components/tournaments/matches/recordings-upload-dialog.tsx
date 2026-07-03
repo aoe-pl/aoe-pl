@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { RecordingParser } from "@/lib/recording-parser/RecordingParser";
 import { Loader2Icon, UploadCloudIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ConfirmStep } from "./recordings/confirm-step";
 import { DropZone } from "./recordings/drop-zone";
 import {
@@ -43,8 +43,6 @@ export function RecordingsUploadDialog({
   const [steps, setSteps] = useState<GameStep[]>(() =>
     buildInitialSteps(gameCount),
   );
-  const [pyodideReady, setPyodideReady] = useState(false);
-  const [pyodideError, setPyodideError] = useState<string | null>(null);
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [strictValidation, setStrictValidation] = useState(true);
@@ -54,20 +52,6 @@ export function RecordingsUploadDialog({
   const totalSteps = gameCount + 1;
   const isConfirmStep = currentStep === gameCount;
   const currentGameStep = !isConfirmStep ? steps[currentStep] : null;
-
-  useEffect(() => {
-    if (!open || pyodideReady) return;
-
-    setPyodideError(null);
-    parser
-      .initialize()
-      .then(() => setPyodideReady(true))
-      .catch((err: unknown) =>
-        setPyodideError(
-          err instanceof Error ? err.message : "Failed to load Pyodide",
-        ),
-      );
-  }, [open, pyodideReady, parser]);
 
   const handleFiles = useCallback(
     async (newFiles: File[]) => {
@@ -192,7 +176,7 @@ export function RecordingsUploadDialog({
 
       <DialogContent className="flex max-h-[90vh] max-w-[96rem] flex-col gap-6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Game Recordings (mgz)</DialogTitle>
+          <DialogTitle>Upload Game Recordings</DialogTitle>
           <p className="text-muted-foreground text-sm">
             Upload <code>.aoe2record</code> files for{" "}
             <strong>{player1Name}</strong> vs <strong>{player2Name}</strong>.
@@ -200,133 +184,114 @@ export function RecordingsUploadDialog({
           </p>
         </DialogHeader>
 
-        {pyodideError && (
-          <Alert variant="destructive">
-            <AlertDescription>
-              Error loading parser: {pyodideError}
-            </AlertDescription>
-          </Alert>
-        )}
+        <StepIndicator
+          totalGames={gameCount}
+          currentStep={currentStep}
+          steps={steps}
+        />
 
-        {!pyodideReady && !pyodideError && (
-          <div className="text-muted-foreground flex items-center justify-center gap-2 py-8 text-sm">
-            <Loader2Icon className="size-5 animate-spin" />
-            Loading parser…
+        {!isConfirmStep && currentGameStep && (
+          <div className="space-y-4">
+            <DropZone
+              onFiles={handleFiles}
+              existingCount={currentGameStep.files.length}
+              disabled={parsing}
+            />
+
+            {parsing && (
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <Loader2Icon className="size-4 animate-spin" />
+                Parsing recording…
+              </div>
+            )}
+
+            {parseError && (
+              <Alert variant="destructive">
+                <AlertDescription>{parseError}</AlertDescription>
+              </Alert>
+            )}
+
+            {currentGameStep.validationError && (
+              <Alert variant="destructive">
+                <AlertDescription className="flex items-start justify-between gap-4">
+                  <span>{currentGameStep.validationError}</span>
+                  <button
+                    onClick={handleClearStep}
+                    className="text-destructive shrink-0 text-xs underline"
+                  >
+                    Clear files
+                  </button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <RecordingsTable
+              recordings={currentGameStep.recordings}
+              showExample={currentGameStep.files.length === 0}
+            />
           </div>
         )}
 
-        {pyodideReady && (
-          <>
-            <StepIndicator
-              totalGames={gameCount}
-              currentStep={currentStep}
-              steps={steps}
-            />
+        {isConfirmStep && (
+          <ConfirmStep
+            steps={steps}
+            gameCount={gameCount}
+            player1Name={player1Name}
+            player2Name={player2Name}
+          />
+        )}
 
-            {!isConfirmStep && currentGameStep && (
-              <div className="space-y-4">
-                <DropZone
-                  onFiles={handleFiles}
-                  existingCount={currentGameStep.files.length}
-                  disabled={parsing}
-                />
-
-                {parsing && (
-                  <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                    <Loader2Icon className="size-4 animate-spin" />
-                    Parsing recording…
-                  </div>
-                )}
-
-                {parseError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{parseError}</AlertDescription>
-                  </Alert>
-                )}
-
-                {currentGameStep.validationError && (
-                  <Alert variant="destructive">
-                    <AlertDescription className="flex items-start justify-between gap-4">
-                      <span>{currentGameStep.validationError}</span>
-                      <button
-                        onClick={handleClearStep}
-                        className="text-destructive shrink-0 text-xs underline"
-                      >
-                        Clear files
-                      </button>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <RecordingsTable
-                  recordings={currentGameStep.recordings}
-                  showExample={currentGameStep.files.length === 0}
-                />
-              </div>
-            )}
-
-            {isConfirmStep && (
-              <ConfirmStep
-                steps={steps}
-                gameCount={gameCount}
-                player1Name={player1Name}
-                player2Name={player2Name}
+        <div className="flex items-center justify-between gap-2">
+          {!isConfirmStep && isAdmin && (
+            <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-xs select-none">
+              <Checkbox
+                checked={strictValidation}
+                onCheckedChange={(v) => setStrictValidation(!!v)}
               />
+              Validate files
+            </label>
+          )}
+          <div className="flex flex-1 justify-end gap-2">
+            {currentStep > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBack}
+              >
+                Back
+              </Button>
             )}
-
-            <div className="flex items-center justify-between gap-2">
-              {!isConfirmStep && isAdmin && (
-                <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-xs select-none">
-                  <Checkbox
-                    checked={strictValidation}
-                    onCheckedChange={(v) => setStrictValidation(!!v)}
-                  />
-                  Validate files
-                </label>
-              )}
-              <div className="flex flex-1 justify-end gap-2">
-                {currentStep > 0 && (
+            {!isConfirmStep ? (
+              canGoNext ? (
+                <Button
+                  size="sm"
+                  onClick={handleNext}
+                >
+                  Next
+                </Button>
+              ) : (
+                !parsing &&
+                !currentGameStep?.files.length && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleBack}
+                    onClick={handleNext}
                   >
-                    Back
+                    Skip
                   </Button>
-                )}
-                {!isConfirmStep ? (
-                  canGoNext ? (
-                    <Button
-                      size="sm"
-                      onClick={handleNext}
-                    >
-                      Next
-                    </Button>
-                  ) : (
-                    !parsing &&
-                    !currentGameStep?.files.length && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleNext}
-                      >
-                        Skip
-                      </Button>
-                    )
-                  )
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={handleSubmit}
-                    disabled={hasValidationErrors || hasNoFiles}
-                  >
-                    Confirm &amp; Submit
-                  </Button>
-                )}
-              </div>
-            </div>
-          </>
-        )}
+                )
+              )
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleSubmit}
+                disabled={hasValidationErrors || hasNoFiles}
+              >
+                Confirm &amp; Submit
+              </Button>
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
