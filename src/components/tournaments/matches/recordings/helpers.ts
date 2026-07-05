@@ -7,11 +7,21 @@ export function buildInitialSteps(gameCount: number): GameStep[] {
     recordings: [],
     skipped: false,
     validationError: null,
+    winnerOverride: null,
   }));
 }
 
 export function winsNeeded(gameCount: number): number {
   return Math.ceil(gameCount / 2);
+}
+
+/** Returns the effective winner for a step: override takes priority, then last recording. */
+export function getStepWinner(step: GameStep): 1 | 2 | null {
+  if (step.recordings.length === 0) return null;
+
+  const winner = step.recordings.at(-1)!.winner;
+
+  return step.winnerOverride ?? winner;
 }
 
 /** Returns [player1Wins, player2Wins] across all non-skipped steps with a result. */
@@ -22,7 +32,7 @@ export function computeScores(steps: GameStep[]): [number, number] {
   for (const step of steps) {
     if (step.skipped || step.recordings.length === 0) continue;
 
-    const winner = step.recordings[0]!.winner;
+    const winner = getStepWinner(step);
     if (winner === 1) p1++;
     else if (winner === 2) p2++;
   }
@@ -31,49 +41,41 @@ export function computeScores(steps: GameStep[]): [number, number] {
 }
 
 /**
- * Validates that a step with multiple files is a legitimate restored-game scenario:
- * - No duplicate filenames
- * - Same game GUID (when both files have one)
- * - Second file flagged as restored
- * - Same map and civilisations across all files
+ * Validates recording data across multiple files for a single game.
  */
-export function validateRestoredGame(
+export function validateGameRecFileData(
   recordings: ParsedRecording[],
 ): string | null {
+  // TODO: add playerID validation - will need to get playerID from aoe2companion link.
   if (recordings.length <= 1) return null;
 
-  const first = recordings[0]!;
+  const [firstRec, ...rest] = recordings;
 
-  for (let i = 1; i < recordings.length; i++) {
-    const rec = recordings[i]!;
+  // Check if all recordings have different file name (all entries, including firstRec).
+  const fileNames = recordings.map((e) => e.fileName);
+  const checks = [new Set(fileNames).size === recordings.length];
 
-    if (rec.fileName === first.fileName) {
-      return "Duplicate file detected. Please clear and re-upload the correct files.";
-    }
+  // Same civ check
+  checks.push(rest.every((e) => e.civ1 === firstRec!.civ1));
+  checks.push(rest.every((e) => e.civ2 === firstRec!.civ2));
 
-    // Fallback parser data does not include guid
-    const bothHaveGuid = first.guid !== "" && rec.guid !== "";
+  // Check if all recordings have the same player
+  checks.push(rest.every((e) => e.player1 === firstRec!.player1));
+  checks.push(rest.every((e) => e.player2 === firstRec!.player2));
 
-    if (bothHaveGuid && rec.guid !== first.guid) {
-      return `"${rec.fileName}" belongs to a different game. Only upload files from the same game.`;
-    }
+  // Check if all recordings have the same map
+  checks.push(rest.every((e) => e.map === firstRec!.map));
 
-    if (!rec.restored) {
-      return `"${rec.fileName}" is not flagged as a restored game recording.`;
-    }
+  // First recording should have worldTime=0, and all others should have worldTime >= previous recording's worldTime
+  checks.push(firstRec?.worldTime === 0);
+  checks.push(
+    recordings.every(
+      (v, i) => i === 0 || v.worldTime >= recordings[i - 1]!.worldTime,
+    ),
+  );
 
-    if (rec.mapId !== first.mapId) {
-      return `"${rec.fileName}" was played on a different map (${rec.map} vs ${first.map}).`;
-    }
+  // If all checks pass, return null (no error).
+  if (checks.every((v) => v)) return null;
 
-    const sameCivs =
-      (rec.civId1 === first.civId1 && rec.civId2 === first.civId2) ||
-      (rec.civId1 === first.civId2 && rec.civId2 === first.civId1);
-
-    if (!sameCivs) {
-      return `"${rec.fileName}" has different civilisations from the first file.`;
-    }
-  }
-
-  return null;
+  return "Recording file data does not match or there were duplicate files detected.";
 }

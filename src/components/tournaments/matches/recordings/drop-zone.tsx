@@ -12,18 +12,13 @@ import {
 
 interface DropZoneProps {
   onFiles: (files: File[]) => void | Promise<void>;
-  existingCount: number;
   disabled?: boolean;
 }
 
 /**
  * Drop zone for files. Supports drag-and-drop and click-to-select.
  */
-export function DropZone({
-  onFiles,
-  existingCount,
-  disabled = false,
-}: DropZoneProps) {
+export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -84,12 +79,6 @@ export function DropZone({
         Drag &amp; drop <code>.aoe2record</code> file(s) here, or{" "}
         <span className="text-primary underline">click to select</span>
       </p>
-      {existingCount > 0 && (
-        <p className="text-muted-foreground text-xs">
-          {existingCount} file{existingCount > 1 ? "s" : ""} added — add more if
-          the game was restored
-        </p>
-      )}
       <input
         ref={inputRef}
         type="file"

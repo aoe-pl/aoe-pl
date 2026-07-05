@@ -16,6 +16,7 @@ export interface ParsedRecording {
   winner: 1 | 2 | null;
   guid: string;
   restored: boolean;
+  worldTime: number;
 }
 
 export interface UploadRecsPayload {

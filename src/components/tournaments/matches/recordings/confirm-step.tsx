@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
-import { computeScores, winsNeeded } from "./helpers";
+import { computeScores, getStepWinner, winsNeeded } from "./helpers";
 import { RecordingsTable } from "./recordings-table";
 import type { GameStep } from "./types";
 
@@ -77,23 +77,32 @@ export function ConfirmStep({
         )}
       </div>
 
-      {uploadedSteps.map(({ step, gameNumber }) => (
-        <div
-          key={gameNumber}
-          className="space-y-2"
-        >
-          <h3 className="text-sm font-semibold">Game {gameNumber}</h3>
-          <ul className="text-muted-foreground list-inside list-disc text-xs">
-            {step.files.map((f) => (
-              <li key={f.name}>{f.name}</li>
-            ))}
-          </ul>
-          <RecordingsTable
-            recordings={step.recordings}
-            showExample={false}
-          />
-        </div>
-      ))}
+      {uploadedSteps.map(({ step, gameNumber }) => {
+        const winner = getStepWinner(step);
+        const winnerName =
+          winner === 1 ? player1Name : winner === 2 ? player2Name : null;
+        return (
+          <div
+            key={gameNumber}
+            className="space-y-2"
+          >
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-sm font-semibold">Game {gameNumber}</h3>
+              {winnerName && (
+                <span className="text-xs text-green-500">
+                  Winner: <span className="font-semibold">{winnerName}</span>
+                </span>
+              )}
+            </div>
+            <ul className="text-muted-foreground list-inside list-disc text-xs">
+              {step.files.map((f) => (
+                <li key={f.name}>{f.name}</li>
+              ))}
+            </ul>
+            <RecordingsTable recordings={step.recordings} />
+          </div>
+        );
+      })}
     </div>
   );
 }

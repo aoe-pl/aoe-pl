@@ -23,7 +23,10 @@ export function StepIndicator({
         const isDone = i < currentStep;
         const isActive = i === currentStep;
         const isConfirm = i === totalGames;
-        const isSkipped = !isConfirm && !!steps[i]?.skipped;
+        const isSkipped =
+          !isConfirm &&
+          (!!steps[i]?.skipped ||
+            (isDone && (steps[i]?.recordings.length ?? 0) === 0));
 
         return (
           <li

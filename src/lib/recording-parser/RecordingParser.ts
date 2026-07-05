@@ -1,16 +1,11 @@
-/**
- * RecordingParser parses .aoe2record files into a normalised ParsedRecording
- * using the aoe2rec-js library.
- */
-
 import { parse_rec_summary } from "aoe2rec-js";
 import { CIV_NAMES, MAP_NAMES } from "./civ-data";
 import type { ParsedRecording } from "./types";
 
-// ─── RecordingParser ──────────────────────────────────────────────────────────
-
+/**
+ * RecordingParser parses .aoe2record files using the aoe2rec-js library.
+ */
 export class RecordingParser {
-  /** Parses a .aoe2record file using aoe2rec-js. */
   async parse(file: File): Promise<ParsedRecording> {
     const buffer = await file.arrayBuffer();
     const summary = parse_rec_summary(buffer);
@@ -20,8 +15,7 @@ export class RecordingParser {
       world_time: summary.header.replay.world_time,
       old_world_time: summary.header.replay.old_world_time,
       timestamp: summary.header.timestamp,
-      map_resolved_id: summary.header.game_settings.resolved_map_id,
-      map_selected_id: summary.header.game_settings.selected_map_id,
+      map: summary.header.game_settings.resolved_map_id,
       rms_strings: summary.header.game_settings.rms_strings,
       replay: {
         game_mode: summary.header.replay.game_mode,
@@ -46,12 +40,20 @@ export class RecordingParser {
       })),
     });
 
-    const team0 = summary.teams[0];
-    const team1 = summary.teams[1];
-    const p1 = team0?.players[0];
-    const p2 = team1?.players[0];
+    const team0 = summary.teams[0]!;
+    const team1 = summary.teams[1]!;
+    const p1 = team0.players[0]!;
+    const p2 = team1.players[0]!;
 
-    const winner: 1 | 2 | null = team0?.winner ? 1 : team1?.winner ? 2 : null;
+    // Edge case if both teams are marked as winners. This supposedly happens when one player is defeated in a restored game.
+    // In this case, we will treat the winner as null.
+    let winner: 1 | 2 | null = null;
+
+    const bothMarkedAsWinners = team0?.winner === true && team1.winner === true;
+
+    if (!bothMarkedAsWinners) {
+      winner = team0.winner ? 1 : 2;
+    }
 
     const mapId = summary.header.game_settings.resolved_map_id;
     const timestamp = summary.header.timestamp;
@@ -73,16 +75,16 @@ export class RecordingParser {
         ? new Date(timestamp * 1000).toISOString().slice(0, 10)
         : "",
       winner,
-      // aoe2rec-js does not expose a game GUID.
-      // Empty guid tells validateRestoredGame to skip the guid-match check.
       guid: "",
       restored: true,
+      worldTime: summary.header.replay.world_time ?? 0,
     };
   }
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
+// Formats a duration in milliseconds to a string in the format "H:MM:SS".
 function formatDurationMs(milliseconds: number): string {
   const totalSeconds = Math.floor(milliseconds / 1000);
   const h = Math.floor(totalSeconds / 3600);
