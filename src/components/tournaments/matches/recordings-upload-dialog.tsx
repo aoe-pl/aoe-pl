@@ -59,7 +59,6 @@ export function RecordingsUploadDialog({
     parseError,
     strictValidation,
     setStrictValidation,
-    recPlayerNames,
     isConfirmStep,
     currentGameStep,
     hasValidationErrors,

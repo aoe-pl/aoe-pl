@@ -32,10 +32,6 @@ export function useRecordingsUpload({
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [strictValidation, setStrictValidation] = useState(true);
-  const [recPlayerNames, setRecPlayerNames] = useState<{
-    player1: string;
-    player2: string;
-  }>();
 
   const parser = useMemo(() => new RecordingParser(), []);
 
@@ -85,11 +81,6 @@ export function useRecordingsUpload({
           }
 
           next[currentStep] = step;
-
-          setRecPlayerNames({
-            player1: step.recordings[0]?.player1Data?.name ?? "?",
-            player2: step.recordings[0]?.player2Data?.name ?? "?",
-          });
 
           const [p1Wins, p2Wins] = computeScores(next);
           const needed = winsNeeded(gameCount);
@@ -188,7 +179,6 @@ export function useRecordingsUpload({
     parseError,
     strictValidation,
     setStrictValidation,
-    recPlayerNames,
     isConfirmStep,
     currentGameStep,
     hasValidationErrors,
