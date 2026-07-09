@@ -1,14 +1,14 @@
 import "@/styles/globals.css";
 
-import { type Metadata } from "next";
-import { Geist } from "next/font/google";
-
 import { Navigation } from "@/components/layout/navigation";
 import { ThemeCustomizer } from "@/components/layout/theme-customizer";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { getIsAdmin, getSession } from "@/lib/session";
 import { TRPCReactProvider } from "@/trpc/react";
+import { type Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { Geist } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "AoE2 - Polska",
@@ -39,7 +39,11 @@ export default async function RootLayout({
             session={session}
             isAdmin={isAdmin}
           />
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+
+          <TRPCReactProvider>
+            <TooltipProvider> {children} </TooltipProvider>
+          </TRPCReactProvider>
+
           <ThemeCustomizer />
         </NextIntlClientProvider>
       </body>

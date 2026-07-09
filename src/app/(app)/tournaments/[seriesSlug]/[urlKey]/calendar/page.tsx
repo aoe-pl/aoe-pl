@@ -2,7 +2,7 @@ import {
   TournamentCalendar,
   type TournamentMatchRow,
 } from "@/components/tournaments/calendar/tournament-calendar";
-import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { getTournament } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { auth } from "@/server/auth";
@@ -14,7 +14,7 @@ export default async function TournamentCalendarPage({
 }) {
   const { seriesSlug, urlKey } = await params;
   const [tournament, session] = await Promise.all([
-    getTournamentOrNotFound(seriesSlug, urlKey),
+    getTournament(seriesSlug, urlKey),
     auth(),
   ]);
 

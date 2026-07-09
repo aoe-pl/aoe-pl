@@ -49,7 +49,6 @@ export function StepIndicator({
                   !isActive &&
                   "border-muted-foreground/30 text-muted-foreground",
               )}
-              aria-current={isActive ? "step" : undefined}
             >
               {isSkipped ? (
                 <MinusIcon className="size-3.5 opacity-40" />

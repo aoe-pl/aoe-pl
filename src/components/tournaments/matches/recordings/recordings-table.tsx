@@ -29,10 +29,10 @@ export function RecordingsTable({ recordings }: RecordingsTableProps) {
           {recordings.map((r, i) => (
             <TableRow key={i}>
               <TableCell>
-                {r.player1} - {r.civ1}
+                {r.player1Data.name} - {r.player1Data.civ}
               </TableCell>
               <TableCell>
-                {r.player2} - {r.civ2}
+                {r.player2Data.name} - {r.player2Data.civ}
               </TableCell>
               <TableCell>{r.map}</TableCell>
               <TableCell>{r.length}</TableCell>

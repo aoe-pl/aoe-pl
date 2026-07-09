@@ -217,7 +217,7 @@ export const tournamentMatchRepository = {
 
   async getTournamentMatchByNumber(matchNumber: number) {
     return db.tournamentMatch.findUnique({
-      where: { matchNumber },
+      where: { matchNumber: matchNumber },
       include: {
         TournamentMatchParticipant: {
           include: {

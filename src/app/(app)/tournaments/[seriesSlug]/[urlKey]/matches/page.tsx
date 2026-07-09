@@ -4,7 +4,7 @@ import {
 } from "@/components/tournaments/matches/match-list";
 import { TournamentSectionContent } from "@/components/tournaments/tournament-section-content";
 import {
-  getTournamentOrNotFound,
+  getTournament,
   getTournamentPageData,
 } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
@@ -19,7 +19,7 @@ export default async function TournamentMatchesPage({
   const locale = await getLocale();
 
   const [tournament, { section }] = await Promise.all([
-    getTournamentOrNotFound(seriesSlug, urlKey),
+    getTournament(seriesSlug, urlKey),
     getTournamentPageData(seriesSlug, urlKey, "matches"),
   ]);
 

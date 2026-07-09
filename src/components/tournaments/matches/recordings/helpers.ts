@@ -43,25 +43,65 @@ export function computeScores(steps: GameStep[]): [number, number] {
 /**
  * Validates recording data across multiple files for a single game.
  */
+// prettier-ignore
 export function validateGameRecFileData(
   recordings: ParsedRecording[],
+  p1ProfileId: number ,
+  p2ProfileId: number,
 ): string | null {
   // TODO: add playerID validation - will need to get playerID from aoe2companion link.
-  if (recordings.length <= 1) return null;
+  const checks: boolean[] = [];
+
+
+    // Check if playerId match profileIds in parsedResults.
+    // If they are matching, make sure player 1 profile id matches player 1 in the recording, and player 2 id matches player 2 in the recording.
+  let profileIdCheck = true;
+
+  recordings.forEach((rec) => {
+    const recProfileIds = [
+        rec.player1Data.profileId,
+        rec.player2Data.profileId,
+      ];
+    const hasP1 = recProfileIds.includes(p1ProfileId);
+    const hasP2 = recProfileIds.includes(p2ProfileId);
+    
+    if (!hasP1 || !hasP2) {
+        profileIdCheck = false;
+       
+        return;
+      }
+      
+    // At this point, we know that both player IDs are present in the recording. We can now check which one is player 1 and which one is player 2.
+    // If p1ProfileId is the first profileId, then player 1 is correct. If not, we need to swap them.
+    if (recProfileIds[1] === p1ProfileId) {
+      const temp = rec.player1Data;
+      rec.player1Data = rec.player2Data;
+      rec.player2Data = temp;
+    }
+  });
+  
+  checks.push(profileIdCheck);
+
+  // If there is only one recording, we don't need to do any further checks.
+  if (recordings.length === 0) {
+    return checks.every((v) => v) ? null : `Profile ID mismatch.`;
+  }
 
   const [firstRec, ...rest] = recordings;
 
   // Check if all recordings have different file name (all entries, including firstRec).
   const fileNames = recordings.map((e) => e.fileName);
-  const checks = [new Set(fileNames).size === recordings.length];
+  const fileNameCheck = new Set(fileNames).size === recordings.length
+
+  checks.push(fileNameCheck);
 
   // Same civ check
-  checks.push(rest.every((e) => e.civ1 === firstRec!.civ1));
-  checks.push(rest.every((e) => e.civ2 === firstRec!.civ2));
+  checks.push(rest.every((e) => e.player1Data.civ === firstRec!.player1Data.civ));
+  checks.push(rest.every((e) => e.player2Data.civ === firstRec!.player2Data.civ));
 
   // Check if all recordings have the same player
-  checks.push(rest.every((e) => e.player1 === firstRec!.player1));
-  checks.push(rest.every((e) => e.player2 === firstRec!.player2));
+  checks.push(rest.every((e) => e.player1Data.profileId === firstRec!.player1Data.profileId));
+  checks.push(rest.every((e) => e.player2Data.profileId === firstRec!.player2Data.profileId));
 
   // Check if all recordings have the same map
   checks.push(rest.every((e) => e.map === firstRec!.map));
@@ -77,5 +117,5 @@ export function validateGameRecFileData(
   // If all checks pass, return null (no error).
   if (checks.every((v) => v)) return null;
 
-  return "Recording file data does not match or there were duplicate files detected.";
+  return `Recording files are invalid. Please ensure that all recordings are from the same game, with the same players, civs, and map.`;
 }

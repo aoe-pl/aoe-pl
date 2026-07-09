@@ -9,12 +9,22 @@ import {
 } from "./helpers";
 import type { GameStep } from "./types";
 
+interface UseRecordingsUploadOptions {
+  gameCount: number; // Total number of games in the series (5 for BO5)
+  p1ProfileId: number;
+  p2ProfileId: number;
+}
+
 /**
  * Custom hook for managing the state of a recordings upload dialog.
  * Handles the current step, parsing of files, validation, and navigation between steps.
  * @param gameCount The total number of games in the series (e.g., 5 for a best-of-5 series).
  */
-export function useRecordingsUpload(gameCount: number) {
+export function useRecordingsUpload({
+  gameCount,
+  p1ProfileId,
+  p2ProfileId,
+}: UseRecordingsUploadOptions) {
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState<GameStep[]>(() =>
     buildInitialSteps(gameCount),
@@ -65,7 +75,11 @@ export function useRecordingsUpload(gameCount: number) {
           step.recordings.sort((a, b) => a.worldTime - b.worldTime);
 
           if (strictValidation) {
-            step.validationError = validateGameRecFileData(step.recordings);
+            step.validationError = validateGameRecFileData(
+              step.recordings,
+              p1ProfileId,
+              p2ProfileId,
+            );
           } else {
             step.validationError = null;
           }
@@ -73,8 +87,8 @@ export function useRecordingsUpload(gameCount: number) {
           next[currentStep] = step;
 
           setRecPlayerNames({
-            player1: step.recordings[0]!.player1,
-            player2: step.recordings[0]!.player2,
+            player1: step.recordings[0]?.player1Data?.name ?? "?",
+            player2: step.recordings[0]?.player2Data?.name ?? "?",
           });
 
           const [p1Wins, p2Wins] = computeScores(next);
@@ -166,6 +180,7 @@ export function useRecordingsUpload(gameCount: number) {
     !currentGameStep?.validationError &&
     currentWinner !== null;
 
+  console.log(canGoNext, currentGameStep?.validationError);
   return {
     steps,
     currentStep,

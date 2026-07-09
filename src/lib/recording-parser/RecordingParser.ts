@@ -59,24 +59,26 @@ export class RecordingParser {
     const timestamp = summary.header.timestamp;
 
     return {
+      player1Data: {
+        profileId: p1.profile_id,
+        name: p1.name,
+        civId: p1.civ_id,
+        civ: CIV_NAMES[p1.civ_id]!,
+      },
+
+      player2Data: {
+        profileId: p2.profile_id,
+        name: p2.name,
+        civId: p2.civ_id,
+        civ: CIV_NAMES[p2.civ_id]!,
+      },
+
       fileName: file.name,
-      player1: p1?.name ?? "",
-      player2: p2?.name ?? "",
-      profileId1: p1?.profile_id ?? 0,
-      profileId2: p2?.profile_id ?? 0,
-      civ1: CIV_NAMES[p1?.civ_id ?? -1] ?? `Civ #${p1?.civ_id ?? "?"}`,
-      civ2: CIV_NAMES[p2?.civ_id ?? -1] ?? `Civ #${p2?.civ_id ?? "?"}`,
-      civId1: p1?.civ_id ?? 0,
-      civId2: p2?.civ_id ?? 0,
-      map: MAP_NAMES[mapId] ?? `Map #${mapId}`,
+      map: MAP_NAMES[mapId]!,
       mapId,
       length: formatDurationMs(summary.duration),
-      date: timestamp
-        ? new Date(timestamp * 1000).toISOString().slice(0, 10)
-        : "",
+      date: new Date(timestamp * 1000).toISOString().slice(0, 10),
       winner,
-      guid: "",
-      restored: true,
       worldTime: summary.header.replay.world_time ?? 0,
     };
   }

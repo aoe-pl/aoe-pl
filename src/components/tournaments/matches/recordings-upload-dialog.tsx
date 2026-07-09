@@ -10,6 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UploadCloudIcon } from "lucide-react";
 import { useState } from "react";
 import { ConfirmStep } from "./recordings/confirm-step";
@@ -20,18 +25,31 @@ import { useRecordingsUpload } from "./recordings/recordings-upload-hook";
 import { StepIndicator } from "./recordings/step-indicator";
 
 export interface RecordingsUploadDialogProps {
-  player1Name: string;
-  player2Name: string;
+  player1Data: {
+    profileId: number | null;
+    name: string;
+  };
+  player2Data: {
+    profileId: number | null;
+    name: string;
+  };
   gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
   isAdmin?: boolean;
 }
 
 export function RecordingsUploadDialog({
-  player1Name,
-  player2Name,
+  player1Data,
+  player2Data,
   gameCount = 5,
   isAdmin = false,
 }: RecordingsUploadDialogProps) {
+  const player1Name = player1Data.name;
+  const player2Name = player2Data.name;
+
+  // IF player1Data.profileId or player2Data.profileId, don't allow to upload recs. Disable the button.
+  const isUploadDisabled =
+    player1Data.profileId === null || player2Data.profileId === null;
+
   const [open, setOpen] = useState(false);
 
   const {
@@ -53,11 +71,11 @@ export function RecordingsUploadDialog({
     handleNext,
     handleBack,
     reset,
-  } = useRecordingsUpload(gameCount);
-
-  // TODO: ! Will need to get playerIDs (from aoe2) so we can compare them and match with recording file data.
-  // ! Otherwise we cannot know which player is which when uploading games!
-  // -> game amon vs gwizdek can be uploaded with gwizdek as player1, and it's messed up
+  } = useRecordingsUpload({
+    gameCount,
+    p1ProfileId: player1Data.profileId!, // ! Assume dialog won't even open if profileId is null, so we can safely assert non-null here.
+    p2ProfileId: player2Data.profileId!,
+  });
 
   const handleSubmit = () => {
     // TODO
@@ -69,13 +87,40 @@ export function RecordingsUploadDialog({
     if (!isOpen) reset();
   };
 
+  if (isUploadDisabled) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Button
+              size="lg"
+              disabled
+              className="disabled:pointer-events-auto disabled:cursor-not-allowed"
+            >
+              Upload Recs
+            </Button>
+          </span>
+        </TooltipTrigger>
+
+        <TooltipContent>
+          Upload is disabled because because one or both players do not have a
+          valid aoe2companion link set on their profile page.
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <Dialog
       open={open}
       onOpenChange={handleOpenChange}
     >
       <DialogTrigger asChild>
-        <Button size="lg">
+        <Button
+          size="lg"
+          disabled={isUploadDisabled}
+          className="disabled:pointer-events-auto disabled:cursor-not-allowed"
+        >
           <UploadCloudIcon />
           Upload Recs
         </Button>
@@ -111,7 +156,6 @@ export function RecordingsUploadDialog({
               <Alert variant="destructive">
                 <AlertDescription>{parseError}</AlertDescription>
               </Alert>
-              // TODO: fix "winner" being set to player (from website) instead of match player name
             )}
 
             {currentGameStep.validationError && (
@@ -138,9 +182,9 @@ export function RecordingsUploadDialog({
 
                 const winnerName =
                   winner === 1
-                    ? recPlayerNames?.player1
+                    ? player1Data.name
                     : winner === 2
-                      ? recPlayerNames?.player2
+                      ? player2Data.name
                       : null;
 
                 return winnerName ? (

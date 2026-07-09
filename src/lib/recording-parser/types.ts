@@ -1,21 +1,25 @@
 /** Data parsed from a single .aoe2record file. */
 export interface ParsedRecording {
+  player1Data: {
+    profileId: number;
+    name: string;
+    civId: number;
+    civ: string;
+  };
+
+  player2Data: {
+    profileId: number;
+    name: string;
+    civId: number;
+    civ: string;
+  };
+
   fileName: string;
-  player1: string;
-  player2: string;
-  profileId1: number;
-  profileId2: number;
-  civ1: string;
-  civ2: string;
-  civId1: number;
-  civId2: number;
   map: string;
   mapId: number;
   length: string;
   date: string;
-  winner: 1 | 2 | null;
-  guid: string;
-  restored: boolean;
+  winner: 1 | 2 | null; // null if no winner or both teams marked as winners
   worldTime: number;
 }
 
