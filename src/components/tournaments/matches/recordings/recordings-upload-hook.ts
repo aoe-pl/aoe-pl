@@ -171,7 +171,6 @@ export function useRecordingsUpload({
     !currentGameStep?.validationError &&
     currentWinner !== null;
 
-  console.log(canGoNext, currentGameStep?.validationError);
   return {
     steps,
     currentStep,

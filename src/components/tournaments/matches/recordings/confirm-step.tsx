@@ -23,16 +23,6 @@ export function ConfirmStep({
 
   const [p1Wins, p2Wins] = computeScores(steps);
 
-  console.log(
-    "p1 wins:",
-    p1Wins,
-    "p2 wins:",
-    p2Wins,
-    "needed:",
-    winsNeeded(gameCount),
-    "uploaded steps:",
-    uploadedSteps.length,
-  );
   const needed = winsNeeded(gameCount);
   const expectedGames = p1Wins + p2Wins;
   const uploadedCount = uploadedSteps.length;
