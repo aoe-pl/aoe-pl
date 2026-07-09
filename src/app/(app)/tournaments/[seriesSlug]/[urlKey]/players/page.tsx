@@ -1,5 +1,5 @@
 import { TournamentPlayerList } from "@/components/tournaments/players/tournament-player-list";
-import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { getTournament } from "@/lib/helpers/tournament-page-data";
 import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
 
 export default async function TournamentPlayersPage({
@@ -9,7 +9,7 @@ export default async function TournamentPlayersPage({
 }) {
   const { seriesSlug, urlKey } = await params;
 
-  const tournament = await getTournamentOrNotFound(seriesSlug, urlKey);
+  const tournament = await getTournament(seriesSlug, urlKey);
 
   const tournamentParticipants =
     await tournamentParticipantRepository.getTournamentParticipants(

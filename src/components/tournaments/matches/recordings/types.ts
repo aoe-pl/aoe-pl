@@ -5,4 +5,5 @@ export interface GameStep {
   recordings: ParsedRecording[];
   skipped: boolean;
   validationError: string | null;
+  winnerOverride: 1 | 2 | null;
 }

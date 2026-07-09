@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation";
-import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
-import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
-import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
-import { slugify } from "@/lib/utils";
 import type { TournamentQueryOptions } from "@/lib/repositories/tournamentRepository";
+import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
+import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
+import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
+import { slugify } from "@/lib/utils";
+import { notFound } from "next/navigation";
 
-export async function getTournamentOrNotFound(
+export async function getTournament(
   seriesSlug: string,
   urlKey: string,
   options?: TournamentQueryOptions,
@@ -31,7 +31,7 @@ export async function getTournamentPageData(
   urlKey: string,
   sectionSlug: string,
 ) {
-  const tournament = await getTournamentOrNotFound(seriesSlug, urlKey);
+  const tournament = await getTournament(seriesSlug, urlKey);
 
   const section = await tournamentSectionRepository.getSectionBySlug(
     tournament.id,
@@ -40,7 +40,7 @@ export async function getTournamentPageData(
 
   if (!section) notFound();
 
-  if (section && !section.isVisible) notFound();
+  if (!section.isVisible) notFound();
 
   return { tournament, section };
 }

@@ -7,7 +7,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model Account {
   id                       String  @id @default(cuid())
   userId                   String
@@ -52,7 +51,7 @@ model User {
   tournamentSeries      TournamentSeries[]
   userGameProfiles      UserGameProfile[]
   userRoles             UserRole[]
-  userStreams            UserStream[]
+  userStreams           UserStream[]
   newsPosts             NewsPost[]
 }
 

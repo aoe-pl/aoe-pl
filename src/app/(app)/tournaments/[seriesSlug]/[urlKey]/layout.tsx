@@ -3,7 +3,7 @@ import {
   TournamentNavMobile,
   type TournamentNavLink,
 } from "@/components/tournaments/tournament-nav";
-import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
+import { getTournament } from "@/lib/helpers/tournament-page-data";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { predefinedTournamentSections } from "@/lib/tournaments/section-constants";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -17,7 +17,7 @@ export default async function TournamentDetailLayout({
 }) {
   const { seriesSlug, urlKey } = await params;
 
-  const tournament = await getTournamentOrNotFound(seriesSlug, urlKey, {
+  const tournament = await getTournament(seriesSlug, urlKey, {
     includeMatchMode: true,
   });
 

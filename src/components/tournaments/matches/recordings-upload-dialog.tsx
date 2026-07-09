@@ -10,154 +10,104 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RecordingParser } from "@/lib/recording-parser/RecordingParser";
-import { Loader2Icon, UploadCloudIcon } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { UploadCloudIcon } from "lucide-react";
+import { useState } from "react";
 import { ConfirmStep } from "./recordings/confirm-step";
 import { DropZone } from "./recordings/drop-zone";
-import {
-  buildInitialSteps,
-  computeScores,
-  validateRestoredGame,
-  winsNeeded,
-} from "./recordings/helpers";
+import { getStepWinner } from "./recordings/helpers";
 import { RecordingsTable } from "./recordings/recordings-table";
+import { useRecordingsUpload } from "./recordings/recordings-upload-hook";
 import { StepIndicator } from "./recordings/step-indicator";
-import type { GameStep } from "./recordings/types";
 
 export interface RecordingsUploadDialogProps {
-  player1Name: string;
-  player2Name: string;
+  player1Data: {
+    profileId: number | null;
+    name: string;
+  };
+  player2Data: {
+    profileId: number | null;
+    name: string;
+  };
   gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
   isAdmin?: boolean;
 }
 
 export function RecordingsUploadDialog({
-  player1Name,
-  player2Name,
+  player1Data,
+  player2Data,
   gameCount = 5,
   isAdmin = false,
 }: RecordingsUploadDialogProps) {
+  const player1Name = player1Data.name;
+  const player2Name = player2Data.name;
+
+  // IF player1Data.profileId or player2Data.profileId, don't allow to upload recs. Disable the button.
+  const isUploadDisabled =
+    player1Data.profileId === null || player2Data.profileId === null;
+
   const [open, setOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState<GameStep[]>(() =>
-    buildInitialSteps(gameCount),
-  );
-  const [parsing, setParsing] = useState(false);
-  const [parseError, setParseError] = useState<string | null>(null);
-  const [strictValidation, setStrictValidation] = useState(true);
 
-  const parser = useMemo(() => new RecordingParser(), []);
-
-  const totalSteps = gameCount + 1;
-  const isConfirmStep = currentStep === gameCount;
-  const currentGameStep = !isConfirmStep ? steps[currentStep] : null;
-
-  const handleFiles = useCallback(
-    async (newFiles: File[]) => {
-      const invalidFiles = newFiles.filter(
-        (f) => !f.name.endsWith(".aoe2record"),
-      );
-      if (invalidFiles.length > 0) {
-        setParseError(
-          `Invalid file type: ${invalidFiles.map((f) => f.name).join(", ")}. Only .aoe2record files are accepted.`,
-        );
-        return;
-      }
-
-      setParsing(true);
-      setParseError(null);
-
-      try {
-        const parsedResults = await Promise.all(
-          newFiles.map((file) => parser.parse(file)),
-        );
-
-        setSteps((prev) => {
-          const next = [...prev];
-          const step = { ...next[currentStep]! };
-
-          step.files = [...step.files, ...newFiles];
-          step.recordings = [...step.recordings, ...parsedResults];
-
-          if (strictValidation) {
-            step.validationError = validateRestoredGame(step.recordings);
-          } else {
-            step.validationError = null;
-          }
-
-          next[currentStep] = step;
-
-          const [p1Wins, p2Wins] = computeScores(next);
-          const needed = winsNeeded(gameCount);
-
-          // Mark remaining steps as skipped if one player has won the series already
-          if (p1Wins >= needed || p2Wins >= needed) {
-            for (let i = currentStep + 1; i < gameCount; i++) {
-              next[i] = { ...next[i]!, skipped: true };
-            }
-          }
-
-          return next;
-        });
-      } catch (err) {
-        setParseError(
-          err instanceof Error ? err.message : "Failed to parse recording",
-        );
-      } finally {
-        setParsing(false);
-      }
-    },
-    [currentStep, gameCount, strictValidation, parser],
-  );
-
-  const handleClearStep = useCallback(() => {
-    setSteps((prev) => {
-      const next = [...prev];
-      next[currentStep] = {
-        files: [],
-        recordings: [],
-        skipped: false,
-        validationError: null,
-      };
-      return next;
-    });
-    setParseError(null);
-  }, [currentStep]);
-
-  const handleNext = () => {
-    let next = currentStep + 1;
-    while (next < gameCount && steps[next]?.skipped) next++;
-    if (next <= totalSteps - 1) setCurrentStep(next);
-  };
-
-  const handleBack = () => {
-    let prev = currentStep - 1;
-    while (prev > 0 && steps[prev]?.skipped) prev--;
-    setCurrentStep(prev);
-  };
+  const {
+    steps,
+    currentStep,
+    parsing,
+    parseError,
+    strictValidation,
+    setStrictValidation,
+    isConfirmStep,
+    currentGameStep,
+    hasValidationErrors,
+    hasNoFiles,
+    canGoNext,
+    handleFiles,
+    handleClearStep,
+    handleSetWinner,
+    handleNext,
+    handleBack,
+    reset,
+  } = useRecordingsUpload({
+    gameCount,
+    p1ProfileId: player1Data.profileId!, // ! Assume dialog won't even open if profileId is null, so we can safely assert non-null here.
+    p2ProfileId: player2Data.profileId!,
+  });
 
   const handleSubmit = () => {
-    // TODO: call uploadRecordings() with matchId + uploader
+    // TODO
     setOpen(false);
   };
 
-  const handleOpenChange = (val: boolean) => {
-    setOpen(val);
-
-    if (!val) {
-      setCurrentStep(0);
-      setSteps(buildInitialSteps(gameCount));
-      setParseError(null);
-    }
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) reset();
   };
 
-  const hasValidationErrors = steps.some((s) => s.validationError !== null);
-  const hasNoFiles = steps.every((s) => s.files.length === 0);
-  const canGoNext =
-    !parsing &&
-    (currentGameStep?.files.length ?? 0) > 0 &&
-    !currentGameStep?.validationError;
+  if (isUploadDisabled) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Button
+              size="lg"
+              disabled
+              className="disabled:pointer-events-auto disabled:cursor-not-allowed"
+            >
+              Upload Recs
+            </Button>
+          </span>
+        </TooltipTrigger>
+
+        <TooltipContent>
+          Upload is disabled because because one or both players do not have a
+          valid aoe2companion link set on their profile page.
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <Dialog
@@ -166,20 +116,24 @@ export function RecordingsUploadDialog({
     >
       <DialogTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
+          size="lg"
+          disabled={isUploadDisabled}
+          className="disabled:pointer-events-auto disabled:cursor-not-allowed"
         >
           <UploadCloudIcon />
           Upload Recs
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[90vh] max-w-[96rem] flex-col gap-6 overflow-y-auto">
+      <DialogContent className="flex max-h-[90vh] w-full flex-col gap-6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Game Recordings</DialogTitle>
-          <p className="text-muted-foreground text-sm">
-            Upload <code>.aoe2record</code> files for{" "}
-            <strong>{player1Name}</strong> vs <strong>{player2Name}</strong>.
+          <DialogTitle className="text-center">
+            Upload Game Recordings
+          </DialogTitle>
+          <p className="text-center">
+            Upload aoe2record files for <strong>{player1Name}</strong> vs{" "}
+            <strong>{player2Name}</strong>.
+            <br />
             One file per game; add multiple if a game was restored.
           </p>
         </DialogHeader>
@@ -194,16 +148,8 @@ export function RecordingsUploadDialog({
           <div className="space-y-4">
             <DropZone
               onFiles={handleFiles}
-              existingCount={currentGameStep.files.length}
               disabled={parsing}
             />
-
-            {parsing && (
-              <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Loader2Icon className="size-4 animate-spin" />
-                Parsing recording…
-              </div>
-            )}
 
             {parseError && (
               <Alert variant="destructive">
@@ -217,7 +163,7 @@ export function RecordingsUploadDialog({
                   <span>{currentGameStep.validationError}</span>
                   <button
                     onClick={handleClearStep}
-                    className="text-destructive shrink-0 text-xs underline"
+                    className="text-destructive shrink-0 underline"
                   >
                     Clear files
                   </button>
@@ -225,10 +171,55 @@ export function RecordingsUploadDialog({
               </Alert>
             )}
 
-            <RecordingsTable
-              recordings={currentGameStep.recordings}
-              showExample={currentGameStep.files.length === 0}
-            />
+            {!hasNoFiles && (
+              <RecordingsTable recordings={currentGameStep.recordings} />
+            )}
+
+            {currentGameStep.files.length > 0 &&
+              (() => {
+                const winner = getStepWinner(currentGameStep);
+
+                const winnerName =
+                  winner === 1
+                    ? player1Data.name
+                    : winner === 2
+                      ? player2Data.name
+                      : null;
+
+                return winnerName ? (
+                  <p className="text-sm">
+                    Winner:{" "}
+                    <span className="font-semibold text-green-500">
+                      {winnerName}
+                    </span>
+                  </p>
+                ) : (
+                  <Alert variant="destructive">
+                    <AlertDescription className="space-y-2">
+                      <p>
+                        Winner could not be determined automatically. Please
+                        select the winner manually.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSetWinner(1)}
+                        >
+                          {player1Name}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSetWinner(2)}
+                        >
+                          {player2Name}
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                );
+              })()}
           </div>
         )}
 
@@ -252,43 +243,19 @@ export function RecordingsUploadDialog({
             </label>
           )}
           <div className="flex flex-1 justify-end gap-2">
-            {currentStep > 0 && (
+            {currentStep > 0 && <Button onClick={handleBack}>Back</Button>}
+
+            {isConfirmStep && (
               <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBack}
-              >
-                Back
-              </Button>
-            )}
-            {!isConfirmStep ? (
-              canGoNext ? (
-                <Button
-                  size="sm"
-                  onClick={handleNext}
-                >
-                  Next
-                </Button>
-              ) : (
-                !parsing &&
-                !currentGameStep?.files.length && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleNext}
-                  >
-                    Skip
-                  </Button>
-                )
-              )
-            ) : (
-              <Button
-                size="sm"
                 onClick={handleSubmit}
                 disabled={hasValidationErrors || hasNoFiles}
               >
                 Confirm &amp; Submit
               </Button>
+            )}
+
+            {!isConfirmStep && canGoNext && (
+              <Button onClick={handleNext}>Next</Button>
             )}
           </div>
         </div>

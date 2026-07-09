@@ -23,7 +23,10 @@ export function StepIndicator({
         const isDone = i < currentStep;
         const isActive = i === currentStep;
         const isConfirm = i === totalGames;
-        const isSkipped = !isConfirm && !!steps[i]?.skipped;
+        const isSkipped =
+          !isConfirm &&
+          (!!steps[i]?.skipped ||
+            (isDone && (steps[i]?.recordings.length ?? 0) === 0));
 
         return (
           <li
@@ -46,7 +49,6 @@ export function StepIndicator({
                   !isActive &&
                   "border-muted-foreground/30 text-muted-foreground",
               )}
-              aria-current={isActive ? "step" : undefined}
             >
               {isSkipped ? (
                 <MinusIcon className="size-3.5 opacity-40" />

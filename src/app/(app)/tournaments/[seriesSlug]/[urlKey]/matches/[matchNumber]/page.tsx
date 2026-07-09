@@ -1,9 +1,9 @@
 import { PlayerLink } from "@/components/player-link";
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
 import { RecordingsUploadDialog } from "@/components/tournaments/matches/recordings-upload-dialog";
-import { getTournamentOrNotFound } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
+import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { auth } from "@/server/auth";
 import { format } from "date-fns";
 import { getLocale } from "next-intl/server";
@@ -14,10 +14,9 @@ export default async function TournamentMatchPage({
 }: {
   params: Promise<{ seriesSlug: string; urlKey: string; matchNumber: string }>;
 }) {
-  const { seriesSlug, urlKey, matchNumber } = await params;
+  const { matchNumber } = await params;
 
-  const [, match, locale, session] = await Promise.all([
-    getTournamentOrNotFound(seriesSlug, urlKey),
+  const [match, locale, session] = await Promise.all([
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
     getLocale(),
     auth(),
@@ -40,6 +39,7 @@ export default async function TournamentMatchPage({
     return "?";
   };
 
+  // TODO Update/replace this to accept teams, not just 2 players. This will be needed for team tournaments.
   const p1 = participants[0];
   const p2 = participants[1];
 
@@ -47,6 +47,12 @@ export default async function TournamentMatchPage({
   const player2Name = p2 ? getSlotName(p2) : "TBD";
   const player1Number = p1?.participant?.user?.playerNumber;
   const player2Number = p2?.participant?.user?.playerNumber;
+
+  const p1CompanionUrl = p1?.participant?.user?.aoe2companionUrl;
+  const p2CompanionUrl = p2?.participant?.user?.aoe2companionUrl;
+
+  const p1ProfileId = getPlayerProfileIdFromCompanionUrl(p1CompanionUrl ?? "");
+  const p2ProfileId = getPlayerProfileIdFromCompanionUrl(p2CompanionUrl ?? "");
 
   const dateLabel = match.matchDate
     ? format(new Date(match.matchDate), "PPP p", { locale: dateFnsLocale })
@@ -71,8 +77,14 @@ export default async function TournamentMatchPage({
         </h1>
         <div className="flex gap-2">
           <RecordingsUploadDialog
-            player1Name={player1Name}
-            player2Name={player2Name}
+            player1Data={{
+              profileId: p1ProfileId,
+              name: player1Name,
+            }}
+            player2Data={{
+              profileId: p2ProfileId,
+              name: player2Name,
+            }}
             gameCount={gameCount}
             isAdmin={isAdmin}
           />
