@@ -256,6 +256,7 @@ model TournamentTeam {
   TournamentParticipant      TournamentParticipant[]
   captain                    TournamentParticipant?       @relation("TeamCaptain", fields: [captainId], references: [id])
   tournament                 Tournament                   @relation(fields: [tournamentId], references: [id])
+  TournamentBracketParticipant TournamentBracketParticipant[]
 
   @@unique([tournamentId, name])
 }
@@ -290,6 +291,7 @@ model TournamentBracket {
   isManualSeeding Boolean                 @default(false)
   stage           TournamentStage         @relation(fields: [stageId], references: [id], onDelete: Cascade)
   bracketNodes    TournamentBracketNode[]
+  participants    TournamentBracketParticipant[]
 }
 
 model TournamentBracketNode {
@@ -326,6 +328,20 @@ model TournamentGroup {
   matches                    TournamentMatch[]            @relation("GroupMatches")
 
   @@unique([stageId, name])
+}
+
+model TournamentBracketParticipant {
+  id            String                 @id @default(cuid())
+  bracketId     String
+  participantId String?
+  teamId        String?
+  seedNumber    Int?
+  bracket       TournamentBracket      @relation(fields: [bracketId], references: [id], onDelete: Cascade)
+  participant   TournamentParticipant? @relation(fields: [participantId], references: [id])
+  team          TournamentTeam?        @relation(fields: [teamId], references: [id])
+
+  @@unique([bracketId, participantId])
+  @@unique([bracketId, teamId])
 }
 
 model TournamentRegistrationField {
@@ -366,6 +382,7 @@ model TournamentParticipant {
   tournament                 Tournament                   @relation(fields: [tournamentId], references: [id])
   user                       User?                        @relation(fields: [userId], references: [id])
   TournamentTeam             TournamentTeam[]             @relation("TeamCaptain")
+  TournamentBracketParticipant TournamentBracketParticipant[]
 
   @@unique([tournamentId, nickname])
   @@index([tournamentId])

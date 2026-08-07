@@ -5,8 +5,8 @@ import {
   getWbAdvanceTarget,
   isLbFinalRound,
   log2,
+  standardSeedOrder,
   type AdvanceTarget,
-  type BracketParticipantSlot,
 } from "@/lib/tournaments/match-generation/bracket-matches";
 import { db } from "@/server/db";
 import type { BracketType, Prisma } from "@prisma/client";
@@ -37,6 +37,13 @@ export type TournamentBracketUpdateData = Partial<
 
 const bracketDetailInclude = {
   stage: { include: { tournament: true } },
+  participants: {
+    include: {
+      participant: { include: { user: true, team: true } },
+      team: true,
+    },
+    orderBy: { seedNumber: "asc" },
+  },
   bracketNodes: {
     include: {
       match: {
@@ -94,17 +101,19 @@ export const tournamentBracketRepository = {
       });
 
       const isTeamBased = stage.tournament.isTeamBased;
-      const entrants = buildEntrantSlots(data.entrantIds ?? [], isTeamBased);
 
       // Bracket type is defined by the stage. The client submits its own
       // copy, but the stage wins to keep a single source of truth.
       const bracketType = stage.bracketType ?? data.bracketType;
 
+      // Entrants are stored as a bracket roster (participants pool), NOT
+      // placed into round-1 matches - the admin assigns them to matches in
+      // the bracket view.
       const plan = generateBracketPlan({
         bracketType,
         bracketSize: data.bracketSize,
         isSeeded: data.isSeeded,
-        entrants,
+        entrants: [],
       });
 
       const bracket = await tx.tournamentBracket.create({
@@ -121,6 +130,10 @@ export const tournamentBracketRepository = {
           stage: { connect: { id: stageId } },
         },
       });
+
+      if (data.entrantIds && data.entrantIds.length > 0) {
+        await createRoster(tx, bracket.id, data.entrantIds, isTeamBased);
+      }
 
       await materializeBracketPlan(tx, bracket.id, plan);
 
@@ -186,24 +199,14 @@ export const tournamentBracketRepository = {
         }
 
         const isTeamBased = current.stage.tournament.isTeamBased;
-        const entrants = buildEntrantSlots(
-          data.entrantIds ??
-            current.bracketNodes
-              .filter((n) => n.isWinnerBracket && n.round === 1)
-              .flatMap(
-                (n) =>
-                  n.match?.TournamentMatchParticipant.map(
-                    (p) => p.participantId ?? p.teamId ?? "",
-                  ) ?? [],
-              ),
-          isTeamBased,
-        );
 
+        // Same as create: entrants live in the roster, round-1 matches stay
+        // empty until the admin assigns them in the bracket view.
         const plan = generateBracketPlan({
           bracketType,
           bracketSize,
           isSeeded,
-          entrants,
+          entrants: [],
         });
 
         await tx.tournamentBracket.update({
@@ -220,6 +223,13 @@ export const tournamentBracketRepository = {
             endDate: data.endDate,
           },
         });
+
+        if (entrantsProvided) {
+          await tx.tournamentBracketParticipant.deleteMany({
+            where: { bracketId: id },
+          });
+          await createRoster(tx, id, data.entrantIds ?? [], isTeamBased);
+        }
 
         await materializeBracketPlan(tx, id, plan);
 
@@ -259,15 +269,213 @@ export const tournamentBracketRepository = {
       return tx.tournamentBracket.delete({ where: { id } });
     });
   },
+
+  /**
+   * Assigns the bracket roster to round-1 matches, resetting the whole
+   * bracket first (scores, winners, participants). "RATING" orders the
+   * roster by rating (not in the DB yet - all 0, so roster/seeded order is
+   * used); "RANDOM" shuffles it. Seeded brackets use the standard seeding
+   * order to map seeds to slots.
+   */
+  async allocateParticipants(id: string, mode: "RATING" | "RANDOM") {
+    return db.$transaction(async (tx) => {
+      const bracket = await tx.tournamentBracket.findUniqueOrThrow({
+        where: { id },
+        include: allocateBracketInclude,
+      });
+
+      const roster = await ensureRoster(tx, bracket);
+
+      // Allocation starts the bracket fresh: every match back to PENDING,
+      // no participants, no scores, no games.
+      await resetBracketMatches(tx, id);
+
+      const ordered =
+        mode === "RANDOM" ? shuffleArray(roster) : roster;
+      await placeRosterInRound1(tx, bracket, ordered);
+
+      return tx.tournamentBracket.findUniqueOrThrow({ where: { id } });
+    });
+  },
+
+  /**
+   * Resets the bracket to a just-created state (all matches PENDING, no
+   * participants, no scores, no games) while keeping the roster intact -
+   * the same players stay available for re-allocation.
+   */
+  async clearBracket(id: string) {
+    return db.$transaction(async (tx) => {
+      const bracket = await tx.tournamentBracket.findUniqueOrThrow({
+        where: { id },
+        include: allocateBracketInclude,
+      });
+
+      // Legacy brackets may not have a persisted roster - derive it from
+      // round-1 before wiping, so "the same players" survive a clear.
+      await ensureRoster(tx, bracket);
+      await resetBracketMatches(tx, id);
+
+      return tx.tournamentBracket.findUniqueOrThrow({ where: { id } });
+    });
+  },
 };
 
-function buildEntrantSlots(
+type RosterEntry = {
+  participantId: string | null;
+  teamId: string | null;
+};
+
+const allocateBracketInclude = {
+  bracketNodes: {
+    include: { match: { include: { TournamentMatchParticipant: true } } },
+  },
+  participants: { include: { participant: true, team: true } },
+} satisfies Prisma.TournamentBracketInclude;
+
+type AllocatableBracket = Prisma.TournamentBracketGetPayload<{
+  include: typeof allocateBracketInclude;
+}>;
+
+function createRoster(
+  tx: TxClient,
+  bracketId: string,
   entrantIds: string[],
   isTeamBased: boolean,
-): BracketParticipantSlot[] {
-  return entrantIds.map((id) =>
-    isTeamBased ? { teamId: id } : { participantId: id },
-  );
+) {
+  return tx.tournamentBracketParticipant.createMany({
+    data: entrantIds.map((id, i) =>
+      isTeamBased
+        ? { bracketId, teamId: id, seedNumber: i + 1 }
+        : { bracketId, participantId: id, seedNumber: i + 1 },
+    ),
+  });
+}
+
+/**
+ * Returns the persisted roster, or (for legacy brackets created before the
+ * roster existed) derives it from round-1 match participants and persists
+ * it so it survives future resets.
+ */
+async function ensureRoster(
+  tx: TxClient,
+  bracket: AllocatableBracket,
+): Promise<RosterEntry[]> {
+  if (bracket.participants.length > 0) {
+    return bracket.participants
+      .sort((a, b) => (a.seedNumber ?? 0) - (b.seedNumber ?? 0))
+      .map((p) => ({ participantId: p.participantId, teamId: p.teamId }));
+  }
+
+  const round1Nodes = bracket.bracketNodes
+    .filter((n) => n.isWinnerBracket && n.round === 1)
+    .sort((a, b) => a.position - b.position);
+
+  const entries: RosterEntry[] = [];
+  for (const node of round1Nodes) {
+    for (const p of node.match?.TournamentMatchParticipant ?? []) {
+      entries.push({ participantId: p.participantId, teamId: p.teamId });
+    }
+  }
+
+  if (entries.length > 0) {
+    await tx.tournamentBracketParticipant.createMany({
+      data: entries.map((e, i) => ({
+        bracketId: bracket.id,
+        participantId: e.participantId,
+        teamId: e.teamId,
+        seedNumber: i + 1,
+      })),
+    });
+  }
+
+  return entries;
+}
+
+async function resetBracketMatches(tx: TxClient, bracketId: string) {
+  const nodes = await tx.tournamentBracketNode.findMany({
+    where: { bracketId },
+    select: { matchId: true },
+  });
+  const matchIds = nodes
+    .map((n) => n.matchId)
+    .filter((mid): mid is string => !!mid);
+  if (matchIds.length === 0) return;
+
+  await tx.game.deleteMany({ where: { matchId: { in: matchIds } } });
+  await tx.tournamentMatchParticipant.deleteMany({
+    where: { matchId: { in: matchIds } },
+  });
+  await tx.tournamentMatch.updateMany({
+    where: { id: { in: matchIds } },
+    data: { status: "PENDING" },
+  });
+}
+
+async function placeRosterInRound1(
+  tx: TxClient,
+  bracket: AllocatableBracket,
+  roster: RosterEntry[],
+) {
+  const round1Nodes = bracket.bracketNodes
+    .filter((n) => n.isWinnerBracket && n.round === 1)
+    .sort((a, b) => a.position - b.position);
+
+  const seedSlots = standardSeedOrder(bracket.bracketSize);
+  const slotForSeed = (seed: number) => seedSlots.indexOf(seed);
+
+  for (let i = 0; i < roster.length; i++) {
+    const entry = roster[i]!;
+    const seedNumber = i + 1;
+    const slotIndex = bracket.isSeeded
+      ? slotForSeed(seedNumber)
+      : seedNumber - 1;
+    const matchPosition = Math.floor(slotIndex / 2);
+    const node = round1Nodes[matchPosition];
+    if (!node?.matchId) continue;
+    await upsertMatchParticipant(tx, node.matchId, entry);
+  }
+}
+
+async function upsertMatchParticipant(
+  tx: TxClient,
+  matchId: string,
+  slot: RosterEntry,
+) {
+  if (slot.participantId) {
+    await tx.tournamentMatchParticipant.upsert({
+      where: {
+        matchId_participantId: {
+          matchId,
+          participantId: slot.participantId,
+        },
+      },
+      create: {
+        matchId,
+        participantId: slot.participantId,
+        isWinner: false,
+      },
+      update: {},
+    });
+  } else if (slot.teamId) {
+    await tx.tournamentMatchParticipant.upsert({
+      where: {
+        matchId_teamId: { matchId, teamId: slot.teamId },
+      },
+      create: { matchId, teamId: slot.teamId, isWinner: false },
+      update: {},
+    });
+  }
+}
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = result[i]!;
+    result[i] = result[j]!;
+    result[j] = tmp;
+  }
+  return result;
 }
 
 async function materializeBracketPlan(
@@ -276,18 +484,20 @@ async function materializeBracketPlan(
   plan: ReturnType<typeof generateBracketPlan>,
 ) {
   const nodeIdByKey = new Map<string, string>();
-  const byeMatchIds: string[] = [];
 
   const key = (round: number, position: number, isWinnerBracket: boolean) =>
     `${isWinnerBracket ? "wb" : "lb"}:${round}:${position}`;
 
-  // Pass 1: create matches + nodes.
+  // Pass 1: create matches + nodes. Bye matches (single entrant) are left
+  // PENDING with no winner - the admin resolves them manually, which then
+  // advances the entrant like any other match. Not auto-completing them
+  // keeps the empty slot fillable and lets the winner be recorded once.
   for (const spec of plan.nodes) {
     const initialParticipants = spec.initialParticipants ?? [];
 
     const match = await tx.tournamentMatch.create({
       data: {
-        status: spec.isBye ? "COMPLETED" : "PENDING",
+        status: "PENDING",
         civDraftKey: "",
         mapDraftKey: "",
         TournamentMatchParticipant:
@@ -296,7 +506,6 @@ async function materializeBracketPlan(
                 create: initialParticipants.map((p) => ({
                   participantId: p.participantId ?? undefined,
                   teamId: p.teamId ?? undefined,
-                  isWinner: spec.isBye ?? false,
                 })),
               }
             : undefined,
@@ -317,8 +526,6 @@ async function materializeBracketPlan(
       key(spec.round, spec.position, spec.isWinnerBracket),
       node.id,
     );
-
-    if (spec.isBye) byeMatchIds.push(match.id);
   }
 
   // Pass 2: link parentNodeId for forward advancement within the same
@@ -354,11 +561,6 @@ async function materializeBracketPlan(
         data: { parentNodeId: parentId },
       });
     }
-  }
-
-  // Pass 3: resolve byes, propagating the sole entrant forward.
-  for (const matchId of byeMatchIds) {
-    await syncBracketAdvancement(tx, matchId, { hadWinnerBefore: false });
   }
 }
 

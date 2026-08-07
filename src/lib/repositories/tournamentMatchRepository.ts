@@ -452,6 +452,102 @@ export const tournamentMatchRepository = {
     });
   },
 
+  /**
+   * Attaches a participant (or team) to an existing match - used to fill
+   * empty or single-entrant (bye) slots in a bracket. No advancement is
+   * triggered; that happens when the admin later records a winner.
+   */
+  async addMatchParticipant(
+    matchId: string,
+    input: { participantId?: string | null; teamId?: string | null },
+  ) {
+    return db.$transaction(async (tx) => {
+      if (input.participantId) {
+        await tx.tournamentMatchParticipant.upsert({
+          where: {
+            matchId_participantId: {
+              matchId,
+              participantId: input.participantId,
+            },
+          },
+          create: {
+            matchId,
+            participantId: input.participantId,
+            isWinner: false,
+          },
+          update: {},
+        });
+      } else if (input.teamId) {
+        await tx.tournamentMatchParticipant.upsert({
+          where: {
+            matchId_teamId: { matchId, teamId: input.teamId },
+          },
+          create: { matchId, teamId: input.teamId, isWinner: false },
+          update: {},
+        });
+      }
+
+      return tx.tournamentMatch.findUnique({ where: { id: matchId } });
+    });
+  },
+
+  /**
+   * Detaches a participant (or team) from an existing match. Used to clear
+   * a bracket slot. No advancement is triggered.
+   */
+  async removeMatchParticipant(
+    matchId: string,
+    input: { participantId?: string | null; teamId?: string | null },
+  ) {
+    return db.$transaction(async (tx) => {
+      if (input.participantId) {
+        await tx.tournamentMatchParticipant.deleteMany({
+          where: { matchId, participantId: input.participantId },
+        });
+      } else if (input.teamId) {
+        await tx.tournamentMatchParticipant.deleteMany({
+          where: { matchId, teamId: input.teamId },
+        });
+      }
+
+      return tx.tournamentMatch.findUnique({ where: { id: matchId } });
+    });
+  },
+
+  /**
+   * All participants/teams currently placed in any bracket match of the
+   * tournament - used to offer only un-allocated players when filling a
+   * bracket slot.
+   */
+  async getBracketAllocatedParticipants(tournamentId: string) {
+    const matches = await db.tournamentMatch.findMany({
+      where: {
+        bracketNodes: {
+          some: { bracket: { stage: { tournamentId } } },
+        },
+      },
+      select: {
+        TournamentMatchParticipant: {
+          select: { participantId: true, teamId: true },
+        },
+      },
+    });
+
+    const participantIds = new Set<string>();
+    const teamIds = new Set<string>();
+    for (const match of matches) {
+      for (const p of match.TournamentMatchParticipant) {
+        if (p.participantId) participantIds.add(p.participantId);
+        if (p.teamId) teamIds.add(p.teamId);
+      }
+    }
+
+    return {
+      participantIds: [...participantIds],
+      teamIds: [...teamIds],
+    };
+  },
+
   async updateMatchParticipant(
     matchId: string,
     participantId: string,

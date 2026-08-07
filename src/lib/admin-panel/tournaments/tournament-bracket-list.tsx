@@ -115,16 +115,25 @@ export function TournamentBracketList({
     });
     if (!detail) return;
 
-    const round1Nodes = detail.bracketNodes
-      .filter((n) => n.isWinnerBracket && n.round === 1)
-      .sort((a, b) => a.position - b.position);
+    // Roster is the source of truth; fall back to round-1 participants for
+    // legacy brackets created before the roster existed.
+    let entrantIds = (detail.participants ?? [])
+      .sort((a, b) => (a.seedNumber ?? 0) - (b.seedNumber ?? 0))
+      .map((p) => p.participantId ?? p.teamId ?? "")
+      .filter((id) => id !== "");
 
-    const entrantIds = round1Nodes.flatMap(
-      (n) =>
-        n.match?.TournamentMatchParticipant.map(
-          (p) => p.participantId ?? p.teamId ?? "",
-        ).filter((id) => id !== "") ?? [],
-    );
+    if (entrantIds.length === 0) {
+      const round1Nodes = detail.bracketNodes
+        .filter((n) => n.isWinnerBracket && n.round === 1)
+        .sort((a, b) => a.position - b.position);
+
+      entrantIds = round1Nodes.flatMap(
+        (n) =>
+          n.match?.TournamentMatchParticipant.map(
+            (p) => p.participantId ?? p.teamId ?? "",
+          ).filter((id) => id !== "") ?? [],
+      );
+    }
 
     const hasResults = detail.bracketNodes.some((n) =>
       n.match?.TournamentMatchParticipant.some((p) => p.isWinner),

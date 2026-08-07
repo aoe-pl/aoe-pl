@@ -618,6 +618,24 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input }) => {
         return tournamentBracketRepository.updateBracket(input.id, input.data);
       }),
+    allocate: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          mode: z.enum(["RATING", "RANDOM"]),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentBracketRepository.allocateParticipants(
+          input.id,
+          input.mode,
+        );
+      }),
+    clear: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentBracketRepository.clearBracket(input.id);
+      }),
     delete: adminProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
@@ -738,6 +756,41 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentMatchRepository.updateTournamentMatch(
           input.id,
           input.data,
+        );
+      }),
+    addParticipant: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          participantId: z.string().optional(),
+          teamId: z.string().optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.addMatchParticipant(input.matchId, {
+          participantId: input.participantId,
+          teamId: input.teamId,
+        });
+      }),
+    removeParticipant: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          participantId: z.string().optional(),
+          teamId: z.string().optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.removeMatchParticipant(input.matchId, {
+          participantId: input.participantId,
+          teamId: input.teamId,
+        });
+      }),
+    allocatedParticipants: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentMatchRepository.getBracketAllocatedParticipants(
+          input.tournamentId,
         );
       }),
     manageGames: adminProcedure

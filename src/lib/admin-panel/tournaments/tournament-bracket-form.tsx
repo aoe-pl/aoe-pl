@@ -290,7 +290,7 @@ export function TournamentBracketForm({
               name="entrantIds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Entrants (seed order)</FormLabel>
+                  <FormLabel>Participants (bracket pool)</FormLabel>
                   <FormControl>
                     {hasResults ? (
                       <p className="text-muted-foreground text-sm">
@@ -309,8 +309,10 @@ export function TournamentBracketForm({
                     )}
                   </FormControl>
                   <FormDescription>
-                    Selection order determines seed order (1st = top seed). Use
-                    the shuffle button to randomize.
+                    These are the bracket&apos;s participants. They are not
+                    placed into matches here - assign them to round-1 matches
+                    from the bracket view (auto-allocate, random, or per
+                    match). Order determines seed order.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
