@@ -93,7 +93,11 @@ export function getWbAdvanceTarget(
   hasLosersBracket: boolean,
 ): AdvanceTarget | null {
   if (round >= wbRounds) {
-    if (!hasLosersBracket) return null;
+    // Only the WB final (round === wbRounds) advances into the grand
+    // final. The grand final node itself (round wbRounds + 1) has no
+    // further advancement - returning a target here would self-link it
+    // (parentNodeId = own id), which breaks the bracket renderer.
+    if (!hasLosersBracket || round > wbRounds) return null;
     // WB champion advances to the grand final (slot reserved, doesn't
     // matter which - see module docs).
     return { round: wbRounds + 1, position: 0, isWinnerBracket: true };

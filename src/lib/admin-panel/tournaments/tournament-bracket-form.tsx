@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   BracketEntrantsSelector,
@@ -102,6 +103,17 @@ export function TournamentBracketForm({
 
   const hasResults = initialData?.hasResults ?? false;
 
+  const stageId = form.watch("stageId");
+  const selectedStage = stages?.find((stage) => stage.id === stageId);
+
+  // Bracket type lives on the stage, not on the bracket. Keep the hidden
+  // form field in sync so the submitted payload always matches the stage.
+  useEffect(() => {
+    if (selectedStage?.bracketType) {
+      form.setValue("bracketType", selectedStage.bracketType);
+    }
+  }, [selectedStage?.id, selectedStage?.bracketType, form]);
+
   const handleSubmit = (data: TournamentBracketFormSchema) => {
     onSubmit({
       ...data,
@@ -148,6 +160,12 @@ export function TournamentBracketForm({
                       </SelectContent>
                     </Select>
                   </FormControl>
+                  <FormDescription>
+                    Bracket type comes from the stage:{" "}
+                    {selectedStage?.bracketType
+                      ? bracketTypesLabels[selectedStage.bracketType]
+                      : "—"}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -201,38 +219,6 @@ export function TournamentBracketForm({
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="bracketType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bracket Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={hasResults}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select bracket type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.values(BracketType).map((type) => (
-                          <SelectItem
-                            key={type}
-                            value={type}
-                          >
-                            {bracketTypesLabels[type]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

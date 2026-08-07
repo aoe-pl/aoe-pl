@@ -96,8 +96,12 @@ export const tournamentBracketRepository = {
       const isTeamBased = stage.tournament.isTeamBased;
       const entrants = buildEntrantSlots(data.entrantIds ?? [], isTeamBased);
 
+      // Bracket type is defined by the stage. The client submits its own
+      // copy, but the stage wins to keep a single source of truth.
+      const bracketType = stage.bracketType ?? data.bracketType;
+
       const plan = generateBracketPlan({
-        bracketType: data.bracketType,
+        bracketType,
         bracketSize: data.bracketSize,
         isSeeded: data.isSeeded,
         entrants,
@@ -108,7 +112,7 @@ export const tournamentBracketRepository = {
           name: data.name,
           description: data.description,
           displayOrder: data.displayOrder ?? 0,
-          bracketType: data.bracketType,
+          bracketType,
           bracketSize: data.bracketSize,
           isSeeded: data.isSeeded,
           isManualSeeding: data.isManualSeeding ?? false,
@@ -344,7 +348,7 @@ async function materializeBracketPlan(
       key(target.round, target.position, target.isWinnerBracket),
     );
 
-    if (nodeId && parentId) {
+    if (nodeId && parentId && nodeId !== parentId) {
       await tx.tournamentBracketNode.update({
         where: { id: nodeId },
         data: { parentNodeId: parentId },

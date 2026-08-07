@@ -40,7 +40,7 @@ import type { TournamentMatchFormSchema } from "./tournament";
 import { TournamentMatchForm } from "./tournament-match-form";
 
 const BOX_WIDTH = 200;
-const BOX_HEIGHT = 100;
+const BOX_HEIGHT = 65;
 
 type BracketParticipant = {
   id: string;
@@ -86,23 +86,12 @@ function MatchCard({ match }: MatchComponentProps) {
       )}
       onClick={() => data.matchId && data.onSelect(data.matchId)}
     >
-      <div
-        className={cn(
-          "flex items-center gap-1 border-b px-2 py-1 text-[10px] font-medium tracking-wide uppercase",
-          data.isGrandFinal
-            ? "bg-amber-400/15 text-amber-600 dark:text-amber-400"
-            : data.isWinnerBracket
-              ? "bg-primary/10 text-primary"
-              : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-        )}
-      >
-        {data.isGrandFinal && <Trophy className="h-3 w-3" />}
-        {data.isGrandFinal
-          ? "Grand Final"
-          : data.isWinnerBracket
-            ? `WB · Round ${data.round}`
-            : `LB · Round ${data.round}`}
-      </div>
+      {data.isGrandFinal && (
+        <div className="flex items-center gap-1 border-b border-amber-400/70 bg-amber-400/15 px-2 py-1 text-[10px] font-medium tracking-wide text-amber-600 uppercase dark:text-amber-400">
+          <Trophy className="h-3 w-3" />
+          Grand Final
+        </div>
+      )}
       <div className="divide-y">
         {participants.length === 0 && (
           <div className="text-muted-foreground px-2 py-2.5 text-xs italic">
@@ -133,7 +122,7 @@ function MatchCard({ match }: MatchComponentProps) {
                   : "bg-muted text-muted-foreground",
               )}
             >
-              {p.wonScore}-{p.lostScore}
+              {p.wonScore}
             </span>
           </div>
         ))}
@@ -180,10 +169,11 @@ function useMediaQuery(query: string) {
 }
 
 /**
- * Scales the bracket SVG to fill the container while keeping its aspect
- * ratio, so the whole bracket is always visible. The library's own SVGViewer
- * only sizes its viewport to min(container, bracket size), which leaves the
- * bracket small or clipped instead of filling the panel.
+ * Scales the bracket SVG to fill the container's width; the height follows
+ * the bracket's own aspect ratio, so nothing is clipped and the bracket
+ * stays readable at full width. The library's own SVGViewer only sizes its
+ * viewport to min(container, bracket size), which leaves the bracket small
+ * instead of filling the panel.
  */
 function FitBracket({
   size,
@@ -219,22 +209,32 @@ function FitBracket({
     return <div ref={contentRef}>{children}</div>;
   }
 
-  const scale = Math.min(
-    size.width / contentSize.width,
-    size.height / contentSize.height,
-  );
+  // Fill the container's width; height scales proportionally so the whole
+  // bracket stays visible without distortion.
+  const scale = size.width / contentSize.width;
+  const scaledHeight = contentSize.height * scale;
 
   return (
-    <div
-      ref={contentRef}
-      className="absolute top-0 left-0"
-      style={{
-        transform: `scale(${scale})`,
-        transformOrigin: "top left",
-      }}
-    >
-      {children}
-    </div>
+    <>
+      <div
+        ref={contentRef}
+        className="absolute top-0 left-0"
+        style={{
+          width: contentSize.width,
+          height: contentSize.height,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
+      </div>
+      {/* Spacer sized to the scaled bracket: makes the parent grow to fit
+          instead of clipping the overflow. */}
+      <div
+        style={{ width: "100%", height: scaledHeight }}
+        aria-hidden
+      />
+    </>
   );
 }
 
@@ -332,7 +332,12 @@ export function TournamentBracketGraph({
 
       return {
         id: node.id,
-        nextMatchId: node.parentNodeId ?? null,
+        // Grand final node was self-linked by an older generation bug
+        // (parentNodeId = own id). Treat it as a final: no next match.
+        nextMatchId:
+          node.parentNodeId && node.parentNodeId !== node.id
+            ? node.parentNodeId
+            : null,
         nextLooserMatchId,
         tournamentRoundText: isGrandFinal ? "GF" : String(node.round),
         startTime: "",
@@ -455,7 +460,7 @@ export function TournamentBracketGraph({
   return (
     <div
       ref={containerRef}
-      className="bg-muted/20 relative h-[70vh] w-full overflow-hidden rounded-lg border"
+      className="bg-muted/20 relative min-h-[70vh] w-full overflow-hidden rounded-lg border"
     >
       {isMobile ? (
         bracketElement

@@ -126,14 +126,6 @@ export function TournamentStagesList({
                         </span>
                       </div>
                     )}
-                    {stage.bracketSize && (
-                      <div className="flex items-center gap-1">
-                        <span className="text-muted-foreground">Size:</span>
-                        <span className="font-medium">
-                          {stage.bracketSize} participants
-                        </span>
-                      </div>
-                    )}
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Seeded:</span>
                       <span className="font-medium">

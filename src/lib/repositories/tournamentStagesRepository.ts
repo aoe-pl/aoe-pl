@@ -26,7 +26,6 @@ export const tournamentStagesRepository = {
         type: data.type,
         isActive: data.isActive,
         bracketType: data.bracketType,
-        bracketSize: data.bracketSize,
         isSeeded: data.isSeeded,
         tournament: {
           connect: {
@@ -45,7 +44,6 @@ export const tournamentStagesRepository = {
         type: data.type,
         isActive: data.isActive,
         bracketType: data.bracketType,
-        bracketSize: data.bracketSize,
         isSeeded: data.isSeeded,
       },
     });

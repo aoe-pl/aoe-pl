@@ -130,7 +130,6 @@ const tournamentStageFormSchema = z.object({
   isActive: z.boolean().optional(),
   isVisible: z.boolean().optional(),
   bracketType: z.nativeEnum(BracketType).optional(),
-  bracketSize: z.number().int().positive().optional(),
   isSeeded: z.boolean().optional(),
 });
 

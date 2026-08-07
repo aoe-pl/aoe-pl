@@ -268,7 +268,6 @@ model TournamentStage {
   isActive     Boolean             @default(false)
   description  String?
   bracketType  BracketType?
-  bracketSize  Int?
   isSeeded     Boolean             @default(true)
   brackets     TournamentBracket[]
   groups       TournamentGroup[]

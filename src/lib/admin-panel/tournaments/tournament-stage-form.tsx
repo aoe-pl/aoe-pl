@@ -80,7 +80,6 @@ export function TournamentStageForm({
       isVisible: initialData?.isVisible ?? false,
       description: initialData?.description ?? "",
       bracketType: initialData?.bracketType ?? "SINGLE_ELIMINATION",
-      bracketSize: initialData?.bracketSize ?? 16,
       isSeeded: initialData?.isSeeded ?? true,
     },
   });
@@ -103,7 +102,6 @@ export function TournamentStageForm({
     if (data.type !== "BRACKET") {
       const cleanedData = { ...data };
       delete cleanedData.bracketType;
-      delete cleanedData.bracketSize;
       onSubmit(cleanedData);
     } else {
       onSubmit(data);
@@ -222,34 +220,6 @@ export function TournamentStageForm({
                       <FormDescription>
                         Single elimination removes players after one loss,
                         double elimination gives a second chance
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="bracketSize"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bracket Size</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="16"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined,
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Number of participants in this bracket stage
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
