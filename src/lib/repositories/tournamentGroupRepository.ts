@@ -181,14 +181,22 @@ export const tournamentGroupRepository = {
         },
       });
 
-      const tournament = await tx.tournament.findUnique({
+      const stage = await tx.tournamentStage.findUnique({
         where: { id: stageId },
+        include: { tournament: true },
       });
+
+      // Bracket stages are managed via TournamentBracket/TournamentBracketNode
+      // (see tournamentBracketRepository) - groups in a bracket stage should
+      // not auto-generate round-robin matches.
+      if (stage?.type === "BRACKET") {
+        return group;
+      }
 
       // we are not support team based registration yet
       // and for individual registration -> team based we can't generate matches
       // because we don't know the teams yet, admin need to create them manually
-      if (data.isTeamBased || tournament?.isTeamBased) {
+      if (data.isTeamBased || stage?.tournament.isTeamBased) {
         return group;
       }
 
@@ -289,6 +297,10 @@ export const tournamentGroupRepository = {
       participant2Id: match.TournamentMatchParticipant[1]?.participantId ?? "",
     }));
 
+    // Bracket stages are managed via TournamentBracket/TournamentBracketNode -
+    // groups in a bracket stage never get round-robin matches auto-generated.
+    const isBracketStage = currentGroup.stage.type === "BRACKET";
+
     // Only calculate match changes if participants actually changed
     let matchesToDelete: typeof currentMatches = [];
     let matchesToCreate: Array<{
@@ -299,7 +311,7 @@ export const tournamentGroupRepository = {
       mapDraftKey: string;
     }> = [];
 
-    if (participantsChanged) {
+    if (participantsChanged && !isBracketStage) {
       // Get matches to delete (where either participant was removed)
       matchesToDelete = getMatchesToDelete(currentMatches, newParticipantIds);
 
@@ -372,7 +384,7 @@ export const tournamentGroupRepository = {
         // because we don't know the teams yet, admin need to create them manually
         // Only update matches if participants changed and not team based
         matches:
-          isTeamBased || !participantsChanged
+          isTeamBased || isBracketStage || !participantsChanged
             ? undefined
             : {
                 // Delete matches where participants were removed

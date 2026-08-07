@@ -55,9 +55,13 @@ export function TournamentGroupForm({
   defaultIsTeamBased,
   defaultMatchModeId,
 }: TournamentGroupFormProps) {
-  const { data: stages } = api.tournaments.stages.list.useQuery({
+  const { data: allStages } = api.tournaments.stages.list.useQuery({
     tournamentId,
   });
+
+  // Groups only make sense within GROUP-type stages. Bracket stages use
+  // TournamentBracket instead.
+  const stages = allStages?.filter((stage) => stage.type === "GROUP");
 
   const { data: participants } = api.tournaments.participants.list.useQuery({
     tournamentId,

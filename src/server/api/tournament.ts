@@ -2,6 +2,7 @@ import {
   tournamentFormSchema,
   tournamentStageFormSchema,
 } from "@/lib/admin-panel/tournaments/tournament";
+import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
 import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
@@ -26,6 +27,7 @@ import type {
   TournamentSeries,
 } from "@prisma/client";
 import {
+  BracketType,
   MatchStatus,
   RegistrationFieldType,
   TournamentMatchModeType,
@@ -121,6 +123,11 @@ export const tournamentRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       return tournamentRepository.unarchiveTournament(input.id);
+    }),
+  delete: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return tournamentRepository.deleteTournament(input.id);
     }),
 
   // Tournament Stages routes
@@ -361,6 +368,49 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentParticipantRepository.deleteById(input.participantId);
       }),
 
+    adminAdd: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          userId: z.string(),
+          nickname: z.string().min(1).optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const existing =
+          await tournamentParticipantRepository.findByUserAndTournament(
+            input.userId,
+            input.tournamentId,
+          );
+
+        if (existing) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This user is already registered for the tournament.",
+          });
+        }
+
+        const user = await usersRepository.getUserById(input.userId);
+        if (!user) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found.",
+          });
+        }
+
+        const trimmedNickname = input.nickname?.trim();
+        const nickname =
+          trimmedNickname && trimmedNickname.length > 0
+            ? trimmedNickname
+            : (user.name ?? "Player");
+
+        return tournamentParticipantRepository.registerParticipant(
+          input.tournamentId,
+          input.userId,
+          nickname,
+        );
+      }),
+
     updateRegistrationData: adminProcedure
       .input(
         z.object({
@@ -376,6 +426,17 @@ export const tournamentRouter = createTRPCRouter({
           input.participantId,
           input.registrationData,
         );
+      }),
+  }),
+
+  teams: createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return db.tournamentTeam.findMany({
+          where: { tournamentId: input.tournamentId },
+          orderBy: { name: "asc" },
+        });
       }),
   }),
 
@@ -491,6 +552,76 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentGroupRepository.deleteTournamentGroup(input.id);
+      }),
+  }),
+
+  brackets: createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ stageId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentBracketRepository.getBracketsByStageId(input.stageId);
+      }),
+    listByTournament: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentBracketRepository.getBracketsByTournamentId(
+          input.tournamentId,
+        );
+      }),
+    get: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentBracketRepository.getBracketById(input.id);
+      }),
+    create: adminProcedure
+      .input(
+        z.object({
+          stageId: z.string(),
+          data: z.object({
+            name: z.string().min(1),
+            description: z.string().optional(),
+            displayOrder: z.number().int().min(0).optional(),
+            bracketType: z.nativeEnum(BracketType),
+            bracketSize: z.number().int().positive(),
+            isSeeded: z.boolean(),
+            isManualSeeding: z.boolean().optional(),
+            startDate: z.date().optional(),
+            endDate: z.date().optional(),
+            entrantIds: z.array(z.string()).optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentBracketRepository.createBracket(
+          input.stageId,
+          input.data,
+        );
+      }),
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          data: z.object({
+            name: z.string().min(1).optional(),
+            description: z.string().optional(),
+            displayOrder: z.number().int().min(0).optional(),
+            bracketType: z.nativeEnum(BracketType).optional(),
+            bracketSize: z.number().int().positive().optional(),
+            isSeeded: z.boolean().optional(),
+            isManualSeeding: z.boolean().optional(),
+            startDate: z.date().optional(),
+            endDate: z.date().optional(),
+            entrantIds: z.array(z.string()).optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentBracketRepository.updateBracket(input.id, input.data);
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentBracketRepository.deleteBracket(input.id);
       }),
   }),
 

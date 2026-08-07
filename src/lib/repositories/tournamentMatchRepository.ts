@@ -1,4 +1,5 @@
 import { createAoe2RecsService } from "@/lib/storage";
+import { syncBracketAdvancement } from "@/lib/repositories/tournamentBracketRepository";
 import { db } from "@/server/db";
 import type { MatchStatus, Prisma } from "@prisma/client";
 
@@ -387,6 +388,11 @@ export const tournamentMatchRepository = {
     });
 
     return db.$transaction(async (tx) => {
+      const beforeParticipants = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId: id },
+      });
+      const hadWinnerBefore = beforeParticipants.some((p) => p.isWinner);
+
       // Update match data
       const updatedMatch = await tx.tournamentMatch.update({
         where: { id },
@@ -440,6 +446,8 @@ export const tournamentMatchRepository = {
         }
       }
 
+      await syncBracketAdvancement(tx, id, { hadWinnerBefore });
+
       return updatedMatch;
     });
   },
@@ -453,14 +461,25 @@ export const tournamentMatchRepository = {
       lostScore?: number;
     },
   ) {
-    return db.tournamentMatchParticipant.update({
-      where: {
-        matchId_participantId: {
-          matchId,
-          participantId,
+    return db.$transaction(async (tx) => {
+      const before = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId },
+      });
+      const hadWinnerBefore = before.some((p) => p.isWinner);
+
+      const updated = await tx.tournamentMatchParticipant.update({
+        where: {
+          matchId_participantId: {
+            matchId,
+            participantId,
+          },
         },
-      },
-      data,
+        data,
+      });
+
+      await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
+
+      return updated;
     });
   },
 
@@ -473,14 +492,25 @@ export const tournamentMatchRepository = {
       lostScore?: number;
     },
   ) {
-    return db.tournamentMatchParticipant.update({
-      where: {
-        matchId_teamId: {
-          matchId,
-          teamId,
+    return db.$transaction(async (tx) => {
+      const before = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId },
+      });
+      const hadWinnerBefore = before.some((p) => p.isWinner);
+
+      const updated = await tx.tournamentMatchParticipant.update({
+        where: {
+          matchId_teamId: {
+            matchId,
+            teamId,
+          },
         },
-      },
-      data,
+        data,
+      });
+
+      await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
+
+      return updated;
     });
   },
 
@@ -539,6 +569,8 @@ export const tournamentMatchRepository = {
           console.log("No match participants found, returning early");
           return;
         }
+
+        const hadWinnerBefore = matchParticipants.some((p) => p.isWinner);
 
         // Delete existing games
         await tx.game.deleteMany({
@@ -656,6 +688,8 @@ export const tournamentMatchRepository = {
             where: { id: matchId },
             data: { status: "ADMIN_APPROVED" },
           });
+
+          await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
         }
       });
 

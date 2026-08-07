@@ -26,6 +26,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   BracketType,
   bracketTypesLabels,
+  stageTypesLabels,
+  TournamentStageType,
   type TournamentStage,
   type TournamentStageFormSchema,
 } from "./tournament";
@@ -45,10 +47,10 @@ interface TournamentStageFormProps {
 }
 
 // TODO: We support only groups for now
-// const stageTypes: { value: TournamentStageType; label: string }[] = [
-//   { value: TournamentStageType.GROUP, label: stageTypesLabels.GROUP },
-//   { value: TournamentStageType.BRACKET, label: stageTypesLabels.BRACKET },
-// ];
+const stageTypes: { value: TournamentStageType; label: string }[] = [
+  { value: TournamentStageType.GROUP, label: stageTypesLabels.GROUP },
+  { value: TournamentStageType.BRACKET, label: stageTypesLabels.BRACKET },
+];
 
 const bracketTypes: { value: BracketType; label: string }[] = [
   {
@@ -137,7 +139,7 @@ export function TournamentStageForm({
               )}
             />
 
-            {/* <FormField
+            { <FormField
               control={form.control}
               name="type"
               render={({ field }) => (
@@ -169,7 +171,7 @@ export function TournamentStageForm({
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            /> }
 
             <FormField
               control={form.control}

@@ -27,6 +27,7 @@ export function Navigation({ session, isAdmin }: NavigationProps) {
     { label: t("home"), href: "/" },
     { label: t("news"), href: "/news" },
     { label: t("tournaments"), href: "/tournaments" },
+    { label: "Bracket Test", href: "/bracket-test" },
   ];
 
   return (

@@ -308,7 +308,7 @@ model TournamentBracketNode {
   parentNode      TournamentBracketNode?  @relation("BracketNodeParent", fields: [parentNodeId], references: [id])
   childNodes      TournamentBracketNode[] @relation("BracketNodeParent")
 
-  @@unique([bracketId, round, position])
+  @@unique([bracketId, round, position, isWinnerBracket])
 }
 
 model TournamentGroup {

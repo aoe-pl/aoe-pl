@@ -5,16 +5,18 @@ export const predefinedTournamentSections = [
   { slug: "awards", displayOrder: 3 },
   { slug: "calendar", displayOrder: 4 },
   { slug: "groups", displayOrder: 5 },
-  { slug: "rules", displayOrder: 6 },
-  { slug: "essentials", displayOrder: 7 },
-  { slug: "matches", displayOrder: 8 },
-  { slug: "players", displayOrder: 9 },
+  { slug: "bracket", displayOrder: 6 },
+  { slug: "rules", displayOrder: 7 },
+  { slug: "essentials", displayOrder: 8 },
+  { slug: "matches", displayOrder: 9 },
+  { slug: "players", displayOrder: 10 },
 ] as const;
 
 export const specialTournamentSectionSlugs = new Set([
   "registration",
   "calendar",
   "groups",
+  "bracket",
   "matches",
   "players",
 ]);

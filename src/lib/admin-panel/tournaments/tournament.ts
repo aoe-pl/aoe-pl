@@ -14,6 +14,7 @@ import {
   type TournamentSection,
   type Game,
   type TournamentMatchMode,
+  type TournamentBracket,
   MatchStatus,
 } from "@prisma/client";
 import z from "zod";
@@ -200,6 +201,22 @@ const tournamentGroupFormSchema = z.object({
   participantIds: z.array(z.string()).optional(),
 });
 
+const tournamentBracketFormSchema = z.object({
+  stageId: z.string().min(1, "Stage is required"),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  displayOrder: z.number().int().min(0).optional(),
+  bracketType: z.nativeEnum(BracketType),
+  bracketSize: z.number().int().positive(),
+  isSeeded: z.boolean(),
+  isManualSeeding: z.boolean().optional(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+  entrantIds: z.array(z.string()).optional(),
+});
+
+type TournamentBracketFormSchema = z.infer<typeof tournamentBracketFormSchema>;
+
 const tournamentMatchFormSchema = z.object({
   groupId: z.string().optional(),
   matchDate: z.date().optional(),
@@ -266,7 +283,9 @@ export {
   tournamentStatuses,
   matchStatuses,
   tournamentGroupFormSchema,
+  tournamentBracketFormSchema,
   type TournamentGroupFormSchema,
+  type TournamentBracketFormSchema,
   type TournamentMatchFormSchema,
   type TournamentStageFormSchema,
   type Tournament,
@@ -280,4 +299,5 @@ export {
   type TournamentSection,
   type Game,
   type TournamentMatchMode,
+  type TournamentBracket,
 };

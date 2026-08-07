@@ -1,13 +1,16 @@
-import { api } from "@/trpc/server";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import type { TournamentWithRelations } from "@/server/api/tournament";
-import { TournamentStatusBadge } from "./tournament-status-badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Users, Calendar, CalendarCheck, ClockIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { TournamentWithRelations } from "@/server/api/tournament";
+import { api } from "@/trpc/server";
+import { Calendar, CalendarCheck, ClockIcon, Eye, Users } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { TournamentArchiveButton } from "./TournamentListClient";
+import Link from "next/link";
+import { TournamentStatusBadge } from "./tournament-status-badge";
+import {
+  TournamentArchiveButton,
+  TournamentDeleteButton,
+} from "./TournamentListClient";
 
 export async function ArchivedTournamentList() {
   const t = await getTranslations("admin.tournaments");
@@ -51,6 +54,10 @@ export async function ArchivedTournamentList() {
                         tournamentId={tournament.id}
                         isArchived={true}
                         title={t("unarchive")}
+                      />
+                      <TournamentDeleteButton
+                        tournamentId={tournament.id}
+                        tournamentName={tournament.name ?? "Tournament"}
                       />
                     </div>
                   </div>

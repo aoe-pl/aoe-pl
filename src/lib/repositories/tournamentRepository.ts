@@ -213,7 +213,54 @@ export const tournamentRepository = {
     });
   },
   async deleteTournament(id: string) {
-    return db.tournament.delete({ where: { id } });
+    return db.$transaction(async (tx) => {
+      const stages = await tx.tournamentStage.findMany({
+        where: { tournamentId: id },
+        select: { id: true },
+      });
+      const stageIds = stages.map((s) => s.id);
+
+      // Bracket matches aren't cascade-deleted when their bracket/stage is
+      // removed (TournamentBracketNode.matchId has no cascade), so they'd be
+      // left orphaned. Detach and delete them explicitly first - this
+      // cascades Game/GameParticipant/TournamentMatchParticipant/streams.
+      await tx.tournamentBracketNode.updateMany({
+        where: { bracket: { stageId: { in: stageIds } } },
+        data: { matchId: null },
+      });
+
+      const matches = await tx.tournamentMatch.findMany({
+        where: {
+          OR: [
+            { group: { stageId: { in: stageIds } } },
+            {
+              bracketNodes: {
+                some: { bracket: { stageId: { in: stageIds } } },
+              },
+            },
+          ],
+        },
+        select: { id: true },
+      });
+      await tx.tournamentMatch.deleteMany({
+        where: { id: { in: matches.map((m) => m.id) } },
+      });
+
+      // Break the TournamentTeam <-> TournamentParticipant (captain) cycle
+      // before deleting participants/teams.
+      await tx.tournamentTeam.updateMany({
+        where: { tournamentId: id },
+        data: { captainId: null },
+      });
+
+      await tx.tournamentParticipant.deleteMany({
+        where: { tournamentId: id },
+      });
+
+      await tx.tournamentTeam.deleteMany({ where: { tournamentId: id } });
+
+      return tx.tournament.delete({ where: { id } });
+    });
   },
   async archiveTournament(id: string) {
     return db.tournament.update({

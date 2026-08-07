@@ -1,20 +1,23 @@
-import { api } from "@/trpc/server";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import type { TournamentWithRelations } from "@/server/api/tournament";
-import { TournamentStatusBadge } from "./tournament-status-badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { TournamentWithRelations } from "@/server/api/tournament";
+import { api } from "@/trpc/server";
 import {
-  Edit,
-  Eye,
-  Users,
   Calendar,
   CalendarCheck,
   ClockIcon,
+  Edit,
+  Eye,
+  Users,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { TournamentArchiveButton } from "./TournamentListClient";
+import Link from "next/link";
+import { TournamentStatusBadge } from "./tournament-status-badge";
+import {
+  TournamentArchiveButton,
+  TournamentDeleteButton,
+} from "./TournamentListClient";
 
 export async function TournamentList() {
   const t = await getTranslations("admin.tournaments");
@@ -70,6 +73,10 @@ export async function TournamentList() {
                         tournamentId={tournament.id}
                         isArchived={false}
                         title={t("archive")}
+                      />
+                      <TournamentDeleteButton
+                        tournamentId={tournament.id}
+                        tournamentName={tournament.name ?? "Tournament"}
                       />
                     </div>
                   </div>
