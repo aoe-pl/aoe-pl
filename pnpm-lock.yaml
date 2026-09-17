@@ -98,6 +98,9 @@ importers:
       '@trpc/server':
         specifier: ^11.0.0
         version: 11.1.0(typescript@5.8.3)
+      '@uiw/react-markdown-preview':
+        specifier: ^5.2.1
+        version: 5.2.1(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@uiw/react-md-editor':
         specifier: ^4.0.11
         version: 4.1.1(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
