@@ -1,16 +1,9 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Calendar24 } from "@/components/ui/calendar-24";
+import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -20,18 +13,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { type TournamentMatchFormSchema, matchStatuses } from "./tournament";
-import type { ExtendedTournamentMatch } from "./groups-detail/match";
-import { Calendar24 } from "@/components/ui/calendar-24";
-import { TournamentParticipantsSelector } from "./tournament-participants-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useState, useEffect, type ReactNode } from "react";
+import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import { SpoilerProtection } from "./groups-detail/spoiler-protection";
+import { matchStatuses, type TournamentMatchFormSchema } from "./tournament";
+import { TournamentParticipantsSelector } from "./tournament-participants-selector";
 
 type ParticipantScore = {
   id: string; // Corresponds to participantId or teamId
@@ -171,8 +171,7 @@ export function TournamentMatchForm({
         isWinner: s.wonScore === maxWonScore && maxWonScore > 0,
       })),
     );
-  },
-[isBracketMatch, scores.map((s) => s.wonScore).join(",")]);
+  }, [isBracketMatch, scores.map((s) => s.wonScore).join(",")]);
 
   const handleSubmit = (data: TournamentMatchData) => {
     if (!initialData) {

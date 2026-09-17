@@ -131,7 +131,10 @@ export function BracketEntrantsSelector({
                         key={option.id}
                         value={option.label}
                         onSelect={() => {
-                          if (value.includes(option.id) && !canRemove(option.id)) {
+                          if (
+                            value.includes(option.id) &&
+                            !canRemove(option.id)
+                          ) {
                             return;
                           }
                           const next = value.includes(option.id)
