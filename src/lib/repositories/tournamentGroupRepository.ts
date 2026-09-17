@@ -17,9 +17,7 @@ export type TournamentGroupCreateData = {
   participantIds?: string[];
 };
 
-export type TournamentGroupUpdateData = Partial<TournamentGroupCreateData> & {
-  stageId?: string;
-};
+export type TournamentGroupUpdateData = Partial<TournamentGroupCreateData>;
 
 export const tournamentGroupRepository = {
   async getTournamentGroupById(id: string) {
@@ -57,20 +55,16 @@ export const tournamentGroupRepository = {
             Game: true,
           },
         },
-        stage: {
+        tournament: {
           include: {
-            tournament: {
-              include: {
-                matchMode: true,
-              },
-            },
+            matchMode: true,
           },
         },
       },
     });
   },
-  async getTournamentGroups(
-    stageId: string,
+  async getGroupsByTournamentId(
+    tournamentId: string,
     options?: {
       includeMatchMode?: boolean;
       includeParticipants?: boolean;
@@ -78,8 +72,11 @@ export const tournamentGroupRepository = {
     },
   ) {
     return db.tournamentGroup.findMany({
-      where: { stageId },
+      where: {
+        tournamentId,
+      },
       include: {
+        tournament: true,
         matchMode: options?.includeMatchMode,
         TournamentGroupParticipant: options?.includeParticipants
           ? {
@@ -99,43 +96,8 @@ export const tournamentGroupRepository = {
     });
   },
 
-  async getGroupsByTournamentId(
-    tournamentId: string,
-    options?: {
-      includeMatchMode?: boolean;
-      includeParticipants?: boolean;
-      includeMatches?: boolean;
-    },
-  ) {
-    return db.tournamentGroup.findMany({
-      where: {
-        stage: {
-          tournamentId,
-        },
-      },
-      include: {
-        stage: true,
-        matchMode: options?.includeMatchMode,
-        TournamentGroupParticipant: options?.includeParticipants
-          ? {
-              include: {
-                tournamentParticipant: {
-                  include: {
-                    user: true,
-                    team: true,
-                  },
-                },
-              },
-            }
-          : undefined,
-        matches: options?.includeMatches,
-      },
-      orderBy: [{ stage: { name: "asc" } }, { displayOrder: "asc" }],
-    });
-  },
-
   async createTournamentGroup(
-    stageId: string,
+    tournamentId: string,
     data: TournamentGroupCreateData,
   ) {
     const participantsIds = data.participantIds?.map((id) => ({
@@ -166,7 +128,7 @@ export const tournamentGroupRepository = {
           isTeamBased: data.isTeamBased,
           isMixed: data.isMixed,
           color: data.color,
-          stage: { connect: { id: stageId } },
+          tournament: { connect: { id: tournamentId } },
           TournamentGroupParticipant:
             participantsIds && participantsIds.length > 0
               ? {
@@ -182,12 +144,11 @@ export const tournamentGroupRepository = {
       });
 
       const tournament = await tx.tournament.findUnique({
-        where: { id: stageId },
+        where: { id: tournamentId },
       });
 
-      // we are not support team based registration yet
-      // and for individual registration -> team based we can't generate matches
-      // because we don't know the teams yet, admin need to create them manually
+      // Team-based groups can't auto-generate round-robin matches (teams
+      // are unknown until created), so matches are added manually.
       if (data.isTeamBased || tournament?.isTeamBased) {
         return group;
       }
@@ -258,11 +219,7 @@ export const tournamentGroupRepository = {
             tournamentParticipant: true,
           },
         },
-        stage: {
-          include: {
-            tournament: true,
-          },
-        },
+        tournament: true,
       },
     });
 
@@ -288,6 +245,8 @@ export const tournamentGroupRepository = {
       participant1Id: match.TournamentMatchParticipant[0]?.participantId ?? "",
       participant2Id: match.TournamentMatchParticipant[1]?.participantId ?? "",
     }));
+
+    // Groups always use round-robin matches - no stage type checks anymore.
 
     // Only calculate match changes if participants actually changed
     let matchesToDelete: typeof currentMatches = [];
@@ -316,7 +275,7 @@ export const tournamentGroupRepository = {
       matchesToCreate = getMatchesToCreate(currentMatches, allParticipants);
     }
 
-    const tournament = currentGroup.stage.tournament;
+    const tournament = currentGroup.tournament;
     const isTeamBased = data.isTeamBased ?? tournament?.isTeamBased;
 
     // if we change from individual -> tournament based, we need to remove all matches
@@ -331,7 +290,6 @@ export const tournamentGroupRepository = {
       data: {
         name: data.name,
         description: data.description,
-        stage: data.stageId ? { connect: { id: data.stageId } } : undefined,
         matchMode: data.matchModeId
           ? { connect: { id: data.matchModeId } }
           : undefined,

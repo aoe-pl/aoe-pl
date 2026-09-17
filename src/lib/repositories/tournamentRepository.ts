@@ -1,6 +1,10 @@
 import { db } from "@/server/db";
 
-import { TournamentStatus, type RegistrationMode } from "@prisma/client";
+import {
+  TournamentStatus,
+  type RegistrationMode,
+  type TournamentFormat,
+} from "@prisma/client";
 
 const statusOrder = {
   [TournamentStatus.ACTIVE]: 0,
@@ -11,7 +15,6 @@ const statusOrder = {
 
 export interface TournamentQueryOptions {
   includeGroups?: boolean;
-  includeStages?: boolean;
   includeParticipants?: boolean;
   includeMatchMode?: boolean;
   includeBrackets?: boolean;
@@ -21,14 +24,12 @@ export const tournamentRepository = {
   async getTournaments({
     sortByStatus,
     includeTournamentSeries = false,
-    includeStages = false,
     includeParticipants = false,
     includeMatchMode = false,
     archived = false,
   }: {
     sortByStatus?: boolean;
     includeTournamentSeries?: boolean;
-    includeStages?: boolean;
     includeParticipants?: boolean;
     includeMatchMode?: boolean;
     archived?: boolean;
@@ -40,7 +41,6 @@ export const tournamentRepository = {
       include: {
         tournamentSeries: includeTournamentSeries,
         matchMode: includeMatchMode,
-        stages: includeStages,
         TournamentParticipant: includeParticipants,
       },
       orderBy: { startDate: "desc" },
@@ -58,13 +58,11 @@ export const tournamentRepository = {
     id: string,
     {
       includeGroups = false,
-      includeStages = false,
       includeParticipants = false,
       includeMatchMode = false,
       includeBrackets = false,
     }: {
       includeGroups?: boolean;
-      includeStages?: boolean;
       includeParticipants?: boolean;
       includeMatchMode?: boolean;
       includeBrackets?: boolean;
@@ -75,14 +73,8 @@ export const tournamentRepository = {
       include: {
         tournamentSeries: true,
         matchMode: includeMatchMode,
-        stages: includeStages
-          ? {
-              include: {
-                groups: includeGroups,
-                brackets: includeBrackets,
-              },
-            }
-          : undefined,
+        groups: includeGroups,
+        brackets: includeBrackets,
         TournamentParticipant: includeParticipants,
       },
     });
@@ -92,7 +84,6 @@ export const tournamentRepository = {
     urlKey: string,
     {
       includeGroups = false,
-      includeStages = false,
       includeParticipants = false,
       includeMatchMode = false,
       includeBrackets = false,
@@ -103,14 +94,8 @@ export const tournamentRepository = {
       include: {
         tournamentSeries: true,
         matchMode: includeMatchMode,
-        stages: includeStages
-          ? {
-              include: {
-                groups: includeGroups,
-                brackets: includeBrackets,
-              },
-            }
-          : undefined,
+        groups: includeGroups,
+        brackets: includeBrackets,
         TournamentParticipant: includeParticipants,
       },
     });
@@ -120,7 +105,7 @@ export const tournamentRepository = {
     urlKey: string;
     registrationMode: RegistrationMode;
     tournamentSeriesId: string;
-    matchModeId: string;
+    format: TournamentFormat;
     description?: string;
     isTeamBased: boolean;
     startDate: Date;
@@ -136,6 +121,7 @@ export const tournamentRepository = {
         name: data.name,
         urlKey: data.urlKey,
         registrationMode: data.registrationMode,
+        format: data.format,
         description: data.description,
         isTeamBased: data.isTeamBased,
         startDate: data.startDate,
@@ -145,11 +131,6 @@ export const tournamentRepository = {
         registrationEndDate: data.registrationEndDate,
         status: data.status,
         isVisible: data.isVisible,
-        matchMode: {
-          connect: {
-            id: data.matchModeId,
-          },
-        },
         tournamentSeries: {
           connect: {
             id: data.tournamentSeriesId,
@@ -172,7 +153,7 @@ export const tournamentRepository = {
       urlKey: string;
       registrationMode: RegistrationMode;
       tournamentSeriesId: string;
-      matchModeId: string;
+      format: TournamentFormat;
       description: string;
       isTeamBased: boolean;
       startDate: Date;
@@ -190,6 +171,7 @@ export const tournamentRepository = {
         name: data.name,
         urlKey: data.urlKey,
         registrationMode: data.registrationMode,
+        format: data.format,
         description: data.description,
         isTeamBased: data.isTeamBased,
         startDate: data.startDate,
@@ -199,11 +181,6 @@ export const tournamentRepository = {
         registrationEndDate: data.registrationEndDate,
         status: data.status,
         isVisible: data.isVisible,
-        matchMode: {
-          connect: {
-            id: data.matchModeId,
-          },
-        },
         tournamentSeries: {
           connect: {
             id: data.tournamentSeriesId,
@@ -213,7 +190,48 @@ export const tournamentRepository = {
     });
   },
   async deleteTournament(id: string) {
-    return db.tournament.delete({ where: { id } });
+    return db.$transaction(async (tx) => {
+      // Bracket matches aren't cascade-deleted when their bracket is removed
+      // (TournamentBracketNode.matchId has no cascade), so they'd be left
+      // orphaned. Detach and delete them explicitly first - this cascades
+      // Game/GameParticipant/TournamentMatchParticipant/streams.
+      await tx.tournamentBracketNode.updateMany({
+        where: { bracket: { tournamentId: id } },
+        data: { matchId: null },
+      });
+
+      const matches = await tx.tournamentMatch.findMany({
+        where: {
+          OR: [
+            { group: { tournamentId: id } },
+            {
+              bracketNodes: {
+                some: { bracket: { tournamentId: id } },
+              },
+            },
+          ],
+        },
+        select: { id: true },
+      });
+      await tx.tournamentMatch.deleteMany({
+        where: { id: { in: matches.map((m) => m.id) } },
+      });
+
+      // Break the TournamentTeam <-> TournamentParticipant (captain) cycle
+      // before deleting participants/teams.
+      await tx.tournamentTeam.updateMany({
+        where: { tournamentId: id },
+        data: { captainId: null },
+      });
+
+      await tx.tournamentParticipant.deleteMany({
+        where: { tournamentId: id },
+      });
+
+      await tx.tournamentTeam.deleteMany({ where: { tournamentId: id } });
+
+      return tx.tournament.delete({ where: { id } });
+    });
   },
   async archiveTournament(id: string) {
     return db.tournament.update({

@@ -54,13 +54,9 @@ export interface ExtendedTournamentMatch extends TournamentMatch {
   group: {
     id: string;
     name: string;
-    stage: {
+    tournament: {
       id: string;
       name: string;
-      tournament: {
-        id: string;
-        name: string;
-      };
     };
   } | null;
   TournamentMatchMode: {
@@ -99,13 +95,9 @@ export interface RawTournamentMatch extends TournamentMatch {
   group?: {
     id: string;
     name: string;
-    stage: {
+    tournament: {
       id: string;
       name: string;
-      tournament: {
-        id: string;
-        name: string;
-      };
     };
   } | null;
   TournamentMatchMode?: {

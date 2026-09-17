@@ -13,7 +13,7 @@ export const tournamentParticipantRepository = {
           include: {
             tournamentGroup: {
               include: {
-                stage: true,
+                tournament: true,
               },
             },
           },

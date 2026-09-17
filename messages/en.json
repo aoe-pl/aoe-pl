@@ -51,13 +51,16 @@
       "edit_title": "Edit tournament",
       "archive": "Archive",
       "unarchive": "Restore from archive",
+      "delete": "Delete",
+      "delete_confirm_title": "Delete tournament?",
+      "delete_confirm_description": "This will permanently delete \"{name}\" and all of its groups, brackets, matches and participants. This action cannot be undone.",
+      "delete_success": "Tournament deleted.",
       "no_archived_tournaments": "No archived tournaments",
       "all_archived_tournaments": "All archived tournaments will be displayed here.",
       "view": {
         "tournament_not_found": "Tournament not found.",
         "tabs": {
           "info": "Info",
-          "stages": "Stages",
           "groups": "Groups",
           "bracket": "Bracket",
           "participants": "Participants",
@@ -105,6 +108,10 @@
         "description_placeholder": "Enter tournament description",
         "status": "Status",
         "status_placeholder": "Select status",
+        "format": "Format",
+        "format_placeholder": "Select format",
+        "format_description": "Groups (league) or single/double elimination bracket. One tournament uses one format.",
+        "format_locked_description": "Format can't be changed after creation. Create a new tournament to change it.",
         "start_date": "Start date",
         "start_date_placeholder": "Select start date",
         "end_date": "End date (Optional)",
@@ -191,12 +198,6 @@
           "all_participants": "All participants"
         }
       },
-      "stage": {
-        "visible": "Visible",
-        "hidden": "Hidden",
-        "visible_label": "Visible stage",
-        "visible_description": "The stage will be visible to users"
-      },
       "sections": {
         "loading": "Loading...",
         "save_changes": "Save changes",
@@ -224,6 +225,7 @@
           "awards": "Awards",
           "calendar": "Calendar",
           "groups": "Groups",
+          "bracket": "Bracket",
           "rules": "Rules",
           "essentials": "Essentials",
           "matches": "Matches",
@@ -581,6 +583,7 @@
         "first_steps": "First steps",
         "calendar": "Calendar",
         "groups": "Groups",
+        "bracket": "Bracket",
         "players": "Players",
         "rules": "Rules",
         "essentials": "Essentials",

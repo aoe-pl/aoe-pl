@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AddParticipantDialog } from "@/lib/admin-panel/tournaments/add-participant-dialog";
 import { ParticipantDataDialog } from "@/lib/admin-panel/tournaments/participant-data-dialog";
 import { RemoveParticipantButton } from "@/lib/admin-panel/tournaments/remove-participant-button";
 import { api } from "@/trpc/server";
@@ -17,7 +18,7 @@ import type {
   TournamentGroup,
   TournamentGroupParticipant,
   TournamentParticipant,
-  TournamentStage,
+  Tournament,
 } from "@prisma/client";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
@@ -29,7 +30,7 @@ type TournamentParticipantsProps = {
 type ParticipantWithGroups = TournamentParticipant & {
   TournamentGroupParticipant: (TournamentGroupParticipant & {
     tournamentGroup: TournamentGroup & {
-      stage: TournamentStage;
+      tournament: Tournament;
     };
   })[];
 };
@@ -49,8 +50,9 @@ export async function TournamentParticipants({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Participants ({participants.length})</CardTitle>
+        <AddParticipantDialog tournamentId={tournamentId} />
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] w-full overflow-x-auto">

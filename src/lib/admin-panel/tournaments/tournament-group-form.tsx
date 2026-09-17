@@ -23,16 +23,10 @@ import {
   type TournamentGroupFormSchema,
   type TournamentGroupWithParticipants,
 } from "./tournament";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TournamentParticipantsSelector } from "./tournament-participants-selector";
 import { DrawerFooter } from "@/components/ui/drawer";
+import { useEffect } from "react";
 
 type TournamentGroupFormProps = {
   initialData?: TournamentGroupWithParticipants;
@@ -42,7 +36,6 @@ type TournamentGroupFormProps = {
   isPending?: boolean;
   tournamentId: string;
   defaultIsTeamBased: boolean;
-  defaultMatchModeId: string;
 };
 
 export function TournamentGroupForm({
@@ -53,27 +46,23 @@ export function TournamentGroupForm({
   isPending,
   tournamentId,
   defaultIsTeamBased,
-  defaultMatchModeId,
 }: TournamentGroupFormProps) {
-  const { data: stages } = api.tournaments.stages.list.useQuery({
-    tournamentId,
-  });
-
   const { data: participants } = api.tournaments.participants.list.useQuery({
     tournamentId,
     includeUser: true,
   });
 
+  const { data: matchModes = [] } = api.tournaments.matchMode.list.useQuery();
+
   const form = useForm<TournamentGroupFormSchema>({
     resolver: zodResolver(tournamentGroupFormSchema),
     defaultValues: {
-      stageId: initialData?.stageId ?? "",
       name: initialData?.name ?? "",
       description: initialData?.description ?? "",
       displayOrder: initialData?.displayOrder ?? groups.length,
       isTeamBased: initialData?.isTeamBased ?? defaultIsTeamBased,
       isMixed: initialData?.isMixed ?? false,
-      matchModeId: initialData?.matchModeId ?? defaultMatchModeId,
+      matchModeId: initialData?.matchModeId ?? "",
       color: initialData?.color ?? "",
       participantIds:
         initialData?.TournamentGroupParticipant?.map(
@@ -82,12 +71,17 @@ export function TournamentGroupForm({
     },
   });
 
+  // No tournament-level default anymore: default to the first available
+  // match mode so every group carries an explicit one.
+  useEffect(() => {
+    if (!form.getValues("matchModeId") && matchModes.length > 0) {
+      form.setValue("matchModeId", matchModes[0]!.id);
+    }
+  }, [matchModes, form]);
+
   const handleSubmit = (data: TournamentGroupFormSchema) => {
-    console.log("*******************", data.stageId);
     onSubmit({
       ...data,
-      matchModeId:
-        data.matchModeId === defaultMatchModeId ? undefined : data.matchModeId,
       // TODO: Add team based tournament currently we only set team based when we create mix teams!
       // team based should be isTeamBased: data.isTeamBased === defaultTeamBased ? undefined : data.isTeamBased,
       // because it should by default inherit from tournament team based setting!
@@ -112,37 +106,6 @@ export function TournamentGroupForm({
           className="space-y-6"
         >
           <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="stageId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Stage</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a stage" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {stages?.map((stage) => (
-                          <SelectItem
-                            key={stage.id}
-                            value={stage.id}
-                          >
-                            {stage.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="name"
@@ -183,18 +146,16 @@ export function TournamentGroupForm({
               name="matchModeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Match Mode (Optional)</FormLabel>
+                  <FormLabel>Match Mode</FormLabel>
                   <FormControl>
                     <TournamentMatchModeSelector
                       value={field.value ?? ""}
                       onChange={field.onChange}
-                      allowClear
-                      defaultMatchModeId={defaultMatchModeId}
                     />
                   </FormControl>
                   <FormDescription>
-                    Override the tournament's default match mode for this group.
-                    If not set, the tournament's default will be used.
+                    Match mode (Best of / Play All) for this group&apos;s
+                    matches.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

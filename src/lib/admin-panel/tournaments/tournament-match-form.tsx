@@ -1,16 +1,9 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Calendar24 } from "@/components/ui/calendar-24";
+import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -20,19 +13,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { type TournamentMatchFormSchema, matchStatuses } from "./tournament";
-import type { ExtendedTournamentMatch } from "./groups-detail/match";
-import { Calendar24 } from "@/components/ui/calendar-24";
-import { TournamentParticipantsSelector } from "./tournament-participants-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from "react";
+import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import { SpoilerProtection } from "./groups-detail/spoiler-protection";
+import { matchStatuses, type TournamentMatchFormSchema } from "./tournament";
+import { TournamentParticipantsSelector } from "./tournament-participants-selector";
 
 type ParticipantScore = {
   id: string; // Corresponds to participantId or teamId
@@ -65,6 +64,8 @@ interface TournamentMatchFormProps {
   onCancel: () => void;
   isPending?: boolean;
   groupId?: string;
+  /** Rendered at the top of the scrollable area (e.g. drawer title). */
+  header?: ReactNode;
 }
 
 export function TournamentMatchForm({
@@ -73,6 +74,7 @@ export function TournamentMatchForm({
   onCancel,
   isPending,
   groupId,
+  header,
 }: TournamentMatchFormProps) {
   const [scores, setScores] = useState<ParticipantScore[]>([]);
 
@@ -144,8 +146,13 @@ export function TournamentMatchForm({
     setScores(newScores);
   };
 
+  // Bracket matches manage the winner manually (single-player slots, bye
+  // advancement) - the score-derived winner logic below is group-only.
+  const isBracketMatch = !!initialData && !initialData.groupId;
+
   // Automatically determine winner when scores change
   useEffect(() => {
+    if (isBracketMatch) return;
     if (scores.length < 2) {
       setScores((s) => s.map((i) => ({ ...i, isWinner: false })));
       return;
@@ -164,7 +171,7 @@ export function TournamentMatchForm({
         isWinner: s.wonScore === maxWonScore && maxWonScore > 0,
       })),
     );
-  }, [scores.map((s) => s.wonScore).join(",")]);
+  }, [isBracketMatch, scores.map((s) => s.wonScore).join(",")]);
 
   const handleSubmit = (data: TournamentMatchData) => {
     if (!initialData) {
@@ -222,7 +229,12 @@ export function TournamentMatchForm({
 
     return (
       <div className="space-y-4">
-        <FormLabel>Match Results</FormLabel>
+        <div>
+          <FormLabel>Match Results</FormLabel>
+          <FormDescription>
+            Mark the winner - advancement to the next round is automatic.
+          </FormDescription>
+        </div>
         <div className="space-y-3">
           {scores.map((pScore) => (
             <div
@@ -231,7 +243,27 @@ export function TournamentMatchForm({
             >
               <div className="flex items-center gap-3">
                 <span className="font-medium">{pScore.name}</span>
-                {pScore.isWinner && <Badge variant="default">Winner</Badge>}
+                {isBracketMatch && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={pScore.isWinner ? "default" : "outline"}
+                    className="h-7"
+                    onClick={() => {
+                      // Exactly one winner per match: toggling on clears the
+                      // others, toggling off unmarks everyone.
+                      setScores((currentScores) =>
+                        currentScores.map((s) => ({
+                          ...s,
+                          isWinner: s.id === pScore.id ? !s.isWinner : false,
+                        })),
+                      );
+                    }}
+                    title="Mark as winner - advances to the next round"
+                  >
+                    {pScore.isWinner ? "Winner" : "Set as winner"}
+                  </Button>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <FormLabel>Won:</FormLabel>
@@ -282,6 +314,7 @@ export function TournamentMatchForm({
 
   return (
     <ScrollArea className="h-[60vh] px-4">
+      {header}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}

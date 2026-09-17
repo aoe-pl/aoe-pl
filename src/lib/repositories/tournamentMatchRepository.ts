@@ -1,4 +1,5 @@
 import { createAoe2RecsService } from "@/lib/storage";
+import { syncBracketAdvancement } from "@/lib/repositories/tournamentBracketRepository";
 import { db } from "@/server/db";
 import type { MatchStatus, Prisma } from "@prisma/client";
 
@@ -25,13 +26,9 @@ const upcomingMatchesInclude = {
   group: {
     include: {
       matchMode: true,
-      stage: {
+      tournament: {
         include: {
-          tournament: {
-            include: {
-              matchMode: true,
-            },
-          },
+          matchMode: true,
         },
       },
     },
@@ -99,11 +96,9 @@ export const tournamentMatchRepository = {
           in: ["PENDING", "SCHEDULED"],
         },
         group: {
-          stage: {
-            tournament: {
-              status: "ACTIVE",
-              isVisible: true,
-            },
+          tournament: {
+            status: "ACTIVE",
+            isVisible: true,
           },
         },
       },
@@ -127,11 +122,9 @@ export const tournamentMatchRepository = {
           in: ["PENDING", "SCHEDULED"],
         },
         group: {
-          stage: {
-            tournament: {
-              status: "ACTIVE",
-              isVisible: true,
-            },
+          tournament: {
+            status: "ACTIVE",
+            isVisible: true,
           },
         },
       },
@@ -203,11 +196,7 @@ export const tournamentMatchRepository = {
         },
         group: {
           include: {
-            stage: {
-              include: {
-                tournament: true,
-              },
-            },
+            tournament: true,
           },
         },
         TournamentMatchMode: true,
@@ -252,11 +241,7 @@ export const tournamentMatchRepository = {
         },
         group: {
           include: {
-            stage: {
-              include: {
-                tournament: true,
-              },
-            },
+            tournament: true,
           },
         },
         TournamentMatchMode: true,
@@ -387,6 +372,11 @@ export const tournamentMatchRepository = {
     });
 
     return db.$transaction(async (tx) => {
+      const beforeParticipants = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId: id },
+      });
+      const hadWinnerBefore = beforeParticipants.some((p) => p.isWinner);
+
       // Update match data
       const updatedMatch = await tx.tournamentMatch.update({
         where: { id },
@@ -440,8 +430,106 @@ export const tournamentMatchRepository = {
         }
       }
 
+      await syncBracketAdvancement(tx, id, { hadWinnerBefore });
+
       return updatedMatch;
     });
+  },
+
+  /**
+   * Attaches a participant (or team) to an existing match - used to fill
+   * empty or single-entrant (bye) slots in a bracket. No advancement is
+   * triggered; that happens when the admin later records a winner.
+   */
+  async addMatchParticipant(
+    matchId: string,
+    input: { participantId?: string | null; teamId?: string | null },
+  ) {
+    return db.$transaction(async (tx) => {
+      if (input.participantId) {
+        await tx.tournamentMatchParticipant.upsert({
+          where: {
+            matchId_participantId: {
+              matchId,
+              participantId: input.participantId,
+            },
+          },
+          create: {
+            matchId,
+            participantId: input.participantId,
+            isWinner: false,
+          },
+          update: {},
+        });
+      } else if (input.teamId) {
+        await tx.tournamentMatchParticipant.upsert({
+          where: {
+            matchId_teamId: { matchId, teamId: input.teamId },
+          },
+          create: { matchId, teamId: input.teamId, isWinner: false },
+          update: {},
+        });
+      }
+
+      return tx.tournamentMatch.findUnique({ where: { id: matchId } });
+    });
+  },
+
+  /**
+   * Detaches a participant (or team) from an existing match. Used to clear
+   * a bracket slot. No advancement is triggered.
+   */
+  async removeMatchParticipant(
+    matchId: string,
+    input: { participantId?: string | null; teamId?: string | null },
+  ) {
+    return db.$transaction(async (tx) => {
+      if (input.participantId) {
+        await tx.tournamentMatchParticipant.deleteMany({
+          where: { matchId, participantId: input.participantId },
+        });
+      } else if (input.teamId) {
+        await tx.tournamentMatchParticipant.deleteMany({
+          where: { matchId, teamId: input.teamId },
+        });
+      }
+
+      return tx.tournamentMatch.findUnique({ where: { id: matchId } });
+    });
+  },
+
+  /**
+   * All participants/teams currently placed in any bracket match of the
+   * tournament - used to offer only un-allocated players when filling a
+   * bracket slot.
+   */
+  async getBracketAllocatedParticipants(tournamentId: string) {
+    const matches = await db.tournamentMatch.findMany({
+      where: {
+        bracketNodes: {
+          some: { bracket: { tournamentId } },
+        },
+      },
+      select: {
+        TournamentMatchParticipant: {
+          select: { participantId: true, teamId: true },
+        },
+      },
+    });
+
+    const participantIds = new Set<string>();
+    const teamIds = new Set<string>();
+    for (const match of matches) {
+      for (const p of match.TournamentMatchParticipant) {
+        if (p.participantId) participantIds.add(p.participantId);
+        if (p.teamId) teamIds.add(p.teamId);
+      }
+    }
+
+    return {
+      participantIds: [...participantIds],
+      teamIds: [...teamIds],
+    };
   },
 
   async updateMatchParticipant(
@@ -453,14 +541,25 @@ export const tournamentMatchRepository = {
       lostScore?: number;
     },
   ) {
-    return db.tournamentMatchParticipant.update({
-      where: {
-        matchId_participantId: {
-          matchId,
-          participantId,
+    return db.$transaction(async (tx) => {
+      const before = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId },
+      });
+      const hadWinnerBefore = before.some((p) => p.isWinner);
+
+      const updated = await tx.tournamentMatchParticipant.update({
+        where: {
+          matchId_participantId: {
+            matchId,
+            participantId,
+          },
         },
-      },
-      data,
+        data,
+      });
+
+      await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
+
+      return updated;
     });
   },
 
@@ -473,14 +572,25 @@ export const tournamentMatchRepository = {
       lostScore?: number;
     },
   ) {
-    return db.tournamentMatchParticipant.update({
-      where: {
-        matchId_teamId: {
-          matchId,
-          teamId,
+    return db.$transaction(async (tx) => {
+      const before = await tx.tournamentMatchParticipant.findMany({
+        where: { matchId },
+      });
+      const hadWinnerBefore = before.some((p) => p.isWinner);
+
+      const updated = await tx.tournamentMatchParticipant.update({
+        where: {
+          matchId_teamId: {
+            matchId,
+            teamId,
+          },
         },
-      },
-      data,
+        data,
+      });
+
+      await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
+
+      return updated;
     });
   },
 
@@ -539,6 +649,8 @@ export const tournamentMatchRepository = {
           console.log("No match participants found, returning early");
           return;
         }
+
+        const hadWinnerBefore = matchParticipants.some((p) => p.isWinner);
 
         // Delete existing games
         await tx.game.deleteMany({
@@ -656,6 +768,8 @@ export const tournamentMatchRepository = {
             where: { id: matchId },
             data: { status: "ADMIN_APPROVED" },
           });
+
+          await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
         }
       });
 
@@ -691,9 +805,7 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.findMany({
       where: {
         group: {
-          stage: {
-            tournamentId,
-          },
+          tournamentId,
         },
       },
       include: {
@@ -715,9 +827,7 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.findMany({
       where: {
         group: {
-          stage: {
-            tournamentId,
-          },
+          tournamentId,
         },
       },
       include: {

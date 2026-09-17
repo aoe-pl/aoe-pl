@@ -1,0 +1,688 @@
+"use client";
+
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { ErrorToast } from "@/components/ui/error-toast-content";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getLoserDropTarget,
+  log2,
+} from "@/lib/tournaments/match-generation/bracket-matches";
+import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import {
+  DoubleEliminationBracket,
+  SingleEliminationBracket,
+  SVGViewer,
+  type CommonTreeProps,
+  type MatchComponentProps,
+  type MatchType,
+} from "@g-loot/react-tournament-brackets/dist/esm";
+import { Trophy, X } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+import { toast } from "sonner";
+import type { ExtendedTournamentMatch } from "./groups-detail/match";
+import type { TournamentMatchFormSchema } from "./tournament";
+import { TournamentMatchForm } from "./tournament-match-form";
+
+const boxHeight = 65;
+const spaceBetweenRows = 30;
+const canvasPadding = 25;
+
+type BracketParticipant = {
+  id: string;
+  name?: string;
+  isWinner?: boolean;
+  wonScore: number;
+  lostScore: number;
+};
+
+type BracketMatch = {
+  id: string;
+  nextMatchId: string | null;
+  nextLooserMatchId?: string;
+  tournamentRoundText?: string;
+  startTime: string;
+  state: string;
+  participants: BracketParticipant[];
+  matchId: string | null;
+  isWinnerBracket: boolean;
+  round: number;
+  isGrandFinal: boolean;
+  onSelect: (matchId: string) => void;
+};
+
+function participantLabel(p: BracketParticipant): string {
+  return p.name ?? "TBD";
+}
+
+/**
+ * Region labels for double-elimination brackets, positioned in the SVG's
+ * internal padding gutters (the library draws the loser bracket offset by
+ * the winner bracket's height, so the gutter above it is free). Rendered
+ * inside the scaled bracket container, so coordinates are in SVG space.
+ */
+function DoubleElimLabels({ upperHeight }: { upperHeight: number }) {
+  return (
+    <>
+      <div className="border-primary/30 bg-background/90 text-primary absolute top-0.5 left-1 z-10 rounded-md border px-2 py-0 text-[10px] font-semibold tracking-wide uppercase backdrop-blur-sm">
+        Winner Bracket
+      </div>
+      <div
+        className="bg-background/90 absolute left-1 z-10 rounded-md border border-rose-300/40 px-2 py-0 text-[10px] font-semibold tracking-wide text-rose-600 uppercase backdrop-blur-sm dark:text-rose-400"
+        style={{ top: upperHeight + 2 }}
+      >
+        Loser Bracket
+      </div>
+    </>
+  );
+}
+
+function MatchCard({ match }: MatchComponentProps) {
+  const data = match as unknown as BracketMatch;
+  const participants = data.participants;
+  const isDecided = participants.some((p) => p.isWinner);
+
+  return (
+    <div
+      className={cn(
+        "bg-card h-full w-full overflow-hidden rounded-lg border shadow-sm transition-shadow",
+        data.matchId && "cursor-pointer hover:shadow-lg",
+        data.isGrandFinal
+          ? "border-amber-400/70 ring-1 ring-amber-400/40"
+          : !data.isWinnerBracket && "border-rose-300/40",
+        isDecided && "border-emerald-500/50",
+      )}
+      onClick={() => data.matchId && data.onSelect(data.matchId)}
+    >
+      <div className="divide-y">
+        {participants.length === 0 && (
+          <div className="text-muted-foreground px-2 py-2.5 text-xs italic">
+            TBD
+          </div>
+        )}
+        {participants.map((p) => (
+          <div
+            key={p.id}
+            className={cn(
+              "flex items-center justify-between gap-2 px-2 py-1.5 text-xs",
+              p.isWinner
+                ? "bg-emerald-500/10 font-semibold text-emerald-700 dark:text-emerald-400"
+                : isDecided && "text-muted-foreground",
+            )}
+          >
+            <span className="flex min-w-0 items-center gap-1">
+              {p.isWinner && (
+                <Trophy className="h-3 w-3 shrink-0 text-emerald-500" />
+              )}
+              <span className="truncate">{participantLabel(p)}</span>
+            </span>
+            <span
+              className={cn(
+                "shrink-0 rounded px-1.5 py-0.5 text-[11px] tabular-nums",
+                p.isWinner
+                  ? "bg-emerald-500/20"
+                  : "bg-muted text-muted-foreground",
+              )}
+            >
+              {p.wonScore}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function useContainerSize<T extends HTMLElement>() {
+  const [size, setSize] = useState({ width: 800, height: 500 });
+  const observerRef = useRef<ResizeObserver | null>(null);
+
+  // Callback ref: attaches whenever the container element actually mounts.
+  // A mount-only effect is not enough - the container only renders after the
+  // bracket query finishes loading, so on first show the ref is still null
+  // when the effect runs and the observer would never attach (bracket would
+  // render at the default size instead of filling the panel).
+  const containerRef = useCallback((el: T | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      setSize({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
+    });
+    observer.observe(el);
+    observerRef.current = observer;
+  }, []);
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
+
+  return { ref: containerRef, size };
+}
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, [query]);
+
+  return matches;
+}
+
+/**
+ * Scales the bracket SVG to fill the container's width; the height follows
+ * the bracket's own aspect ratio, so nothing is clipped and the bracket
+ * stays readable at full width. The library's own SVGViewer only sizes its
+ * viewport to min(container, bracket size), which leaves the bracket small
+ * instead of filling the panel.
+ */
+function FitBracket({
+  size,
+  children,
+}: {
+  size: { width: number; height: number };
+  children: ReactNode;
+}) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentSize, setContentSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  // Measure the bracket SVG's intrinsic size (set via width/height attrs).
+  // Runs after every render; guarded so it converges once the size is stable
+  // and re-measures if the bracket data changes.
+  useIsomorphicLayoutEffect(() => {
+    const svg = contentRef.current?.querySelector("svg");
+    if (!svg) return;
+    const width = Number.parseFloat(svg.getAttribute("width") ?? "") || 0;
+    const height = Number.parseFloat(svg.getAttribute("height") ?? "") || 0;
+    if (width > 0 && height > 0) {
+      setContentSize((prev) =>
+        prev && prev.width === width && prev.height === height
+          ? prev
+          : { width, height },
+      );
+    }
+  });
+
+  if (!contentSize) {
+    return <div ref={contentRef}>{children}</div>;
+  }
+
+  // Fill the container's width; height scales proportionally so the whole
+  // bracket stays visible without distortion.
+  const scale = size.width / contentSize.width;
+  const scaledHeight = contentSize.height * scale;
+
+  return (
+    <>
+      <div
+        ref={contentRef}
+        className="absolute top-0 left-0"
+        style={{
+          width: contentSize.width,
+          height: contentSize.height,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
+      </div>
+      {/* Spacer sized to the scaled bracket: makes the parent grow to fit
+          instead of clipping the overflow. */}
+      <div
+        style={{ width: "100%", height: scaledHeight }}
+        aria-hidden
+      />
+    </>
+  );
+}
+
+type TournamentBracketGraphProps = {
+  bracketId: string;
+  readOnly?: boolean;
+};
+
+export function TournamentBracketGraph({
+  bracketId,
+  readOnly = false,
+}: TournamentBracketGraphProps) {
+  const {
+    data: bracket,
+    refetch,
+    isLoading,
+  } = api.tournaments.brackets.get.useQuery({ id: bracketId });
+
+  const [editingMatchId, setEditingMatchId] = useState<string | null>(null);
+  const { ref: containerRef, size } = useContainerSize<HTMLDivElement>();
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
+  const { mutate: updateMatch, isPending: updatePending } =
+    api.tournaments.matches.update.useMutation({
+      onSuccess: () => {
+        void refetch();
+        setEditingMatchId(null);
+        toast.success("Match updated successfully");
+      },
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+      },
+    });
+
+  const bracketTournamentId = bracket?.tournament?.id;
+  const isTeamBased = bracket?.tournament?.isTeamBased ?? false;
+
+  const { data: allocated } =
+    api.tournaments.matches.allocatedParticipants.useQuery(
+      { tournamentId: bracketTournamentId ?? "" },
+      { enabled: !!bracketTournamentId && !!editingMatchId },
+    );
+
+  const { mutate: addMatchParticipant } =
+    api.tournaments.matches.addParticipant.useMutation({
+      onSuccess: () => {
+        void refetch();
+        toast.success("Participant added to match");
+      },
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+      },
+    });
+
+  const { mutate: removeMatchParticipant } =
+    api.tournaments.matches.removeParticipant.useMutation({
+      onSuccess: () => {
+        void refetch();
+        toast.success("Participant removed from match");
+      },
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+      },
+    });
+
+  const onSelect = readOnly ? () => undefined : setEditingMatchId;
+
+  const { isDoubleElim, singleMatches, doubleMatches } = useMemo(() => {
+    if (!bracket) {
+      return {
+        isDoubleElim: false,
+        singleMatches: [] as BracketMatch[],
+        doubleMatches: {
+          upper: [] as BracketMatch[],
+          lower: [] as BracketMatch[],
+        },
+      };
+    }
+
+    const isDoubleElim = bracket.bracketType === "DOUBLE_ELIMINATION";
+
+    const bracketNodes = bracket.bracketNodes;
+    const wbNodes = bracketNodes.filter((n) => n.isWinnerBracket);
+    const lbNodes = bracketNodes.filter((n) => !n.isWinnerBracket);
+    // Plan WB rounds derived from bracket size. Can't use max node round:
+    // in double elimination the grand final node lives at round wbRounds + 1
+    // and would skew the count.
+    const wbRounds = log2(bracket.bracketSize);
+    const lbRounds = Math.max(0, ...lbNodes.map((n) => n.round));
+
+    const nodeByKey = new Map(
+      bracketNodes.map((n) => [
+        `${n.isWinnerBracket ? "wb" : "lb"}:${n.round}:${n.position}`,
+        n,
+      ]),
+    );
+
+    function buildMatch(node: (typeof bracketNodes)[number]): BracketMatch {
+      const participants: BracketParticipant[] =
+        node.match?.TournamentMatchParticipant.map((p) => ({
+          id: p.id,
+          name: p.participant?.nickname ?? p.team?.name ?? undefined,
+          isWinner: p.isWinner,
+          resultText: null,
+          wonScore: p.wonScore,
+          lostScore: p.lostScore,
+        })) ?? [];
+
+      // Single elimination: the champion match IS the last WB round.
+      // Double elimination: a dedicated grand final node at wbRounds + 1.
+      const isGrandFinal =
+        node.isWinnerBracket &&
+        node.round === (isDoubleElim ? wbRounds + 1 : wbRounds);
+
+      // Loser-drop links (double elimination only, WB nodes only). Computed
+      // on the fly since this link isn't persisted (see
+      // tournamentBracketRepository.syncBracketAdvancement).
+      let nextLooserMatchId: string | undefined;
+      if (node.isWinnerBracket && node.round <= wbRounds && lbRounds > 0) {
+        const dropTarget = getLoserDropTarget(node.round, node.position);
+        const targetNode = nodeByKey.get(
+          `lb:${dropTarget.round}:${dropTarget.position}`,
+        );
+        nextLooserMatchId = targetNode?.id;
+      }
+
+      return {
+        id: node.id,
+        // Grand final node was self-linked by an older generation bug
+        // (parentNodeId = own id). Treat it as a final: no next match.
+        nextMatchId:
+          node.parentNodeId && node.parentNodeId !== node.id
+            ? node.parentNodeId
+            : null,
+        nextLooserMatchId,
+        tournamentRoundText: isGrandFinal ? "GF" : String(node.round),
+        startTime: "",
+        state: "SCORE_DONE",
+        participants,
+        matchId: node.matchId,
+        isWinnerBracket: node.isWinnerBracket,
+        round: node.round,
+        isGrandFinal,
+        onSelect,
+      };
+    }
+
+    if (isDoubleElim) {
+      return {
+        isDoubleElim,
+        singleMatches: [] as BracketMatch[],
+        doubleMatches: {
+          upper: wbNodes.map(buildMatch),
+          lower: lbNodes.map(buildMatch),
+        },
+      };
+    }
+
+    return {
+      isDoubleElim,
+      singleMatches: wbNodes.map(buildMatch),
+      doubleMatches: {
+        upper: [] as BracketMatch[],
+        lower: [] as BracketMatch[],
+      },
+    };
+  }, [bracket, onSelect]);
+
+  const editingMatch = useMemo<ExtendedTournamentMatch | undefined>(() => {
+    if (!editingMatchId || !bracket) return undefined;
+    const node = bracket.bracketNodes.find((n) => n.matchId === editingMatchId);
+    if (!node?.match) return undefined;
+
+    return {
+      ...node.match,
+      group: null,
+      GameCount: node.match.Game?.length ?? 0,
+      TournamentMatchMode: null,
+    } as ExtendedTournamentMatch;
+  }, [editingMatchId, bracket]);
+
+  const allocatedParticipantIds = new Set(allocated?.participantIds ?? []);
+  const allocatedTeamIds = new Set(allocated?.teamIds ?? []);
+
+  // Only roster members not yet placed in any bracket match are offered.
+  const addOptions = (bracket?.participants ?? [])
+    .map((p) => ({
+      id: (p.participantId ?? p.teamId)!,
+      label: p.participant?.nickname ?? p.team?.name ?? "Unknown",
+      isTeam: !!p.teamId,
+    }))
+    .filter((o) =>
+      o.isTeam
+        ? !allocatedTeamIds.has(o.id)
+        : !allocatedParticipantIds.has(o.id),
+    );
+
+  const handleSubmit = (data: TournamentMatchFormSchema) => {
+    if (!editingMatchId) return;
+
+    updateMatch({
+      id: editingMatchId,
+      data: {
+        matchDate: data.matchDate,
+        civDraftKey: data.civDraftKey,
+        mapDraftKey: data.mapDraftKey,
+        status: data.status,
+        comment: data.comment,
+        adminComment: data.adminComment,
+        participantScores: data.participantScores,
+        teamScores: data.teamScores,
+      },
+    });
+  };
+
+  if (isLoading) {
+    return <p className="text-muted-foreground text-sm">Loading bracket...</p>;
+  }
+
+  if (!bracket) {
+    return <p className="text-muted-foreground text-sm">Bracket not found.</p>;
+  }
+
+  const options = {
+    style: {
+      width: 200,
+      boxHeight: 65,
+      spaceBetweenColumns: 30,
+      spaceBetweenRows: spaceBetweenRows,
+      roundHeader: { isShown: false },
+    },
+  };
+
+  // Replicates the library's calculateSVGDimensions (roundHeader hidden):
+  // the loser bracket is drawn offset by this height, which is where the
+  // "Loser Bracket" region label sits.
+  const upperHeight = isDoubleElim
+    ? (bracket.bracketSize / 2) * (boxHeight + spaceBetweenRows) +
+      canvasPadding * 2
+    : 0;
+
+  const svgViewerWrapper: NonNullable<CommonTreeProps["svgWrapper"]> = ({
+    children,
+    ...props
+  }) => (
+    <SVGViewer
+      width={size.width}
+      height={size.height}
+      background="transparent"
+      SVGBackground="transparent"
+      {...props}
+    >
+      {children}
+    </SVGViewer>
+  );
+
+  const bracketComponent = isDoubleElim ? (
+    <DoubleEliminationBracket
+      matches={
+        doubleMatches as unknown as {
+          upper: MatchType[];
+          lower: MatchType[];
+        }
+      }
+      matchComponent={MatchCard}
+      options={options}
+      svgWrapper={isMobile ? svgViewerWrapper : undefined}
+    />
+  ) : (
+    <SingleEliminationBracket
+      matches={singleMatches as unknown as MatchType[]}
+      matchComponent={MatchCard}
+      options={options}
+      svgWrapper={isMobile ? svgViewerWrapper : undefined}
+    />
+  );
+
+  const bracketElement =
+    isDoubleElim && !isMobile ? (
+      <>
+        <DoubleElimLabels upperHeight={upperHeight} />
+        {bracketComponent}
+      </>
+    ) : (
+      bracketComponent
+    );
+
+  return (
+    <>
+      <div
+        ref={containerRef}
+        className="bg-muted/20 relative min-h-[70vh] w-full overflow-hidden rounded-lg border"
+      >
+        {isMobile ? (
+          bracketElement
+        ) : (
+          <FitBracket size={size}>{bracketElement}</FitBracket>
+        )}
+
+        {!readOnly && (
+          <Drawer
+            open={!!editingMatchId}
+            onOpenChange={(open) => {
+              if (!open) setEditingMatchId(null);
+            }}
+          >
+            <DrawerContent>
+              <TournamentMatchForm
+                initialData={editingMatch}
+                onSubmit={handleSubmit}
+                onCancel={() => setEditingMatchId(null)}
+                isPending={updatePending}
+                header={
+                  <>
+                    <div className="space-y-1 pt-2 pb-2">
+                      <h2 className="text-lg font-semibold">
+                        Edit Bracket Match
+                      </h2>
+                      <p className="text-muted-foreground text-sm">
+                        Update the match result. Winner advancement to the next
+                        round is automatic.
+                      </p>
+                    </div>
+                    {editingMatch &&
+                      !editingMatch.TournamentMatchParticipant.some(
+                        (p) => p.isWinner,
+                      ) && (
+                        <div className="mb-3 border-b pb-3">
+                          <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+                            Match participants
+                          </p>
+                          <div className="space-y-1.5">
+                            {editingMatch.TournamentMatchParticipant.length ===
+                              0 && (
+                              <p className="text-muted-foreground text-sm italic">
+                                No participants yet - add one below.
+                              </p>
+                            )}
+                            {editingMatch.TournamentMatchParticipant.map(
+                              (p) => (
+                                <div
+                                  key={p.id}
+                                  className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm"
+                                >
+                                  <span className="min-w-0 truncate">
+                                    {p.participant?.nickname ??
+                                      p.team?.name ??
+                                      "Unknown"}
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-muted-foreground hover:text-destructive h-6 w-6 shrink-0 p-0"
+                                    title="Remove participant"
+                                    onClick={() =>
+                                      removeMatchParticipant({
+                                        matchId: editingMatch.id,
+                                        participantId:
+                                          p.participantId ?? undefined,
+                                        teamId: p.teamId ?? undefined,
+                                      })
+                                    }
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                          {editingMatch.TournamentMatchParticipant.length <
+                            2 && (
+                            <div className="mt-3">
+                              <Select
+                                key={
+                                  editingMatch.TournamentMatchParticipant.length
+                                }
+                                onValueChange={(id) => {
+                                  const option = addOptions.find(
+                                    (o) => o.id === id,
+                                  );
+                                  addMatchParticipant({
+                                    matchId: editingMatch.id,
+                                    participantId:
+                                      option && !option.isTeam ? id : undefined,
+                                    teamId: option?.isTeam ? id : undefined,
+                                  });
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue
+                                    placeholder={
+                                      isTeamBased
+                                        ? "Select team to add..."
+                                        : "Select participant to add..."
+                                    }
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {addOptions.map((option) => (
+                                    <SelectItem
+                                      key={option.id}
+                                      value={option.id}
+                                    >
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                  </>
+                }
+              />
+            </DrawerContent>
+          </Drawer>
+        )}
+      </div>
+    </>
+  );
+}

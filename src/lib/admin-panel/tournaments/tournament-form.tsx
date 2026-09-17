@@ -9,7 +9,12 @@ import {
   FormLabel,
   Form,
 } from "@/components/ui/form";
-import { type tournamentFormSchema, TournamentStatus } from "./tournament";
+import {
+  type tournamentFormSchema,
+  TournamentFormat,
+  formatLabels,
+  TournamentStatus,
+} from "./tournament";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -32,7 +37,6 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TournamentSeriesSelector } from "./tournament-series-selector";
-import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
@@ -43,12 +47,15 @@ type TournamentFormProps = {
   onSubmit: (data: TournamentFormData) => void;
   form: UseFormReturn<TournamentFormData>;
   isPending: boolean;
+  /** True when editing: format can't be changed after creation. */
+  formatLocked?: boolean;
 };
 
 export function TournamentForm({
   onSubmit,
   form,
   isPending,
+  formatLocked = false,
 }: TournamentFormProps) {
   const t = useTranslations("admin.tournaments.form");
   const tGlobal = useTranslations();
@@ -119,24 +126,6 @@ export function TournamentForm({
 
           <FormField
             control={form.control}
-            name="matchModeId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("match_mode_label")}</FormLabel>
-                <FormControl>
-                  <TournamentMatchModeSelector
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>{t("match_mode_description")}</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="urlKey"
             render={({ field }) => (
               <FormItem>
@@ -197,6 +186,43 @@ export function TournamentForm({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="format"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("format")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={formatLocked}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("format_placeholder")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(TournamentFormat).map((format) => (
+                      <SelectItem
+                        key={format}
+                        value={format}
+                      >
+                        {formatLabels[format]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {formatLocked
+                    ? t("format_locked_description")
+                    : t("format_description")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

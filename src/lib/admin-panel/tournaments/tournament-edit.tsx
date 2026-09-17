@@ -3,11 +3,7 @@
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
-import {
-  tournamentFormSchema,
-  type Tournament,
-  type TournamentStage,
-} from "./tournament";
+import { tournamentFormSchema, type Tournament } from "./tournament";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -17,13 +13,7 @@ import { ErrorToast } from "@/components/ui/error-toast-content";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
-export type TournamentWithStages = Tournament & { stages: TournamentStage[] };
-
-export function TournamentEdit({
-  tournament,
-}: {
-  tournament: TournamentWithStages;
-}) {
+export function TournamentEdit({ tournament }: { tournament: Tournament }) {
   const router = useRouter();
 
   const form = useForm<TournamentFormData>({
@@ -32,8 +22,8 @@ export function TournamentEdit({
       name: tournament.name,
       urlKey: tournament.urlKey,
       tournamentSeriesId: tournament.tournamentSeriesId,
-      matchModeId: tournament.matchModeId,
       registrationMode: tournament.registrationMode,
+      format: tournament.format,
       description: tournament.description ?? undefined,
       isTeamBased: tournament.isTeamBased,
       startDate: tournament.startDate ?? undefined,
@@ -76,6 +66,7 @@ export function TournamentEdit({
       isPending={createTournamentMutation.isPending}
       form={form}
       onSubmit={onSubmit}
+      formatLocked
     />
   );
 }
