@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { ErrorToast } from "@/components/ui/error-toast-content";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -34,13 +34,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-
-const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import { toast } from "sonner";
 import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import type { TournamentMatchFormSchema } from "./tournament";
 import { TournamentMatchForm } from "./tournament-match-form";
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const boxHeight = 65;
 const spaceBetweenRows = 30;

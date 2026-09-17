@@ -20,42 +20,38 @@ jobs:
       MINIO_ACCESS_KEY: dummy
       MINIO_SECRET_KEY: dummy
       MINIO_BUCKET_NAME: dummy
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
+          node-version: 20
+          cache: npm
 
       - name: Install deps with platform-specific binaries
         run: |
-          pnpm install --frozen-lockfile
-          pnpm install lightningcss --force
+          npm install
+          npm install lightningcss --force
 
       - name: Rebuild native modules
-        run: pnpm rebuild
+        run: npm rebuild
 
       - name: Format check
-        run: pnpm run format:check
+        run: npm run format:check
         if: always()
 
       - name: Lint
-        run: pnpm run lint
+        run: npm run lint
         if: always()
 
       - name: Build
-        run: pnpm run build
+        run: npm run build
         if: always()
 
       - name: Find deadcode
         run: |
-          pnpm run knip || echo "Dead code found – review manually"
+          npm run knip || echo "Dead code found – review manually"
         if: always()
         continue-on-error: true

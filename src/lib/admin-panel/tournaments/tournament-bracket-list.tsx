@@ -29,12 +29,12 @@ import type {
   TournamentBracket,
   TournamentBracketFormSchema,
 } from "./tournament";
+import { TournamentBracketControls } from "./tournament-bracket-controls";
 import {
   TournamentBracketForm,
   type TournamentBracketEditData,
 } from "./tournament-bracket-form";
 import { TournamentBracketGraph } from "./tournament-bracket-graph";
-import { TournamentBracketControls } from "./tournament-bracket-controls";
 
 type TournamentBracketListProps = {
   tournamentId: string;
