@@ -37,15 +37,11 @@ import { TournamentGroupForm } from "./tournament-group-form";
 type TournamentGroupListProps = {
   tournamentId: string;
   defaultIsTeamBased: boolean;
-  defaultMatchModeId: string;
-  defaultMatchMode: TournamentMatchMode;
 };
 
 export function TournamentGroupList({
   tournamentId,
   defaultIsTeamBased,
-  defaultMatchModeId,
-  defaultMatchMode,
 }: TournamentGroupListProps) {
   const t = useTranslations();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -148,7 +144,6 @@ export function TournamentGroupList({
 
   const handleSubmit = (data: {
     name: string;
-    stageId: string;
     displayOrder: number;
     description?: string | undefined;
     matchModeId?: string | undefined;
@@ -166,7 +161,6 @@ export function TournamentGroupList({
       isMixed: data.isMixed,
       color: data.color,
       participantIds: data.participantIds ?? [],
-      stageId: data.stageId,
     };
 
     if (editingGroup) {
@@ -179,7 +173,7 @@ export function TournamentGroupList({
     }
 
     createGroup({
-      stageId: data.stageId,
+      tournamentId,
       data: groupData,
     });
   };
@@ -202,34 +196,13 @@ export function TournamentGroupList({
     );
   }, [isLoading, handleAdd]);
 
-  const getMatchModeName = (groupMatchMode?: TournamentMatchMode | null) => {
-    const matchMode = groupMatchMode ?? defaultMatchMode;
-
-    return formatMatchModeName(matchMode.mode, matchMode.gameCount, t);
+  const getMatchModeName = (groupMatchMode: TournamentMatchMode) => {
+    return formatMatchModeName(
+      groupMatchMode.mode,
+      groupMatchMode.gameCount,
+      t,
+    );
   };
-
-  // Groups are separated by the stage they belong to, since a tournament can
-  // have multiple GROUP-type stages (and bracket stages have their own tab).
-  const groupsByStage = useMemo(() => {
-    const map = new Map<
-      string,
-      { stageName: string; groups: NonNullable<typeof groups> }
-    >();
-
-    for (const group of groups ?? []) {
-      const existing = map.get(group.stageId);
-      if (existing) {
-        existing.groups.push(group);
-      } else {
-        map.set(group.stageId, {
-          stageName: group.stage.name,
-          groups: [group],
-        });
-      }
-    }
-
-    return Array.from(map.values());
-  }, [groups]);
 
   return (
     <div className="space-y-4">
@@ -241,135 +214,119 @@ export function TournamentGroupList({
         emptyState
       ) : (
         <div className="space-y-6">
-          {groupsByStage.map(({ stageName, groups: stageGroups }) => (
-            <div
-              key={stageName}
-              className="space-y-3"
-            >
-              <h3 className="text-muted-foreground text-sm font-semibold">
-                Stage: {stageName}
-              </h3>
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                {stageGroups.map((group) => (
-                  <Card
-                    key={group.id}
-                    className="w-full min-w-[320px] transition-shadow hover:shadow-md sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
-                    style={getGroupColorStyle(group.color)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <CardTitle className="text-base">
-                              {group.name}
-                            </CardTitle>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              asChild
-                              className="h-8 w-8 p-0"
-                              title="View group details"
-                            >
-                              <Link
-                                href={`/admin/tournaments/groups/${group.id}`}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(group)}
-                              className="h-8 w-8 p-0"
-                              title="Edit group"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(group)}
-                              disabled={
-                                deletionPending && deletingGroupId === group.id
-                              }
-                              className="text-destructive hover:text-destructive h-8 w-8 p-0"
-                              title="Delete group"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {(group.matchMode?.mode ?? defaultMatchMode) ? (
-                            <Badge variant="outline">
-                              {getMatchModeName(group.matchMode)}
-                            </Badge>
-                          ) : null}
-                          <Badge
-                            variant={
-                              group.isTeamBased ? "default" : "secondary"
-                            }
-                          >
-                            {group.isTeamBased ? "Team Based" : "Individual"}
-                          </Badge>
-                          {group.isMixed && (
-                            <Badge
-                              variant="default"
-                              className="text-xs"
-                            >
-                              Mixed
-                            </Badge>
-                          )}
-                        </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            {(groups ?? []).map((group) => (
+              <Card
+                key={group.id}
+                className="w-full min-w-[320px] transition-shadow hover:shadow-md sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
+                style={getGroupColorStyle(group.color)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base">
+                          {group.name}
+                        </CardTitle>
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Description */}
-                      {group.description && (
-                        <div className="space-y-1">
-                          <p className="text-sm">{group.description}</p>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="h-8 w-8 p-0"
+                          title="View group details"
+                        >
+                          <Link href={`/admin/tournaments/groups/${group.id}`}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(group)}
+                          className="h-8 w-8 p-0"
+                          title="Edit group"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(group)}
+                          disabled={
+                            deletionPending && deletingGroupId === group.id
+                          }
+                          className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                          title="Delete group"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {group.matchMode ? (
+                        <Badge variant="outline">
+                          {getMatchModeName(group.matchMode)}
+                        </Badge>
+                      ) : null}
+                      <Badge
+                        variant={group.isTeamBased ? "default" : "secondary"}
+                      >
+                        {group.isTeamBased ? "Team Based" : "Individual"}
+                      </Badge>
+                      {group.isMixed && (
+                        <Badge
+                          variant="default"
+                          className="text-xs"
+                        >
+                          Mixed
+                        </Badge>
                       )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Description */}
+                  {group.description && (
+                    <div className="space-y-1">
+                      <p className="text-sm">{group.description}</p>
+                    </div>
+                  )}
 
-                      {/* Group Details */}
-                      <div className="space-y-2 border-t pt-3">
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                          <div className="flex items-center gap-1">
-                            <Users className="text-muted-foreground h-3 w-3" />
-                            <span className="text-muted-foreground">
-                              Participants:
-                            </span>
-                            <span className="font-medium">
-                              {group.TournamentGroupParticipant?.length ?? 0}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="text-muted-foreground h-3 w-3" />
-                            <span className="text-muted-foreground">
-                              Matches:
-                            </span>
-                            <span className="font-medium">
-                              {group.matches?.length ?? 0}
-                            </span>
-                          </div>
-                        </div>
+                  {/* Group Details */}
+                  <div className="space-y-2 border-t pt-3">
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <Users className="text-muted-foreground h-3 w-3" />
+                        <span className="text-muted-foreground">
+                          Participants:
+                        </span>
+                        <span className="font-medium">
+                          {group.TournamentGroupParticipant?.length ?? 0}
+                        </span>
                       </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="text-muted-foreground h-3 w-3" />
+                        <span className="text-muted-foreground">Matches:</span>
+                        <span className="font-medium">
+                          {group.matches?.length ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                      {/* Group Info */}
-                      <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
-                        <div>Display Order: {group.displayOrder}</div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          ))}
+                  {/* Group Info */}
+                  <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
+                    <div>Display Order: {group.displayOrder}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 
@@ -399,7 +356,6 @@ export function TournamentGroupList({
             isPending={creationPending || updatePending}
             tournamentId={tournamentId}
             defaultIsTeamBased={defaultIsTeamBased}
-            defaultMatchModeId={defaultMatchModeId}
           />
         </DrawerContent>
       </Drawer>

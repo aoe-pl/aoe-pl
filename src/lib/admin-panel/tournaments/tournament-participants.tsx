@@ -18,7 +18,7 @@ import type {
   TournamentGroup,
   TournamentGroupParticipant,
   TournamentParticipant,
-  TournamentStage,
+  Tournament,
 } from "@prisma/client";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
@@ -30,7 +30,7 @@ type TournamentParticipantsProps = {
 type ParticipantWithGroups = TournamentParticipant & {
   TournamentGroupParticipant: (TournamentGroupParticipant & {
     tournamentGroup: TournamentGroup & {
-      stage: TournamentStage;
+      tournament: Tournament;
     };
   })[];
 };

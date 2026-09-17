@@ -1,22 +1,6 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,8 +24,9 @@ import {
   type MatchComponentProps,
   type MatchType,
 } from "@g-loot/react-tournament-brackets/dist/esm";
-import { RotateCcw, Shuffle, TrendingUp, Trophy, X } from "lucide-react";
+import { Trophy, X } from "lucide-react";
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -57,11 +42,9 @@ import type { ExtendedTournamentMatch } from "./groups-detail/match";
 import type { TournamentMatchFormSchema } from "./tournament";
 import { TournamentMatchForm } from "./tournament-match-form";
 
-const BOX_WIDTH = 200;
-const BOX_HEIGHT = 65;
-const SPACE_BETWEEN_ROWS = 30;
-// Library default (not overridden in options below).
-const CANVAS_PADDING = 25;
+const boxHeight = 65;
+const spaceBetweenRows = 30;
+const canvasPadding = 25;
 
 type BracketParticipant = {
   id: string;
@@ -99,11 +82,11 @@ function participantLabel(p: BracketParticipant): string {
 function DoubleElimLabels({ upperHeight }: { upperHeight: number }) {
   return (
     <>
-      <div className="absolute top-0.5 left-1 z-10 rounded-md border border-primary/30 bg-background/90 px-2 py-0 text-[10px] font-semibold tracking-wide text-primary uppercase backdrop-blur-sm">
+      <div className="border-primary/30 bg-background/90 text-primary absolute top-0.5 left-1 z-10 rounded-md border px-2 py-0 text-[10px] font-semibold tracking-wide uppercase backdrop-blur-sm">
         Winner Bracket
       </div>
       <div
-        className="absolute left-1 z-10 rounded-md border border-rose-300/40 bg-background/90 px-2 py-0 text-[10px] font-semibold tracking-wide text-rose-600 uppercase backdrop-blur-sm dark:text-rose-400"
+        className="bg-background/90 absolute left-1 z-10 rounded-md border border-rose-300/40 px-2 py-0 text-[10px] font-semibold tracking-wide text-rose-600 uppercase backdrop-blur-sm dark:text-rose-400"
         style={{ top: upperHeight + 2 }}
       >
         Loser Bracket
@@ -129,12 +112,6 @@ function MatchCard({ match }: MatchComponentProps) {
       )}
       onClick={() => data.matchId && data.onSelect(data.matchId)}
     >
-      {data.isGrandFinal && (
-        <div className="flex items-center gap-1 border-b border-amber-400/70 bg-amber-400/15 px-2 py-1 text-[10px] font-medium tracking-wide text-amber-600 uppercase dark:text-amber-400">
-          <Trophy className="h-3 w-3" />
-          Grand Final
-        </div>
-      )}
       <div className="divide-y">
         {participants.length === 0 && (
           <div className="text-muted-foreground px-2 py-2.5 text-xs italic">
@@ -175,11 +152,17 @@ function MatchCard({ match }: MatchComponentProps) {
 }
 
 function useContainerSize<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
   const [size, setSize] = useState({ width: 800, height: 500 });
+  const observerRef = useRef<ResizeObserver | null>(null);
 
-  useEffect(() => {
-    const el = ref.current;
+  // Callback ref: attaches whenever the container element actually mounts.
+  // A mount-only effect is not enough - the container only renders after the
+  // bracket query finishes loading, so on first show the ref is still null
+  // when the effect runs and the observer would never attach (bracket would
+  // render at the default size instead of filling the panel).
+  const containerRef = useCallback((el: T | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
     if (!el) return;
 
     const observer = new ResizeObserver((entries) => {
@@ -191,10 +174,12 @@ function useContainerSize<T extends HTMLElement>() {
       });
     });
     observer.observe(el);
-    return () => observer.disconnect();
+    observerRef.current = observer;
   }, []);
 
-  return { ref, size };
+  useEffect(() => () => observerRef.current?.disconnect(), []);
+
+  return { ref: containerRef, size };
 }
 
 function useMediaQuery(query: string) {
@@ -297,9 +282,6 @@ export function TournamentBracketGraph({
   } = api.tournaments.brackets.get.useQuery({ id: bracketId });
 
   const [editingMatchId, setEditingMatchId] = useState<string | null>(null);
-  const [confirmAction, setConfirmAction] = useState<
-    "RATING" | "RANDOM" | "CLEAR" | null
-  >(null);
   const { ref: containerRef, size } = useContainerSize<HTMLDivElement>();
   const isMobile = useMediaQuery("(max-width: 767px)");
 
@@ -315,8 +297,8 @@ export function TournamentBracketGraph({
       },
     });
 
-  const bracketTournamentId = bracket?.stage?.tournament?.id;
-  const isTeamBased = bracket?.stage?.tournament?.isTeamBased ?? false;
+  const bracketTournamentId = bracket?.tournament?.id;
+  const isTeamBased = bracket?.tournament?.isTeamBased ?? false;
 
   const { data: allocated } =
     api.tournaments.matches.allocatedParticipants.useQuery(
@@ -340,28 +322,6 @@ export function TournamentBracketGraph({
       onSuccess: () => {
         void refetch();
         toast.success("Participant removed from match");
-      },
-      onError: (error) => {
-        toast.error(<ErrorToast message={error.message} />);
-      },
-    });
-
-  const { mutate: allocate, isPending: allocatePending } =
-    api.tournaments.brackets.allocate.useMutation({
-      onSuccess: () => {
-        void refetch();
-        toast.success("Bracket allocated");
-      },
-      onError: (error) => {
-        toast.error(<ErrorToast message={error.message} />);
-      },
-    });
-
-  const { mutate: clearBracket, isPending: clearPending } =
-    api.tournaments.brackets.clear.useMutation({
-      onSuccess: () => {
-        void refetch();
-        toast.success("Bracket cleared");
       },
       onError: (error) => {
         toast.error(<ErrorToast message={error.message} />);
@@ -526,34 +486,12 @@ export function TournamentBracketGraph({
     return <p className="text-muted-foreground text-sm">Bracket not found.</p>;
   }
 
-  const hasRoster =
-    (bracket.participants?.length ?? 0) > 0 ||
-    bracket.bracketNodes.some(
-      (n) =>
-        n.isWinnerBracket &&
-        n.round === 1 &&
-        (n.match?.TournamentMatchParticipant.length ?? 0) > 0,
-    );
-
-  const hasResults = bracket.bracketNodes.some((n) =>
-    n.match?.TournamentMatchParticipant.some((p) => p.isWinner),
-  );
-
-  // Allocation/clear wipe results - confirm when anything would be lost.
-  const runAction = (action: "RATING" | "RANDOM" | "CLEAR") => {
-    if (action === "CLEAR" || hasResults) {
-      setConfirmAction(action);
-      return;
-    }
-    allocate({ id: bracketId, mode: action });
-  };
-
   const options = {
     style: {
-      width: BOX_WIDTH,
-      boxHeight: BOX_HEIGHT,
+      width: 200,
+      boxHeight: 65,
       spaceBetweenColumns: 30,
-      spaceBetweenRows: SPACE_BETWEEN_ROWS,
+      spaceBetweenRows: spaceBetweenRows,
       roundHeader: { isShown: false },
     },
   };
@@ -562,8 +500,8 @@ export function TournamentBracketGraph({
   // the loser bracket is drawn offset by this height, which is where the
   // "Loser Bracket" region label sits.
   const upperHeight = isDoubleElim
-    ? (bracket.bracketSize / 2) * (BOX_HEIGHT + SPACE_BETWEEN_ROWS) +
-      CANVAS_PADDING * 2
+    ? (bracket.bracketSize / 2) * (boxHeight + spaceBetweenRows) +
+      canvasPadding * 2
     : 0;
 
   const svgViewerWrapper: NonNullable<CommonTreeProps["svgWrapper"]> = ({
@@ -614,200 +552,137 @@ export function TournamentBracketGraph({
 
   return (
     <>
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={() => runAction("RATING")}
-          disabled={!hasRoster || allocatePending || clearPending}
-          title="Assign roster to round 1 by rating"
-        >
-          <TrendingUp className="h-4 w-4" />
-          Auto-allocate by rating
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={() => runAction("RANDOM")}
-          disabled={!hasRoster || allocatePending || clearPending}
-          title="Shuffle roster into round 1"
-        >
-          <Shuffle className="h-4 w-4" />
-          Random
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-destructive hover:text-destructive"
-          onClick={() => runAction("CLEAR")}
-          disabled={!hasRoster || allocatePending || clearPending}
-          title="Reset bracket to round 1 (keeps roster)"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Clear
-        </Button>
-      </div>
       <div
         ref={containerRef}
-      className="bg-muted/20 relative min-h-[70vh] w-full overflow-hidden rounded-lg border"
-    >
-      {isMobile ? (
-        bracketElement
-      ) : (
-        <FitBracket size={size}>{bracketElement}</FitBracket>
-      )}
-
-      {!readOnly && (
-        <Drawer
-          open={!!editingMatchId}
-          onOpenChange={(open) => {
-            if (!open) setEditingMatchId(null);
-          }}
-        >
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle>Edit Bracket Match</DrawerTitle>
-              <DrawerDescription>
-                Update the match result. Winner advancement to the next round is
-                automatic.
-              </DrawerDescription>
-            </DrawerHeader>
-
-            {editingMatch &&
-              !editingMatch.TournamentMatchParticipant.some(
-                (p) => p.isWinner,
-              ) && (
-                <div className="border-b px-4 py-4">
-                  <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
-                    Match participants
-                  </p>
-                  <div className="space-y-1.5">
-                    {editingMatch.TournamentMatchParticipant.length === 0 && (
-                      <p className="text-muted-foreground text-sm italic">
-                        No participants yet - add one below.
-                      </p>
-                    )}
-                    {editingMatch.TournamentMatchParticipant.map((p) => (
-                      <div
-                        key={p.id}
-                        className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm"
-                      >
-                        <span className="min-w-0 truncate">
-                          {p.participant?.nickname ??
-                            p.team?.name ??
-                            "Unknown"}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 shrink-0 p-0 text-muted-foreground hover:text-destructive"
-                          title="Remove participant"
-                          onClick={() =>
-                            removeMatchParticipant({
-                              matchId: editingMatch.id,
-                              participantId: p.participantId ?? undefined,
-                              teamId: p.teamId ?? undefined,
-                            })
-                          }
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                  {editingMatch.TournamentMatchParticipant.length < 2 && (
-                    <div className="mt-3">
-                      <Select
-                        key={editingMatch.TournamentMatchParticipant.length}
-                        onValueChange={(id) => {
-                          const option = addOptions.find((o) => o.id === id);
-                          addMatchParticipant({
-                            matchId: editingMatch.id,
-                            participantId: option && !option.isTeam ? id : undefined,
-                            teamId: option?.isTeam ? id : undefined,
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              isTeamBased
-                                ? "Select team to add..."
-                                : "Select participant to add..."
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {addOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
-              )}
-
-            <TournamentMatchForm
-              initialData={editingMatch}
-              onSubmit={handleSubmit}
-              onCancel={() => setEditingMatchId(null)}
-              isPending={updatePending}
-            />
-          </DrawerContent>
-        </Drawer>
-      )}
-      </div>
-
-      <AlertDialog
-        open={confirmAction !== null}
-        onOpenChange={(open) => {
-          if (!open) setConfirmAction(null);
-        }}
+        className="bg-muted/20 relative min-h-[70vh] w-full overflow-hidden rounded-lg border"
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction === "CLEAR"
-                ? "Clear bracket?"
-                : "Re-allocate bracket?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirmAction === "CLEAR"
-                ? "This resets every match back to round 1: scores, winners and games are removed. The participant roster stays intact and can be re-assigned."
-                : "This resets every match and re-assigns the roster to round 1" +
-                  (confirmAction === "RATING"
-                    ? " by rating."
-                    : " randomly.") +
-                  " Current scores and results will be removed."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (confirmAction === "CLEAR") {
-                  clearBracket({ id: bracketId });
-                } else if (confirmAction) {
-                  allocate({ id: bracketId, mode: confirmAction });
+        {isMobile ? (
+          bracketElement
+        ) : (
+          <FitBracket size={size}>{bracketElement}</FitBracket>
+        )}
+
+        {!readOnly && (
+          <Drawer
+            open={!!editingMatchId}
+            onOpenChange={(open) => {
+              if (!open) setEditingMatchId(null);
+            }}
+          >
+            <DrawerContent>
+              <TournamentMatchForm
+                initialData={editingMatch}
+                onSubmit={handleSubmit}
+                onCancel={() => setEditingMatchId(null)}
+                isPending={updatePending}
+                header={
+                  <>
+                    <div className="space-y-1 pt-2 pb-2">
+                      <h2 className="text-lg font-semibold">
+                        Edit Bracket Match
+                      </h2>
+                      <p className="text-muted-foreground text-sm">
+                        Update the match result. Winner advancement to the next
+                        round is automatic.
+                      </p>
+                    </div>
+                    {editingMatch &&
+                      !editingMatch.TournamentMatchParticipant.some(
+                        (p) => p.isWinner,
+                      ) && (
+                        <div className="mb-3 border-b pb-3">
+                          <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+                            Match participants
+                          </p>
+                          <div className="space-y-1.5">
+                            {editingMatch.TournamentMatchParticipant.length ===
+                              0 && (
+                              <p className="text-muted-foreground text-sm italic">
+                                No participants yet - add one below.
+                              </p>
+                            )}
+                            {editingMatch.TournamentMatchParticipant.map(
+                              (p) => (
+                                <div
+                                  key={p.id}
+                                  className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm"
+                                >
+                                  <span className="min-w-0 truncate">
+                                    {p.participant?.nickname ??
+                                      p.team?.name ??
+                                      "Unknown"}
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-muted-foreground hover:text-destructive h-6 w-6 shrink-0 p-0"
+                                    title="Remove participant"
+                                    onClick={() =>
+                                      removeMatchParticipant({
+                                        matchId: editingMatch.id,
+                                        participantId:
+                                          p.participantId ?? undefined,
+                                        teamId: p.teamId ?? undefined,
+                                      })
+                                    }
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                          {editingMatch.TournamentMatchParticipant.length <
+                            2 && (
+                            <div className="mt-3">
+                              <Select
+                                key={
+                                  editingMatch.TournamentMatchParticipant.length
+                                }
+                                onValueChange={(id) => {
+                                  const option = addOptions.find(
+                                    (o) => o.id === id,
+                                  );
+                                  addMatchParticipant({
+                                    matchId: editingMatch.id,
+                                    participantId:
+                                      option && !option.isTeam ? id : undefined,
+                                    teamId: option?.isTeam ? id : undefined,
+                                  });
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue
+                                    placeholder={
+                                      isTeamBased
+                                        ? "Select team to add..."
+                                        : "Select participant to add..."
+                                    }
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {addOptions.map((option) => (
+                                    <SelectItem
+                                      key={option.id}
+                                      value={option.id}
+                                    >
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                  </>
                 }
-                setConfirmAction(null);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {confirmAction === "CLEAR" ? "Clear" : "Allocate"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              />
+            </DrawerContent>
+          </Drawer>
+        )}
+      </div>
     </>
   );
 }

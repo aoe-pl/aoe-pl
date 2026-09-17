@@ -36,6 +36,12 @@ type BracketEntrantsSelectorProps = {
   onChange: (value: string[]) => void;
   options: BracketEntrantOption[];
   isLoading?: boolean;
+  /**
+   * Entrant ids that may be removed from the selection. Entrants not in
+   * this list are locked (e.g. already placed in a bracket match).
+   * Undefined = all removable.
+   */
+  removableIds?: string[];
 };
 
 /**
@@ -48,8 +54,12 @@ export function BracketEntrantsSelector({
   onChange,
   options,
   isLoading = false,
+  removableIds,
 }: BracketEntrantsSelectorProps) {
   const [open, setOpen] = useState(false);
+
+  const canRemove = (id: string) =>
+    removableIds === undefined || removableIds.includes(id);
 
   const optionsById = new Map(options.map((o) => [o.id, o]));
   const selected = value
@@ -121,6 +131,9 @@ export function BracketEntrantsSelector({
                         key={option.id}
                         value={option.label}
                         onSelect={() => {
+                          if (value.includes(option.id) && !canRemove(option.id)) {
+                            return;
+                          }
                           const next = value.includes(option.id)
                             ? value.filter((id) => id !== option.id)
                             : [...value, option.id];
@@ -165,9 +178,6 @@ export function BracketEntrantsSelector({
               key={entrant.id}
               className="bg-muted/40 flex items-center gap-2 rounded-md border px-2 py-1 text-sm"
             >
-              <span className="text-muted-foreground w-8 shrink-0 text-xs">
-                Seed {index + 1}
-              </span>
               <span className="flex-1 truncate">{entrant.label}</span>
               <Button
                 type="button"
@@ -189,15 +199,24 @@ export function BracketEntrantsSelector({
               >
                 <ChevronDown className="h-3 w-3" />
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-destructive h-6 w-6"
-                onClick={() => remove(entrant.id)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
+              {canRemove(entrant.id) ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive h-6 w-6"
+                  onClick={() => remove(entrant.id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              ) : (
+                <span
+                  className="text-muted-foreground/60 shrink-0 text-[10px]"
+                  title="Placed in a match - cannot be removed"
+                >
+                  in match
+                </span>
+              )}
             </li>
           ))}
         </ol>

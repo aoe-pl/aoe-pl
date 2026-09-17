@@ -197,7 +197,8 @@ model Tournament {
   urlKey                String
   registrationMode      RegistrationMode
   tournamentSeriesId    String
-  matchModeId           String
+  matchModeId           String?
+  format                TournamentFormat
   description           String?
   isTeamBased           Boolean                 @default(false)
   startDate             DateTime
@@ -209,11 +210,12 @@ model Tournament {
   isVisible             Boolean
   archived              Boolean                 @default(false)
   name                  String
-  matchMode             TournamentMatchMode     @relation(fields: [matchModeId], references: [id])
+  matchMode             TournamentMatchMode?     @relation(fields: [matchModeId], references: [id])
   tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])
   TournamentParticipant    TournamentParticipant[]
   sections                 TournamentSection[]
-  stages                   TournamentStage[]
+  groups                   TournamentGroup[]
+  brackets                 TournamentBracket[]
   teams                    TournamentTeam[]
   registrationFields       TournamentRegistrationField[]
 
@@ -261,24 +263,9 @@ model TournamentTeam {
   @@unique([tournamentId, name])
 }
 
-model TournamentStage {
-  id           String              @id @default(cuid())
-  tournamentId String
-  name         String
-  type         TournamentStageType
-  isActive     Boolean             @default(false)
-  description  String?
-  bracketType  BracketType?
-  isSeeded     Boolean             @default(true)
-  brackets     TournamentBracket[]
-  groups       TournamentGroup[]
-  tournament   Tournament          @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  isVisible    Boolean             @default(false)
-}
-
 model TournamentBracket {
   id              String                  @id @default(cuid())
-  stageId         String
+  tournamentId    String
   name            String
   displayOrder    Int
   isActive        Boolean                 @default(false)
@@ -289,7 +276,9 @@ model TournamentBracket {
   bracketSize     Int
   isSeeded        Boolean                 @default(true)
   isManualSeeding Boolean                 @default(false)
-  stage           TournamentStage         @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  /** Per-round BestOf config, keyed like "wb:1", "lb:1", "wb:4" (grand final). */
+  roundBestOfs    Json?
+  tournament      Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   bracketNodes    TournamentBracketNode[]
   participants    TournamentBracketParticipant[]
 }
@@ -314,7 +303,7 @@ model TournamentBracketNode {
 
 model TournamentGroup {
   id                         String                       @id @default(cuid())
-  stageId                    String
+  tournamentId               String
   displayOrder               Int
   name                       String
   description                String?
@@ -323,11 +312,11 @@ model TournamentGroup {
   isMixed                    Boolean?
   color                      String?
   matchMode                  TournamentMatchMode?         @relation(fields: [matchModeId], references: [id])
-  stage                      TournamentStage              @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  tournament                 Tournament                   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
   matches                    TournamentMatch[]            @relation("GroupMatches")
 
-  @@unique([stageId, name])
+  @@unique([tournamentId, name])
 }
 
 model TournamentBracketParticipant {
@@ -415,6 +404,8 @@ model TournamentMatch {
   createdBy                  String?
   createdAt                  DateTime                     @default(now())
   tournamentMatchModeId      String?
+  /** Best-of series length for this match (bracket matches only). */
+  bestOf                     Int?
   Game                       Game[]
   bracketNodes               TournamentBracketNode[]
   group                      TournamentGroup?             @relation("GroupMatches", fields: [groupId], references: [id], onDelete: Cascade)
@@ -529,7 +520,7 @@ enum TeamStatus {
   WITHDRAWN
 }
 
-enum TournamentStageType {
+enum TournamentFormat {
   GROUP
   BRACKET
 }

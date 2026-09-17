@@ -26,13 +26,9 @@ const upcomingMatchesInclude = {
   group: {
     include: {
       matchMode: true,
-      stage: {
+      tournament: {
         include: {
-          tournament: {
-            include: {
-              matchMode: true,
-            },
-          },
+          matchMode: true,
         },
       },
     },
@@ -100,11 +96,9 @@ export const tournamentMatchRepository = {
           in: ["PENDING", "SCHEDULED"],
         },
         group: {
-          stage: {
-            tournament: {
-              status: "ACTIVE",
-              isVisible: true,
-            },
+          tournament: {
+            status: "ACTIVE",
+            isVisible: true,
           },
         },
       },
@@ -128,11 +122,9 @@ export const tournamentMatchRepository = {
           in: ["PENDING", "SCHEDULED"],
         },
         group: {
-          stage: {
-            tournament: {
-              status: "ACTIVE",
-              isVisible: true,
-            },
+          tournament: {
+            status: "ACTIVE",
+            isVisible: true,
           },
         },
       },
@@ -204,11 +196,7 @@ export const tournamentMatchRepository = {
         },
         group: {
           include: {
-            stage: {
-              include: {
-                tournament: true,
-              },
-            },
+            tournament: true,
           },
         },
         TournamentMatchMode: true,
@@ -253,11 +241,7 @@ export const tournamentMatchRepository = {
         },
         group: {
           include: {
-            stage: {
-              include: {
-                tournament: true,
-              },
-            },
+            tournament: true,
           },
         },
         TournamentMatchMode: true,
@@ -523,7 +507,7 @@ export const tournamentMatchRepository = {
     const matches = await db.tournamentMatch.findMany({
       where: {
         bracketNodes: {
-          some: { bracket: { stage: { tournamentId } } },
+          some: { bracket: { tournamentId } },
         },
       },
       select: {
@@ -821,9 +805,7 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.findMany({
       where: {
         group: {
-          stage: {
-            tournamentId,
-          },
+          tournamentId,
         },
       },
       include: {
@@ -845,9 +827,7 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.findMany({
       where: {
         group: {
-          stage: {
-            tournamentId,
-          },
+          tournamentId,
         },
       },
       include: {

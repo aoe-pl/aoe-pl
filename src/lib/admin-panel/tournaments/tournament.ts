@@ -1,10 +1,9 @@
 import {
   RegistrationMode,
-  TournamentStageType,
+  TournamentFormat,
   TournamentStatus,
   BracketType,
   TournamentMatchModeType,
-  type TournamentStage,
   type Tournament,
   type TournamentParticipant,
   type TournamentGroup,
@@ -32,8 +31,8 @@ const tournamentStatusesLabels: Record<TournamentStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
-const stageTypesLabels: Record<TournamentStageType, string> = {
-  GROUP: "Group Stage",
+const formatLabels: Record<TournamentFormat, string> = {
+  GROUP: "Group (league)",
   BRACKET: "Bracket",
 };
 
@@ -42,8 +41,8 @@ const bracketTypesLabels: Record<BracketType, string> = {
   DOUBLE_ELIMINATION: "Double Elimination",
 };
 
-const getStageTypeLabel = (type: TournamentStageType) => {
-  return stageTypesLabels[type];
+const getFormatLabel = (format: TournamentFormat) => {
+  return formatLabels[format];
 };
 
 const getBracketTypeLabel = (type: BracketType) => {
@@ -82,10 +81,8 @@ const tournamentFormSchema = z
     tournamentSeriesId: z
       .string()
       .min(1, "admin.tournaments.form.validation.tournament_series_required"),
-    matchModeId: z
-      .string()
-      .min(1, "admin.tournaments.form.validation.match_mode_required"),
     registrationMode: z.nativeEnum(RegistrationMode),
+    format: z.nativeEnum(TournamentFormat),
     description: z.string().optional(),
     isTeamBased: z.boolean(),
     startDate: z.date({
@@ -123,17 +120,69 @@ const tournamentFormSchema = z
     },
   );
 
-const tournamentStageFormSchema = z.object({
-  name: z.string().min(1, "Stage name is required"),
+const tournamentGroupFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  type: z.nativeEnum(TournamentStageType),
-  isActive: z.boolean().optional(),
-  isVisible: z.boolean().optional(),
-  bracketType: z.nativeEnum(BracketType).optional(),
-  isSeeded: z.boolean().optional(),
+  matchModeId: z.string().min(1, "Match mode is required"),
+  displayOrder: z.number().int().min(0),
+  isTeamBased: z.boolean().optional(),
+  isMixed: z.boolean().optional(),
+  color: z.string().optional(),
+  participantIds: z.array(z.string()).optional(),
 });
 
-type TournamentStageFormSchema = z.infer<typeof tournamentStageFormSchema>;
+const tournamentBracketFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  displayOrder: z.number().int().min(0).optional(),
+  bracketType: z.nativeEnum(BracketType),
+  bracketSize: z.number().int().positive(),
+  isManualSeeding: z.boolean().optional(),
+  roundBestOfs: z
+    .object({
+      standard: z.string().optional(),
+      semifinal: z.string().optional(),
+      final: z.string().optional(),
+    })
+    .optional(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+  entrantIds: z.array(z.string()).optional(),
+});
+
+type TournamentBracketFormSchema = z.infer<typeof tournamentBracketFormSchema>;
+
+const tournamentMatchFormSchema = z.object({
+  groupId: z.string().optional(),
+  matchDate: z.date().optional(),
+  civDraftKey: z.string().optional(),
+  mapDraftKey: z.string().optional(),
+  status: z.nativeEnum(MatchStatus).optional(),
+  comment: z.string().optional(),
+  adminComment: z.string().optional(),
+  participantIds: z.array(z.string()).optional(),
+  teamIds: z.array(z.string()).optional(),
+  participantScores: z
+    .array(
+      z.object({
+        participantId: z.string(),
+        wonScore: z.number().int().min(0),
+        lostScore: z.number().int().min(0),
+        isWinner: z.boolean(),
+      }),
+    )
+    .optional(),
+  teamScores: z
+    .array(
+      z.object({
+        teamId: z.string(),
+        wonScore: z.number().int().min(0),
+        lostScore: z.number().int().min(0),
+        isWinner: z.boolean(),
+      }),
+    )
+    .optional(),
+});
 
 const registrationModes: { value: RegistrationMode; label: string }[] = [
   {
@@ -188,66 +237,6 @@ const matchStatuses: { value: MatchStatus; label: string }[] = [
   },
 ];
 
-const tournamentGroupFormSchema = z.object({
-  stageId: z.string().min(1, "Stage is required"),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  matchModeId: z.string().optional(),
-  displayOrder: z.number().int().min(0),
-  isTeamBased: z.boolean().optional(),
-  isMixed: z.boolean().optional(),
-  color: z.string().optional(),
-  participantIds: z.array(z.string()).optional(),
-});
-
-const tournamentBracketFormSchema = z.object({
-  stageId: z.string().min(1, "Stage is required"),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  displayOrder: z.number().int().min(0).optional(),
-  bracketType: z.nativeEnum(BracketType),
-  bracketSize: z.number().int().positive(),
-  isSeeded: z.boolean(),
-  isManualSeeding: z.boolean().optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
-  entrantIds: z.array(z.string()).optional(),
-});
-
-type TournamentBracketFormSchema = z.infer<typeof tournamentBracketFormSchema>;
-
-const tournamentMatchFormSchema = z.object({
-  groupId: z.string().optional(),
-  matchDate: z.date().optional(),
-  civDraftKey: z.string().optional(),
-  mapDraftKey: z.string().optional(),
-  status: z.nativeEnum(MatchStatus).optional(),
-  comment: z.string().optional(),
-  adminComment: z.string().optional(),
-  participantIds: z.array(z.string()).optional(),
-  teamIds: z.array(z.string()).optional(),
-  participantScores: z
-    .array(
-      z.object({
-        participantId: z.string(),
-        wonScore: z.number().int().min(0),
-        lostScore: z.number().int().min(0),
-        isWinner: z.boolean(),
-      }),
-    )
-    .optional(),
-  teamScores: z
-    .array(
-      z.object({
-        teamId: z.string(),
-        wonScore: z.number().int().min(0),
-        lostScore: z.number().int().min(0),
-        isWinner: z.boolean(),
-      }),
-    )
-    .optional(),
-});
-
 type TournamentGroupFormSchema = z.infer<typeof tournamentGroupFormSchema>;
 type TournamentMatchFormSchema = z.infer<typeof tournamentMatchFormSchema>;
 
@@ -259,20 +248,19 @@ type TournamentGroupWithParticipants = TournamentGroup & {
 };
 
 export {
-  tournamentStageFormSchema,
   tournamentMatchFormSchema,
   registrationModesLabels,
   tournamentStatusesLabels,
   matchStatusesLabels,
-  stageTypesLabels,
+  formatLabels,
   bracketTypesLabels,
   TournamentMatchModeType,
+  TournamentFormat,
   TournamentStatus,
-  TournamentStageType,
   BracketType,
   RegistrationMode,
   MatchStatus,
-  getStageTypeLabel,
+  getFormatLabel,
   getBracketTypeLabel,
   getTournamentStatusLabel,
   getMatchStatusLabel,
@@ -286,9 +274,7 @@ export {
   type TournamentGroupFormSchema,
   type TournamentBracketFormSchema,
   type TournamentMatchFormSchema,
-  type TournamentStageFormSchema,
   type Tournament,
-  type TournamentStage,
   type TournamentParticipant,
   type TournamentGroup,
   type TournamentGroupWithParticipants,

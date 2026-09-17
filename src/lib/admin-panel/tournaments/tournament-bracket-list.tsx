@@ -34,6 +34,7 @@ import {
   type TournamentBracketEditData,
 } from "./tournament-bracket-form";
 import { TournamentBracketGraph } from "./tournament-bracket-graph";
+import { TournamentBracketControls } from "./tournament-bracket-controls";
 
 type TournamentBracketListProps = {
   tournamentId: string;
@@ -139,7 +140,23 @@ export function TournamentBracketList({
       n.match?.TournamentMatchParticipant.some((p) => p.isWinner),
     );
 
-    setEditingBracket({ ...detail, entrantIds, hasResults });
+    const allocatedEntrantIds = Array.from(
+      new Set(
+        detail.bracketNodes.flatMap(
+          (n) =>
+            n.match?.TournamentMatchParticipant.map(
+              (p) => p.participantId ?? p.teamId ?? "",
+            ).filter((id) => id !== "") ?? [],
+        ),
+      ),
+    );
+
+    setEditingBracket({
+      ...detail,
+      entrantIds,
+      hasResults,
+      allocatedEntrantIds,
+    });
     setIsDrawerOpen(true);
   };
 
@@ -163,7 +180,7 @@ export function TournamentBracketList({
           displayOrder: data.displayOrder,
           bracketType: data.bracketType,
           bracketSize: data.bracketSize,
-          isSeeded: data.isSeeded,
+          roundBestOfs: data.roundBestOfs,
           entrantIds: data.entrantIds,
         },
       });
@@ -171,14 +188,14 @@ export function TournamentBracketList({
     }
 
     createBracket({
-      stageId: data.stageId,
+      tournamentId,
       data: {
         name: data.name,
         description: data.description,
         displayOrder: data.displayOrder,
         bracketType: data.bracketType,
         bracketSize: data.bracketSize,
-        isSeeded: data.isSeeded,
+        roundBestOfs: data.roundBestOfs,
         entrantIds: data.entrantIds ?? [],
       },
     });
@@ -218,7 +235,7 @@ export function TournamentBracketList({
                       {bracket.bracketSize} slots
                     </Badge>
                     <span className="text-muted-foreground text-xs">
-                      Stage: {bracket.stage.name}
+                      {bracket.bracketType}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -267,6 +284,7 @@ export function TournamentBracketList({
               </CardHeader>
               {expandedBracketId === bracket.id && (
                 <CardContent>
+                  <TournamentBracketControls bracketId={bracket.id} />
                   <TournamentBracketGraph bracketId={bracket.id} />
                 </CardContent>
               )}

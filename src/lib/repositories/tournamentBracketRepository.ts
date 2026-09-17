@@ -13,14 +13,73 @@ import type { BracketType, Prisma } from "@prisma/client";
 
 type TxClient = Prisma.TransactionClient;
 
+export type RoundBestOfs = {
+  standard?: string;
+  semifinal?: string;
+  final?: string;
+};
+
+/**
+ * Maps a bracket node to its BestOf tier. The final is the champion match
+ * (grand final node in double elim). Semifinals are the rounds feeding it:
+ * the WB final + LB final in double elim, the second-to-last WB round in
+ * single elim. Everything else uses the "standard" tier.
+ */
+function roundTierFor(
+  isWinnerBracket: boolean,
+  round: number,
+  wbRounds: number,
+  lbRounds: number,
+): "standard" | "semifinal" | "final" {
+  if (isWinnerBracket) {
+    if (lbRounds > 0) {
+      if (round === wbRounds + 1) return "final"; // grand final
+      if (round === wbRounds) return "semifinal"; // WB final
+    } else {
+      if (round === wbRounds) return "final";
+      if (round === wbRounds - 1 && wbRounds >= 3) return "semifinal";
+    }
+  } else if (round === lbRounds) {
+    return "semifinal"; // LB final
+  }
+
+  return "standard";
+}
+
+/**
+ * Resolves a round's match mode from the tier config and applies it to a
+ * match: tournamentMatchModeId is always set; bestOf mirrors the game count
+ * for BEST_OF modes (null for PLAY_ALL).
+ */
+async function applyRoundMode(
+  tx: TxClient,
+  matchId: string,
+  roundBestOfs: RoundBestOfs | undefined,
+  tier: "standard" | "semifinal" | "final",
+  modeById: Map<string, { id: string; mode: string; gameCount: number }>,
+) {
+  const modeId = roundBestOfs?.[tier];
+  const mode = modeId ? modeById.get(modeId) : undefined;
+
+  await tx.tournamentMatch.update({
+    where: { id: matchId },
+    data: {
+      tournamentMatchModeId: mode?.id ?? null,
+      bestOf: mode?.mode === "BEST_OF" ? mode.gameCount : null,
+    },
+  });
+}
+
 export type TournamentBracketCreateData = {
   name: string;
   description?: string;
   displayOrder?: number;
   bracketType: BracketType;
   bracketSize: number;
-  isSeeded: boolean;
+  isSeeded?: boolean;
   isManualSeeding?: boolean;
+  /** BestOf tiers: standard rounds, semifinal, final. */
+  roundBestOfs?: RoundBestOfs;
   startDate?: Date;
   endDate?: Date;
   /** Ordered by seed (index 0 = seed 1). Participant or team ids depending
@@ -36,7 +95,7 @@ export type TournamentBracketUpdateData = Partial<
 };
 
 const bracketDetailInclude = {
-  stage: { include: { tournament: true } },
+  tournament: true,
   participants: {
     include: {
       participant: { include: { user: true, team: true } },
@@ -71,18 +130,11 @@ const bracketDetailInclude = {
 } satisfies Prisma.TournamentBracketInclude;
 
 export const tournamentBracketRepository = {
-  async getBracketsByStageId(stageId: string) {
-    return db.tournamentBracket.findMany({
-      where: { stageId },
-      orderBy: { displayOrder: "asc" },
-    });
-  },
-
   async getBracketsByTournamentId(tournamentId: string) {
     return db.tournamentBracket.findMany({
-      where: { stage: { tournamentId } },
-      include: { stage: true },
-      orderBy: [{ stage: { name: "asc" } }, { displayOrder: "asc" }],
+      where: { tournamentId },
+      include: { tournament: true },
+      orderBy: { displayOrder: "asc" },
     });
   },
 
@@ -93,18 +145,16 @@ export const tournamentBracketRepository = {
     });
   },
 
-  async createBracket(stageId: string, data: TournamentBracketCreateData) {
+  async createBracket(tournamentId: string, data: TournamentBracketCreateData) {
     return db.$transaction(async (tx) => {
-      const stage = await tx.tournamentStage.findUniqueOrThrow({
-        where: { id: stageId },
-        include: { tournament: true },
+      const tournament = await tx.tournament.findUniqueOrThrow({
+        where: { id: tournamentId },
       });
 
-      const isTeamBased = stage.tournament.isTeamBased;
+      const isTeamBased = tournament.isTeamBased;
 
-      // Bracket type is defined by the stage. The client submits its own
-      // copy, but the stage wins to keep a single source of truth.
-      const bracketType = stage.bracketType ?? data.bracketType;
+      // Bracket type is chosen per bracket (no stages anymore).
+      const bracketType = data.bracketType;
 
       // Entrants are stored as a bracket roster (participants pool), NOT
       // placed into round-1 matches - the admin assigns them to matches in
@@ -112,7 +162,7 @@ export const tournamentBracketRepository = {
       const plan = generateBracketPlan({
         bracketType,
         bracketSize: data.bracketSize,
-        isSeeded: data.isSeeded,
+        isSeeded: data.isSeeded ?? true,
         entrants: [],
       });
 
@@ -123,11 +173,12 @@ export const tournamentBracketRepository = {
           displayOrder: data.displayOrder ?? 0,
           bracketType,
           bracketSize: data.bracketSize,
-          isSeeded: data.isSeeded,
+          isSeeded: data.isSeeded ?? true,
           isManualSeeding: data.isManualSeeding ?? false,
+          roundBestOfs: data.roundBestOfs,
           startDate: data.startDate,
           endDate: data.endDate,
-          stage: { connect: { id: stageId } },
+          tournament: { connect: { id: tournamentId } },
         },
       });
 
@@ -135,7 +186,7 @@ export const tournamentBracketRepository = {
         await createRoster(tx, bracket.id, data.entrantIds, isTeamBased);
       }
 
-      await materializeBracketPlan(tx, bracket.id, plan);
+      await materializeBracketPlan(tx, bracket.id, plan, data.roundBestOfs);
 
       return bracket;
     });
@@ -146,7 +197,7 @@ export const tournamentBracketRepository = {
       const current = await tx.tournamentBracket.findUniqueOrThrow({
         where: { id },
         include: {
-          stage: { include: { tournament: true } },
+          tournament: true,
           bracketNodes: {
             include: {
               match: { include: { TournamentMatchParticipant: true } },
@@ -161,18 +212,14 @@ export const tournamentBracketRepository = {
 
       const entrantsProvided = data.entrantIds !== undefined;
 
-      if (entrantsProvided && hasAnyResult) {
-        throw new Error(
-          "Cannot change bracket participants after matches have results. Delete and recreate the bracket instead.",
-        );
-      }
-
       const bracketType = data.bracketType ?? current.bracketType;
       const bracketSize = data.bracketSize ?? current.bracketSize;
       const isSeeded = data.isSeeded ?? current.isSeeded;
 
+      // Entrants no longer drive structure: they only sync the roster pool
+      // (add-only), so they're decoupled from the wipe/regenerate path and
+      // are safe even after matches have results.
       const structureChanged =
-        entrantsProvided ||
         bracketType !== current.bracketType ||
         bracketSize !== current.bracketSize ||
         isSeeded !== current.isSeeded;
@@ -183,10 +230,30 @@ export const tournamentBracketRepository = {
         );
       }
 
+      const isTeamBased = current.tournament.isTeamBased;
+
+      if (entrantsProvided) {
+        const allocatedIds = new Set(
+          current.bracketNodes.flatMap(
+            (n) =>
+              n.match?.TournamentMatchParticipant.flatMap((p) =>
+                p.participantId
+                  ? [p.participantId]
+                  : p.teamId
+                    ? [p.teamId]
+                    : [],
+              ) ?? [],
+          ),
+        );
+        await syncRoster(tx, id, data.entrantIds ?? [], isTeamBased, {
+          allocatedIds,
+        });
+      }
+
       if (structureChanged) {
         // Wipe and regenerate. Deleting the bracket's matches cascades to
         // bracket nodes (matchId onDelete not cascade on node -> delete
-        // nodes explicitly first).
+        // nodes explicitly first). The roster is left untouched.
         const matchIds = current.bracketNodes
           .map((n) => n.matchId)
           .filter((mid): mid is string => !!mid);
@@ -197,8 +264,6 @@ export const tournamentBracketRepository = {
             where: { id: { in: matchIds } },
           });
         }
-
-        const isTeamBased = current.stage.tournament.isTeamBased;
 
         // Same as create: entrants live in the roster, round-1 matches stay
         // empty until the admin assigns them in the bracket view.
@@ -219,21 +284,41 @@ export const tournamentBracketRepository = {
             bracketSize,
             isSeeded,
             isManualSeeding: data.isManualSeeding,
+            roundBestOfs: data.roundBestOfs,
             startDate: data.startDate,
             endDate: data.endDate,
           },
         });
 
-        if (entrantsProvided) {
-          await tx.tournamentBracketParticipant.deleteMany({
-            where: { bracketId: id },
-          });
-          await createRoster(tx, id, data.entrantIds ?? [], isTeamBased);
-        }
-
-        await materializeBracketPlan(tx, id, plan);
+        await materializeBracketPlan(tx, id, plan, data.roundBestOfs);
 
         return tx.tournamentBracket.findUniqueOrThrow({ where: { id } });
+      }
+
+      // Roster/round-config changes without a structural change still apply
+      // the match modes to every existing match.
+      if (data.roundBestOfs) {
+        const wbRounds = log2(current.bracketSize);
+        const lbRounds =
+          current.bracketType === "DOUBLE_ELIMINATION" ? 2 * (wbRounds - 1) : 0;
+        const modes = await tx.tournamentMatchMode.findMany();
+        const modeById = new Map(modes.map((m) => [m.id, m]));
+        for (const node of current.bracketNodes) {
+          if (!node.matchId) continue;
+          const tier = roundTierFor(
+            node.isWinnerBracket,
+            node.round,
+            wbRounds,
+            lbRounds,
+          );
+          await applyRoundMode(
+            tx,
+            node.matchId,
+            data.roundBestOfs,
+            tier,
+            modeById,
+          );
+        }
       }
 
       return tx.tournamentBracket.update({
@@ -243,6 +328,7 @@ export const tournamentBracketRepository = {
           description: data.description,
           displayOrder: data.displayOrder,
           isManualSeeding: data.isManualSeeding,
+          roundBestOfs: data.roundBestOfs,
           startDate: data.startDate,
           endDate: data.endDate,
         },
@@ -290,8 +376,7 @@ export const tournamentBracketRepository = {
       // no participants, no scores, no games.
       await resetBracketMatches(tx, id);
 
-      const ordered =
-        mode === "RANDOM" ? shuffleArray(roster) : roster;
+      const ordered = mode === "RANDOM" ? shuffleArray(roster) : roster;
       await placeRosterInRound1(tx, bracket, ordered);
 
       return tx.tournamentBracket.findUniqueOrThrow({ where: { id } });
@@ -349,6 +434,55 @@ function createRoster(
         : { bracketId, participantId: id, seedNumber: i + 1 },
     ),
   });
+}
+
+/**
+ * Roster sync: creates missing entrants, renumbers seed order to match the
+ * submitted list, and removes roster members that are no longer selected -
+ * but only if they are not placed in any bracket match (allocated players
+ * are protected).
+ */
+async function syncRoster(
+  tx: TxClient,
+  bracketId: string,
+  entrantIds: string[],
+  isTeamBased: boolean,
+  opts: { allocatedIds: Set<string> },
+) {
+  const existing = await tx.tournamentBracketParticipant.findMany({
+    where: { bracketId },
+  });
+  const existingByKey = new Map(
+    existing.map((p) => [(p.participantId ?? p.teamId)!, p]),
+  );
+
+  const sent = new Set(entrantIds);
+
+  // Unselected + unallocated roster members can be removed; allocated ones
+  // are kept even if unselected.
+  for (const row of existing) {
+    const key = row.participantId ?? row.teamId;
+    if (key && !sent.has(key) && !opts.allocatedIds.has(key)) {
+      await tx.tournamentBracketParticipant.delete({ where: { id: row.id } });
+    }
+  }
+
+  for (let i = 0; i < entrantIds.length; i++) {
+    const id = entrantIds[i]!;
+    const row = existingByKey.get(id);
+    if (row) {
+      await tx.tournamentBracketParticipant.update({
+        where: { id: row.id },
+        data: { seedNumber: i + 1 },
+      });
+    } else {
+      await tx.tournamentBracketParticipant.create({
+        data: isTeamBased
+          ? { bracketId, teamId: id, seedNumber: i + 1 }
+          : { bracketId, participantId: id, seedNumber: i + 1 },
+      });
+    }
+  }
 }
 
 /**
@@ -482,6 +616,7 @@ async function materializeBracketPlan(
   tx: TxClient,
   bracketId: string,
   plan: ReturnType<typeof generateBracketPlan>,
+  roundBestOfs?: RoundBestOfs,
 ) {
   const nodeIdByKey = new Map<string, string>();
 
@@ -492,6 +627,9 @@ async function materializeBracketPlan(
   // PENDING with no winner - the admin resolves them manually, which then
   // advances the entrant like any other match. Not auto-completing them
   // keeps the empty slot fillable and lets the winner be recorded once.
+  const modes = await tx.tournamentMatchMode.findMany();
+  const modeById = new Map(modes.map((m) => [m.id, m]));
+
   for (const spec of plan.nodes) {
     const initialParticipants = spec.initialParticipants ?? [];
 
@@ -526,6 +664,15 @@ async function materializeBracketPlan(
       key(spec.round, spec.position, spec.isWinnerBracket),
       node.id,
     );
+
+    // Apply the tier's match mode (tournamentMatchModeId + bestOf mirror).
+    const tier = roundTierFor(
+      spec.isWinnerBracket,
+      spec.round,
+      plan.wbRounds,
+      plan.lbRounds,
+    );
+    await applyRoundMode(tx, match.id, roundBestOfs, tier, modeById);
   }
 
   // Pass 2: link parentNodeId for forward advancement within the same

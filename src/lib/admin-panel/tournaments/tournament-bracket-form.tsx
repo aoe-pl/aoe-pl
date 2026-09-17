@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
@@ -26,6 +25,7 @@ import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 import {
   BracketEntrantsSelector,
   type BracketEntrantOption,
@@ -40,9 +40,26 @@ import {
 
 const BRACKET_SIZE_OPTIONS = [2, 4, 8, 16, 32, 64, 128];
 
+const ROUND_MODE_FIELDS: {
+  key: "standard" | "semifinal" | "final";
+  label: string;
+}[] = [
+  { key: "standard", label: "Standard (all other rounds)" },
+  { key: "semifinal", label: "Semifinal" },
+  { key: "final", label: "Final" },
+];
+
+/** Sensible defaults when no round mode is set yet: Best of 3/5/7. */
+const DEFAULT_ROUND_GAME_COUNTS = {
+  standard: 3,
+  semifinal: 5,
+  final: 7,
+} as const;
+
 export type TournamentBracketEditData = TournamentBracket & {
   entrantIds: string[];
   hasResults: boolean;
+  allocatedEntrantIds: string[];
 };
 
 type TournamentBracketFormProps = {
@@ -64,13 +81,6 @@ export function TournamentBracketForm({
   tournamentId,
   isTeamBased,
 }: TournamentBracketFormProps) {
-  const { data: allStages } = api.tournaments.stages.list.useQuery({
-    tournamentId,
-  });
-
-  // Brackets only make sense within BRACKET-type stages.
-  const stages = allStages?.filter((stage) => stage.type === "BRACKET");
-
   const { data: participants, isLoading: participantsLoading } =
     api.tournaments.participants.list.useQuery(
       { tournamentId, includeUser: true },
@@ -90,35 +100,62 @@ export function TournamentBracketForm({
   const form = useForm<TournamentBracketFormSchema>({
     resolver: zodResolver(tournamentBracketFormSchema),
     defaultValues: {
-      stageId: initialData?.stageId ?? "",
       name: initialData?.name ?? "",
       description: initialData?.description ?? "",
       displayOrder: initialData?.displayOrder ?? brackets.length,
       bracketType: initialData?.bracketType ?? BracketType.SINGLE_ELIMINATION,
       bracketSize: initialData?.bracketSize ?? 8,
-      isSeeded: initialData?.isSeeded ?? true,
+      roundBestOfs:
+        (initialData?.roundBestOfs as
+          | { standard?: string; semifinal?: string; final?: string }
+          | null
+          | undefined) ?? {},
       entrantIds: initialData?.entrantIds ?? [],
     },
   });
 
   const hasResults = initialData?.hasResults ?? false;
 
-  const stageId = form.watch("stageId");
-  const selectedStage = stages?.find((stage) => stage.id === stageId);
+  // Roster members not yet placed in any match may be removed.
+  const removableIds = initialData
+    ? initialData.entrantIds.filter(
+        (id) => !initialData.allocatedEntrantIds.includes(id),
+      )
+    : undefined;
 
-  // Bracket type lives on the stage, not on the bracket. Keep the hidden
-  // form field in sync so the submitted payload always matches the stage.
+  const roundBestOfs = form.watch("roundBestOfs") ?? {};
+
+  const { data: matchModes = [] } = api.tournaments.matchMode.list.useQuery();
+
+  // Preselect Best of 3/5/7 by default; keep any saved round modes.
   useEffect(() => {
-    if (selectedStage?.bracketType) {
-      form.setValue("bracketType", selectedStage.bracketType);
+    if (matchModes.length === 0) return;
+    const findMode = (gameCount: number) =>
+      matchModes.find((m) => m.mode === "BEST_OF" && m.gameCount === gameCount);
+    const current = form.getValues("roundBestOfs") ?? {};
+    const next = { ...current };
+    let changed = false;
+    for (const [tier, gameCount] of Object.entries(
+      DEFAULT_ROUND_GAME_COUNTS,
+    ) as [keyof typeof DEFAULT_ROUND_GAME_COUNTS, number][]) {
+      if (!next[tier]) {
+        const mode = findMode(gameCount);
+        if (mode) {
+          next[tier] = mode.id;
+          changed = true;
+        }
+      }
     }
-  }, [selectedStage?.id, selectedStage?.bracketType, form]);
+    if (changed) form.setValue("roundBestOfs", next);
+  }, [matchModes, form]);
+
+  // Bracket type is set per bracket.
 
   const handleSubmit = (data: TournamentBracketFormSchema) => {
     onSubmit({
       ...data,
       description: data.description ?? undefined,
-      entrantIds: hasResults ? undefined : (data.entrantIds ?? []),
+      entrantIds: data.entrantIds ?? [],
     });
   };
 
@@ -136,35 +173,34 @@ export function TournamentBracketForm({
           <div className="space-y-4">
             <FormField
               control={form.control}
-              name="stageId"
+              name="bracketType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Stage</FormLabel>
+                  <FormLabel>Bracket Type</FormLabel>
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={hasResults}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a stage" />
+                        <SelectValue placeholder="Select bracket type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {stages?.map((stage) => (
+                        {Object.values(BracketType).map((type) => (
                           <SelectItem
-                            key={stage.id}
-                            value={stage.id}
+                            key={type}
+                            value={type}
                           >
-                            {stage.name}
+                            {bracketTypesLabels[type]}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
                   <FormDescription>
-                    Bracket type comes from the stage:{" "}
-                    {selectedStage?.bracketType
-                      ? bracketTypesLabels[selectedStage.bracketType]
-                      : "—"}
+                    Single or double elimination. Cannot be changed once matches
+                    have results.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -263,24 +299,37 @@ export function TournamentBracketForm({
 
             <FormField
               control={form.control}
-              name="isSeeded"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={hasResults}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Standard Seeding</FormLabel>
-                    <FormDescription>
-                      Use standard tournament seeding (top seeds avoid each
-                      other early). If disabled, entrants are paired
-                      sequentially in the order below.
-                    </FormDescription>
+              name="roundBestOfs"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Match Mode (per tier)</FormLabel>
+                  <div className="space-y-3">
+                    {ROUND_MODE_FIELDS.map((field) => (
+                      <div
+                        key={field.key}
+                        className="space-y-1"
+                      >
+                        <span className="text-sm font-medium">
+                          {field.label}
+                        </span>
+                        <TournamentMatchModeSelector
+                          value={roundBestOfs[field.key] ?? ""}
+                          onChange={(id) =>
+                            form.setValue("roundBestOfs", {
+                              ...roundBestOfs,
+                              [field.key]: id,
+                            })
+                          }
+                        />
+                      </div>
+                    ))}
                   </div>
+                  <FormDescription>
+                    Match mode (Best of / Play All) per tier. All standard
+                    rounds share one mode; semifinal and final can differ. Saved
+                    matches are updated accordingly.
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -292,27 +341,23 @@ export function TournamentBracketForm({
                 <FormItem>
                   <FormLabel>Participants (bracket pool)</FormLabel>
                   <FormControl>
-                    {hasResults ? (
-                      <p className="text-muted-foreground text-sm">
-                        Entrants can no longer be changed once matches have
-                        results. Delete and recreate the bracket instead.
-                      </p>
-                    ) : (
-                      <BracketEntrantsSelector
-                        value={field.value ?? []}
-                        onChange={field.onChange}
-                        options={entrantOptions}
-                        isLoading={
-                          isTeamBased ? teamsLoading : participantsLoading
-                        }
-                      />
-                    )}
+                    <BracketEntrantsSelector
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      options={entrantOptions}
+                      isLoading={
+                        isTeamBased ? teamsLoading : participantsLoading
+                      }
+                      removableIds={removableIds}
+                    />
                   </FormControl>
                   <FormDescription>
-                    These are the bracket&apos;s participants. They are not
-                    placed into matches here - assign them to round-1 matches
-                    from the bracket view (auto-allocate, random, or per
-                    match). Order determines seed order.
+                    Participants can be added or removed at any time while they
+                    are not yet placed in a match - they are not placed into
+                    matches here. Assign them to round-1 matches from the
+                    bracket view (auto-allocate, random, or per match). Once
+                    assigned to a match, they can no longer be removed.
+                    Selection order determines seed order.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

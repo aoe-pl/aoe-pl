@@ -56,7 +56,7 @@ export function UpcomingMatches() {
           const matchMode =
             match.TournamentMatchMode ??
             match.group?.matchMode ??
-            match.group?.stage?.tournament?.matchMode;
+            match.group?.tournament?.matchMode;
 
           if (matchMode == null) return null;
 
@@ -66,7 +66,7 @@ export function UpcomingMatches() {
             (key, params) => tGlobal(key, params),
           );
 
-          const tournament = match.group?.stage?.tournament?.name;
+          const tournament = match.group?.tournament?.name;
           const participants = match.TournamentMatchParticipant;
           const groupColor = match.group?.color;
 

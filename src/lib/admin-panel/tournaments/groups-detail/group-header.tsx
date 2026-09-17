@@ -3,8 +3,7 @@
 import { Button } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { type TournamentStage } from "../tournament";
-import { Calendar, Gamepad, MapPin, Users } from "lucide-react";
+import { Calendar, Gamepad, Trophy, Users } from "lucide-react";
 
 export type GroupHeaderProps = {
   name: string;
@@ -14,7 +13,7 @@ export type GroupHeaderProps = {
   matchMode: { mode: string; gameCount: number };
   onEdit: () => void;
   isMixed: boolean;
-  stage: TournamentStage;
+  tournamentName: string;
 };
 
 export function GroupHeader({
@@ -24,7 +23,7 @@ export function GroupHeader({
   matchMode,
   onEdit,
   isMixed,
-  stage,
+  tournamentName,
 }: GroupHeaderProps) {
   return (
     <>
@@ -63,9 +62,9 @@ export function GroupHeader({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <MapPin className="text-muted-foreground h-4 w-4" />
+              <Trophy className="text-muted-foreground h-4 w-4" />
               <span className="text-muted-foreground text-sm">
-                {stage.name}
+                {tournamentName}
               </span>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import {
   RegistrationMode,
+  TournamentFormat,
   tournamentFormSchema,
   TournamentStatus,
 } from "./tournament";
@@ -24,8 +25,8 @@ export function TournamentCreate() {
       name: "",
       urlKey: "",
       tournamentSeriesId: "",
-      matchModeId: "",
       registrationMode: RegistrationMode.INDIVIDUAL,
+      format: TournamentFormat.GROUP,
       description: "",
       isTeamBased: false,
       startDate: undefined,

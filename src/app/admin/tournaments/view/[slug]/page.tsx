@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TournamentStatusBadge } from "@/lib/admin-panel/tournaments/tournament-status-badge";
 import { TournamentInfo } from "@/lib/admin-panel/tournaments/tournament-info";
-import { TournamentStages } from "@/lib/admin-panel/tournaments/tournament-stages";
 import { TournamentTabs } from "./tabs";
 import { TournamentParticipants } from "@/lib/admin-panel/tournaments/tournament-participants";
 import { TournamentGroupList } from "@/lib/admin-panel/tournaments/tournament-group-list";
@@ -40,6 +39,14 @@ export default async function AdminTournamentsViewPage({
     );
   }
 
+  const isBracketFormat = tournament.format === "BRACKET";
+  const tabKeys = [
+    "info",
+    ...(isBracketFormat ? ["bracket"] : ["groups"]),
+    "participants",
+    "sections",
+  ];
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 md:max-w-6xl">
       <div className="py-4">
@@ -61,21 +68,14 @@ export default async function AdminTournamentsViewPage({
         </Breadcrumb>
       </div>
 
-      <TournamentTabs
-        tabKeys={[
-          "info",
-          "stages",
-          "groups",
-          "bracket",
-          "participants",
-          "sections",
-        ]}
-      >
+      <TournamentTabs tabKeys={tabKeys}>
         <TabsList className="mb-2">
           <TabsTrigger value="info">{tView("tabs.info")}</TabsTrigger>
-          <TabsTrigger value="stages">{tView("tabs.stages")}</TabsTrigger>
-          <TabsTrigger value="groups">{tView("tabs.groups")}</TabsTrigger>
-          <TabsTrigger value="bracket">{tView("tabs.bracket")}</TabsTrigger>
+          {isBracketFormat ? (
+            <TabsTrigger value="bracket">{tView("tabs.bracket")}</TabsTrigger>
+          ) : (
+            <TabsTrigger value="groups">{tView("tabs.groups")}</TabsTrigger>
+          )}
           <TabsTrigger value="participants">
             {tView("tabs.participants")}
           </TabsTrigger>
@@ -95,25 +95,21 @@ export default async function AdminTournamentsViewPage({
           />
         </TabsContent>
 
-        <TabsContent value="stages">
-          <TournamentStages tournamentId={tournament.id} />
-        </TabsContent>
-
-        <TabsContent value="groups">
-          <TournamentGroupList
-            defaultIsTeamBased={tournament.isTeamBased}
-            defaultMatchModeId={tournament.matchModeId}
-            defaultMatchMode={tournament.matchMode}
-            tournamentId={tournament.id}
-          />
-        </TabsContent>
-
-        <TabsContent value="bracket">
-          <TournamentBracketList
-            tournamentId={tournament.id}
-            isTeamBased={tournament.isTeamBased}
-          />
-        </TabsContent>
+        {isBracketFormat ? (
+          <TabsContent value="bracket">
+            <TournamentBracketList
+              tournamentId={tournament.id}
+              isTeamBased={tournament.isTeamBased}
+            />
+          </TabsContent>
+        ) : (
+          <TabsContent value="groups">
+            <TournamentGroupList
+              defaultIsTeamBased={tournament.isTeamBased}
+              tournamentId={tournament.id}
+            />
+          </TabsContent>
+        )}
 
         <TabsContent value="participants">
           <TournamentParticipants tournamentId={tournament.id} />
