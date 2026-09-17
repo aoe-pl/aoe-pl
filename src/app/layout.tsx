@@ -1,7 +1,6 @@
 import "@/styles/globals.css";
 
 import { Navigation } from "@/components/layout/navigation";
-import { ThemeCustomizer } from "@/components/layout/theme-customizer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getIsAdmin, getSession } from "@/lib/session";
 import { TRPCReactProvider } from "@/trpc/react";
@@ -43,8 +42,6 @@ export default async function RootLayout({
           <TRPCReactProvider>
             <TooltipProvider> {children} </TooltipProvider>
           </TRPCReactProvider>
-
-          <ThemeCustomizer />
         </NextIntlClientProvider>
       </body>
     </html>

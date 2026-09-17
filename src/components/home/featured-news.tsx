@@ -54,7 +54,8 @@ export function FeaturedNews() {
 
             <Button
               asChild
-              className="bg-primary text-primary-foreground w-full"
+              className="w-full font-semibold text-[#221a10] shadow-md transition-colors hover:text-[#221a10]"
+              style={{ backgroundColor: "#e6c052" }}
             >
               <Link href="/news">
                 {t("all_news_button")}

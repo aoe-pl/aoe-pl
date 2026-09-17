@@ -50,10 +50,18 @@
   --color-game-header-2: oklch(0.97 0.18 100); /* Yellow */
   --color-game-header-3: oklch(0.92 0.18 250); /* Blue */
   --color-game-header-4: oklch(0.92 0.18 30); /* Red/Orange */
+
+  /* Medieval theme */
+  --medieval-wood: #463021; /* brown/wooden panel fill */
+  --medieval-wood-border: #6b4e2e; /* wooden panel border */
+  --medieval-gold: #e6c052; /* titles/headings, highlights */
+  --medieval-gold-muted: #b8a97f; /* subtext */
+  --medieval-parchment: #836135; /* parchment / text background */
+  --medieval-parchment-foreground: #f4ecd7; /* normal text on parchment */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: #141e17;
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
@@ -65,8 +73,8 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(67.111% 0.19923 24.213);
-  --accent-foreground: oklch(0.269 0 0);
+  --accent: #e6c052;
+  --accent-foreground: #221a10;
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -138,18 +146,48 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    min-height: 100%;
+    background: radial-gradient(
+      ellipse at top,
+      #24371f 0%,
+      #16211a 55%,
+      #0f1810 100%
+    );
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: transparent;
   }
 }
 
 @layer components {
   .panel {
-    @apply bg-card border-border rounded-2xl border p-6 backdrop-blur-sm;
+    background-color: var(--medieval-wood);
+    border: 1px solid var(--medieval-wood-border);
+    @apply rounded-2xl p-6;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 4px 16px rgba(0, 0, 0, 0.4);
   }
 
   .panel-header {
-    @apply text-accent mb-4 text-lg font-bold;
+    color: var(--medieval-gold);
+    @apply mb-4 text-lg font-bold;
+  }
+
+  /* Parchment content block, placed inside a wooden .panel.
+     Remaps the theme variables so any text-* utilities resolve to
+
+     light ink within the parchment, regardless of Tailwind layer order. */
+  .panel-parchment {
+    --foreground: var(--medieval-parchment-foreground);
+    --muted-foreground: rgb(244 236 215 / 0.7);
+    --card-foreground: var(--medieval-parchment-foreground);
+    --border: rgb(244 236 215 / 0.25);
+    background-color: var(--medieval-parchment);
+    color: var(--medieval-parchment-foreground);
+    @apply rounded-xl p-4;
   }
 
   .wmde-markdown {

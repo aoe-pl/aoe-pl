@@ -1,8 +1,5 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { locales } from "@/lib/locales";
+import { ChevronDown } from "lucide-react";
+import { useLocale } from "next-intl";
+import { usePathname } from "next/navigation";
 
 export function LanguageSwitcher() {
   const locale = useLocale();
@@ -22,7 +22,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="text-foreground/80 flex items-center gap-1 text-sm">
+        <button className="text-accent flex items-center gap-1 text-sm font-bold">
           <span className="text-base">{current.flag}</span>
           <span>{current.code.toUpperCase()}</span>
           <ChevronDown className="h-4" />
@@ -37,7 +37,7 @@ export function LanguageSwitcher() {
           >
             <a
               href={`/api/locale?${locales.key}=${l.code}&returnTo=${encodeURIComponent(pathname)}`}
-              className={`flex items-center`}
+              className={`text-accent flex items-center`}
             >
               <span className="">{l.flag}</span>
               {l.label}
