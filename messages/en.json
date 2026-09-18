@@ -28,7 +28,7 @@
       "vs": "vs"
     },
     "top_players": {
-      "title": "Top 10 Polish Players",
+      "title": "Top Polish Players",
       "loading": "Loading players...",
       "error": "Failed to load players",
       "wins": "{count} wins"

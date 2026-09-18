@@ -6,6 +6,9 @@ import {
 import { db } from "@/server/db";
 import { z } from "zod";
 
+/** Maximum number of players the top-players list supports. */
+const MAX_PLAYERS = 100;
+
 interface LeaderboardPlayer {
   leaderboardId: string;
   profileId: number;
@@ -30,7 +33,7 @@ async function fetchTopPolishPlayers(
   count: number,
 ): Promise<LeaderboardPlayer[]> {
   const polishPlayers: LeaderboardPlayer[] = [];
-  const maxPages = 20;
+  const maxPages = 100;
 
   let page = 1;
 
@@ -77,7 +80,7 @@ export const leaderboardRouter = createTRPCRouter({
   getTopPolishPlayers: publicProcedure
     .input(
       z.object({
-        count: z.number().min(1).max(50).default(10),
+        count: z.number().min(1).max(MAX_PLAYERS).default(MAX_PLAYERS),
       }),
     )
     .query(async ({ input }) => {
