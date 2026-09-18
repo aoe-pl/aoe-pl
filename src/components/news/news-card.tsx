@@ -15,8 +15,8 @@ export function NewsCard({ news }: NewsCardProps) {
   const isFeatured = news.featured;
 
   const cardStyle = isFeatured
-    ? "rounded-xl border p-4 from-primary/20 to-accent/10 border-primary/30 bg-gradient-to-br"
-    : "rounded-xl border p-4 bg-accent-foreground border-border hover:border-primary/50 hover:shadow-lg";
+    ? "panel-parchment border-l-4 border-[#e6c052]"
+    : "panel-parchment transition-shadow hover:shadow-lg";
 
   return (
     <div className={`${cardStyle}`}>
@@ -25,12 +25,12 @@ export function NewsCard({ news }: NewsCardProps) {
           <h3 className="text-foreground text-base font-bold">{news.title}</h3>
 
           {news.description && (
-            <p className="text-foreground/80 line-clamp-3 text-sm">
+            <p className="text-foreground text-md line-clamp-3">
               {news.description}
             </p>
           )}
 
-          <div className={`flex gap-2 text-xs font-semibold text-white`}>
+          <div className={`flex gap-2 text-xs font-semibold`}>
             <span>
               📅 {new Date(news.createdAt).toLocaleDateString("pl-PL")}
             </span>

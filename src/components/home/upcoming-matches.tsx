@@ -1,10 +1,10 @@
 "use client";
 
-import { Sword, Clock } from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
-import { api } from "@/trpc/react";
-import { isBrightColor } from "@/lib/utils";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
+import { isBrightColor } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import { Clock, Sword } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 export function UpcomingMatches() {
   const t = useTranslations("home.upcoming_matches");
@@ -95,7 +95,7 @@ export function UpcomingMatches() {
           return (
             <div
               key={match.id}
-              className="bg-background/50 border-border/50 rounded-lg border p-3 transition-colors"
+              className="panel-parchment transition-colors"
             >
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-foreground text-sm font-semibold">

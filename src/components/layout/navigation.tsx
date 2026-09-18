@@ -30,7 +30,7 @@ export function Navigation({ session, isAdmin }: NavigationProps) {
   ];
 
   return (
-    <nav className="from-background/95 to-background/70 border-primary/20 fixed top-0 z-50 w-full border-b bg-gradient-to-b shadow-lg backdrop-blur-lg">
+    <nav className="from-background/95 to-background/80 border-primary/20 fixed top-0 z-50 w-full border-b bg-gradient-to-b shadow-lg backdrop-blur-lg">
       <div className="mx-auto max-w-6xl px-4 py-5">
         <div className="flex items-center justify-between">
           <Link
@@ -92,9 +92,7 @@ function DesktopNavigation({
   t: (key: string) => string;
 }) {
   const navLinkClass =
-    "text-foreground/80 hover:text-accent group relative px-4 py-2 text-sm font-semibold transition-colors";
-  const underlineClass =
-    "from-primary to-accent absolute bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full";
+    "text-accent hover:text-foreground group relative px-4 py-2 text-sm font-semibold transition-colors";
 
   return (
     <div className="hidden items-center gap-1 md:flex md:gap-2">
@@ -105,7 +103,6 @@ function DesktopNavigation({
           className={navLinkClass}
         >
           {item.label}
-          <div className={underlineClass} />
         </Link>
       ))}
 
@@ -115,7 +112,6 @@ function DesktopNavigation({
           className={navLinkClass}
         >
           {t("profile")}
-          <div className={underlineClass} />
         </Link>
       )}
 
@@ -125,7 +121,6 @@ function DesktopNavigation({
           className={navLinkClass}
         >
           {t("admin")}
-          <div className={underlineClass} />
         </Link>
       )}
 
@@ -142,7 +137,7 @@ function DesktopNavigation({
 
       <Button
         asChild
-        className="text-primary-foreground ml-4 font-semibold shadow-lg"
+        className="text-primary-foreground bg-accent ml-4 font-semibold shadow-lg"
       >
         <Link href={session ? "/api/auth/signout" : "/api/auth/signin"}>
           {session ? t("logout") : t("login")}

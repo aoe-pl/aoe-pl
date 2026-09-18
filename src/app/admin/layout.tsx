@@ -16,7 +16,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="admin-panel flex pt-20">
+    <div className="flex pt-20">
       <div>
         <Sidebar />
       </div>

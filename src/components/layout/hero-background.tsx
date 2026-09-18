@@ -8,7 +8,6 @@ export function HeroBackground({ children }: { children: React.ReactNode }) {
         alt=""
         fill
         priority
-        className="object-cover object-[center_30%]"
         quality={75}
       />
       <div className="from-background/80 via-background/60 to-background absolute inset-0 bg-gradient-to-b via-50%" />

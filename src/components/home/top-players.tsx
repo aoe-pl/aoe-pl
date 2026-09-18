@@ -39,14 +39,14 @@ export async function TopPlayers() {
           {isAdmin && <TopPlayersFilterDialog />}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           {players.map((player, index) => {
             const rank = index + 1;
 
             return (
               <div
                 key={player.profileId}
-                className="bg-background/50 border-border/50 flex items-center justify-between rounded-lg border p-3"
+                className="panel-parchment flex items-center justify-between p-3"
               >
                 <div className="flex flex-1 items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center text-xl font-bold">
