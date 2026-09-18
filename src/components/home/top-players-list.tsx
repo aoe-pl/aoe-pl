@@ -1,5 +1,6 @@
 "use client";
 
+import { PlayerLink } from "@/components/player-link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -11,6 +12,7 @@ interface TopPlayersListProps {
     profileId: number;
     name: string;
     rating: number;
+    playerNumber: number | null;
   }[];
 }
 
@@ -51,10 +53,11 @@ export function TopPlayersList({ players }: TopPlayersListProps) {
                     <span className="text-accent text-sm">{rank}</span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <div className="text-foreground font-semibold">
-                    {player.name}
-                  </div>
+                <div className="text-foreground flex-1 font-semibold">
+                  <PlayerLink
+                    playerNumber={player.playerNumber ?? undefined}
+                    name={player.name}
+                  />
                 </div>
               </div>
               <div className="text-right">

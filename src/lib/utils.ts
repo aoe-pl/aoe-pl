@@ -47,11 +47,9 @@ export function isBrightColor(hexColor: string): boolean {
 export function getPlayerProfileIdFromCompanionUrl(url: string): number | null {
   if (!url) return null;
 
-  const regex = /\/players\/(\d+)(?:\/|\?|$)/;
+  const match = /\/players\/(\d+)(?:\/|\?|$)/.exec(url);
+  if (!match) return null;
 
-  const p1CompanionUrl = url;
-
-  const match1 = regex.exec(p1CompanionUrl)!;
-
-  return Number(match1[1]) ?? null;
+  const profileId = Number(match[1]);
+  return Number.isNaN(profileId) ? null : profileId;
 }

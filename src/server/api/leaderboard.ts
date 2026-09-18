@@ -1,3 +1,4 @@
+import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import {
   adminProcedure,
   createTRPCRouter,
@@ -76,6 +77,27 @@ async function fetchTopPolishPlayers(
   return polishPlayers.slice(0, count);
 }
 
+/**
+ * Builds a map of AoE2Companion profileId -> internal playerNumber for users
+ * who linked their AoE2Companion profile. This lets us link leaderboard entries
+ * to their in-app profile page when the account exists.
+ */
+async function getProfileIdToPlayerNumberMap(): Promise<Map<number, number>> {
+  const users = await db.user.findMany({
+    where: { aoe2companionUrl: { not: null } },
+    select: { playerNumber: true, aoe2companionUrl: true },
+  });
+
+  const map = new Map<number, number>();
+  for (const user of users) {
+    const profileId = getPlayerProfileIdFromCompanionUrl(
+      user.aoe2companionUrl ?? "",
+    );
+    if (profileId !== null) map.set(profileId, user.playerNumber);
+  }
+  return map;
+}
+
 export const leaderboardRouter = createTRPCRouter({
   getTopPolishPlayers: publicProcedure
     .input(
@@ -90,9 +112,16 @@ export const leaderboardRouter = createTRPCRouter({
 
       const players = await fetchTopPolishPlayers(input.count + filters.length);
 
-      const filtered = players.filter((p) => !isPlayerFiltered(p, filters));
+      const filtered = players
+        .filter((p) => !isPlayerFiltered(p, filters))
+        .slice(0, input.count);
 
-      return filtered.slice(0, input.count);
+      const profileIdToPlayerNumber = await getProfileIdToPlayerNumberMap();
+
+      return filtered.map((player) => ({
+        ...player,
+        playerNumber: profileIdToPlayerNumber.get(player.profileId) ?? null,
+      }));
     }),
 
   getPlayerFilters: adminProcedure.query(async () => {
