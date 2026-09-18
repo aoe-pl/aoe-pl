@@ -52,12 +52,12 @@
   --color-game-header-4: oklch(0.92 0.18 30); /* Red/Orange */
 
   /* Medieval theme */
-  --medieval-wood: #463021; /* brown/wooden panel fill */
-  --medieval-wood-border: #6b4e2e; /* wooden panel border */
-  --medieval-gold: #e6c052; /* titles/headings, highlights */
-  --medieval-gold-muted: #b8a97f; /* subtext */
-  --medieval-parchment: #836135; /* parchment / text background */
-  --medieval-parchment-foreground: #f4ecd7; /* normal text on parchment */
+  --medieval-wood: #463021;
+  --medieval-wood-border: #6b4e2e;
+  --medieval-gold: #e6c052;
+  --medieval-gold-muted: #b8a97f;
+  --medieval-parchment: #836135;
+  --medieval-parchment-foreground: #f4ecd7;
 }
 
 .dark {
@@ -176,10 +176,6 @@
     @apply mb-4 text-lg font-bold;
   }
 
-  /* Parchment content block, placed inside a wooden .panel.
-     Remaps the theme variables so any text-* utilities resolve to
-
-     light ink within the parchment, regardless of Tailwind layer order. */
   .panel-parchment {
     --foreground: var(--medieval-parchment-foreground);
     --muted-foreground: rgb(244 236 215 / 0.7);
