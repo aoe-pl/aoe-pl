@@ -23,7 +23,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="mx-auto -mt-14 max-w-6xl px-4">
+      <main className="relative z-10 mx-auto -mt-14 max-w-6xl px-4">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <section className="space-y-8 lg:col-span-2">
             <FeaturedNews />
