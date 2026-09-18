@@ -28,7 +28,7 @@
       "vs": "vs"
     },
     "top_players": {
-      "title": "Top 10 Polskich Graczy",
+      "title": "Top Polskich Graczy",
       "loading": "Ładowanie graczy...",
       "error": "Nie udało się załadować graczy",
       "wins": "{count} zwycięstw"
