@@ -36,7 +36,6 @@ export async function TopPlayers() {
             className="w-6"
             aria-hidden
           />{" "}
-          {/* spacer matching button width */}
           <span className="flex-1 text-center">{t("title")}</span>
           {isAdmin && <TopPlayersFilterDialog />}
         </div>
