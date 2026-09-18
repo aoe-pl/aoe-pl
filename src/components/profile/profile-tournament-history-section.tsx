@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -39,14 +38,12 @@ export function ProfileTournamentHistorySection({
   const t = useTranslations("profile.tournaments");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Trophy className="h-4 w-4" />
-          {t("title")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="panel">
+      <div className="panel-header flex items-center gap-2">
+        <Trophy className="h-5 w-5" />
+        {t("title")}
+      </div>
+      <div>
         {participants.length > 0 ? (
           <div className="rounded border">
             <Table>
@@ -99,7 +96,7 @@ export function ProfileTournamentHistorySection({
         ) : (
           <p className="text-muted-foreground text-sm">{t("none")}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

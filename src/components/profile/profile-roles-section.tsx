@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import {
@@ -78,14 +77,12 @@ export function ProfileRolesSection({
   const isOwnProfile = userId === currentUserId;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Shield className="h-4 w-4" />
-          {t("title")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="panel">
+      <div className="panel-header flex items-center gap-2">
+        <Shield className="h-5 w-5" />
+        {t("title")}
+      </div>
+      <div className="space-y-4">
         {currentRoles.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {currentRoles.map((ur) => {
@@ -163,7 +160,7 @@ export function ProfileRolesSection({
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

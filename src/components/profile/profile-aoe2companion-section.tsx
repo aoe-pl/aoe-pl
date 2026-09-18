@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
@@ -46,25 +45,23 @@ export function ProfileAoe2CompanionSection({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between text-base">
-          <span className="flex items-center gap-2">
-            <Link2 className="h-4 w-4" />
-            {t("title")}
-          </span>
-          {isEditable && !editing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="panel">
+      <div className="panel-header flex items-center justify-between">
+        <span className="flex items-center gap-2">
+          <Link2 className="h-5 w-5" />
+          {t("title")}
+        </span>
+        {isEditable && !editing && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditing(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )}
+      </div>
+      <div>
         {editing ? (
           <div className="flex items-center gap-2">
             <Input
@@ -103,7 +100,7 @@ export function ProfileAoe2CompanionSection({
         ) : (
           <p className="text-muted-foreground text-sm">{t("none")}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

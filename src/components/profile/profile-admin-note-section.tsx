@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
@@ -44,25 +43,23 @@ export function ProfileAdminNoteSection({
   };
 
   return (
-    <Card className="border-amber-500/30 bg-amber-500/5">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between text-base">
-          <span className="flex items-center gap-2">
-            <NotebookPen className="h-4 w-4" />
-            {t("title")}
-          </span>
-          {!editing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="panel border-amber-500/40">
+      <div className="panel-header flex items-center justify-between">
+        <span className="flex items-center gap-2">
+          <NotebookPen className="h-5 w-5" />
+          {t("title")}
+        </span>
+        {!editing && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditing(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )}
+      </div>
+      <div>
         {editing ? (
           <div className="space-y-2">
             <Textarea
@@ -97,7 +94,7 @@ export function ProfileAdminNoteSection({
         ) : (
           <p className="text-muted-foreground text-sm">{t("none")}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
