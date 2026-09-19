@@ -14,7 +14,7 @@ export default async function TournamentMatchPage({
 }: {
   params: Promise<{ seriesSlug: string; urlKey: string; matchNumber: string }>;
 }) {
-  const { matchNumber } = await params;
+  const { urlKey, matchNumber } = await params;
 
   const [match, locale, session] = await Promise.all([
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
@@ -85,6 +85,8 @@ export default async function TournamentMatchPage({
               profileId: p2ProfileId,
               name: player2Name,
             }}
+            matchNumber={match.matchNumber}
+            tournamentName={urlKey}
             gameCount={gameCount}
             isAdmin={isAdmin}
           />
