@@ -6,7 +6,7 @@ import {
   getStepWinner,
   validateGameRecFileData,
   winsNeeded,
-} from "./helpers";
+} from "./recordings-helpers";
 import type { GameStep } from "./types";
 
 interface UseRecordingsUploadOptions {

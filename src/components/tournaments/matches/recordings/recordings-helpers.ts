@@ -1,4 +1,5 @@
 import type { ParsedRecording } from "@/lib/recording-parser/types";
+import { sanitizeFileName } from "@/lib/storage/paths";
 import type { GameStep } from "./types";
 
 export function buildInitialSteps(gameCount: number): GameStep[] {
@@ -80,7 +81,8 @@ export function validateGameRecFileData(
     }
   });
   
-  checks.push(profileIdCheck);
+  // TODO: uncomment if we decide to check profile IDs
+  // checks.push(profileIdCheck);
 
   // If there is only one recording, we don't need to do any further checks.
   if (recordings.length === 0) {
@@ -118,4 +120,44 @@ export function validateGameRecFileData(
   if (checks.every((v) => v)) return null;
 
   return `Recording files are invalid. Please ensure that all recordings are from the same game, with the same players, civs, and map.`;
+}
+
+/** Extract the extension from a file name, falling back to `aoe2record`. */
+function getFileExtension(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot > -1 ? fileName.slice(dot + 1) : "aoe2record";
+}
+
+/**
+ * Build a proper file name for a recording.
+ */
+export function buildRecordingFileName(
+  file: File,
+  recording: ParsedRecording | undefined,
+  gameNumber: number,
+  usedNames: Set<string>,
+): string {
+  const extension = getFileExtension(file.name);
+  const label = recording
+    ? `${recording.player1Data.name}_${recording.player2Data.name}_${recording.map}`
+    : file.name.replace(/\.[^.]+$/, "");
+
+  const base = sanitizeFileName(`${label}_game_${gameNumber}`);
+  const name = `${base}.${extension}`;
+
+  if (!usedNames.has(name)) {
+    usedNames.add(name);
+    return name;
+  }
+
+  let counter = 2;
+
+  while (usedNames.has(`${base}_${counter}.${extension}`)) {
+    counter++;
+  }
+  const uniqueName = `${base}_${counter}.${extension}`;
+
+  usedNames.add(uniqueName);
+
+  return uniqueName;
 }

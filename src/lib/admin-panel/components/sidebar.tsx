@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import {
+  BackspaceIcon,
+  CogIcon,
   HomeIcon,
   TrophyIcon,
-  CogIcon,
-  BackspaceIcon,
 } from "@/components/icons";
-import { Archive } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Archive } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Sidebar() {
   const t = useTranslations("admin.sidebar");

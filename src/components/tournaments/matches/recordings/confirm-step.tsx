@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
-import { computeScores, getStepWinner, winsNeeded } from "./helpers";
+import { computeScores, getStepWinner, winsNeeded } from "./recordings-helpers";
 import { RecordingsTable } from "./recordings-table";
 import type { GameStep } from "./types";
 

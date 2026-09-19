@@ -10,20 +10,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ErrorToast } from "@/components/ui/error-toast-content";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { storagePaths } from "@/lib/storage/paths";
+import { uploadFile } from "@/lib/storage/upload-client";
 import { UploadCloudIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { ConfirmStep } from "./recordings/confirm-step";
 import { DropZone } from "./recordings/drop-zone";
-import { getStepWinner } from "./recordings/helpers";
+import {
+  buildRecordingFileName,
+  getStepWinner,
+} from "./recordings/recordings-helpers";
 import { RecordingsTable } from "./recordings/recordings-table";
 import { useRecordingsUpload } from "./recordings/recordings-upload-hook";
 import { StepIndicator } from "./recordings/step-indicator";
-
 export interface RecordingsUploadDialogProps {
   player1Data: {
     profileId: number | null;
@@ -33,6 +39,10 @@ export interface RecordingsUploadDialogProps {
     profileId: number | null;
     name: string;
   };
+  /** The tournament match number (used as the storage folder name). */
+  matchNumber: number;
+  /** Tournament identifier used as the folder name inside the bucket. */
+  tournamentName: string;
   gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
   isAdmin?: boolean;
 }
@@ -40,6 +50,8 @@ export interface RecordingsUploadDialogProps {
 export function RecordingsUploadDialog({
   player1Data,
   player2Data,
+  matchNumber,
+  tournamentName,
   gameCount = 5,
   isAdmin = false,
 }: RecordingsUploadDialogProps) {
@@ -51,6 +63,7 @@ export function RecordingsUploadDialog({
     player1Data.profileId === null || player2Data.profileId === null;
 
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     steps,
@@ -76,9 +89,62 @@ export function RecordingsUploadDialog({
     p2ProfileId: player2Data.profileId!,
   });
 
-  const handleSubmit = () => {
-    // TODO
-    setOpen(false);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+
+    try {
+      const path = storagePaths.tournamentMatchGames(
+        tournamentName,
+        String(matchNumber),
+      );
+      const usedNames = new Set<string>();
+
+      // Collect every raw file across all games, naming each one after the
+      // players, map and game number parsed from it.
+      const uploads = steps.flatMap((step, stepIndex) =>
+        step.files.map((file) => {
+          const recording = step.recordings.find(
+            (r) => r.fileName === file.name,
+          );
+          return {
+            file,
+            fileName: buildRecordingFileName(
+              file,
+              recording,
+              stepIndex + 1,
+              usedNames,
+            ),
+          };
+        }),
+      );
+
+      // Upload files to Minio
+      await Promise.all(
+        uploads.map(({ file, fileName }) =>
+          uploadFile({ file, path, fileName }),
+        ),
+      );
+
+      toast.success(
+        uploads.length === 1
+          ? "Recording uploaded"
+          : `${uploads.length} recordings uploaded`,
+      );
+
+      setOpen(false);
+    } catch (error) {
+      toast.error(
+        <ErrorToast
+          message={
+            error instanceof Error
+              ? error.message
+              : "Failed to upload recordings"
+          }
+        />,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -248,9 +314,9 @@ export function RecordingsUploadDialog({
             {isConfirmStep && (
               <Button
                 onClick={handleSubmit}
-                disabled={hasValidationErrors || hasNoFiles}
+                disabled={hasValidationErrors || hasNoFiles || isSubmitting}
               >
-                Confirm &amp; Submit
+                {isSubmitting ? "Submitting..." : "Confirm & Submit"}
               </Button>
             )}
 
