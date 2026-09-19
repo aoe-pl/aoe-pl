@@ -11,13 +11,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ErrorToast } from "@/components/ui/error-toast-content";
-import { storagePaths } from "@/lib/storage/paths";
-import { uploadFile } from "@/lib/storage/upload-client";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@radix-ui/react-tooltip";
+} from "@/components/ui/tooltip";
+import { storagePaths } from "@/lib/storage/paths";
+import { uploadFile } from "@/lib/storage/upload-client";
 import { UploadCloudIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ import {
 import { RecordingsTable } from "./recordings/recordings-table";
 import { useRecordingsUpload } from "./recordings/recordings-upload-hook";
 import { StepIndicator } from "./recordings/step-indicator";
-
 export interface RecordingsUploadDialogProps {
   player1Data: {
     profileId: number | null;
