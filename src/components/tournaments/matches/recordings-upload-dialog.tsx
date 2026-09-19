@@ -16,14 +16,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { storagePaths } from "@/lib/storage/paths";
+import { buildObjectKey, storagePaths } from "@/lib/storage/paths";
 import { uploadFile } from "@/lib/storage/upload-client";
+import { api } from "@/trpc/react";
 import { UploadCloudIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmStep } from "./recordings/confirm-step";
 import { DropZone } from "./recordings/drop-zone";
 import {
+  buildGamePayload,
   buildRecordingFileName,
   getStepWinner,
 } from "./recordings/recordings-helpers";
@@ -39,10 +42,11 @@ export interface RecordingsUploadDialogProps {
     profileId: number | null;
     name: string;
   };
-  /** The tournament match number (used as the storage folder name). */
   matchNumber: number;
-  /** Tournament identifier used as the folder name inside the bucket. */
   tournamentName: string;
+  matchId: string;
+  player1MatchParticipantId: string;
+  player2MatchParticipantId: string;
   gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
   isAdmin?: boolean;
 }
@@ -52,18 +56,29 @@ export function RecordingsUploadDialog({
   player2Data,
   matchNumber,
   tournamentName,
+  matchId,
+  player1MatchParticipantId,
+  player2MatchParticipantId,
   gameCount = 5,
   isAdmin = false,
 }: RecordingsUploadDialogProps) {
   const player1Name = player1Data.name;
   const player2Name = player2Data.name;
 
+  // TODO See whether this check is needed.
+  // IF enabled, users wont be able to upload recs to matches they are not a part of.
+  // As apparently not everyone will have playerId, disabling this for now.
+  const isUploadDisabled = false;
+
   // IF player1Data.profileId or player2Data.profileId, don't allow to upload recs. Disable the button.
-  const isUploadDisabled =
-    player1Data.profileId === null || player2Data.profileId === null;
+  // const isUploadDisabled = player1Data.profileId === null || player2Data.profileId === null;
 
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
+  const { mutateAsync: saveRecordings } =
+    api.tournaments.matches.saveRecordings.useMutation();
 
   const {
     steps,
@@ -108,6 +123,7 @@ export function RecordingsUploadDialog({
           );
           return {
             file,
+            stepIndex,
             fileName: buildRecordingFileName(
               file,
               recording,
@@ -118,27 +134,72 @@ export function RecordingsUploadDialog({
         }),
       );
 
-      // Upload files to Minio
-      await Promise.all(
-        uploads.map(({ file, fileName }) =>
-          uploadFile({ file, path, fileName }),
-        ),
-      );
+      // The storage key is deterministic (path + sanitized file name), so we
+      // can predict it and group the keys per game without waiting for Minio.
+      const keysByStep = new Map<number, string[]>();
+      for (const upload of uploads) {
+        const key = buildObjectKey(path, upload.fileName);
+        keysByStep.set(upload.stepIndex, [
+          ...(keysByStep.get(upload.stepIndex) ?? []),
+          key,
+        ]);
+      }
+
+      // Build the payload for every game that has recordings attached.
+      const games = steps.flatMap((step, stepIndex) => {
+        const recordingKeys = keysByStep.get(stepIndex);
+        if (!recordingKeys || recordingKeys.length === 0) return [];
+
+        return [
+          buildGamePayload({
+            step,
+            gameNumber: stepIndex + 1,
+            recordingKeys,
+            player1: {
+              matchParticipantId: player1MatchParticipantId,
+              profileId: player1Data.profileId,
+            },
+            player2: {
+              matchParticipantId: player2MatchParticipantId,
+              profileId: player2Data.profileId,
+            },
+          }),
+        ];
+      });
+
+      // Persist the games first so the score table updates right away; the
+      // (slower) Minio uploads happen in the background afterwards.
+      await saveRecordings({ matchId, games });
 
       toast.success(
-        uploads.length === 1
-          ? "Recording uploaded"
-          : `${uploads.length} recordings uploaded`,
+        games.length === 1 ? "Recording saved" : `${games.length} games saved`,
       );
 
+      router.refresh();
       setOpen(false);
+
+      // Fire-and-forget: the games already reference the predicted keys.
+      void toast.promise(
+        Promise.all(
+          uploads.map((upload) =>
+            uploadFile({
+              file: upload.file,
+              path,
+              fileName: upload.fileName,
+            }),
+          ),
+        ),
+        {
+          loading: "Uploading recordings…",
+          success: "Recordings uploaded",
+          error: "Recordings saved, but the upload failed",
+        },
+      );
     } catch (error) {
       toast.error(
         <ErrorToast
           message={
-            error instanceof Error
-              ? error.message
-              : "Failed to upload recordings"
+            error instanceof Error ? error.message : "Failed to save recordings"
           }
         />,
       );

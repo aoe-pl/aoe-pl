@@ -143,7 +143,7 @@ export function buildRecordingFileName(
     : file.name.replace(/\.[^.]+$/, "");
 
   const base = sanitizeFileName(`${label}_game_${gameNumber}`);
-  const name = `${base}.${extension}`;
+  const name = sanitizeFileName(`${base}.${extension}`);
 
   if (!usedNames.has(name)) {
     usedNames.add(name);
@@ -152,12 +152,80 @@ export function buildRecordingFileName(
 
   let counter = 2;
 
-  while (usedNames.has(`${base}_${counter}.${extension}`)) {
+  const suffixed = (n: number) => sanitizeFileName(`${base}_${n}.${extension}`);
+
+  while (usedNames.has(suffixed(counter))) {
     counter++;
   }
-  const uniqueName = `${base}_${counter}.${extension}`;
+  const uniqueName = suffixed(counter);
 
   usedNames.add(uniqueName);
 
   return uniqueName;
+}
+
+/** A game ready to be persisted for a match. */
+export interface RecordingGamePayload {
+  gameNumber: number;
+  mapName: string;
+  recordingKeys: string[];
+  participants: {
+    matchParticipantId: string;
+    civName?: string;
+    isWinner: boolean;
+  }[];
+}
+
+interface BuildGamePayloadArgs {
+  step: GameStep;
+  gameNumber: number;
+  recordingKeys: string[];
+  player1: { matchParticipantId: string; profileId: number | null };
+  player2: { matchParticipantId: string; profileId: number | null };
+}
+
+/**
+ * Turn a single (validated) game step into the payload stored in the database.
+ * Civs are matched to match participants by aoe2companion profile id, falling
+ * back to the parser's player ordering when the ids are unknown.
+ */
+export function buildGamePayload({
+  step,
+  gameNumber,
+  recordingKeys,
+  player1,
+  player2,
+}: BuildGamePayloadArgs): RecordingGamePayload {
+  const first = step.recordings[0];
+  const last = step.recordings.at(-1);
+  const winner = getStepWinner(step);
+
+  const player1IsSecond =
+    player1.profileId != null &&
+    last?.player2Data.profileId === player1.profileId;
+
+  const player1Civ = player1IsSecond
+    ? last?.player2Data.civ
+    : last?.player1Data.civ;
+  const player2Civ = player1IsSecond
+    ? last?.player1Data.civ
+    : last?.player2Data.civ;
+
+  return {
+    gameNumber,
+    mapName: first?.map ?? "",
+    recordingKeys,
+    participants: [
+      {
+        matchParticipantId: player1.matchParticipantId,
+        civName: player1Civ,
+        isWinner: winner === 1,
+      },
+      {
+        matchParticipantId: player2.matchParticipantId,
+        civName: player2Civ,
+        isWinner: winner === 2,
+      },
+    ],
+  };
 }

@@ -1,6 +1,10 @@
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { createAoe2RecsService } from "@/lib/storage";
-import { sanitizeFileName, sanitizePathPrefix } from "@/lib/storage/paths";
+import {
+  buildObjectKey,
+  sanitizeFileName,
+  sanitizePathPrefix,
+} from "@/lib/storage/paths";
 import { auth } from "@/server/auth";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -55,7 +59,7 @@ export async function POST(request: NextRequest) {
       ? sanitizeFileName(fileName)
       : `${new Date().toISOString().replace(/[:.]/g, "-")}-${originalName}`;
 
-    const key = prefix ? `${prefix}/${objectName}` : objectName;
+    const key = buildObjectKey(path, objectName);
 
     const buffer = Buffer.from(await file.arrayBuffer());
 

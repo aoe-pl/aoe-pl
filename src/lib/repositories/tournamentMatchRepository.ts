@@ -1,5 +1,5 @@
-import { createAoe2RecsService } from "@/lib/storage";
 import { syncBracketAdvancement } from "@/lib/repositories/tournamentBracketRepository";
+import { createAoe2RecsService } from "@/lib/storage";
 import { db } from "@/server/db";
 import type { MatchStatus, Prisma } from "@prisma/client";
 
@@ -238,6 +238,7 @@ export const tournamentMatchRepository = {
               },
             },
           },
+          orderBy: { gameNumber: "asc" },
         },
         group: {
           include: {

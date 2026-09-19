@@ -41,6 +41,15 @@ export function buildStoragePath(...parts: (string | undefined)[]): string {
 }
 
 /**
+ * Build the final object key for a file inside the bucket.
+ */
+export function buildObjectKey(path: string, fileName: string): string {
+  const prefix = sanitizePathPrefix(path);
+  const name = sanitizeFileName(fileName);
+  return prefix ? `${prefix}/${name}` : name;
+}
+
+/**
  * Standard path prefixes used across the project. Prefer these over
  * hand-written strings so the folder structure stays consistent.
  */

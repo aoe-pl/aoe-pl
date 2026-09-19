@@ -1,11 +1,16 @@
-import { PlayerLink } from "@/components/player-link";
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
-import { RecordingsUploadDialog } from "@/components/tournaments/matches/recordings-upload-dialog";
+import {
+  MatchGamesTable,
+  type MatchGameRow,
+} from "@/components/tournaments/matches/match-games-table";
+import { MatchRecordingsPanel } from "@/components/tournaments/matches/match-recordings-panel";
+import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboard";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { auth } from "@/server/auth";
 import { format } from "date-fns";
+import { Check, X } from "lucide-react";
 import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -59,24 +64,78 @@ export default async function TournamentMatchPage({
     : "Date TBD";
 
   const groupName = match.group?.name ?? "—";
-  const gameCount = match.TournamentMatchMode?.gameCount ?? 5;
+  const gameCount = match.TournamentMatchMode?.gameCount ?? match.bestOf ?? 5;
+  const isApproved = match.status === "ADMIN_APPROVED";
+
+  const player1Score = p1?.wonScore ?? 0;
+  const player2Score = p2?.wonScore ?? 0;
+
+  const hasRecordings = match.Game.some(
+    (game) => game.recordingKeys.length > 0 || game.recUrl !== null,
+  );
+
+  const gameRows: MatchGameRow[] = Array.from(
+    { length: gameCount },
+    (_, index) => {
+      const game = match.Game[index];
+      const gamePlayer1 = game?.participants.find(
+        (participant) => participant.matchParticipantId === p1?.id,
+      );
+      const gamePlayer2 = game?.participants.find(
+        (participant) => participant.matchParticipantId === p2?.id,
+      );
+
+      return {
+        player1Civ: gamePlayer1?.civ?.name ?? null,
+        player2Civ: gamePlayer2?.civ?.name ?? null,
+        map: game?.map?.name ?? null,
+        player1Won: gamePlayer1?.isWinner ?? false,
+        player2Won: gamePlayer2?.isWinner ?? false,
+      };
+    },
+  );
 
   return (
-    <div className="panel space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="text-2xl font-bold">
-          <PlayerLink
-            name={player1Name}
-            playerNumber={player1Number}
-          />{" "}
-          <span className="text-muted-foreground">vs</span>{" "}
-          <PlayerLink
-            name={player2Name}
-            playerNumber={player2Number}
+    <div className="panel">
+      <div className="grid gap-6 xl:grid-cols-[15rem_minmax(0,1fr)_15rem]">
+        <div
+          className="hidden xl:block"
+          aria-hidden
+        />
+
+        <div className="flex flex-col items-center gap-6">
+          <MatchScoreboard
+            player1Name={player1Name}
+            player2Name={player2Name}
+            player1Number={player1Number}
+            player2Number={player2Number}
+            player1Score={player1Score}
+            player2Score={player2Score}
           />
-        </h1>
-        <div className="flex gap-2">
-          <RecordingsUploadDialog
+
+          <MatchGamesTable rows={gameRows} />
+        </div>
+
+        <aside
+          className="h-fit space-y-5 rounded-xl border border-[color:var(--medieval-wood-border)] p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
+        >
+          <div className="space-y-3 text-sm">
+            <div>
+              <div className="text-[color:var(--medieval-gold-muted)]">
+                Date
+              </div>
+              <div className="font-medium">{dateLabel}</div>
+            </div>
+            <div>
+              <div className="text-[color:var(--medieval-gold-muted)]">
+                Group
+              </div>
+              <div className="font-medium">{groupName}</div>
+            </div>
+          </div>
+
+          <MatchRecordingsPanel
             player1Data={{
               profileId: p1ProfileId,
               name: player1Name,
@@ -87,17 +146,46 @@ export default async function TournamentMatchPage({
             }}
             matchNumber={match.matchNumber}
             tournamentName={urlKey}
+            matchId={match.id}
+            player1MatchParticipantId={p1?.id ?? ""}
+            player2MatchParticipantId={p2?.id ?? ""}
             gameCount={gameCount}
             isAdmin={isAdmin}
+            hasRecordings={hasRecordings}
           />
-        </div>
+
+          <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+            <DraftLink label="Civ Draft" />
+            <DraftLink label="Map Draft" />
+          </div>
+
+          <div className="flex items-center justify-between border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+            <span className="text-[color:var(--medieval-gold-muted)]">
+              Approved by admin
+            </span>
+            {isApproved ? (
+              <Check
+                className="h-4 w-4 text-green-500"
+                aria-label="Approved"
+              />
+            ) : (
+              <X
+                className="h-4 w-4 text-[color:var(--medieval-gold-muted)]"
+                aria-label="Not approved"
+              />
+            )}
+          </div>
+        </aside>
       </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-        <dt className="text-muted-foreground">Date</dt>
-        <dd>{dateLabel}</dd>
-        <dt className="text-muted-foreground">Group</dt>
-        <dd>{groupName}</dd>
-      </dl>
     </div>
+  );
+}
+
+/** Placeholder link for the (not yet implemented) civ/map drafts. */
+function DraftLink({ label }: { label: string }) {
+  return (
+    <span className="flex cursor-not-allowed items-center gap-1 text-[color:var(--medieval-gold)] underline decoration-dotted underline-offset-4">
+      {label}
+    </span>
   );
 }
