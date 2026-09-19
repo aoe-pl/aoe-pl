@@ -152,7 +152,6 @@ export function RecordingsUploadDialog({
     if (!isOpen) reset();
   };
 
-  // TODO Uncomment this when done
   if (isUploadDisabled) {
     return (
       <Tooltip>
