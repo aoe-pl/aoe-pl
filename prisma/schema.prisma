@@ -455,13 +455,15 @@ model GameParticipant {
 }
 
 model Game {
-  id           String            @id @default(cuid())
-  matchId      String
-  mapId        String
-  recUrl       String?
-  map          Map               @relation(fields: [mapId], references: [id])
-  match        TournamentMatch   @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  participants GameParticipant[]
+  id            String            @id @default(cuid())
+  matchId       String
+  mapId         String
+  gameNumber    Int?
+  recUrl        String?
+  recordingKeys String[]          @default([])
+  map           Map               @relation(fields: [mapId], references: [id])
+  match         TournamentMatch   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  participants  GameParticipant[]
 }
 
 enum RegistrationFieldType {

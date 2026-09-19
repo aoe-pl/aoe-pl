@@ -745,6 +745,44 @@ export const tournamentRouter = createTRPCRouter({
           input.filesToRemove,
         );
       }),
+    saveRecordings: protectedProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          games: z.array(
+            z.object({
+              gameNumber: z.number().int().positive(),
+              mapName: z.string(),
+              recordingKeys: z.array(z.string()),
+              participants: z.array(
+                z.object({
+                  matchParticipantId: z.string(),
+                  civName: z.string().optional(),
+                  isWinner: z.boolean(),
+                }),
+              ),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        if (input.games.length === 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "No games were provided.",
+          });
+        }
+
+        return tournamentGameRepository.saveMatchRecordings(
+          input.matchId,
+          input.games,
+        );
+      }),
+    clearRecordings: protectedProcedure
+      .input(z.object({ matchId: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentGameRepository.clearMatchRecordings(input.matchId);
+      }),
     updateParticipant: adminProcedure
       .input(
         z.object({
