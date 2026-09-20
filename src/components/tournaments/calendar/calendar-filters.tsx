@@ -30,8 +30,8 @@ interface CalendarFiltersProps {
 }
 
 const popoverTriggerStyle = cn(
-  "flex items-center gap-2 rounded-md border px-3 py-3 text-sm font-medium",
-  "hover:bg-muted focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
+  "flex items-center gap-2 rounded-md border border-[color:var(--medieval-wood-border)] px-3 py-3 text-sm font-medium",
+  "hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[color:var(--medieval-gold)]/50 focus-visible:outline-none",
 );
 
 export function CalendarFilters({
@@ -65,13 +65,13 @@ export function CalendarFilters({
               className={cn(
                 popoverTriggerStyle,
                 selectedGroups.size > 0
-                  ? "border-primary/50 bg-primary/5 text-primary"
-                  : "border-border text-muted-foreground",
+                  ? "border-[color:var(--medieval-gold)]/60 bg-[color:var(--medieval-gold)]/15 text-[color:var(--medieval-gold)]"
+                  : "text-[color:var(--medieval-gold-muted)]",
               )}
             >
               {t("groups")}
               {selectedGroups.size > 0 && (
-                <span className="bg-primary text-primary-foreground rounded-full px-1 py-px text-[10px] leading-none font-bold">
+                <span className="rounded-full bg-[color:var(--medieval-gold)] px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
                   {selectedGroups.size}
                 </span>
               )}
@@ -122,13 +122,13 @@ export function CalendarFilters({
               className={cn(
                 popoverTriggerStyle,
                 selectedPlayers.size > 0
-                  ? "border-primary/50 bg-primary/5 text-primary"
-                  : "border-border text-muted-foreground",
+                  ? "border-[color:var(--medieval-gold)]/60 bg-[color:var(--medieval-gold)]/15 text-[color:var(--medieval-gold)]"
+                  : "text-[color:var(--medieval-gold-muted)]",
               )}
             >
               {t("players")}
               {selectedPlayers.size > 0 && (
-                <span className="bg-primary text-primary-foreground rounded-full px-1 py-px text-[10px] leading-none font-bold">
+                <span className="rounded-full bg-[color:var(--medieval-gold)] px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
                   {selectedPlayers.size}
                 </span>
               )}
@@ -204,7 +204,7 @@ export function CalendarFilters({
           {activePlayers.map((p) => (
             <span
               key={p.id}
-              className="bg-primary/20 flex items-center rounded-full px-2 py-2 text-xs"
+              className="text-primary flex items-center rounded-full bg-[color:var(--medieval-gold)]/20 px-2 py-2 text-xs"
             >
               {p.nickname}
               <button

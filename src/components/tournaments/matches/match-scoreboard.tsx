@@ -45,7 +45,7 @@ export function MatchScoreboard({
           className={`flex-1 truncate text-right text-sm font-bold sm:text-2xl ${
             player1Leading
               ? "text-[color:var(--medieval-gold)]"
-              : "text-[color:var(--medieval-parchment-foreground)]"
+              : "text-primary"
           }`}
         >
           <PlayerLink
@@ -59,7 +59,7 @@ export function MatchScoreboard({
             className={
               player1Leading
                 ? "text-[color:var(--medieval-gold)]"
-                : "text-[color:var(--medieval-parchment-foreground)]"
+                : "text-primary"
             }
           >
             {revealed ? player1Score : "?"}
@@ -71,7 +71,7 @@ export function MatchScoreboard({
             className={
               player2Leading
                 ? "text-[color:var(--medieval-gold)]"
-                : "text-[color:var(--medieval-parchment-foreground)]"
+                : "text-primary"
             }
           >
             {revealed ? player2Score : "?"}
@@ -82,7 +82,7 @@ export function MatchScoreboard({
           className={`flex-1 truncate text-left text-sm font-bold sm:text-2xl ${
             player2Leading
               ? "text-[color:var(--medieval-gold)]"
-              : "text-[color:var(--medieval-parchment-foreground)]"
+              : "text-primary"
           }`}
         >
           <PlayerLink
