@@ -438,6 +438,16 @@ export const tournamentMatchRepository = {
   },
 
   /**
+   * Marks a match as admin-approved, or revokes the approval.
+   */
+  async setMatchApproval(id: string, approved: boolean) {
+    return db.tournamentMatch.update({
+      where: { id },
+      data: { status: approved ? "ADMIN_APPROVED" : "COMPLETED" },
+    });
+  },
+
+  /**
    * Attaches a participant (or team) to an existing match - used to fill
    * empty or single-entrant (bye) slots in a bracket. No advancement is
    * triggered; that happens when the admin later records a winner.

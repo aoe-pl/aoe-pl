@@ -146,8 +146,17 @@ export function TournamentCalendar({
 
       {schedulingMatch && (
         <ScheduleMatchDialog
-          match={schedulingMatch.match}
+          matchId={schedulingMatch.match.id}
           defaultDate={schedulingMatch.defaultDate}
+          player1Name={
+            schedulingMatch.match.TournamentMatchParticipant[0]?.participant
+              ?.nickname ?? "TBD"
+          }
+          player2Name={
+            schedulingMatch.match.TournamentMatchParticipant[1]?.participant
+              ?.nickname ?? "TBD"
+          }
+          groupName={schedulingMatch.match.group?.name ?? null}
           onClose={() => setSchedulingMatch(null)}
         />
       )}

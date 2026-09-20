@@ -654,7 +654,13 @@
         "confirm_button": "Confirm",
         "saving": "Saving...",
         "date_label": "Date",
-        "time_label": "Time"
+        "time_label": "Time",
+        "panel_title": "Match date",
+        "set_date_button": "Set match date",
+        "clear_date_button": "Clear match date",
+        "clear_date_confirm_title": "Clear match date?",
+        "clear_date_confirm_description": "This will remove the scheduled date and mark the match as unscheduled.",
+        "clear_date_confirm_button": "Clear date"
       },
       "filters": {
         "groups": "Groups",
@@ -682,9 +688,34 @@
     "matches": {
       "no_matches": "No upcoming matches",
       "date": "Date",
+      "date_tbd": "Date TBD",
       "group": "Group",
       "player": "Player",
-      "search_players_or_group": "Search player or group"
+      "search_players_or_group": "Search player or group",
+      "status": {
+        "label": "Status",
+        "pending": "Pending",
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "admin_approved": "Admin approved"
+      },
+      "approval": {
+        "title": "Admin approval",
+        "approve_button": "Approve match",
+        "unapprove_button": "Revoke approval"
+      },
+      "recordings": {
+        "upload_button": "Upload recs",
+        "download_button": "Download recs",
+        "clear_button": "Clear recs",
+        "clearing": "Clearing",
+        "clear_confirm_title": "Clear recordings?",
+        "clear_confirm_description": "This permanently deletes every recording saved for this match, including the game results. This cannot be undone.",
+        "clear_confirm_cancel": "Cancel",
+        "clear_confirm_button": "Clear recordings",
+        "cleared_toast": "Recordings cleared",
+        "clear_error": "Failed to clear recordings"
+      }
     }
   },
   "profile": {

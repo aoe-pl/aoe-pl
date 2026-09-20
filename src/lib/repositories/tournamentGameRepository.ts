@@ -171,6 +171,13 @@ export const tournamentGameRepository = {
         }),
       );
 
+      // Once results are recorded the match counts as played. This also
+      // invalidates any previous admin approval, which has to be re-granted.
+      await tx.tournamentMatch.update({
+        where: { id: matchId },
+        data: { status: "COMPLETED" },
+      });
+
       await syncBracketAdvancement(tx, matchId, { hadWinnerBefore });
 
       return { gamesSaved: games.length };
@@ -229,8 +236,8 @@ export const tournamentGameRepository = {
   /**
    * Remove every recording saved for a match: the objects in Minio and the
    * corresponding games in the database. Participant series scores are reset
-   * as well. Missing objects are ignored so a partially uploaded match can
-   * still be cleared.
+   * and the match status is reverted to its pre-result state. Missing objects
+   * are ignored so a partially uploaded match can still be cleared.
    */
   async clearMatchRecordings(matchId: string) {
     const info = await tournamentGameRepository.getMatchRecordingsInfo(matchId);
@@ -253,11 +260,23 @@ export const tournamentGameRepository = {
     }
 
     return db.$transaction(async (tx) => {
+      const match = await tx.tournamentMatch.findUnique({
+        where: { id: matchId },
+        select: { matchDate: true },
+      });
+
       const deleted = await tx.game.deleteMany({ where: { matchId } });
 
       await tx.tournamentMatchParticipant.updateMany({
         where: { matchId },
         data: { wonScore: 0, lostScore: 0, isWinner: false },
+      });
+
+      // Revert the match to its pre-result state: scheduled when it still has
+      // a date, pending otherwise. Any admin approval is revoked with it.
+      await tx.tournamentMatch.update({
+        where: { id: matchId },
+        data: { status: match?.matchDate ? "SCHEDULED" : "PENDING" },
       });
 
       return { gamesDeleted: deleted.count };

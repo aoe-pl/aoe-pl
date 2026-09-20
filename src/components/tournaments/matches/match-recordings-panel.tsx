@@ -5,6 +5,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { api } from "@/trpc/react";
 import { Download, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ import {
 
 interface MatchRecordingsPanelProps extends RecordingsUploadDialogProps {
   hasRecordings: boolean;
+  isApproved: boolean;
 }
 
 /**
@@ -22,10 +24,12 @@ interface MatchRecordingsPanelProps extends RecordingsUploadDialogProps {
  */
 export function MatchRecordingsPanel({
   hasRecordings,
+  isApproved,
   matchId,
   ...dialogProps
 }: MatchRecordingsPanelProps) {
   const router = useRouter();
+  const t = useTranslations("tournament.matches.recordings");
   const [isClearing, setIsClearing] = useState(false);
 
   const { mutateAsync: clearRecordings } =
@@ -36,16 +40,12 @@ export function MatchRecordingsPanel({
 
     try {
       await clearRecordings({ matchId });
-      toast.success("Recordings cleared");
+      toast.success(t("cleared_toast"));
       router.refresh();
     } catch (error) {
       toast.error(
         <ErrorToast
-          message={
-            error instanceof Error
-              ? error.message
-              : "Failed to clear recordings"
-          }
+          message={error instanceof Error ? error.message : t("clear_error")}
         />,
       );
     } finally {
@@ -66,6 +66,7 @@ export function MatchRecordingsPanel({
     <div className="space-y-2">
       <Button
         size="lg"
+        variant="gold"
         className="w-full"
         asChild
       >
@@ -74,28 +75,30 @@ export function MatchRecordingsPanel({
           download
         >
           <Download />
-          Download Recs
+          {t("download_button")}
         </a>
       </Button>
 
-      <ConfirmDialog
-        trigger={
-          <Button
-            size="lg"
-            variant="destructive"
-            className="w-full"
-            disabled={isClearing}
-          >
-            <Trash2 />
-            {isClearing ? "Clearing…" : "Clear Recs"}
-          </Button>
-        }
-        title="Clear recordings?"
-        description="This permanently deletes every recording saved for this match, including the game results. This cannot be undone."
-        cancelLabel="Cancel"
-        confirmLabel="Clear recordings"
-        onConfirm={() => void handleClear()}
-      />
+      {!isApproved && (
+        <ConfirmDialog
+          trigger={
+            <Button
+              size="lg"
+              variant="wine"
+              className="w-full"
+              disabled={isClearing}
+            >
+              <Trash2 />
+              {isClearing ? t("clearing") : t("clear_button")}
+            </Button>
+          }
+          title={t("clear_confirm_title")}
+          description={t("clear_confirm_description")}
+          cancelLabel={t("clear_confirm_cancel")}
+          confirmLabel={t("clear_confirm_button")}
+          onConfirm={() => void handleClear()}
+        />
+      )}
     </div>
   );
 }

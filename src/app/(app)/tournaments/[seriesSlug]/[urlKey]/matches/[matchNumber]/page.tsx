@@ -1,17 +1,18 @@
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
+import { MatchApprovalPanel } from "@/components/tournaments/matches/match-approval-panel";
 import {
   MatchGamesTable,
   type MatchGameRow,
 } from "@/components/tournaments/matches/match-games-table";
 import { MatchRecordingsPanel } from "@/components/tournaments/matches/match-recordings-panel";
+import { MatchSchedulePanel } from "@/components/tournaments/matches/match-schedule-panel";
 import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboard";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { auth } from "@/server/auth";
 import { format } from "date-fns";
-import { Check, X } from "lucide-react";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 export default async function TournamentMatchPage({
@@ -21,10 +22,11 @@ export default async function TournamentMatchPage({
 }) {
   const { urlKey, matchNumber } = await params;
 
-  const [match, locale, session] = await Promise.all([
+  const [match, locale, session, t] = await Promise.all([
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
     getLocale(),
     auth(),
+    getTranslations("tournament.matches"),
   ]);
 
   if (!match) notFound();
@@ -61,11 +63,35 @@ export default async function TournamentMatchPage({
 
   const dateLabel = match.matchDate
     ? format(new Date(match.matchDate), "PPP p", { locale: dateFnsLocale })
-    : "Date TBD";
+    : t("date_tbd");
 
   const groupName = match.group?.name ?? "—";
   const gameCount = match.TournamentMatchMode?.gameCount ?? match.bestOf ?? 5;
   const isApproved = match.status === "ADMIN_APPROVED";
+
+  const statusLabels = {
+    PENDING: t("status.pending"),
+    SCHEDULED: t("status.scheduled"),
+    COMPLETED: t("status.completed"),
+    ADMIN_APPROVED: t("status.admin_approved"),
+  } satisfies Record<typeof match.status, string>;
+
+  // The match can only be approved once it is completed (COMPLETED) or already
+  // approved (ADMIN_APPROVED, so the approval can be revoked).
+  const canApprove =
+    match.status === "COMPLETED" || match.status === "ADMIN_APPROVED";
+
+  // Only admins or participants may schedule, and only while the match is upcoming.
+  const isUpcoming = match.status === "PENDING" || match.status === "SCHEDULED";
+
+  const canSchedule =
+    isUpcoming &&
+    (isAdmin ||
+      (session?.user?.id
+        ? participants.some(
+            (slot) => slot.participant?.user?.id === session.user.id,
+          )
+        : false));
 
   const player1Score = p1?.wonScore ?? 0;
   const player2Score = p2?.wonScore ?? 0;
@@ -123,17 +149,35 @@ export default async function TournamentMatchPage({
           <div className="space-y-3 text-sm">
             <div>
               <div className="text-[color:var(--medieval-gold-muted)]">
-                Date
+                {t("status.label")}
+              </div>
+              <div className="font-medium">{statusLabels[match.status]}</div>
+            </div>
+            <div>
+              <div className="text-[color:var(--medieval-gold-muted)]">
+                {t("date")}
               </div>
               <div className="font-medium">{dateLabel}</div>
             </div>
             <div>
               <div className="text-[color:var(--medieval-gold-muted)]">
-                Group
+                {t("group")}
               </div>
               <div className="font-medium">{groupName}</div>
             </div>
           </div>
+
+          {canSchedule && (
+            <div className="border-t border-[color:var(--medieval-wood-border)] pt-4">
+              <MatchSchedulePanel
+                matchId={match.id}
+                matchDate={match.matchDate}
+                player1Name={player1Name}
+                player2Name={player2Name}
+                groupName={match.group?.name ?? null}
+              />
+            </div>
+          )}
 
           <MatchRecordingsPanel
             player1Data={{
@@ -152,6 +196,7 @@ export default async function TournamentMatchPage({
             gameCount={gameCount}
             isAdmin={isAdmin}
             hasRecordings={hasRecordings}
+            isApproved={isApproved}
           />
 
           <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
@@ -159,22 +204,12 @@ export default async function TournamentMatchPage({
             <DraftLink label="Map Draft" />
           </div>
 
-          <div className="flex items-center justify-between border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
-            <span className="text-[color:var(--medieval-gold-muted)]">
-              Approved by admin
-            </span>
-            {isApproved ? (
-              <Check
-                className="h-4 w-4 text-green-500"
-                aria-label="Approved"
-              />
-            ) : (
-              <X
-                className="h-4 w-4 text-[color:var(--medieval-gold-muted)]"
-                aria-label="Not approved"
-              />
-            )}
-          </div>
+          {isAdmin && canApprove && (
+            <MatchApprovalPanel
+              matchId={match.id}
+              isApproved={isApproved}
+            />
+          )}
         </aside>
       </div>
     </div>
