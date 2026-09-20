@@ -219,12 +219,12 @@ export function RecordingsUploadDialog({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span>
+          <span className="w-full">
             <Button
               size="lg"
               variant="gold"
               disabled
-              className="disabled:pointer-events-auto disabled:cursor-not-allowed"
+              className="w-full disabled:pointer-events-auto disabled:cursor-not-allowed"
             >
               {t("upload_button")}
             </Button>
@@ -249,7 +249,7 @@ export function RecordingsUploadDialog({
           size="lg"
           variant="gold"
           disabled={isUploadDisabled}
-          className="disabled:pointer-events-auto disabled:cursor-not-allowed"
+          className="w-full disabled:pointer-events-auto disabled:cursor-not-allowed"
         >
           <UploadCloudIcon />
           {t("upload_button")}

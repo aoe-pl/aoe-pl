@@ -123,13 +123,8 @@ export default async function TournamentMatchPage({
 
   return (
     <div className="panel">
-      <div className="grid gap-6 xl:grid-cols-[15rem_minmax(0,1fr)_15rem]">
-        <div
-          className="hidden xl:block"
-          aria-hidden
-        />
-
-        <div className="flex flex-col items-center gap-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_15rem]">
+        <div className="flex flex-col gap-6">
           <MatchScoreboard
             player1Name={player1Name}
             player2Name={player2Name}

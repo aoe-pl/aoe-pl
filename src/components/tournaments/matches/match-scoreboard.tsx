@@ -25,7 +25,7 @@ export function MatchScoreboard({
 
   return (
     <div
-      className="w-full max-w-2xl rounded-2xl border-2 border-[color:var(--medieval-wood-border)] px-6 py-5"
+      className="w-full rounded-2xl border-2 border-[color:var(--medieval-wood-border)] px-4 py-4 sm:px-6 sm:py-5"
       style={{
         background:
           "linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.18)), var(--medieval-wood)",
@@ -33,9 +33,9 @@ export function MatchScoreboard({
           "inset 0 2px 0 rgba(255, 255, 255, 0.05), 0 6px 18px rgba(0, 0, 0, 0.45)",
       }}
     >
-      <div className="flex items-center justify-center gap-4 sm:gap-8">
+      <div className="flex items-center justify-center gap-2 sm:gap-8">
         <span
-          className={`font-bprismaold flex-1 truncate text-right text-lg sm:text-2xl ${
+          className={`flex-1 truncate text-right text-sm font-bold sm:text-2xl ${
             player1Leading
               ? "text-[color:var(--medieval-gold)]"
               : "text-[color:var(--medieval-parchment-foreground)]"
@@ -47,7 +47,7 @@ export function MatchScoreboard({
           />
         </span>
 
-        <span className="shrink-0 text-2xl font-black tabular-nums sm:text-4xl">
+        <span className="shrink-0 text-xl font-black tabular-nums sm:text-4xl">
           <span
             className={
               player1Leading
@@ -72,7 +72,7 @@ export function MatchScoreboard({
         </span>
 
         <span
-          className={`flex-1 truncate text-left text-lg font-bold sm:text-2xl ${
+          className={`flex-1 truncate text-left text-sm font-bold sm:text-2xl ${
             player2Leading
               ? "text-[color:var(--medieval-gold)]"
               : "text-[color:var(--medieval-parchment-foreground)]"

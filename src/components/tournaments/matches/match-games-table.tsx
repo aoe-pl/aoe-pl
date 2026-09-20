@@ -18,7 +18,7 @@ interface MatchGamesTableProps {
  */
 export function MatchGamesTable({ rows }: MatchGamesTableProps) {
   return (
-    <div className="w-full max-w-2xl overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
+    <div className="w-full overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
       {rows.map((row, index) => (
         <div
           key={index}
