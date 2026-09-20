@@ -1,7 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
-import { computeScores, getStepWinner, winsNeeded } from "./recordings-helpers";
-import { RecordingsTable } from "./recordings-table";
+import { useTranslations } from "next-intl";
+import { computeScores, winsNeeded } from "./recordings-helpers";
 import type { GameStep } from "./types";
 
 interface ConfirmStepProps {
@@ -11,12 +11,17 @@ interface ConfirmStepProps {
   player2Name: string;
 }
 
+/**
+ * Final review before submitting.
+ */
 export function ConfirmStep({
   steps,
   gameCount,
   player1Name,
   player2Name,
 }: ConfirmStepProps) {
+  const t = useTranslations("tournament.matches.recordings");
+
   const uploadedSteps = steps
     .map((step, i) => ({ step, gameNumber: i + 1 }))
     .filter(({ step }) => step.files.length > 0);
@@ -35,75 +40,71 @@ export function ConfirmStep({
     uploadedCount > 0 &&
     (seriesComplete ? uploadedCount !== expectedGames : true);
 
-  const seriesWinner =
-    p1Wins >= winsNeeded(gameCount)
-      ? player1Name
-      : p2Wins >= winsNeeded(gameCount)
-        ? player2Name
-        : null;
-
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <p className="text-muted-foreground text-sm">
-          Review the uploaded recordings before submitting.
-        </p>
+    <div className="space-y-4">
+      <p className="text-muted-foreground text-sm">{t("confirm.review")}</p>
 
-        <p className="text-md text-center font-medium">
-          {player1Name}{" "}
-          <span className={p1Wins > p2Wins ? "text-green-500" : ""}>
-            {p1Wins}
-          </span>
-          {" : "}
-          <span className={p2Wins > p1Wins ? "text-primary" : ""}>
-            {p2Wins}
-          </span>{" "}
-          {player2Name}
-          {seriesWinner && (
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
-              ({seriesWinner} wins)
-            </span>
-          )}
-        </p>
+      <p className="text-center text-lg font-medium text-[color:var(--medieval-parchment-foreground)]">
+        <span>{player1Name}</span>{" "}
+        <span
+          className={p1Wins > p2Wins ? "text-[color:var(--medieval-gold)]" : ""}
+        >
+          {p1Wins}
+        </span>
+        <span className="mx-1 text-[color:var(--medieval-gold-muted)]">:</span>
+        <span
+          className={p2Wins > p1Wins ? "text-[color:var(--medieval-gold)]" : ""}
+        >
+          {p2Wins}
+        </span>{" "}
+        <span>{player2Name}</span>
+      </p>
 
-        {countMismatch && (
-          <Alert className="border-amber-500/50 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200 [&>svg]:text-amber-500">
-            <TriangleAlertIcon className="size-4" />
-            <AlertDescription>
-              {seriesComplete
-                ? `${uploadedCount} recording${uploadedCount !== 1 ? "s" : ""} uploaded, but the score (${p1Wins}:${p2Wins}) suggests ${expectedGames} game${expectedGames !== 1 ? "s" : ""} were played. Double-check the files are correct.`
-                : `No player has clinched the series yet based on the uploaded recordings (${p1Wins}:${p2Wins}). Make sure all games are accounted for.`}
-            </AlertDescription>
-          </Alert>
-        )}
+      <div className="space-y-3">
+        {uploadedSteps.map(({ step, gameNumber }) => {
+          const recording = step.recordings.at(-1);
+
+          return (
+            <div
+              key={gameNumber}
+              className="space-y-1 rounded-xl border border-[color:var(--medieval-wood-border)] px-3 py-2 text-sm"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
+            >
+              <p className="font-semibold text-[color:var(--medieval-gold)]">
+                {t("confirm.game_label", { number: gameNumber })}
+              </p>
+              <p className="text-[color:var(--medieval-gold-muted)]">
+                {player1Name}: {recording?.player1Data.civ ?? "-"}
+              </p>
+              <p className="text-[color:var(--medieval-gold-muted)]">
+                {player2Name}: {recording?.player2Data.civ ?? "-"}
+              </p>
+              <p className="text-[color:var(--medieval-gold-muted)]">
+                {t("map")}: {recording?.map ?? "-"}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
-      {uploadedSteps.map(({ step, gameNumber }) => {
-        const winner = getStepWinner(step);
-        const winnerName =
-          winner === 1 ? player1Name : winner === 2 ? player2Name : null;
-        return (
-          <div
-            key={gameNumber}
-            className="space-y-2"
-          >
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-semibold">Game {gameNumber}</h3>
-              {winnerName && (
-                <span className="text-xs text-green-500">
-                  Winner: <span className="font-semibold">{winnerName}</span>
-                </span>
-              )}
-            </div>
-            <ul className="text-muted-foreground list-inside list-disc text-xs">
-              {step.files.map((f) => (
-                <li key={f.name}>{f.name}</li>
-              ))}
-            </ul>
-            <RecordingsTable recordings={step.recordings} />
-          </div>
-        );
-      })}
+      {countMismatch && (
+        <Alert className="border-amber-500/50 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200 [&>svg]:text-amber-500">
+          <TriangleAlertIcon className="size-4" />
+          <AlertDescription>
+            {seriesComplete
+              ? t("confirm.count_mismatch_complete", {
+                  uploaded: uploadedCount,
+                  p1: p1Wins,
+                  p2: p2Wins,
+                  expected: expectedGames,
+                })
+              : t("confirm.count_mismatch_incomplete", {
+                  p1: p1Wins,
+                  p2: p2Wins,
+                })}
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

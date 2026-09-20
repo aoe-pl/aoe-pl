@@ -1,4 +1,5 @@
 import { RecordingParser } from "@/lib/recording-parser/RecordingParser";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import {
   buildInitialSteps,
@@ -25,6 +26,7 @@ export function useRecordingsUpload({
   p1ProfileId,
   p2ProfileId,
 }: UseRecordingsUploadOptions) {
+  const t = useTranslations("tournament.matches.recordings");
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState<GameStep[]>(() =>
     buildInitialSteps(gameCount),
@@ -47,7 +49,9 @@ export function useRecordingsUpload({
 
       if (invalidFiles.length > 0) {
         setParseError(
-          `Invalid file type: ${invalidFiles.map((f) => f.name).join(", ")}. Only .aoe2record files are accepted.`,
+          t("parse_error_invalid_type", {
+            files: invalidFiles.map((f) => f.name).join(", "),
+          }),
         );
         return;
       }
@@ -75,6 +79,10 @@ export function useRecordingsUpload({
               step.recordings,
               p1ProfileId,
               p2ProfileId,
+              {
+                profileMismatch: t("validation_error_profile_mismatch"),
+                invalidRecordings: t("validation_error"),
+              },
             );
           } else {
             step.validationError = null;
@@ -96,13 +104,13 @@ export function useRecordingsUpload({
         });
       } catch (err) {
         setParseError(
-          err instanceof Error ? err.message : "Failed to parse recording",
+          err instanceof Error ? err.message : t("parse_error_failed"),
         );
       } finally {
         setParsing(false);
       }
     },
-    [currentStep, gameCount, strictValidation, parser],
+    [currentStep, gameCount, strictValidation, parser, t],
   );
 
   const handleClearStep = useCallback(() => {

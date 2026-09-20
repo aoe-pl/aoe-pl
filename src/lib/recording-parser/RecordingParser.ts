@@ -10,36 +10,6 @@ export class RecordingParser {
     const buffer = await file.arrayBuffer();
     const summary = parse_rec_summary(buffer);
 
-    console.log(`[aoe2rec-js] "${file.name}"`, {
-      duration_raw: summary.duration,
-      world_time: summary.header.replay.world_time,
-      old_world_time: summary.header.replay.old_world_time,
-      timestamp: summary.header.timestamp,
-      map: summary.header.game_settings.resolved_map_id,
-      rms_strings: summary.header.game_settings.rms_strings,
-      replay: {
-        game_mode: summary.header.replay.game_mode,
-        game_speed: summary.header.replay.game_speed,
-        num_players: summary.header.replay.num_players,
-        timer: summary.header.replay.timer,
-        world_time: summary.header.replay.world_time,
-      },
-      teams: summary.teams.map((team, i) => ({
-        team: i,
-        winner: team.winner,
-        players: team.players.map((p) => ({
-          name: p.name,
-          player_number: p.player_number,
-          civ_id: p.civ_id,
-          profile_id: p.profile_id,
-          resigned: p.resigned,
-          color_id: p.color_id,
-          resolved_team_id: p.resolved_team_id,
-          selected_team_id: p.selected_team_id,
-        })),
-      })),
-    });
-
     const team0 = summary.teams[0]!;
     const team1 = summary.teams[1]!;
     const p1 = team0.players[0]!;

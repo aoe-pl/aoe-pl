@@ -31,7 +31,7 @@ import {
   buildRecordingFileName,
   getStepWinner,
 } from "./recordings/recordings-helpers";
-import { RecordingsTable } from "./recordings/recordings-table";
+import { RecordingsList } from "./recordings/recordings-list";
 import { useRecordingsUpload } from "./recordings/recordings-upload-hook";
 import { StepIndicator } from "./recordings/step-indicator";
 export interface RecordingsUploadDialogProps {
@@ -173,9 +173,7 @@ export function RecordingsUploadDialog({
       // (slower) Minio uploads happen in the background afterwards.
       await saveRecordings({ matchId, games });
 
-      toast.success(
-        games.length === 1 ? "Recording saved" : `${games.length} games saved`,
-      );
+      toast.success(t("saved_toast", { count: games.length }));
 
       router.refresh();
       setOpen(false);
@@ -192,17 +190,15 @@ export function RecordingsUploadDialog({
           ),
         ),
         {
-          loading: "Uploading recordings…",
-          success: "Recordings uploaded",
-          error: "Recordings saved, but the upload failed",
+          loading: t("uploading_toast"),
+          success: t("uploaded_toast"),
+          error: t("upload_failed_toast"),
         },
       );
     } catch (error) {
       toast.error(
         <ErrorToast
-          message={
-            error instanceof Error ? error.message : "Failed to save recordings"
-          }
+          message={error instanceof Error ? error.message : t("save_error")}
         />,
       );
     } finally {
@@ -231,10 +227,7 @@ export function RecordingsUploadDialog({
           </span>
         </TooltipTrigger>
 
-        <TooltipContent>
-          Upload is disabled because because one or both players do not have a
-          valid aoe2companion link set on their profile page.
-        </TooltipContent>
+        <TooltipContent>{t("upload_disabled_tooltip")}</TooltipContent>
       </Tooltip>
     );
   }
@@ -258,14 +251,13 @@ export function RecordingsUploadDialog({
 
       <DialogContent className="flex max-h-[90vh] w-full flex-col gap-6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-center">
-            Upload Game Recordings
+          <DialogTitle className="text-center text-[color:var(--medieval-gold)]">
+            {t("title")}
           </DialogTitle>
-          <p className="text-center">
-            Upload aoe2record files for <strong>{player1Name}</strong> vs{" "}
-            <strong>{player2Name}</strong>.
+          <p className="text-center text-sm text-[color:var(--medieval-gold-muted)]">
+            {t("subtitle", { player1: player1Name, player2: player2Name })}
             <br />
-            One file per game; add multiple if a game was restored.
+            {t("hint")}
           </p>
         </DialogHeader>
 
@@ -296,14 +288,14 @@ export function RecordingsUploadDialog({
                     onClick={handleClearStep}
                     className="text-destructive shrink-0 underline"
                   >
-                    Clear files
+                    {t("clear_files")}
                   </button>
                 </AlertDescription>
               </Alert>
             )}
 
             {!hasNoFiles && (
-              <RecordingsTable recordings={currentGameStep.recordings} />
+              <RecordingsList recordings={currentGameStep.recordings} />
             )}
 
             {currentGameStep.files.length > 0 &&
@@ -318,19 +310,11 @@ export function RecordingsUploadDialog({
                       : null;
 
                 return winnerName ? (
-                  <p className="text-sm">
-                    Winner:{" "}
-                    <span className="font-semibold text-green-500">
-                      {winnerName}
-                    </span>
-                  </p>
+                  <> </>
                 ) : (
                   <Alert variant="destructive">
                     <AlertDescription className="space-y-2">
-                      <p>
-                        Winner could not be determined automatically. Please
-                        select the winner manually.
-                      </p>
+                      <p>{t("winner_manual_prompt")}</p>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -370,23 +354,36 @@ export function RecordingsUploadDialog({
                 checked={strictValidation}
                 onCheckedChange={(v) => setStrictValidation(!!v)}
               />
-              Validate files
+              {t("validate_files")}
             </label>
           )}
           <div className="flex flex-1 justify-end gap-2">
-            {currentStep > 0 && <Button onClick={handleBack}>Back</Button>}
+            {currentStep > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleBack}
+              >
+                {t("back_button")}
+              </Button>
+            )}
 
             {isConfirmStep && (
               <Button
+                variant="gold"
                 onClick={handleSubmit}
                 disabled={hasValidationErrors || hasNoFiles || isSubmitting}
               >
-                {isSubmitting ? "Submitting..." : "Confirm & Submit"}
+                {isSubmitting ? t("submitting_button") : t("submit_button")}
               </Button>
             )}
 
             {!isConfirmStep && canGoNext && (
-              <Button onClick={handleNext}>Next</Button>
+              <Button
+                variant="gold"
+                onClick={handleNext}
+              >
+                {t("next_button")}
+              </Button>
             )}
           </div>
         </div>
