@@ -827,6 +827,21 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentMatchRepository.deleteTournamentMatch(input.id);
       }),
 
+    // Admin-only approval of a match result.
+    setApproval: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          approved: z.boolean(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.setMatchApproval(
+          input.matchId,
+          input.approved,
+        );
+      }),
+
     // Secure match scheduling for participants. Only admins or participants of the match can schedule or unschedule it.
     scheduleMatch: protectedProcedure
       .input(z.object({ id: z.string(), matchDate: z.date() }))

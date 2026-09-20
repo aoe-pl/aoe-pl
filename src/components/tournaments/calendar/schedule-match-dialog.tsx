@@ -14,18 +14,23 @@ import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { TournamentMatchRow } from "./hooks/use-calendar-data";
 
 interface ScheduleMatchDialogProps {
-  match: TournamentMatchRow;
+  matchId: string;
   defaultDate: Date;
+  player1Name: string;
+  player2Name: string;
+  groupName?: string | null;
   onClose: () => void;
 }
 
 // Dialog for scheduling a match through the calendar.
 export function ScheduleMatchDialog({
-  match,
+  matchId,
   defaultDate,
+  player1Name,
+  player2Name,
+  groupName,
   onClose,
 }: ScheduleMatchDialogProps) {
   const router = useRouter();
@@ -44,13 +49,8 @@ export function ScheduleMatchDialog({
     });
 
   // TODO For team games, show team names instead of player names. This requires some changes to the data fetching to include team info in the match rows.
-  const p1 = match.TournamentMatchParticipant[0];
-  const p2 = match.TournamentMatchParticipant[1];
-  const p1Name = p1?.participant?.nickname ?? "TBD";
-  const p2Name = p2?.participant?.nickname ?? "TBD";
-
   function handleSubmit() {
-    mutate({ id: match.id, matchDate });
+    mutate({ id: matchId, matchDate });
   }
 
   return (
@@ -66,10 +66,11 @@ export function ScheduleMatchDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <p className="text-sm font-medium">
-            {p1Name} <span className="text-muted-foreground">vs</span> {p2Name}
+            {player1Name} <span className="text-muted-foreground">vs</span>{" "}
+            {player2Name}
           </p>
-          {match.group && (
-            <p className="text-muted-foreground text-sm">{match.group.name}</p>
+          {groupName && (
+            <p className="text-muted-foreground text-sm">{groupName}</p>
           )}
           <Calendar24
             date={matchDate}

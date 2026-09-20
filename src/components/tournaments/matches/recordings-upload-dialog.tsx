@@ -20,6 +20,7 @@ import { buildObjectKey, storagePaths } from "@/lib/storage/paths";
 import { uploadFile } from "@/lib/storage/upload-client";
 import { api } from "@/trpc/react";
 import { UploadCloudIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -64,6 +65,7 @@ export function RecordingsUploadDialog({
 }: RecordingsUploadDialogProps) {
   const player1Name = player1Data.name;
   const player2Name = player2Data.name;
+  const t = useTranslations("tournament.matches.recordings");
 
   // TODO See whether this check is needed.
   // IF enabled, users wont be able to upload recs to matches they are not a part of.
@@ -220,10 +222,11 @@ export function RecordingsUploadDialog({
           <span>
             <Button
               size="lg"
+              variant="gold"
               disabled
               className="disabled:pointer-events-auto disabled:cursor-not-allowed"
             >
-              Upload Recs
+              {t("upload_button")}
             </Button>
           </span>
         </TooltipTrigger>
@@ -244,11 +247,12 @@ export function RecordingsUploadDialog({
       <DialogTrigger asChild>
         <Button
           size="lg"
+          variant="gold"
           disabled={isUploadDisabled}
           className="disabled:pointer-events-auto disabled:cursor-not-allowed"
         >
           <UploadCloudIcon />
-          Upload Recs
+          {t("upload_button")}
         </Button>
       </DialogTrigger>
 

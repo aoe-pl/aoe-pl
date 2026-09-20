@@ -58,6 +58,8 @@
   --medieval-gold-muted: #b8a97f;
   --medieval-parchment: #836135;
   --medieval-parchment-foreground: #f4ecd7;
+  --medieval-danger: #7f2b2b;
+  --medieval-danger-hover: #973434;
 }
 
 .dark {

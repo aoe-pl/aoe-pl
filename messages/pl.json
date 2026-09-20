@@ -647,14 +647,20 @@
         "cancel_match_confirm_button": "Anuluj mecz",
         "cancel_match_keep_button": "Zachowaj",
         "opponent_label": "Przeciwnik",
-        "select_opponent": "Wybierz przeciwnika\u2026",
+        "select_opponent": "Wybierz przeciwnika",
         "unscheduled_count": "{count, plural, one {Masz # niezaplanowany mecz} few {Masz # niezaplanowane mecze} other {Masz # niezaplanowanych meczów}}",
         "schedule_button": "Zaplanuj mecz",
         "cancel_button": "Anuluj",
         "confirm_button": "Potwierdź",
         "saving": "Zapisywanie...",
         "date_label": "Data",
-        "time_label": "Godzina"
+        "time_label": "Godzina",
+        "panel_title": "Data meczu",
+        "set_date_button": "Ustaw datę meczu",
+        "clear_date_button": "Wyczyść datę meczu",
+        "clear_date_confirm_title": "Wyczyścić datę meczu?",
+        "clear_date_confirm_description": "Spowoduje to usunięcie zaplanowanej daty i oznaczenie meczu jako niezaplanowany.",
+        "clear_date_confirm_button": "Wyczyść datę"
       },
       "filters": {
         "groups": "Grupy",
@@ -682,9 +688,34 @@
     "matches": {
       "no_matches": "Brak zaplanowanych meczów.",
       "date": "Data",
+      "date_tbd": "Data do ustalenia",
       "group": "Grupa",
       "player": "Gracz",
-      "search_players_or_group": "Szukaj gracza lub grupy"
+      "search_players_or_group": "Szukaj gracza lub grupy",
+      "status": {
+        "label": "Status",
+        "pending": "Oczekujący",
+        "scheduled": "Zaplanowany",
+        "completed": "Zagrany",
+        "admin_approved": "Zatwierdzony przez admina"
+      },
+      "approval": {
+        "title": "Zatwierdzenie przez admina",
+        "approve_button": "Zatwierdź mecz",
+        "unapprove_button": "Cofnij zatwierdzenie"
+      },
+      "recordings": {
+        "upload_button": "Wgraj nagrania",
+        "download_button": "Pobierz nagrania",
+        "clear_button": "Wyczyść nagrania",
+        "clearing": "Czyszczenie",
+        "clear_confirm_title": "Wyczyścić nagrania?",
+        "clear_confirm_description": "Spowoduje to trwałe usunięcie wszystkich nagrań zapisanych dla tego meczu, wraz z wynikami gier. Tej operacji nie można cofnąć.",
+        "clear_confirm_cancel": "Anuluj",
+        "clear_confirm_button": "Wyczyść nagrania",
+        "cleared_toast": "Nagrania wyczyszczone",
+        "clear_error": "Nie udało się wyczyścić nagrań"
+      }
     }
   },
   "profile": {
