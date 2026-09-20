@@ -41,10 +41,6 @@ export function MatchSchedulePanel({
 
   return (
     <div className="space-y-2 text-sm">
-      <div className="text-[color:var(--medieval-gold-muted)]">
-        {t("schedule.panel_title")}
-      </div>
-
       {dialogOpen && (
         <ScheduleMatchDialog
           matchId={matchId}

@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { UploadCloudIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   useCallback,
   useRef,
@@ -19,6 +20,7 @@ interface DropZoneProps {
  * Drop zone for files. Supports drag-and-drop and click-to-select.
  */
 export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
+  const t = useTranslations("tournament.matches.recordings");
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -53,7 +55,7 @@ export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
     <div
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label="Drop recordings here or click to select"
+      aria-label={t("drop_zone_label")}
       aria-disabled={disabled}
       onClick={() => !disabled && inputRef.current?.click()}
       onKeyDown={(e) =>
@@ -76,8 +78,12 @@ export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
     >
       <UploadCloudIcon className="text-muted-foreground size-8" />
       <p className="text-muted-foreground text-sm">
-        Drag &amp; drop <code>.aoe2record</code> file(s) here, or{" "}
-        <span className="text-primary underline">click to select</span>
+        {t.rich("drop_zone_label", {
+          code: (chunks) => <code>{chunks}</code>,
+          link: (chunks) => (
+            <span className="text-primary underline">{chunks}</span>
+          ),
+        })}
       </p>
       <input
         ref={inputRef}

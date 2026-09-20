@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { CheckIcon, MinusIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { GameStep } from "./types";
 
 interface StepIndicatorProps {
@@ -15,6 +16,7 @@ export function StepIndicator({
   currentStep,
   steps,
 }: StepIndicatorProps) {
+  const t = useTranslations("tournament.matches.recordings");
   const totalSteps = totalGames + 1;
 
   return (
@@ -37,17 +39,17 @@ export function StepIndicator({
               className={cn(
                 "flex size-8 items-center justify-center rounded-full border text-xs font-semibold",
                 isSkipped &&
-                  "border-muted-foreground/20 text-muted-foreground/40",
+                  "border-[color:var(--medieval-gold-muted)]/20 text-[color:var(--medieval-gold-muted)]/40",
                 !isSkipped &&
                   isDone &&
-                  "border-primary bg-primary text-primary-foreground",
+                  "border-[color:var(--medieval-gold)] bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]",
                 !isSkipped &&
                   isActive &&
-                  "border-primary bg-background text-primary ring-primary/30 ring-2",
+                  "border-[color:var(--medieval-gold)] bg-[color:var(--medieval-wood)] text-[color:var(--medieval-gold)] ring-2 ring-[color:var(--medieval-gold)]/30",
                 !isSkipped &&
                   !isDone &&
                   !isActive &&
-                  "border-muted-foreground/30 text-muted-foreground",
+                  "border-[color:var(--medieval-gold-muted)]/40 text-[color:var(--medieval-gold-muted)]",
               )}
             >
               {isSkipped ? (
@@ -65,11 +67,11 @@ export function StepIndicator({
                 className={cn(
                   "text-[10px] leading-none",
                   isActive
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground",
+                    ? "font-medium text-[color:var(--medieval-gold)]"
+                    : "text-[color:var(--medieval-gold-muted)]",
                 )}
               >
-                Confirm
+                {t("step_confirm")}
               </span>
             )}
           </li>

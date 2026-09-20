@@ -709,7 +709,7 @@
         "unapprove_button": "Cofnij zatwierdzenie"
       },
       "recordings": {
-        "upload_button": "Wgraj nagrania",
+        "upload_button": "Wrzuć nagrania",
         "download_button": "Pobierz nagrania",
         "clear_button": "Wyczyść nagrania",
         "clearing": "Czyszczenie",
@@ -718,7 +718,43 @@
         "clear_confirm_cancel": "Anuluj",
         "clear_confirm_button": "Wyczyść nagrania",
         "cleared_toast": "Nagrania wyczyszczone",
-        "clear_error": "Nie udało się wyczyścić nagrań"
+        "clear_error": "Nie udało się wyczyścić nagrań",
+        "title": "Wrzuć nagrania gier",
+        "subtitle": "Wgraj pliki .aoe2record dla {player1} vs {player2}.",
+        "hint": "Jeden plik na grę; dodaj więcej, jeśli gra była wznawiana.",
+        "upload_disabled_tooltip": "Wgrywanie jest wyłączone, ponieważ jeden lub obaj gracze nie mają ustawionego prawidłowego linku AoE2Companion w swoim profilu.",
+        "step_confirm": "Potwierdź",
+        "drop_zone_label": "Upuść nagrania tutaj lub kliknij, aby wybrać",
+        "drop_zone": "Przeciągnij i upuść plik(i) <code>.aoe2record</code> tutaj lub <link>kliknij, aby wybrać</link>",
+        "validate_files": "Waliduj pliki",
+        "clear_files": "Wyczyść pliki",
+        "back_button": "Wstecz",
+        "next_button": "Dalej",
+        "submit_button": "Potwierdź i wyślij",
+        "submitting_button": "Wysyłanie...",
+        "winner": "Zwycięzca",
+        "winner_unknown": "Nieokreślony",
+        "winner_manual_prompt": "Nie udało się automatycznie ustalić zwycięzcy. Wybierz zwycięzcę ręcznie.",
+        "player1": "Gracz 1",
+        "player2": "Gracz 2",
+        "map": "Mapa",
+        "length": "Czas gry",
+        "date": "Data",
+        "saved_toast": "{count, plural, one {Nagranie zapisane} few {Zapisano # gry} many {Zapisano # gier} other {Zapisano # gry}}",
+        "uploading_toast": "Wgrywanie nagrań…",
+        "uploaded_toast": "Nagrania wgrane",
+        "upload_failed_toast": "Nagrania zapisane, ale wgrywanie nie powiodło się",
+        "save_error": "Nie udało się zapisać nagrań",
+        "parse_error_invalid_type": "Nieprawidłowy typ pliku: {files}. Akceptowane są tylko pliki .aoe2record.",
+        "parse_error_failed": "Nie udało się przetworzyć nagrania",
+        "validation_error": "Pliki nagrań są nieprawidłowe. Upewnij się, że wszystkie nagrania pochodzą z tej samej gry, z tymi samymi graczami, cywilizacjami i mapą.",
+        "validation_error_profile_mismatch": "Niezgodność identyfikatora profilu.",
+        "confirm": {
+          "review": "Sprawdź wgrane nagrania przed wysłaniem.",
+          "game_label": "Gra {number}",
+          "count_mismatch_complete": "{uploaded, plural, one {Wgrano # nagranie} few {Wgrano # nagrania} many {Wgrano # nagrań} other {Wgrano # nagrania}}, ale wynik ({p1}:{p2}) sugeruje, że rozegrano {expected, plural, one {# grę} few {# gry} many {# gier} other {# gry}}. Sprawdź, czy pliki są prawidłowe.",
+          "count_mismatch_incomplete": "Na podstawie wgranych nagrań żaden z graczy nie zapewnił sobie jeszcze zwycięstwa w serii ({p1}:{p2}). Upewnij się, że wszystkie gry zostały uwzględnione."
+        }
       }
     }
   },

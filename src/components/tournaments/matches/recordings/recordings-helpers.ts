@@ -41,6 +41,11 @@ export function computeScores(steps: GameStep[]): [number, number] {
   return [p1, p2];
 }
 
+interface ValidationMessages {
+  profileMismatch: string;
+  invalidRecordings: string;
+}
+
 /**
  * Validates recording data across multiple files for a single game.
  */
@@ -49,6 +54,7 @@ export function validateGameRecFileData(
   recordings: ParsedRecording[],
   p1ProfileId: number ,
   p2ProfileId: number,
+  messages: ValidationMessages,
 ): string | null {
   // TODO: add playerID validation - will need to get playerID from aoe2companion link.
   const checks: boolean[] = [];
@@ -86,7 +92,7 @@ export function validateGameRecFileData(
 
   // If there is only one recording, we don't need to do any further checks.
   if (recordings.length === 0) {
-    return checks.every((v) => v) ? null : `Profile ID mismatch.`;
+    return checks.every((v) => v) ? null : messages.profileMismatch;
   }
 
   const [firstRec, ...rest] = recordings;
@@ -119,7 +125,7 @@ export function validateGameRecFileData(
   // If all checks pass, return null (no error).
   if (checks.every((v) => v)) return null;
 
-  return `Recording files are invalid. Please ensure that all recordings are from the same game, with the same players, civs, and map.`;
+  return messages.invalidRecordings;
 }
 
 /** Extract the extension from a file name, falling back to `aoe2record`. */
