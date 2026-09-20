@@ -1,7 +1,7 @@
-import { getTranslations } from "next-intl/server";
 import { NewsList } from "@/components/news/news-list";
 import { auth } from "@/server/auth";
 import { api } from "@/trpc/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function NewsPage() {
   const t = await getTranslations("news");
@@ -14,12 +14,7 @@ export default async function NewsPage() {
         <h1 className="text-foreground mb-4 text-4xl font-bold text-balance drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
           {t("title")}
         </h1>
-        <div className="flex items-center justify-center gap-3">
-          <div
-            className="from-primary to-accent h-1 w-12 bg-gradient-to-r"
-            aria-hidden="true"
-          />
-        </div>
+        <div className="flex items-center justify-center gap-3"></div>
       </div>
       <NewsList isAdmin={isAdmin} />
     </div>

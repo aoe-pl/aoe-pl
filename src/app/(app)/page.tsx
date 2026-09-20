@@ -14,11 +14,11 @@ export default function Home() {
             {t("title")}
           </h1>
           <div className="flex items-center justify-center gap-3">
-            <div className="from-primary to-primary h-1 w-12 bg-gradient-to-r" />
-            <span className="text-primary text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
+            <div className="from-accent to-accent h-1 w-12 bg-gradient-to-r" />
+            <span className="text-accent text-base font-semibold tracking-wider uppercase drop-shadow-lg sm:text-lg">
               {t("subtitle")}
             </span>
-            <div className="from-primary to-primary h-1 w-12 bg-gradient-to-l" />
+            <div className="from-accent to-accent h-1 w-12 bg-gradient-to-l" />
           </div>
         </div>
       </div>
