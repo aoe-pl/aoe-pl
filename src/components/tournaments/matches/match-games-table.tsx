@@ -39,7 +39,7 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
               <Crown className="h-4 w-4 text-[color:var(--medieval-gold)]" />
             )}
           </span>
-          <span className="truncate text-right text-[color:var(--medieval-parchment-foreground)]">
+          <span className="text-primary truncate text-right">
             {row.player1Civ ?? "-"}
           </span>
           <span className="text-center text-[color:var(--medieval-gold-muted)]"></span>
@@ -47,7 +47,7 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
             {row.map ?? "-"}
           </span>
           <span className="text-center text-[color:var(--medieval-gold-muted)]"></span>
-          <span className="truncate text-left text-[color:var(--medieval-parchment-foreground)]">
+          <span className="text-primary truncate text-left">
             {row.player2Civ ?? "-"}
           </span>
           <span className="flex justify-center">

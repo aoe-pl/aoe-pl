@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { useLocale } from "next-intl";
 import { buildWeekDays, getMatchesForDay } from "./calendar-utils";
@@ -38,24 +39,36 @@ export function WeekView({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="panel-inset overflow-hidden">
       {/* Day headers */}
-      <div className="grid grid-cols-7 border-b">
+      <div className="grid grid-cols-7 border-b border-[color:var(--medieval-wood-border)]">
         {days.map((day) => {
           const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
           return (
             <div
               key={day.toISOString()}
-              className={`py-2 text-center ${isSelected ? "bg-primary/5 ring-primary/40 ring-1 ring-inset" : "hover:bg-muted/50"}`}
+              className={cn(
+                "cursor-pointer py-2 text-center transition-colors",
+                isSelected
+                  ? "bg-[color:var(--medieval-gold)]/10 ring-1 ring-[color:var(--medieval-gold)]/50 ring-inset"
+                  : "hover:bg-white/5",
+              )}
               onClick={() => onDaySelect?.(day)}
             >
-              <p className="text-muted-foreground py-2 text-center text-sm font-semibold tracking-wide uppercase">
+              <p className="py-2 text-center text-sm font-semibold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
                 {format(day, "EEEE", { locale })}
               </p>
-              <span className="text-foreground mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold">
+              <span
+                className={cn(
+                  "mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
+                  isSelected
+                    ? "bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]"
+                    : "text-primary",
+                )}
+              >
                 {format(day, "d")}
               </span>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-[color:var(--medieval-gold-muted)]">
                 {format(day, "MMM", { locale })}
               </p>
             </div>
@@ -64,7 +77,7 @@ export function WeekView({
       </div>
 
       {/* Match columns */}
-      <div className="grid grid-cols-7 divide-x">
+      <div className="grid grid-cols-7 divide-x divide-[color:var(--medieval-wood-border)]">
         {days.map((day) => {
           const dayMatches = matchesForDay(day);
 

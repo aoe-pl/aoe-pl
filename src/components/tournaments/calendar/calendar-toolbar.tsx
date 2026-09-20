@@ -38,39 +38,41 @@ export function CalendarToolbar({
       {/* Navigation */}
       <div className="flex items-center gap-2">
         <Button
-          variant="outline"
+          variant="wood"
           size="lg"
           onClick={onPrev}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <Button
-          variant="outline"
+          variant="wood"
           size="lg"
           onClick={onToday}
         >
           {t("today")}
         </Button>
         <Button
-          variant="outline"
+          variant="wood"
           size="lg"
           onClick={onNext}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <span className="ml-2 text-base font-semibold">{headerLabel}</span>
+        <span className="text-primary ml-2 text-base font-semibold">
+          {headerLabel}
+        </span>
       </div>
 
       {/* View toggle. Hidden on mobile since only month view is available there */}
       <div className="hidden items-center sm:flex">
-        <div className="flex overflow-hidden rounded-md border">
+        <div className="flex overflow-hidden rounded-md border border-[color:var(--medieval-wood-border)]">
           <button
             onClick={() => onSetView("month")}
             className={cn(
               commonButtonStyle,
               view === "month"
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted text-muted-foreground",
+                ? "bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]"
+                : "hover:text-primary text-[color:var(--medieval-gold-muted)] hover:bg-white/5",
             )}
           >
             <Calendar className="h-4 w-4" />
@@ -81,8 +83,8 @@ export function CalendarToolbar({
             className={cn(
               commonButtonStyle,
               view === "week"
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted text-muted-foreground",
+                ? "bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]"
+                : "hover:text-primary text-[color:var(--medieval-gold-muted)] hover:bg-white/5",
             )}
           >
             <CalendarDays className="h-4 w-4" />

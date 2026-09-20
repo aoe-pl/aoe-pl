@@ -75,16 +75,16 @@ export function SelectedDayPanel({
   }
 
   return (
-    <div className="bg-card rounded-lg border p-4">
+    <div className="panel-inset p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-semibold">
+        <h3 className="text-primary font-semibold">
           {fmt.dateTime(selectedDay, {
             weekday: "long",
             month: "long",
             day: "numeric",
           })}
           {dayMatches.length > 0 && (
-            <span className="text-muted-foreground ml-2 text-sm font-normal">
+            <span className="ml-2 text-sm font-normal text-[color:var(--medieval-gold-muted)]">
               {t("matches", { count: dayMatches.length })}
             </span>
           )}
@@ -92,7 +92,7 @@ export function SelectedDayPanel({
       </div>
 
       {dayMatches.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-[color:var(--medieval-gold-muted)]">
           {isFiltered
             ? t("no_matches_on_day_filtered")
             : t("no_matches_on_day")}
@@ -125,12 +125,12 @@ export function SelectedDayPanel({
 
       {userPendingRows.length > 0 && (
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-[color:var(--medieval-gold-muted)]">
             {t("schedule.unscheduled_count", { count: userPendingRows.length })}
           </p>
           <Button
             size="sm"
-            variant="outline"
+            variant="gold"
             onClick={() => setUserDialogOpen(true)}
           >
             <CalendarPlus className="mr-2 h-4 w-4" />

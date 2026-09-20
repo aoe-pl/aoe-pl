@@ -54,20 +54,20 @@ export function MatchTile({
         >
           {group.name}
         </span>
-        <span className="shrink-0 text-[12px] font-medium">
+        <span className="text-primary shrink-0 text-[12px] font-medium">
           {format(match.date, "HH:mm")}
         </span>
       </div>
 
       {/* Player names */}
       <div className="mt-1 flex min-w-0 flex-col items-center text-sm font-medium">
-        <span className="text-foreground w-full truncate text-center">
+        <span className="text-primary w-full truncate text-center">
           {player1.nickname}
         </span>
-        <span className="text-muted-foreground text-[10px] leading-none">
+        <span className="text-[10px] leading-none text-[color:var(--medieval-gold-muted)]">
           vs
         </span>
-        <span className="text-foreground w-full truncate text-center">
+        <span className="text-primary w-full truncate text-center">
           {player2.nickname}
         </span>
       </div>

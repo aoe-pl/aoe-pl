@@ -43,13 +43,13 @@ export function MonthView({
   }
 
   return (
-    <div className="bg-card overflow-hidden rounded-lg border">
+    <div className="panel-inset overflow-hidden">
       {/* Day of week header */}
-      <div className="grid grid-cols-7 border-b">
+      <div className="grid grid-cols-7 border-b border-[color:var(--medieval-wood-border)]">
         {weekdays.map((d) => (
           <div
             key={d}
-            className="text-muted-foreground py-2 text-center text-sm font-semibold tracking-wide uppercase"
+            className="py-2 text-center text-sm font-semibold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase"
           >
             {d}
           </div>
@@ -71,20 +71,26 @@ export function MonthView({
               key={day.toISOString()}
               onClick={() => onDaySelect(day)}
               className={cn(
-                "flex min-h-8 cursor-pointer flex-col border-r border-b p-1",
+                "flex min-h-8 cursor-pointer flex-col border-r border-b border-[color:var(--medieval-wood-border)] p-1 transition-colors",
                 isLastRow && "border-b-0",
                 (idx + 1) % 7 === 0 && "border-r-0",
-                isCurrentMonth ? "bg-card" : "bg-muted/30",
+
+                !isCurrentMonth && "bg-black/20",
                 isSelected
-                  ? "bg-primary/5 ring-primary/40 ring-1 ring-inset"
-                  : "hover:bg-muted/50",
+                  ? "bg-[color:var(--medieval-gold)]/10 ring-1 ring-[color:var(--medieval-gold)]/50 ring-inset"
+                  : "hover:bg-white/5",
               )}
             >
               {/* Day number */}
               <span
                 className={cn(
                   "flex h-6 w-6 items-center justify-center self-end text-sm",
-                  isCurrentMonth ? "text-foreground" : "text-muted-foreground",
+
+                  isSelected
+                    ? "rounded-full bg-[color:var(--medieval-gold)] font-semibold text-[color:var(--medieval-wood)]"
+                    : isCurrentMonth
+                      ? "text-primary"
+                      : "text-[color:var(--medieval-gold-muted)]/50",
                 )}
               >
                 {format(day, "d")}
@@ -110,7 +116,7 @@ export function MonthView({
                   );
                 })}
                 {hiddenCount > 0 && (
-                  <span className="text-muted-foreground text-sm leading-3 font-medium">
+                  <span className="text-sm leading-3 font-medium text-[color:var(--medieval-gold-muted)]">
                     +{hiddenCount}
                   </span>
                 )}
