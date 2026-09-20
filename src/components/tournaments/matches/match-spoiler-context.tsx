@@ -17,7 +17,9 @@ interface MatchSpoilerContextValue {
   toggle: () => void;
 }
 
-const MatchSpoilerContext = createContext<MatchSpoilerContextValue | null>(null);
+const MatchSpoilerContext = createContext<MatchSpoilerContextValue | null>(
+  null,
+);
 
 interface MatchSpoilerProviderProps {
   /**
