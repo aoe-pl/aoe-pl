@@ -692,6 +692,10 @@
       "group": "Group",
       "player": "Player",
       "search_players_or_group": "Search player or group",
+      "spoiler": {
+        "reveal": "Reveal scores",
+        "hide": "Hide scores"
+      },
       "status": {
         "label": "Status",
         "pending": "Pending",

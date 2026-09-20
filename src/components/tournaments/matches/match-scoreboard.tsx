@@ -1,4 +1,7 @@
+"use client";
+
 import { PlayerLink } from "@/components/player-link";
+import { useMatchSpoiler } from "./match-spoiler-context";
 
 interface MatchScoreboardProps {
   player1Name: string;
@@ -11,6 +14,9 @@ interface MatchScoreboardProps {
 
 /**
  * Wooden banner showing both players and the current series score.
+ *
+ * While the score is hidden (spoiler protection) the numbers are replaced with
+ * "?" and neither player is highlighted as the leader.
  */
 export function MatchScoreboard({
   player1Name,
@@ -20,8 +26,9 @@ export function MatchScoreboard({
   player1Score,
   player2Score,
 }: MatchScoreboardProps) {
-  const player1Leading = player1Score > player2Score;
-  const player2Leading = player2Score > player1Score;
+  const { revealed } = useMatchSpoiler();
+  const player1Leading = revealed && player1Score > player2Score;
+  const player2Leading = revealed && player2Score > player1Score;
 
   return (
     <div
@@ -55,7 +62,7 @@ export function MatchScoreboard({
                 : "text-[color:var(--medieval-parchment-foreground)]"
             }
           >
-            {player1Score}
+            {revealed ? player1Score : "?"}
           </span>
           <span className="mx-2 text-[color:var(--medieval-gold-muted)]">
             :
@@ -67,7 +74,7 @@ export function MatchScoreboard({
                 : "text-[color:var(--medieval-parchment-foreground)]"
             }
           >
-            {player2Score}
+            {revealed ? player2Score : "?"}
           </span>
         </span>
 

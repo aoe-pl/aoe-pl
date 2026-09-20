@@ -1,4 +1,7 @@
+"use client";
+
 import { Crown } from "lucide-react";
+import { useMatchSpoiler } from "./match-spoiler-context";
 
 export interface MatchGameRow {
   player1Civ: string | null;
@@ -14,9 +17,12 @@ interface MatchGamesTableProps {
 
 /**
  * Per-game breakdown (civ / map / civ) with a crown marking each game's
- * winner. Rows without data render a "-" placeholder.
+ * winner. Rows without data render a "-" placeholder. While the score is
+ * hidden (spoiler protection) the crowns are not shown.
  */
 export function MatchGamesTable({ rows }: MatchGamesTableProps) {
+  const { revealed } = useMatchSpoiler();
+
   return (
     <div className="w-full overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
       {rows.map((row, index) => (
@@ -29,7 +35,7 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
           } ${index % 2 === 1 ? "bg-black/10" : ""}`}
         >
           <span className="flex justify-center">
-            {row.player1Won && (
+            {revealed && row.player1Won && (
               <Crown className="h-4 w-4 text-[color:var(--medieval-gold)]" />
             )}
           </span>
@@ -45,7 +51,7 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
             {row.player2Civ ?? "-"}
           </span>
           <span className="flex justify-center">
-            {row.player2Won && (
+            {revealed && row.player2Won && (
               <Crown className="h-4 w-4 text-[color:var(--medieval-gold)]" />
             )}
           </span>

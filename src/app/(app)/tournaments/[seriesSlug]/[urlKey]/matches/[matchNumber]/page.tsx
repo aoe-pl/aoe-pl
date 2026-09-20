@@ -7,6 +7,8 @@ import {
 import { MatchRecordingsPanel } from "@/components/tournaments/matches/match-recordings-panel";
 import { MatchSchedulePanel } from "@/components/tournaments/matches/match-schedule-panel";
 import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboard";
+import { MatchSpoilerProvider } from "@/components/tournaments/matches/match-spoiler-context";
+import { MatchSpoilerToggle } from "@/components/tournaments/matches/match-spoiler-toggle";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
@@ -100,6 +102,13 @@ export default async function TournamentMatchPage({
     (game) => game.recordingKeys.length > 0 || game.recUrl !== null,
   );
 
+  const hasResults =
+    player1Score > 0 ||
+    player2Score > 0 ||
+    match.Game.some((game) =>
+      game.participants.some((participant) => participant.isWinner),
+    );
+
   const gameRows: MatchGameRow[] = Array.from(
     { length: gameCount },
     (_, index) => {
@@ -122,92 +131,96 @@ export default async function TournamentMatchPage({
   );
 
   return (
-    <div className="panel">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_15rem]">
-        <div className="flex flex-col gap-6">
-          <MatchScoreboard
-            player1Name={player1Name}
-            player2Name={player2Name}
-            player1Number={player1Number}
-            player2Number={player2Number}
-            player1Score={player1Score}
-            player2Score={player2Score}
-          />
+    <MatchSpoilerProvider isApproved={isApproved}>
+      <div className="panel">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_15rem]">
+          <div className="flex flex-col gap-6">
+            <MatchScoreboard
+              player1Name={player1Name}
+              player2Name={player2Name}
+              player1Number={player1Number}
+              player2Number={player2Number}
+              player1Score={player1Score}
+              player2Score={player2Score}
+            />
 
-          <MatchGamesTable rows={gameRows} />
-        </div>
-
-        <aside
-          className="h-fit space-y-5 rounded-xl border border-[color:var(--medieval-wood-border)] p-4"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
-        >
-          <div className="space-y-3 text-sm">
-            <div>
-              <div className="text-[color:var(--medieval-gold-muted)]">
-                {t("status.label")}
-              </div>
-              <div className="font-medium">{statusLabels[match.status]}</div>
-            </div>
-            <div>
-              <div className="text-[color:var(--medieval-gold-muted)]">
-                {t("date")}
-              </div>
-              <div className="font-medium">{dateLabel}</div>
-            </div>
-            <div>
-              <div className="text-[color:var(--medieval-gold-muted)]">
-                {t("group")}
-              </div>
-              <div className="font-medium">{groupName}</div>
-            </div>
+            <MatchGamesTable rows={gameRows} />
           </div>
 
-          {canSchedule && (
-            <div className="border-t border-[color:var(--medieval-wood-border)] pt-4">
-              <MatchSchedulePanel
-                matchId={match.id}
-                matchDate={match.matchDate}
-                player1Name={player1Name}
-                player2Name={player2Name}
-                groupName={match.group?.name ?? null}
-              />
+          <aside
+            className="h-fit space-y-5 rounded-xl border border-[color:var(--medieval-wood-border)] p-4"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
+          >
+            <div className="space-y-3 text-sm">
+              <div>
+                <div className="text-[color:var(--medieval-gold-muted)]">
+                  {t("status.label")}
+                </div>
+                <div className="font-medium">{statusLabels[match.status]}</div>
+              </div>
+              <div>
+                <div className="text-[color:var(--medieval-gold-muted)]">
+                  {t("date")}
+                </div>
+                <div className="font-medium">{dateLabel}</div>
+              </div>
+              <div>
+                <div className="text-[color:var(--medieval-gold-muted)]">
+                  {t("group")}
+                </div>
+                <div className="font-medium">{groupName}</div>
+              </div>
             </div>
-          )}
 
-          <MatchRecordingsPanel
-            player1Data={{
-              profileId: p1ProfileId,
-              name: player1Name,
-            }}
-            player2Data={{
-              profileId: p2ProfileId,
-              name: player2Name,
-            }}
-            matchNumber={match.matchNumber}
-            tournamentName={urlKey}
-            matchId={match.id}
-            player1MatchParticipantId={p1?.id ?? ""}
-            player2MatchParticipantId={p2?.id ?? ""}
-            gameCount={gameCount}
-            isAdmin={isAdmin}
-            hasRecordings={hasRecordings}
-            isApproved={isApproved}
-          />
+            <MatchSpoilerToggle hasResults={hasResults} />
 
-          <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
-            <DraftLink label="Civ Draft" />
-            <DraftLink label="Map Draft" />
-          </div>
+            {canSchedule && (
+              <div className="border-t border-[color:var(--medieval-wood-border)] pt-4">
+                <MatchSchedulePanel
+                  matchId={match.id}
+                  matchDate={match.matchDate}
+                  player1Name={player1Name}
+                  player2Name={player2Name}
+                  groupName={match.group?.name ?? null}
+                />
+              </div>
+            )}
 
-          {isAdmin && canApprove && (
-            <MatchApprovalPanel
+            <MatchRecordingsPanel
+              player1Data={{
+                profileId: p1ProfileId,
+                name: player1Name,
+              }}
+              player2Data={{
+                profileId: p2ProfileId,
+                name: player2Name,
+              }}
+              matchNumber={match.matchNumber}
+              tournamentName={urlKey}
               matchId={match.id}
+              player1MatchParticipantId={p1?.id ?? ""}
+              player2MatchParticipantId={p2?.id ?? ""}
+              gameCount={gameCount}
+              isAdmin={isAdmin}
+              hasRecordings={hasRecordings}
               isApproved={isApproved}
             />
-          )}
-        </aside>
+
+            <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+              <DraftLink label="Civ Draft" />
+              <DraftLink label="Map Draft" />
+            </div>
+
+            {isAdmin && canApprove && (
+              <MatchApprovalPanel
+                matchId={match.id}
+                isApproved={isApproved}
+              />
+            )}
+          </aside>
+        </div>
       </div>
-    </div>
+    </MatchSpoilerProvider>
   );
 }
 

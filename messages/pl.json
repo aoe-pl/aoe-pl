@@ -692,6 +692,10 @@
       "group": "Grupa",
       "player": "Gracz",
       "search_players_or_group": "Szukaj gracza lub grupy",
+      "spoiler": {
+        "reveal": "Pokaż wyniki",
+        "hide": "Ukryj wyniki"
+      },
       "status": {
         "label": "Status",
         "pending": "Oczekujący",
