@@ -47,7 +47,7 @@ export function UserScheduleDialog({
   const t = useTranslations("tournament.calendar");
   const [matchDate, setMatchDate] = useState<Date>(defaultDate);
   const [timeValue, setTimeValue] = useState<string>(
-    format(defaultDate, "HH:mm:ss"),
+    format(defaultDate, "HH:mm"),
   );
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
@@ -147,17 +147,17 @@ export function UserScheduleDialog({
             timeLabel={t("schedule.time_label")}
             onDateChange={(date) => {
               if (date) {
-                const [h, m, s] = timeValue.split(":").map(Number);
-                date.setHours(h ?? 0, m ?? 0, s ?? 0);
+                const [h, m] = timeValue.split(":").map(Number);
+                date.setHours(h ?? 0, m ?? 0);
                 setMatchDate(date);
               }
             }}
             timeValue={timeValue}
             onTimeChange={(time) => {
               setTimeValue(time);
-              const [h, m, s] = time.split(":").map(Number);
+              const [h, m] = time.split(":").map(Number);
               const updated = new Date(matchDate);
-              updated.setHours(h ?? 0, m ?? 0, s ?? 0);
+              updated.setHours(h ?? 0, m ?? 0);
               setMatchDate(updated);
             }}
           />

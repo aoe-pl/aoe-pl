@@ -149,7 +149,7 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
     >
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button>
+          <Button variant={"gold"}>
             <Plus /> {t("form.submit_add")}
           </Button>
         )}

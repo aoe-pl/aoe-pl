@@ -23,7 +23,7 @@ export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
       <div className="container mx-auto px-4 py-8 pt-24 text-center">
         <h1 className="text-2xl font-bold">{t("not_found")}</h1>
         <Button
-          variant="link"
+          variant="wood"
           asChild
           className="mt-4"
         >
@@ -46,21 +46,24 @@ export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
 
   return (
     <div className="container mx-auto mt-10 max-w-3xl px-4 py-8 pt-24">
-      <div className="mb-8 flex items-center justify-between">
-        <Button
-          asChild
-          variant="secondary"
-        >
-          <Link href="/news">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t("back_to_list")}
-          </Link>
-        </Button>
+      <NewsContent
+        news={newsItem}
+        actions={
+          <>
+            <Button
+              asChild
+              variant="wood"
+            >
+              <Link href="/news">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t("back_to_list")}
+              </Link>
+            </Button>
 
-        {isAdmin && <NewsAdminActions newsId={id} />}
-      </div>
-
-      <NewsContent news={newsItem} />
+            {isAdmin && <NewsAdminActions newsId={id} />}
+          </>
+        }
+      />
     </div>
   );
 }

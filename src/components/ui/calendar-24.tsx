@@ -57,7 +57,7 @@ export function Calendar24({
 
   const formatTimeValue = (date: Date | undefined) => {
     if (!date) return timeValue ?? "";
-    return format(date, "HH:mm:ss");
+    return format(date, "HH:mm");
   };
 
   return (
@@ -110,7 +110,6 @@ export function Calendar24({
         <Input
           type="time"
           id="time-picker"
-          step="1"
           value={formatTimeValue(date)}
           onChange={handleTimeChange}
           disabled={disabled}

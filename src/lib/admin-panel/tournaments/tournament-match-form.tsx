@@ -336,31 +336,28 @@ export function TournamentMatchForm({
                           date.setHours(
                             currentTime.getHours(),
                             currentTime.getMinutes(),
-                            currentTime.getSeconds(),
                           );
                         }
                         field.onChange(date);
                       }}
                       onTimeChange={(time) => {
                         if (field.value && time) {
-                          const [hours, minutes, seconds] = time.split(":");
-                          if (hours && minutes && seconds) {
+                          const [hours, minutes] = time.split(":");
+                          if (hours && minutes) {
                             const newDate = new Date(field.value);
                             newDate.setHours(
                               parseInt(hours),
                               parseInt(minutes),
-                              parseInt(seconds),
                             );
                             field.onChange(newDate);
                           }
                         } else if (!field.value && time) {
-                          const [hours, minutes, seconds] = time.split(":");
-                          if (hours && minutes && seconds) {
+                          const [hours, minutes] = time.split(":");
+                          if (hours && minutes) {
                             const newDate = new Date();
                             newDate.setHours(
                               parseInt(hours),
                               parseInt(minutes),
-                              parseInt(seconds),
                             );
                             field.onChange(newDate);
                           }

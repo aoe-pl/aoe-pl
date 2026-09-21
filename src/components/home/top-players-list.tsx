@@ -71,7 +71,7 @@ export function TopPlayersList({ players }: TopPlayersListProps) {
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-center gap-3">
           <Button
-            variant="secondary"
+            variant="wood"
             size="icon"
             className="h-7 w-7"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -85,7 +85,7 @@ export function TopPlayersList({ players }: TopPlayersListProps) {
           </span>
 
           <Button
-            variant="secondary"
+            variant="wood"
             size="icon"
             className="h-7 w-7"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}

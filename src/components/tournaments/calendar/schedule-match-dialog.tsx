@@ -37,7 +37,7 @@ export function ScheduleMatchDialog({
   const t = useTranslations("tournament.calendar");
   const [matchDate, setMatchDate] = useState<Date>(defaultDate);
   const [timeValue, setTimeValue] = useState<string>(
-    format(defaultDate, "HH:mm:ss"),
+    format(defaultDate, "HH:mm"),
   );
 
   const { mutate, isPending } =

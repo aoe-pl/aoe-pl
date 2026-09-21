@@ -204,6 +204,18 @@
     @apply rounded-xl p-4;
   }
 
+  .menu-medieval {
+    --popover: var(--medieval-wood);
+    --popover-foreground: var(--medieval-parchment-foreground);
+    --foreground: var(--medieval-parchment-foreground);
+    --muted-foreground: rgb(244 236 215 / 0.6);
+    --border: var(--medieval-wood-border);
+    --accent: color-mix(in oklab, var(--medieval-gold) 22%, transparent);
+    --accent-foreground: var(--medieval-gold);
+    background-color: var(--medieval-wood);
+    color: var(--medieval-parchment-foreground);
+  }
+
   .wmde-markdown {
     max-height: none !important;
     overflow: visible !important;

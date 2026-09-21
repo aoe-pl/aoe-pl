@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui";
 import {
   Command,
   CommandEmpty,
@@ -13,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn, isBrightColor } from "@/lib/utils";
+import { isBrightColor } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -28,11 +29,6 @@ interface CalendarFiltersProps {
   onPlayerToggle: (id: string) => void;
   onClearAll: () => void;
 }
-
-const popoverTriggerStyle = cn(
-  "flex items-center gap-2 rounded-md border border-[color:var(--medieval-wood-border)] px-3 py-3 text-sm font-medium",
-  "hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[color:var(--medieval-gold)]/50 focus-visible:outline-none",
-);
 
 export function CalendarFilters({
   groups,
@@ -61,22 +57,15 @@ export function CalendarFilters({
           onOpenChange={setGroupsOpen}
         >
           <PopoverTrigger asChild>
-            <button
-              className={cn(
-                popoverTriggerStyle,
-                selectedGroups.size > 0
-                  ? "border-[color:var(--medieval-gold)]/60 bg-[color:var(--medieval-gold)]/15 text-[color:var(--medieval-gold)]"
-                  : "text-[color:var(--medieval-gold-muted)]",
-              )}
-            >
+            <Button variant="wood">
               {t("groups")}
               {selectedGroups.size > 0 && (
-                <span className="rounded-full bg-[color:var(--medieval-gold)] px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
+                <span className="bg-accent-foreground rounded-full px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
                   {selectedGroups.size}
                 </span>
               )}
               <ChevronDown className="h-4 w-4 opacity-60" />
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent
             className="w-56 p-0"
@@ -118,14 +107,7 @@ export function CalendarFilters({
           onOpenChange={setPlayersOpen}
         >
           <PopoverTrigger asChild>
-            <button
-              className={cn(
-                popoverTriggerStyle,
-                selectedPlayers.size > 0
-                  ? "border-[color:var(--medieval-gold)]/60 bg-[color:var(--medieval-gold)]/15 text-[color:var(--medieval-gold)]"
-                  : "text-[color:var(--medieval-gold-muted)]",
-              )}
-            >
+            <Button variant="wood">
               {t("players")}
               {selectedPlayers.size > 0 && (
                 <span className="rounded-full bg-[color:var(--medieval-gold)] px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
@@ -133,7 +115,7 @@ export function CalendarFilters({
                 </span>
               )}
               <ChevronDown className="h-4 w-4 opacity-60" />
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent
             className="w-64 p-0"

@@ -33,7 +33,7 @@ export function NewsAdminActions({ newsId }: NewsAdminActionsProps) {
       <NewsDialog
         id={newsId}
         trigger={
-          <Button variant="secondary">
+          <Button variant="wood">
             <Pencil className="mr-2 h-4 w-4" />
             {t("edit")}
           </Button>
