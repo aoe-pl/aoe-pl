@@ -683,7 +683,18 @@
       "played": "Played",
       "won": "Won",
       "lost": "Lost",
-      "total_score": "Total Score"
+      "total_score": "Total Score",
+      "progress": {
+        "title": "Matches played",
+        "played": "Played",
+        "remaining": "Remaining",
+        "of": "of"
+      },
+      "player_matches": {
+        "title": "Matches of {name}",
+        "vs": "vs",
+        "no_matches": "No matches for this player."
+      }
     },
     "matches": {
       "no_matches": "No upcoming matches",

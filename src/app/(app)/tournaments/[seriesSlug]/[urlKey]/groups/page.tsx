@@ -40,9 +40,14 @@ export default async function TournamentGroupsPage({
     });
   }
 
+  const matchUrlBase = `/tournaments/${seriesSlug}/${urlKey}/matches`;
+
   return (
     <div className="panel space-y-4">
-      <GroupsPageContent groupsData={groupData} />
+      <GroupsPageContent
+        groupsData={groupData}
+        matchUrlBase={matchUrlBase}
+      />
     </div>
   );
 }

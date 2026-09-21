@@ -678,7 +678,18 @@
       "played": "Rozegrane",
       "won": "Wygrane",
       "lost": "Przegrane",
-      "total_score": "Suma punktów"
+      "total_score": "Suma punktów",
+      "progress": {
+        "title": "Rozegrane mecze",
+        "played": "Rozegrane",
+        "remaining": "Pozostałe",
+        "of": "z"
+      },
+      "player_matches": {
+        "title": "Mecze gracza {name}",
+        "vs": "vs",
+        "no_matches": "Brak meczów dla tego gracza."
+      }
     },
     "players": {
       "nickname": "Nick",
