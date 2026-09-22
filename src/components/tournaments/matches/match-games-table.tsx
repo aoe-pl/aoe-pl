@@ -27,6 +27,18 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
   const { revealed } = useMatchSpoiler();
   const t = useTranslations("tournament.matches.spoiler");
 
+  const hasData = rows.some(
+    (row) =>
+      row.player1Civ !== null ||
+      row.player2Civ !== null ||
+      row.map !== null ||
+      row.player1Won ||
+      row.player2Won,
+  );
+
+  // Mask the table only when there is something to hide and it is not revealed.
+  const hidden = hasData && !revealed;
+
   return (
     <div className="relative w-full overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
       {rows.map((row, index) => (
@@ -44,15 +56,15 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
             )}
           </span>
           <span className="text-primary truncate text-right">
-            {revealed ? (row.player1Civ ?? "-") : "?"}
+            {hidden ? "?" : (row.player1Civ ?? "-")}
           </span>
           <span className="text-center text-[color:var(--medieval-gold-muted)]"></span>
           <span className="truncate text-center font-medium text-[color:var(--medieval-gold)]">
-            {revealed ? (row.map ?? "-") : "?"}
+            {hidden ? "?" : (row.map ?? "-")}
           </span>
           <span className="text-center text-[color:var(--medieval-gold-muted)]"></span>
           <span className="text-primary truncate text-left">
-            {revealed ? (row.player2Civ ?? "-") : "?"}
+            {hidden ? "?" : (row.player2Civ ?? "-")}
           </span>
           <span className="flex justify-center">
             {revealed && row.player2Won && (
@@ -62,7 +74,7 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
         </div>
       ))}
 
-      {!revealed && (
+      {hidden && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40 backdrop-blur-sm">
           <span className="text-lg font-black tracking-[0.35em] text-[color:var(--medieval-gold)] uppercase [text-shadow:0_2px_6px_rgba(0,0,0,0.8)]">
             {t("overlay")}
