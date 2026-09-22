@@ -50,6 +50,28 @@ export type TournamentWithRelations = Tournament & {
   TournamentParticipant: TournamentParticipant[];
 };
 
+/**
+ * Ensures the current user may manage the given match's recordings, i.e. is an
+ * admin or a participant in the match.
+ */
+async function assertCanManageMatchRecordings(userId: string, matchId: string) {
+  const match = await db.tournamentMatch.findUnique({
+    where: { id: matchId },
+    include: {
+      TournamentMatchParticipant: { include: { participant: true } },
+    },
+  });
+
+  if (!match) throw new TRPCError({ code: "NOT_FOUND" });
+
+  const admin = await usersRepository.isUserAdmin(userId);
+  const isParticipant = match.TournamentMatchParticipant.some(
+    (p) => p.participant?.userId === userId,
+  );
+
+  if (!admin && !isParticipant) throw new TRPCError({ code: "FORBIDDEN" });
+}
+
 export const tournamentRouter = createTRPCRouter({
   list: publicProcedure
     .input(
@@ -765,13 +787,18 @@ export const tournamentRouter = createTRPCRouter({
           ),
         }),
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         if (input.games.length === 0) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "No games were provided.",
           });
         }
+
+        await assertCanManageMatchRecordings(
+          ctx.session.user.id,
+          input.matchId,
+        );
 
         return tournamentGameRepository.saveMatchRecordings(
           input.matchId,
@@ -780,7 +807,12 @@ export const tournamentRouter = createTRPCRouter({
       }),
     clearRecordings: protectedProcedure
       .input(z.object({ matchId: z.string() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        await assertCanManageMatchRecordings(
+          ctx.session.user.id,
+          input.matchId,
+        );
+
         return tournamentGameRepository.clearMatchRecordings(input.matchId);
       }),
     updateParticipant: adminProcedure

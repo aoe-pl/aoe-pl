@@ -83,17 +83,17 @@ export default async function TournamentMatchPage({
   const canApprove =
     match.status === "COMPLETED" || match.status === "ADMIN_APPROVED";
 
+  // Whether the signed-in user is one of the players in this match.
+  const isParticipant = session?.user?.id
+    ? participants.some(
+        (slot) => slot.participant?.user?.id === session.user.id,
+      )
+    : false;
+
   // Only admins or participants may schedule, and only while the match is upcoming.
   const isUpcoming = match.status === "PENDING" || match.status === "SCHEDULED";
 
-  const canSchedule =
-    isUpcoming &&
-    (isAdmin ||
-      (session?.user?.id
-        ? participants.some(
-            (slot) => slot.participant?.user?.id === session.user.id,
-          )
-        : false));
+  const canSchedule = isUpcoming && (isAdmin || isParticipant);
 
   const player1Score = p1?.wonScore ?? 0;
   const player2Score = p2?.wonScore ?? 0;
@@ -204,6 +204,7 @@ export default async function TournamentMatchPage({
               isAdmin={isAdmin}
               hasRecordings={hasRecordings}
               isApproved={isApproved}
+              canManageRecordings={isAdmin || isParticipant}
             />
 
             <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">

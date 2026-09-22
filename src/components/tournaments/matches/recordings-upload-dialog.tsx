@@ -50,6 +50,7 @@ export interface RecordingsUploadDialogProps {
   player2MatchParticipantId: string;
   gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
   isAdmin?: boolean;
+  canManageRecordings?: boolean;
 }
 
 export function RecordingsUploadDialog({
@@ -62,6 +63,7 @@ export function RecordingsUploadDialog({
   player2MatchParticipantId,
   gameCount = 5,
   isAdmin = false,
+  canManageRecordings = true,
 }: RecordingsUploadDialogProps) {
   const player1Name = player1Data.name;
   const player2Name = player2Data.name;
@@ -210,6 +212,11 @@ export function RecordingsUploadDialog({
     setOpen(isOpen);
     if (!isOpen) reset();
   };
+
+  // Only admins and players directly involved in the match may upload recs.
+  if (!canManageRecordings) {
+    return null;
+  }
 
   if (isUploadDisabled) {
     return (

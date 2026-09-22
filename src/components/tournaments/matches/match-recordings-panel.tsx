@@ -17,6 +17,7 @@ import {
 interface MatchRecordingsPanelProps extends RecordingsUploadDialogProps {
   hasRecordings: boolean;
   isApproved: boolean;
+  canManageRecordings: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ interface MatchRecordingsPanelProps extends RecordingsUploadDialogProps {
 export function MatchRecordingsPanel({
   hasRecordings,
   isApproved,
+  canManageRecordings,
   matchId,
   ...dialogProps
 }: MatchRecordingsPanelProps) {
@@ -58,6 +60,7 @@ export function MatchRecordingsPanel({
       <RecordingsUploadDialog
         {...dialogProps}
         matchId={matchId}
+        canManageRecordings={canManageRecordings}
       />
     );
   }
@@ -79,7 +82,7 @@ export function MatchRecordingsPanel({
         </a>
       </Button>
 
-      {!isApproved && (
+      {!isApproved && canManageRecordings && (
         <ConfirmDialog
           trigger={
             <Button
