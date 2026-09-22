@@ -187,8 +187,8 @@ export const tournamentGameRepository = {
   /**
    * Resolve the storage folder that holds every recording uploaded for a
    * match (`tournaments/<tournament urlKey>/games/<matchNumber>`), together
-   * with a human-friendly base name for downloads built from the match number
-   * and the players/teams involved.
+   * with a human-friendly base name for downloads built from the players/teams
+   * involved.
    */
   async getMatchRecordingsInfo(matchId: string) {
     const match = await db.tournamentMatch.findUnique({
@@ -220,17 +220,37 @@ export const tournamentGameRepository = {
       return "";
     }).filter((name) => name.length > 0);
 
-    const fileName = sanitizeFileName(
-      [String(match.matchNumber), ...slotNames].join("_"),
-    );
+    const playerBaseName = sanitizeFileName(slotNames.join("_"));
 
     return {
       prefix: storagePaths.tournamentMatchGames(
         tournament.urlKey,
         String(match.matchNumber),
       ),
-      fileName,
+      playerBaseName,
     };
+  },
+
+  /**
+   * Resolve the storage keys of every recording file belonging to a single
+   * game. A game recorded across multiple
+   * (restored) files returns several keys; a game with no recording returns an
+   * empty array.
+   */
+  async getMatchRecordingKeysByGameNumber(
+    matchId: string,
+    gameNumber: number,
+  ): Promise<string[]> {
+    const game = await db.game.findFirst({
+      where: { matchId, gameNumber },
+      select: { recordingKeys: true, recUrl: true },
+    });
+
+    if (!game) return [];
+
+    if (game.recordingKeys.length > 0) return game.recordingKeys;
+
+    return game.recUrl ? [game.recUrl] : [];
   },
 
   /**

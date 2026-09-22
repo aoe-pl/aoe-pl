@@ -102,6 +102,21 @@ export default async function TournamentMatchPage({
     (game) => game.recordingKeys.length > 0 || game.recUrl !== null,
   );
 
+  // Per-game recording info (1-based game number + file count). A restored
+  // game stores more than one file and every one must be offered for download.
+  const gamesWithRecordings = match.Game.flatMap((game) => {
+    if (game.gameNumber === null) return [];
+
+    const fileCount =
+      game.recordingKeys.length > 0
+        ? game.recordingKeys.length
+        : game.recUrl
+          ? 1
+          : 0;
+
+    return fileCount > 0 ? [{ gameNumber: game.gameNumber, fileCount }] : [];
+  });
+
   const hasResults =
     player1Score > 0 ||
     player2Score > 0 ||
@@ -205,6 +220,7 @@ export default async function TournamentMatchPage({
               hasRecordings={hasRecordings}
               isApproved={isApproved}
               canManageRecordings={isAdmin || isParticipant}
+              gamesWithRecordings={gamesWithRecordings}
             />
 
             <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">

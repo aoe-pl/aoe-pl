@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { api } from "@/trpc/react";
-import { Download, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  MatchRecordingsDownload,
+  type GameRecordingInfo,
+} from "./match-recordings-download";
 import {
   RecordingsUploadDialog,
   type RecordingsUploadDialogProps,
@@ -18,6 +22,7 @@ interface MatchRecordingsPanelProps extends RecordingsUploadDialogProps {
   hasRecordings: boolean;
   isApproved: boolean;
   canManageRecordings: boolean;
+  gamesWithRecordings: GameRecordingInfo[];
 }
 
 /**
@@ -27,6 +32,7 @@ export function MatchRecordingsPanel({
   hasRecordings,
   isApproved,
   canManageRecordings,
+  gamesWithRecordings,
   matchId,
   ...dialogProps
 }: MatchRecordingsPanelProps) {
@@ -67,20 +73,11 @@ export function MatchRecordingsPanel({
 
   return (
     <div className="space-y-2">
-      <Button
-        size="lg"
-        variant="gold"
-        className="w-full"
-        asChild
-      >
-        <a
-          href={`/api/tournaments/matches/${matchId}/recordings`}
-          download
-        >
-          <Download />
-          {t("download_button")}
-        </a>
-      </Button>
+      <MatchRecordingsDownload
+        matchId={matchId}
+        gameCount={dialogProps.gameCount ?? 5}
+        gamesWithRecordings={gamesWithRecordings}
+      />
 
       {!isApproved && canManageRecordings && (
         <ConfirmDialog

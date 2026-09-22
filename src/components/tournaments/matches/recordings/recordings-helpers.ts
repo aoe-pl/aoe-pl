@@ -144,8 +144,10 @@ export function buildRecordingFileName(
   usedNames: Set<string>,
 ): string {
   const extension = getFileExtension(file.name);
+  // The map is intentionally omitted so downloads are named consistently as
+  // "<player1>_<player2>_game_<n>".
   const label = recording
-    ? `${recording.player1Data.name}_${recording.player2Data.name}_${recording.map}`
+    ? `${recording.player1Data.name}_${recording.player2Data.name}`
     : file.name.replace(/\.[^.]+$/, "");
 
   const base = sanitizeFileName(`${label}_game_${gameNumber}`);

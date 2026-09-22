@@ -724,6 +724,7 @@
       "recordings": {
         "upload_button": "Wrzuć nagrania",
         "download_button": "Pobierz nagrania",
+        "download_game": "Gra {number}",
         "clear_button": "Wyczyść nagrania",
         "clearing": "Czyszczenie",
         "clear_confirm_title": "Wyczyścić nagrania?",

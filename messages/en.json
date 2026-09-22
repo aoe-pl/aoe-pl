@@ -724,6 +724,7 @@
       "recordings": {
         "upload_button": "Upload recs",
         "download_button": "Download recs",
+        "download_game": "Game {number}",
         "clear_button": "Clear recs",
         "clearing": "Clearing",
         "clear_confirm_title": "Clear recordings?",
