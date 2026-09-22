@@ -705,7 +705,9 @@
       "search_players_or_group": "Search player or group",
       "spoiler": {
         "reveal": "Reveal scores",
-        "hide": "Hide scores"
+        "hide": "Hide scores",
+        "overlay": "Spoiler",
+        "overlay_hint": "Results hidden"
       },
       "status": {
         "label": "Status",

@@ -1,6 +1,7 @@
 "use client";
 
 import { Crown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMatchSpoiler } from "./match-spoiler-context";
 
 export interface MatchGameRow {
@@ -18,13 +19,16 @@ interface MatchGamesTableProps {
 /**
  * Per-game breakdown (civ / map / civ) with a crown marking each game's
  * winner. Rows without data render a "-" placeholder. While the score is
- * hidden (spoiler protection) the crowns are not shown.
+ * hidden (spoiler protection) every cell is masked with "?" and a frosted
+ * glass overlay covers the table, so neither the results nor the number of
+ * games played leak.
  */
 export function MatchGamesTable({ rows }: MatchGamesTableProps) {
   const { revealed } = useMatchSpoiler();
+  const t = useTranslations("tournament.matches.spoiler");
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
+    <div className="relative w-full overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
       {rows.map((row, index) => (
         <div
           key={index}
@@ -40,15 +44,15 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
             )}
           </span>
           <span className="text-primary truncate text-right">
-            {row.player1Civ ?? "-"}
+            {revealed ? (row.player1Civ ?? "-") : "?"}
           </span>
           <span className="text-center text-[color:var(--medieval-gold-muted)]"></span>
           <span className="truncate text-center font-medium text-[color:var(--medieval-gold)]">
-            {row.map ?? "-"}
+            {revealed ? (row.map ?? "-") : "?"}
           </span>
           <span className="text-center text-[color:var(--medieval-gold-muted)]"></span>
           <span className="text-primary truncate text-left">
-            {row.player2Civ ?? "-"}
+            {revealed ? (row.player2Civ ?? "-") : "?"}
           </span>
           <span className="flex justify-center">
             {revealed && row.player2Won && (
@@ -57,6 +61,17 @@ export function MatchGamesTable({ rows }: MatchGamesTableProps) {
           </span>
         </div>
       ))}
+
+      {!revealed && (
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40 backdrop-blur-sm">
+          <span className="text-lg font-black tracking-[0.35em] text-[color:var(--medieval-gold)] uppercase [text-shadow:0_2px_6px_rgba(0,0,0,0.8)]">
+            {t("overlay")}
+          </span>
+          <span className="text-xs tracking-widest text-[color:var(--medieval-gold-muted)] uppercase">
+            {t("overlay_hint")}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -705,7 +705,9 @@
       "search_players_or_group": "Szukaj gracza lub grupy",
       "spoiler": {
         "reveal": "Pokaż wyniki",
-        "hide": "Ukryj wyniki"
+        "hide": "Ukryj wyniki",
+        "overlay": "Spoiler",
+        "overlay_hint": "Wyniki ukryte"
       },
       "status": {
         "label": "Status",
