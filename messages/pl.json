@@ -554,7 +554,7 @@
     },
     "match_mode": {
       "best_of_format": "Best of {count}",
-      "play_all_format": "Play All ({count} gier)",
+      "play_all_format": "Play All {count}",
       "best_of_description": "Pierwszy do wygrania {count} gier",
       "play_all_description": "Wszystkie {count} gier są rozgrywane"
     },
@@ -679,6 +679,9 @@
       "won": "Wygrane",
       "lost": "Przegrane",
       "total_score": "Suma punktów",
+      "match_mode": {
+        "label": "Tryb meczu"
+      },
       "progress": {
         "title": "Rozegrane mecze",
         "played": "Rozegrane",
@@ -721,6 +724,9 @@
         "approve_button": "Zatwierdź mecz",
         "unapprove_button": "Cofnij zatwierdzenie"
       },
+      "match_mode": {
+        "label": "Tryb meczu"
+      },
       "recordings": {
         "upload_button": "Wrzuć nagrania",
         "download_button": "Pobierz nagrania",
@@ -736,11 +742,16 @@
         "title": "Wrzuć nagrania gier",
         "subtitle": "Wgraj pliki .aoe2record dla {player1} vs {player2}.",
         "hint": "Jeden plik na grę; dodaj więcej, jeśli gra była wznawiana.",
-        "upload_disabled_tooltip": "Wgrywanie jest wyłączone, ponieważ jeden lub obaj gracze nie mają ustawionego prawidłowego linku AoE2Companion w swoim profilu.",
+        "upload_disabled_tooltip": "Wgrywanie jest wyłączone, ponieważ żaden gracz nie ma ustawionego prawidłowego linku AoE2Companion w swoim profilu.",
+        "admin": {
+          "title": "Nadpisanie administratora",
+          "toggle": "Włącz nadpisanie administratora",
+          "assign_players": "Który nagrany gracz to {player}?",
+          "winner": "Zwycięzca"
+        },
         "step_confirm": "Potwierdź",
         "drop_zone_label": "Upuść nagrania tutaj lub kliknij, aby wybrać",
         "drop_zone": "Przeciągnij i upuść plik(i) <code>.aoe2record</code> tutaj lub <link>kliknij, aby wybrać</link>",
-        "validate_files": "Waliduj pliki",
         "clear_files": "Wyczyść pliki",
         "back_button": "Wstecz",
         "next_button": "Dalej",
@@ -764,10 +775,11 @@
         "validation_error": "Pliki nagrań są nieprawidłowe. Upewnij się, że wszystkie nagrania pochodzą z tej samej gry, z tymi samymi graczami, cywilizacjami i mapą.",
         "validation_error_profile_mismatch": "Niezgodność identyfikatora profilu.",
         "confirm": {
-          "review": "Sprawdź wgrane nagrania przed wysłaniem.",
+          "review": "Sprawdź czy wszystko się zgadza przed wysłaniem.",
           "game_label": "Gra {number}",
           "count_mismatch_complete": "{uploaded, plural, one {Wgrano # nagranie} few {Wgrano # nagrania} many {Wgrano # nagrań} other {Wgrano # nagrania}}, ale wynik ({p1}:{p2}) sugeruje, że rozegrano {expected, plural, one {# grę} few {# gry} many {# gier} other {# gry}}. Sprawdź, czy pliki są prawidłowe.",
-          "count_mismatch_incomplete": "Na podstawie wgranych nagrań żaden z graczy nie zapewnił sobie jeszcze zwycięstwa w serii ({p1}:{p2}). Upewnij się, że wszystkie gry zostały uwzględnione."
+          "count_mismatch_incomplete": "Na podstawie wgranych nagrań żaden z graczy nie zapewnił sobie jeszcze zwycięstwa w serii ({p1}:{p2}). Upewnij się, że wszystkie gry zostały uwzględnione.",
+          "count_mismatch_play_all": "Tryb Play All wymaga wszystkich gier. {uploaded, plural, one {Wgrano tylko # z {total} gier} few {Wgrano tylko # z {total} gier} many {Wgrano tylko # z {total} gier} other {Wgrano tylko # z {total} gier}}."
         }
       }
     }

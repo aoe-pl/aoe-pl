@@ -9,6 +9,7 @@ import { MatchSchedulePanel } from "@/components/tournaments/matches/match-sched
 import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboard";
 import { MatchSpoilerProvider } from "@/components/tournaments/matches/match-spoiler-context";
 import { MatchSpoilerToggle } from "@/components/tournaments/matches/match-spoiler-toggle";
+import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
@@ -24,11 +25,12 @@ export default async function TournamentMatchPage({
 }) {
   const { urlKey, matchNumber } = await params;
 
-  const [match, locale, session, t] = await Promise.all([
+  const [match, locale, session, t, tGlobal] = await Promise.all([
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
     getLocale(),
     auth(),
     getTranslations("tournament.matches"),
+    getTranslations(),
   ]);
 
   if (!match) notFound();
@@ -68,7 +70,23 @@ export default async function TournamentMatchPage({
     : t("date_tbd");
 
   const groupName = match.group?.name ?? "—";
-  const gameCount = match.TournamentMatchMode?.gameCount ?? match.bestOf ?? 5;
+
+  const matchMode =
+    match.TournamentMatchMode ??
+    match.group?.matchMode ??
+    match.group?.tournament.matchMode ??
+    null;
+  const mode = matchMode?.mode ?? "BEST_OF";
+  const gameCount = matchMode?.gameCount ?? match.bestOf ?? 5;
+
+  // Human-readable match mode ("Best of 3", "Play All (5 games)"). Only shown
+  // when a mode is configured, so we never display a misleading fallback.
+  const matchModeLabel = matchMode
+    ? formatMatchModeName(matchMode.mode, matchMode.gameCount, (key, params) =>
+        tGlobal(key, params),
+      )
+    : null;
+
   const isApproved = match.status === "ADMIN_APPROVED";
 
   const statusLabels = {
@@ -102,8 +120,7 @@ export default async function TournamentMatchPage({
     (game) => game.recordingKeys.length > 0 || game.recUrl !== null,
   );
 
-  // Per-game recording info (1-based game number + file count). A restored
-  // game stores more than one file and every one must be offered for download.
+  // Per-game recording info.
   const gamesWithRecordings = match.Game.flatMap((game) => {
     if (game.gameNumber === null) return [];
 
@@ -185,6 +202,14 @@ export default async function TournamentMatchPage({
                 </div>
                 <div className="font-medium">{groupName}</div>
               </div>
+              {matchModeLabel && (
+                <div>
+                  <div className="text-[color:var(--medieval-gold-muted)]">
+                    {t("match_mode.label")}
+                  </div>
+                  <div className="font-medium">{matchModeLabel}</div>
+                </div>
+              )}
             </div>
 
             <MatchSpoilerToggle hasResults={hasResults} />
@@ -216,6 +241,7 @@ export default async function TournamentMatchPage({
               player1MatchParticipantId={p1?.id ?? ""}
               player2MatchParticipantId={p2?.id ?? ""}
               gameCount={gameCount}
+              mode={mode}
               isAdmin={isAdmin}
               hasRecordings={hasRecordings}
               isApproved={isApproved}

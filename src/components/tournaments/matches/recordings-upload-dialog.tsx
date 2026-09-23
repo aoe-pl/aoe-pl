@@ -24,16 +24,19 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AdminOverridePanel } from "./recordings/admin-override-panel";
 import { ConfirmStep } from "./recordings/confirm-step";
 import { DropZone } from "./recordings/drop-zone";
 import {
   buildGamePayload,
   buildRecordingFileName,
+  getStepSwap,
   getStepWinner,
 } from "./recordings/recordings-helpers";
 import { RecordingsList } from "./recordings/recordings-list";
 import { useRecordingsUpload } from "./recordings/recordings-upload-hook";
 import { StepIndicator } from "./recordings/step-indicator";
+import type { MatchMode } from "./recordings/types";
 export interface RecordingsUploadDialogProps {
   player1Data: {
     profileId: number | null;
@@ -48,7 +51,8 @@ export interface RecordingsUploadDialogProps {
   matchId: string;
   player1MatchParticipantId: string;
   player2MatchParticipantId: string;
-  gameCount?: number /** Total games possible (e.g. 5 for BO5). Falls back to 5 if not provided. */;
+  gameCount?: number;
+  mode?: MatchMode;
   isAdmin?: boolean;
   canManageRecordings?: boolean;
 }
@@ -62,6 +66,7 @@ export function RecordingsUploadDialog({
   player1MatchParticipantId,
   player2MatchParticipantId,
   gameCount = 5,
+  mode = "BEST_OF",
   isAdmin = false,
   canManageRecordings = true,
 }: RecordingsUploadDialogProps) {
@@ -69,13 +74,13 @@ export function RecordingsUploadDialog({
   const player2Name = player2Data.name;
   const t = useTranslations("tournament.matches.recordings");
 
-  // TODO See whether this check is needed.
-  // IF enabled, users wont be able to upload recs to matches they are not a part of.
-  // As apparently not everyone will have playerId, disabling this for now.
-  const isUploadDisabled = false;
-
-  // IF player1Data.profileId or player2Data.profileId, don't allow to upload recs. Disable the button.
-  // const isUploadDisabled = player1Data.profileId === null || player2Data.profileId === null;
+  // A player may not have an aoe2companion profile linked, so profileId can be
+  // null. At least one known id is required to map the recording's players onto
+  // the match's players, so upload is only disabled when neither player has one.
+  // Whether the id actually matches a recording is checked during validation,
+  // once the files have been parsed.
+  const isUploadDisabled =
+    player1Data.profileId === null && player2Data.profileId === null;
 
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,8 +94,7 @@ export function RecordingsUploadDialog({
     currentStep,
     parsing,
     parseError,
-    strictValidation,
-    setStrictValidation,
+    adminOverride,
     isConfirmStep,
     currentGameStep,
     hasValidationErrors,
@@ -99,13 +103,16 @@ export function RecordingsUploadDialog({
     handleFiles,
     handleClearStep,
     handleSetWinner,
+    handleSetSwap,
+    handleSetAdminOverride,
     handleNext,
     handleBack,
     reset,
   } = useRecordingsUpload({
     gameCount,
-    p1ProfileId: player1Data.profileId!, // ! Assume dialog won't even open if profileId is null, so we can safely assert non-null here.
-    p2ProfileId: player2Data.profileId!,
+    mode,
+    p1ProfileId: player1Data.profileId,
+    p2ProfileId: player2Data.profileId,
   });
 
   const handleSubmit = async () => {
@@ -133,6 +140,7 @@ export function RecordingsUploadDialog({
               recording,
               stepIndex + 1,
               usedNames,
+              getStepSwap(step),
             ),
           };
         }),
@@ -305,43 +313,50 @@ export function RecordingsUploadDialog({
               <RecordingsList recordings={currentGameStep.recordings} />
             )}
 
-            {currentGameStep.files.length > 0 &&
-              (() => {
-                const winner = getStepWinner(currentGameStep);
+            {/* Non-admins can only pick a winner when it couldn't be read. */}
+            {!isAdmin &&
+              currentGameStep.files.length > 0 &&
+              getStepWinner(currentGameStep) === null && (
+                <Alert variant="destructive">
+                  <AlertDescription className="space-y-2">
+                    <p>{t("winner_manual_prompt")}</p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSetWinner(1)}
+                      >
+                        {player1Name}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSetWinner(2)}
+                      >
+                        {player2Name}
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
 
-                const winnerName =
-                  winner === 1
-                    ? player1Data.name
-                    : winner === 2
-                      ? player2Data.name
-                      : null;
-
-                return winnerName ? (
-                  <> </>
-                ) : (
-                  <Alert variant="destructive">
-                    <AlertDescription className="space-y-2">
-                      <p>{t("winner_manual_prompt")}</p>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSetWinner(1)}
-                        >
-                          {player1Name}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSetWinner(2)}
-                        >
-                          {player2Name}
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                );
-              })()}
+            {/* Admins can fix the player orientation and the winner by hand. */}
+            {isAdmin && adminOverride && currentGameStep.files.length > 0 && (
+              <AdminOverridePanel
+                player1Name={player1Name}
+                player2Name={player2Name}
+                recordedPlayer1Name={
+                  currentGameStep.recordings.at(-1)?.player1Data.name ?? null
+                }
+                recordedPlayer2Name={
+                  currentGameStep.recordings.at(-1)?.player2Data.name ?? null
+                }
+                swap={getStepSwap(currentGameStep)}
+                onSetSwap={handleSetSwap}
+                winner={getStepWinner(currentGameStep)}
+                onSetWinner={handleSetWinner}
+              />
+            )}
           </div>
         )}
 
@@ -349,6 +364,7 @@ export function RecordingsUploadDialog({
           <ConfirmStep
             steps={steps}
             gameCount={gameCount}
+            mode={mode}
             player1Name={player1Name}
             player2Name={player2Name}
           />
@@ -358,10 +374,10 @@ export function RecordingsUploadDialog({
           {!isConfirmStep && isAdmin && (
             <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-xs select-none">
               <Checkbox
-                checked={strictValidation}
-                onCheckedChange={(v) => setStrictValidation(!!v)}
+                checked={adminOverride}
+                onCheckedChange={(v) => handleSetAdminOverride(!!v)}
               />
-              {t("validate_files")}
+              {t("admin.toggle")}
             </label>
           )}
           <div className="flex flex-1 justify-end gap-2">

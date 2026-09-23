@@ -1,6 +1,6 @@
 import type { ParsedRecording } from "@/lib/recording-parser/types";
 import { sanitizeFileName } from "@/lib/storage/paths";
-import type { GameStep } from "./types";
+import type { GameStep, MatchMode } from "./types";
 
 export function buildInitialSteps(gameCount: number): GameStep[] {
   return Array.from({ length: gameCount }, () => ({
@@ -9,20 +9,54 @@ export function buildInitialSteps(gameCount: number): GameStep[] {
     skipped: false,
     validationError: null,
     winnerOverride: null,
+    autoPlayerSwap: false,
+    playerSwapOverride: null,
   }));
 }
 
+/**
+ * Number of game wins a player needs to win a best-of series.
+ */
 export function winsNeeded(gameCount: number): number {
   return Math.ceil(gameCount / 2);
 }
 
-/** Returns the effective winner for a step: override takes priority, then last recording. */
+/**
+ * Whether the winner of the series is already decided by the played games.
+ */
+export function isSeriesDecided(
+  scores: [number, number],
+  gameCount: number,
+  mode: MatchMode,
+): boolean {
+  if (mode === "PLAY_ALL") return false;
+
+  const needed = winsNeeded(gameCount);
+  return scores[0] >= needed || scores[1] >= needed;
+}
+
+/**
+ * Whether the recording's parsed player 1 is the match's player 2. An admin
+ * override wins over the value detected from the aoe2companion profile ids.
+ */
+export function getStepSwap(step: GameStep): boolean {
+  return step.playerSwapOverride ?? step.autoPlayerSwap;
+}
+
+/**
+ * Returns the effective winner for a step in match terms (1 = match player 1).
+ * The manual override takes priority, then the last recording's winner, which
+ * is flipped when the recording's player order is swapped.
+ */
 export function getStepWinner(step: GameStep): 1 | 2 | null {
   if (step.recordings.length === 0) return null;
 
-  const winner = step.recordings.at(-1)!.winner;
+  if (step.winnerOverride !== null) return step.winnerOverride;
 
-  return step.winnerOverride ?? winner;
+  const winner = step.recordings.at(-1)!.winner;
+  if (winner === null) return null;
+
+  return getStepSwap(step) ? (winner === 1 ? 2 : 1) : winner;
 }
 
 /** Returns [player1Wins, player2Wins] across all non-skipped steps with a result. */
@@ -46,49 +80,60 @@ interface ValidationMessages {
   invalidRecordings: string;
 }
 
+/** How a recording's player order relates to the match's player order. */
+type RecordingAlignment = "same" | "swap" | "unknown";
+
+/**
+ * Work out whether a recording lists its players in the same order as the match or reversed.
+ */
+export function resolveRecordingAlignment(
+  rec: ParsedRecording,
+  p1ProfileId: number | null,
+  p2ProfileId: number | null,
+): RecordingAlignment {
+  const recP1 = rec.player1Data.profileId;
+  const recP2 = rec.player2Data.profileId;
+
+  const hasP1 =
+    p1ProfileId != null && (recP1 === p1ProfileId || recP2 === p1ProfileId);
+  const hasP2 =
+    p2ProfileId != null && (recP1 === p2ProfileId || recP2 === p2ProfileId);
+
+  // We need at least one known id present in the recording. When both ids are
+  // known, both must be present or the recording is for a different match-up.
+  if (!hasP1 && !hasP2) return "unknown";
+
+  if (p1ProfileId != null && p2ProfileId != null && (!hasP1 || !hasP2)) {
+    return "unknown";
+  }
+
+  if (hasP1) return recP1 === p1ProfileId ? "same" : "swap";
+
+  return recP2 === p2ProfileId ? "same" : "swap";
+}
+
 /**
  * Validates recording data across multiple files for a single game.
  */
-// prettier-ignore
 export function validateGameRecFileData(
   recordings: ParsedRecording[],
-  p1ProfileId: number ,
-  p2ProfileId: number,
+  p1ProfileId: number | null,
+  p2ProfileId: number | null,
   messages: ValidationMessages,
 ): string | null {
-  // TODO: add playerID validation - will need to get playerID from aoe2companion link.
+  if (p1ProfileId == null && p2ProfileId == null) {
+    return messages.profileMismatch;
+  }
+
   const checks: boolean[] = [];
 
+  // Every recording must be matchable to this match-up: at least one known player id present.
+  const profileIdCheck = recordings.every(
+    (rec) =>
+      resolveRecordingAlignment(rec, p1ProfileId, p2ProfileId) !== "unknown",
+  );
 
-    // Check if playerId match profileIds in parsedResults.
-    // If they are matching, make sure player 1 profile id matches player 1 in the recording, and player 2 id matches player 2 in the recording.
-  let profileIdCheck = true;
-
-  recordings.forEach((rec) => {
-    const recProfileIds = [
-        rec.player1Data.profileId,
-        rec.player2Data.profileId,
-      ];
-    const hasP1 = recProfileIds.includes(p1ProfileId);
-    const hasP2 = recProfileIds.includes(p2ProfileId);
-    
-    if (!hasP1 || !hasP2) {
-        profileIdCheck = false;
-       
-        return;
-      }
-      
-    // At this point, we know that both player IDs are present in the recording. We can now check which one is player 1 and which one is player 2.
-    // If p1ProfileId is the first profileId, then player 1 is correct. If not, we need to swap them.
-    if (recProfileIds[1] === p1ProfileId) {
-      const temp = rec.player1Data;
-      rec.player1Data = rec.player2Data;
-      rec.player2Data = temp;
-    }
-  });
-  
-  // TODO: uncomment if we decide to check profile IDs
-  // checks.push(profileIdCheck);
+  checks.push(profileIdCheck);
 
   // If there is only one recording, we don't need to do any further checks.
   if (recordings.length === 0) {
@@ -99,17 +144,29 @@ export function validateGameRecFileData(
 
   // Check if all recordings have different file name (all entries, including firstRec).
   const fileNames = recordings.map((e) => e.fileName);
-  const fileNameCheck = new Set(fileNames).size === recordings.length
+  const fileNameCheck = new Set(fileNames).size === recordings.length;
 
   checks.push(fileNameCheck);
 
   // Same civ check
-  checks.push(rest.every((e) => e.player1Data.civ === firstRec!.player1Data.civ));
-  checks.push(rest.every((e) => e.player2Data.civ === firstRec!.player2Data.civ));
+  checks.push(
+    rest.every((e) => e.player1Data.civ === firstRec!.player1Data.civ),
+  );
+  checks.push(
+    rest.every((e) => e.player2Data.civ === firstRec!.player2Data.civ),
+  );
 
   // Check if all recordings have the same player
-  checks.push(rest.every((e) => e.player1Data.profileId === firstRec!.player1Data.profileId));
-  checks.push(rest.every((e) => e.player2Data.profileId === firstRec!.player2Data.profileId));
+  checks.push(
+    rest.every(
+      (e) => e.player1Data.profileId === firstRec!.player1Data.profileId,
+    ),
+  );
+  checks.push(
+    rest.every(
+      (e) => e.player2Data.profileId === firstRec!.player2Data.profileId,
+    ),
+  );
 
   // Check if all recordings have the same map
   checks.push(rest.every((e) => e.map === firstRec!.map));
@@ -142,12 +199,15 @@ export function buildRecordingFileName(
   recording: ParsedRecording | undefined,
   gameNumber: number,
   usedNames: Set<string>,
+  swap = false,
 ): string {
   const extension = getFileExtension(file.name);
   // The map is intentionally omitted so downloads are named consistently as
-  // "<player1>_<player2>_game_<n>".
+  // "<player1>_<player2>_game_<n>"
   const label = recording
-    ? `${recording.player1Data.name}_${recording.player2Data.name}`
+    ? swap
+      ? `${recording.player2Data.name}_${recording.player1Data.name}`
+      : `${recording.player1Data.name}_${recording.player2Data.name}`
     : file.name.replace(/\.[^.]+$/, "");
 
   const base = sanitizeFileName(`${label}_game_${gameNumber}`);
@@ -193,9 +253,7 @@ interface BuildGamePayloadArgs {
 }
 
 /**
- * Turn a single (validated) game step into the payload stored in the database.
- * Civs are matched to match participants by aoe2companion profile id, falling
- * back to the parser's player ordering when the ids are unknown.
+ * Build payload for the database.
  */
 export function buildGamePayload({
   step,
@@ -207,17 +265,10 @@ export function buildGamePayload({
   const first = step.recordings[0];
   const last = step.recordings.at(-1);
   const winner = getStepWinner(step);
+  const swap = getStepSwap(step);
 
-  const player1IsSecond =
-    player1.profileId != null &&
-    last?.player2Data.profileId === player1.profileId;
-
-  const player1Civ = player1IsSecond
-    ? last?.player2Data.civ
-    : last?.player1Data.civ;
-  const player2Civ = player1IsSecond
-    ? last?.player1Data.civ
-    : last?.player2Data.civ;
+  const player1Civ = swap ? last?.player2Data.civ : last?.player1Data.civ;
+  const player2Civ = swap ? last?.player1Data.civ : last?.player2Data.civ;
 
   return {
     gameNumber,

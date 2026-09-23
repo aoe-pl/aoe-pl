@@ -9,11 +9,17 @@ export default async function TournamentGroupsPage({
   params: Promise<{ seriesSlug: string; urlKey: string }>;
 }) {
   const { seriesSlug, urlKey } = await params;
-  const { section } = await getTournamentPageData(seriesSlug, urlKey, "groups");
+  const { tournament, section } = await getTournamentPageData(
+    seriesSlug,
+    urlKey,
+    "groups",
+    { includeMatchMode: true },
+  );
 
   const groups = await api.tournaments.groups.listByTournament({
     tournamentId: section.tournamentId,
     includeParticipants: true,
+    includeMatchMode: true,
   });
 
   const groupData: GroupPageData[] = [];
@@ -27,10 +33,15 @@ export default async function TournamentGroupsPage({
       groupId: g.id,
     });
 
+    const matchMode = g.matchMode ?? tournament.matchMode ?? null;
+
     groupData.push({
       groupId: g.id,
       groupColor: g.color!,
       groupName: g.name,
+      matchMode: matchMode
+        ? { mode: matchMode.mode, gameCount: matchMode.gameCount }
+        : null,
       matches: matchesForGroup,
       players: participants.map((p) => ({
         id: p.id,

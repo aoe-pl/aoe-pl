@@ -30,8 +30,9 @@ export async function getTournamentPageData(
   seriesSlug: string,
   urlKey: string,
   sectionSlug: string,
+  options?: TournamentQueryOptions,
 ) {
-  const tournament = await getTournament(seriesSlug, urlKey);
+  const tournament = await getTournament(seriesSlug, urlKey, options);
 
   const section = await tournamentSectionRepository.getSectionBySlug(
     tournament.id,

@@ -5,24 +5,28 @@ import {
   buildInitialSteps,
   computeScores,
   getStepWinner,
+  isSeriesDecided,
+  resolveRecordingAlignment,
   validateGameRecFileData,
-  winsNeeded,
 } from "./recordings-helpers";
-import type { GameStep } from "./types";
+import type { GameStep, MatchMode } from "./types";
 
 interface UseRecordingsUploadOptions {
   gameCount: number; // Total number of games in the series (5 for BO5)
-  p1ProfileId: number;
-  p2ProfileId: number;
+  mode: MatchMode;
+  p1ProfileId: number | null;
+  p2ProfileId: number | null;
 }
 
 /**
  * Custom hook for managing the state of a recordings upload dialog.
  * Handles the current step, parsing of files, validation, and navigation between steps.
  * @param gameCount The total number of games in the series (e.g., 5 for a best-of-5 series).
+ * @param mode How the series is decided (see {@link MatchMode}).
  */
 export function useRecordingsUpload({
   gameCount,
+  mode,
   p1ProfileId,
   p2ProfileId,
 }: UseRecordingsUploadOptions) {
@@ -33,7 +37,7 @@ export function useRecordingsUpload({
   );
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [strictValidation, setStrictValidation] = useState(true);
+  const [adminOverride, setAdminOverride] = useState(false);
 
   const parser = useMemo(() => new RecordingParser(), []);
 
@@ -74,27 +78,35 @@ export function useRecordingsUpload({
           // Auto-sort by worldtime.
           step.recordings.sort((a, b) => a.worldTime - b.worldTime);
 
-          if (strictValidation) {
-            step.validationError = validateGameRecFileData(
-              step.recordings,
+          const lastRecording = step.recordings.at(-1);
+
+          step.autoPlayerSwap =
+            lastRecording != null &&
+            resolveRecordingAlignment(
+              lastRecording,
               p1ProfileId,
               p2ProfileId,
-              {
-                profileMismatch: t("validation_error_profile_mismatch"),
-                invalidRecordings: t("validation_error"),
-              },
-            );
-          } else {
-            step.validationError = null;
-          }
+            ) === "swap";
+
+          // Validation is skipped while an admin takes manual control, so their
+          // overrides aren't blocked by a profile mismatch.
+          step.validationError = adminOverride
+            ? null
+            : validateGameRecFileData(
+                step.recordings,
+                p1ProfileId,
+                p2ProfileId,
+                {
+                  profileMismatch: t("validation_error_profile_mismatch"),
+                  invalidRecordings: t("validation_error"),
+                },
+              );
 
           next[currentStep] = step;
 
-          const [p1Wins, p2Wins] = computeScores(next);
-          const needed = winsNeeded(gameCount);
-
-          // Mark remaining steps as skipped if one player has won the series already
-          if (p1Wins >= needed || p2Wins >= needed) {
+          // Mark the remaining steps as skipped once the series is decided.
+          // Play-all series never end early, so every game is still played.
+          if (isSeriesDecided(computeScores(next), gameCount, mode)) {
             for (let i = currentStep + 1; i < gameCount; i++) {
               next[i] = { ...next[i]!, skipped: true };
             }
@@ -110,35 +122,94 @@ export function useRecordingsUpload({
         setParsing(false);
       }
     },
-    [currentStep, gameCount, strictValidation, parser, t],
+    [
+      currentStep,
+      gameCount,
+      mode,
+      adminOverride,
+      parser,
+      t,
+      p1ProfileId,
+      p2ProfileId,
+    ],
   );
 
   const handleClearStep = useCallback(() => {
     setSteps((prev) => {
       const next = [...prev];
+
       next[currentStep] = {
         files: [],
         recordings: [],
         skipped: false,
         validationError: null,
         winnerOverride: null,
+        autoPlayerSwap: false,
+        playerSwapOverride: null,
       };
+
       return next;
     });
     setParseError(null);
   }, [currentStep]);
+
+  /** Pins the player orientation for the current game (admin only). */
+  const handleSetSwap = useCallback(
+    (swap: boolean) => {
+      setSteps((prev) => {
+        const next = [...prev];
+
+        next[currentStep] = {
+          ...next[currentStep]!,
+          playerSwapOverride: swap,
+        };
+
+        return next;
+      });
+    },
+    [currentStep],
+  );
+
+  /**
+   * Toggle admin override. Enabling it clears validation errors so an admin can
+   * take manual control; disabling it re-validates every loaded game.
+   */
+  const handleSetAdminOverride = useCallback(
+    (value: boolean) => {
+      setAdminOverride(value);
+      setSteps((prev) =>
+        prev.map((step) => ({
+          ...step,
+          validationError:
+            !value && step.recordings.length > 0
+              ? validateGameRecFileData(
+                  step.recordings,
+                  p1ProfileId,
+                  p2ProfileId,
+                  {
+                    profileMismatch: t("validation_error_profile_mismatch"),
+                    invalidRecordings: t("validation_error"),
+                  },
+                )
+              : null,
+        })),
+      );
+    },
+    [p1ProfileId, p2ProfileId, t],
+  );
 
   const handleSetWinner = useCallback(
     (winner: 1 | 2) => {
       setSteps((prev) => {
         const next = [...prev];
         const step = { ...next[currentStep]! };
+
         step.winnerOverride = winner;
+
         next[currentStep] = step;
 
-        const [p1Wins, p2Wins] = computeScores(next);
-        const needed = winsNeeded(gameCount);
-        if (p1Wins >= needed || p2Wins >= needed) {
+        // Only best-of series end early once the winner is decided.
+        if (isSeriesDecided(computeScores(next), gameCount, mode)) {
           for (let i = currentStep + 1; i < gameCount; i++) {
             next[i] = { ...next[i]!, skipped: true };
           }
@@ -147,7 +218,7 @@ export function useRecordingsUpload({
         return next;
       });
     },
-    [currentStep, gameCount],
+    [currentStep, gameCount, mode],
   );
 
   const handleNext = () => {
@@ -167,7 +238,7 @@ export function useRecordingsUpload({
     setSteps(buildInitialSteps(gameCount));
     setParseError(null);
     setParsing(false);
-    setStrictValidation(true);
+    setAdminOverride(false);
   };
 
   const hasValidationErrors = steps.some((s) => s.validationError !== null);
@@ -184,8 +255,7 @@ export function useRecordingsUpload({
     currentStep,
     parsing,
     parseError,
-    strictValidation,
-    setStrictValidation,
+    adminOverride,
     isConfirmStep,
     currentGameStep,
     hasValidationErrors,
@@ -195,6 +265,8 @@ export function useRecordingsUpload({
     handleFiles,
     handleClearStep,
     handleSetWinner,
+    handleSetSwap,
+    handleSetAdminOverride,
     handleNext,
     handleBack,
     reset,
