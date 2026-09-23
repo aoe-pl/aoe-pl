@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { useTranslations } from "next-intl";
 import type { GroupPageData } from "./types/types";
 
@@ -14,6 +15,7 @@ export function GroupProgressPanel({
   groupData: GroupPageData;
 }) {
   const t = useTranslations("tournament.groups");
+  const tGlobal = useTranslations();
 
   const total = groupData.matches.length;
   const played = groupData.matches.filter(
@@ -21,6 +23,14 @@ export function GroupProgressPanel({
   ).length;
   const remaining = total - played;
   const percent = total === 0 ? 0 : Math.round((played / total) * 100);
+
+  const matchModeLabel = groupData.matchMode
+    ? formatMatchModeName(
+        groupData.matchMode.mode,
+        groupData.matchMode.gameCount,
+        (key, params) => tGlobal(key, params),
+      )
+    : null;
 
   const circumference = 2 * Math.PI * RADIUS;
   const dash = (percent / 100) * circumference;
@@ -90,6 +100,17 @@ export function GroupProgressPanel({
           </span>
         </div>
       </div>
+
+      {matchModeLabel && (
+        <div className="border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[color:var(--medieval-gold-muted)]">
+              {t("match_mode.label")}
+            </span>
+            <span className="text-primary font-bold">{matchModeLabel}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

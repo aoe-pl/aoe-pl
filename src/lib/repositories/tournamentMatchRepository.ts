@@ -242,7 +242,12 @@ export const tournamentMatchRepository = {
         },
         group: {
           include: {
-            tournament: true,
+            matchMode: true,
+            tournament: {
+              include: {
+                matchMode: true,
+              },
+            },
           },
         },
         TournamentMatchMode: true,

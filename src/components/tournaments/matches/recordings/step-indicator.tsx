@@ -62,18 +62,6 @@ export function StepIndicator({
                 i + 1
               )}
             </span>
-            {isConfirm && (
-              <span
-                className={cn(
-                  "text-[10px] leading-none",
-                  isActive
-                    ? "font-medium text-[color:var(--medieval-gold)]"
-                    : "text-[color:var(--medieval-gold-muted)]",
-                )}
-              >
-                {t("step_confirm")}
-              </span>
-            )}
           </li>
         );
       })}

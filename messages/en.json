@@ -554,7 +554,7 @@
     },
     "match_mode": {
       "best_of_format": "Best of {count}",
-      "play_all_format": "Play All ({count} games)",
+      "play_all_format": "Play All {count}",
       "best_of_description": "First to win {count} games",
       "play_all_description": "All {count} games are played"
     },
@@ -684,6 +684,9 @@
       "won": "Won",
       "lost": "Lost",
       "total_score": "Total Score",
+      "match_mode": {
+        "label": "Match mode"
+      },
       "progress": {
         "title": "Matches played",
         "played": "Played",
@@ -721,6 +724,9 @@
         "approve_button": "Approve match",
         "unapprove_button": "Revoke approval"
       },
+      "match_mode": {
+        "label": "Match mode"
+      },
       "recordings": {
         "upload_button": "Upload recs",
         "download_button": "Download recs",
@@ -736,11 +742,16 @@
         "title": "Upload game recordings",
         "subtitle": "Upload .aoe2record files for {player1} vs {player2}.",
         "hint": "One file per game; add multiple if a game was restored.",
-        "upload_disabled_tooltip": "Upload is disabled because one or both players do not have a valid aoe2companion link set on their profile page.",
+        "upload_disabled_tooltip": "Upload is disabled because neither player has a valid aoe2companion link set on their profile page.",
+        "admin": {
+          "title": "Admin override",
+          "toggle": "Enable admin override",
+          "assign_players": "Which recorded player is {player}?",
+          "winner": "Winner"
+        },
         "step_confirm": "Confirm",
         "drop_zone_label": "Drop recordings here or click to select",
         "drop_zone": "Drag & drop <code>.aoe2record</code> file(s) here, or <link>click to select</link>",
-        "validate_files": "Validate files",
         "clear_files": "Clear files",
         "back_button": "Back",
         "next_button": "Next",
@@ -767,7 +778,8 @@
           "review": "Review the uploaded recordings before submitting.",
           "game_label": "Game {number}",
           "count_mismatch_complete": "{uploaded, plural, one {# recording uploaded} other {# recordings uploaded}}, but the score ({p1}:{p2}) suggests {expected, plural, one {# game was played} other {# games were played}}. Double-check the files are correct.",
-          "count_mismatch_incomplete": "No player has clinched the series yet based on the uploaded recordings ({p1}:{p2}). Make sure all games are accounted for."
+          "count_mismatch_incomplete": "No player has clinched the series yet based on the uploaded recordings ({p1}:{p2}). Make sure all games are accounted for.",
+          "count_mismatch_play_all": "Play All requires every game. {uploaded, plural, one {Only # of the {total} games has been uploaded} other {Only # of the {total} games have been uploaded}}."
         }
       }
     }
