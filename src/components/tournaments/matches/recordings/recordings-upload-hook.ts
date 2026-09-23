@@ -78,10 +78,8 @@ export function useRecordingsUpload({
           // Auto-sort by worldtime.
           step.recordings.sort((a, b) => a.worldTime - b.worldTime);
 
-          // Detect the player orientation from the profile ids. An admin can
-          // override it later; the override is preserved when more files are
-          // added so it isn't clobbered.
           const lastRecording = step.recordings.at(-1);
+
           step.autoPlayerSwap =
             lastRecording != null &&
             resolveRecordingAlignment(
@@ -139,6 +137,7 @@ export function useRecordingsUpload({
   const handleClearStep = useCallback(() => {
     setSteps((prev) => {
       const next = [...prev];
+
       next[currentStep] = {
         files: [],
         recordings: [],
@@ -148,6 +147,7 @@ export function useRecordingsUpload({
         autoPlayerSwap: false,
         playerSwapOverride: null,
       };
+
       return next;
     });
     setParseError(null);
@@ -158,10 +158,12 @@ export function useRecordingsUpload({
     (swap: boolean) => {
       setSteps((prev) => {
         const next = [...prev];
+
         next[currentStep] = {
           ...next[currentStep]!,
           playerSwapOverride: swap,
         };
+
         return next;
       });
     },
@@ -201,7 +203,9 @@ export function useRecordingsUpload({
       setSteps((prev) => {
         const next = [...prev];
         const step = { ...next[currentStep]! };
+
         step.winnerOverride = winner;
+
         next[currentStep] = step;
 
         // Only best-of series end early once the winner is decided.
