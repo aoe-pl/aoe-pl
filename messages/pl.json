@@ -803,7 +803,24 @@
       "title": "AoE2Companion",
       "none": "Brak powiązanego profilu AoE2Companion.",
       "placeholder": "https://aoe2companion.com/players/...",
-      "save_success": "Link AoE2Companion został zapisany."
+      "save_success": "Link AoE2Companion został zapisany.",
+      "unlink_success": "Link AoE2Companion został usunięty.",
+      "linked": "Profil AoE2Companion powiązany",
+      "not_linked": "Profil AoE2Companion niepowiązany",
+      "linked_button": "AoE2Companion powiązany",
+      "not_linked_button": "Powiąż AoE2Companion",
+      "dialog_title": "Profil AoE2Companion",
+      "dialog_description": "Wklej link do swojego profilu AoE2Companion, aby wyświetlić statystyki rankingowe na tej stronie.",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "unlink": "Usuń powiązanie",
+      "stats": {
+        "title": "Statystyki rankingowe (1v1)",
+        "rating": "Ranking",
+        "rank": "Pozycja",
+        "games": "Gry",
+        "win_rate": "Win rate"
+      }
     },
     "tournaments": {
       "title": "Historia turniejów",

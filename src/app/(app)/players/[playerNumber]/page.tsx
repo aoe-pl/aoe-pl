@@ -1,8 +1,11 @@
 import { ProfileAdminNoteSection } from "@/components/profile/profile-admin-note-section";
-import { ProfileAoe2CompanionSection } from "@/components/profile/profile-aoe2companion-section";
+import { ProfileAoe2Stats } from "@/components/profile/profile-aoe2-stats";
+import { ProfileAoe2CompanionButton } from "@/components/profile/profile-aoe2companion-button";
 import { ProfileRolesSection } from "@/components/profile/profile-roles-section";
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
+import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
 import { getIsAdmin, getSession } from "@/lib/session";
+import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
 
@@ -23,39 +26,67 @@ export default async function PlayerProfilePage({
   if (!profile) notFound();
 
   const session = await getSession();
-  const isOwnProfile = session?.user?.id === profile.id;
   const availableRoles = isAdmin ? await api.roles.list() : [];
+
+  const isOwnProfile = session?.user?.id === profile.id;
+
+  const companionProfileId = profile.aoe2companionUrl
+    ? getPlayerProfileIdFromCompanionUrl(profile.aoe2companionUrl)
+    : null;
+  const companionProfile = companionProfileId
+    ? await fetchAoe2CompanionProfile(companionProfileId)
+    : null;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-24">
-      <h1 className="text-foreground mb-8 text-3xl font-bold">
-        {profile.name}
-      </h1>
+      <div className="panel">
+        <header className="flex flex-wrap items-center justify-between gap-4 pb-6">
+          <h1
+            className="text-3xl font-bold"
+            style={{ color: "var(--medieval-gold)" }}
+          >
+            {profile.name}
+          </h1>
 
-      <div className="space-y-6">
-        <ProfileRolesSection
-          userId={profile.id}
-          currentUserId={session?.user?.id ?? ""}
-          currentRoles={profile.userRoles}
-          availableRoles={availableRoles}
-          isAdmin={isAdmin}
-        />
-
-        <ProfileAoe2CompanionSection
-          currentUrl={profile.aoe2companionUrl}
-          isEditable={isOwnProfile}
-        />
-
-        {isAdmin && (
-          <ProfileAdminNoteSection
+          <ProfileAoe2CompanionButton
             userId={profile.id}
-            currentNote={profile.adminComment}
+            currentUrl={profile.aoe2companionUrl}
+            isEditable={isOwnProfile || isAdmin}
           />
-        )}
+        </header>
 
-        <ProfileTournamentHistorySection
-          participants={profile.TournamentParticipant}
-        />
+        <div className="divide-y divide-[color:var(--medieval-wood-border)] border-t border-[color:var(--medieval-wood-border)]">
+          {companionProfile && (
+            <section className="py-6">
+              <ProfileAoe2Stats profile={companionProfile} />
+            </section>
+          )}
+
+          <section className="py-6">
+            <ProfileRolesSection
+              userId={profile.id}
+              currentUserId={session?.user?.id ?? ""}
+              currentRoles={profile.userRoles}
+              availableRoles={availableRoles}
+              isAdmin={isAdmin}
+            />
+          </section>
+
+          {isAdmin && (
+            <section className="py-6">
+              <ProfileAdminNoteSection
+                userId={profile.id}
+                currentNote={profile.adminComment}
+              />
+            </section>
+          )}
+
+          <section className="py-6">
+            <ProfileTournamentHistorySection
+              participants={profile.TournamentParticipant}
+            />
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -43,7 +43,7 @@ export function ProfileAdminNoteSection({
   };
 
   return (
-    <div className="panel border-amber-500/40">
+    <div className="panel-inset border-amber-500/40 p-4">
       <div className="panel-header flex items-center justify-between">
         <span className="flex items-center gap-2">
           <NotebookPen className="h-5 w-5" />

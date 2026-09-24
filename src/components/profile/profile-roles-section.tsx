@@ -77,7 +77,7 @@ export function ProfileRolesSection({
   const isOwnProfile = userId === currentUserId;
 
   return (
-    <div className="panel">
+    <div>
       <div className="panel-header flex items-center gap-2">
         <Shield className="h-5 w-5" />
         {t("title")}

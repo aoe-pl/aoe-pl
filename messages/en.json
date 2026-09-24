@@ -803,7 +803,24 @@
       "title": "AoE2Companion",
       "none": "No AoE2Companion profile linked.",
       "placeholder": "https://aoe2companion.com/players/...",
-      "save_success": "AoE2Companion link saved."
+      "save_success": "AoE2Companion link saved.",
+      "unlink_success": "AoE2Companion link removed.",
+      "linked": "AoE2Companion linked",
+      "not_linked": "AoE2Companion not linked",
+      "linked_button": "AoE2Companion linked",
+      "not_linked_button": "Link AoE2Companion",
+      "dialog_title": "AoE2Companion profile",
+      "dialog_description": "Paste the link to your AoE2Companion profile to show your ranked stats on this page.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "unlink": "Unlink",
+      "stats": {
+        "title": "Ranked stats (1v1)",
+        "rating": "Rating",
+        "rank": "Rank",
+        "games": "Games",
+        "win_rate": "Win rate"
+      }
     },
     "tournaments": {
       "title": "Tournament History",

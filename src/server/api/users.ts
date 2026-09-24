@@ -6,6 +6,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 const updateUserSchema = z.object({
@@ -82,15 +83,26 @@ export const usersRouter = createTRPCRouter({
     });
   }),
 
-  updateOwnAoe2CompanionUrl: protectedProcedure
+  updateAoe2CompanionUrl: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         url: z.string().url("Invalid URL").optional().or(z.literal("")),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const targetUserId = input.userId ?? ctx.session.user.id;
+
+      // Users may edit their own link; editing another player requires admin.
+      if (
+        targetUserId !== ctx.session.user.id &&
+        !(await usersRepository.isUserAdmin(ctx.session.user.id))
+      ) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
       return usersRepository.updateOwnAoe2CompanionUrl(
-        ctx.session.user.id,
+        targetUserId,
         input.url ?? null,
       );
     }),

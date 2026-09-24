@@ -38,7 +38,7 @@ export function ProfileTournamentHistorySection({
   const t = useTranslations("profile.tournaments");
 
   return (
-    <div className="panel">
+    <div>
       <div className="panel-header flex items-center gap-2">
         <Trophy className="h-5 w-5" />
         {t("title")}
