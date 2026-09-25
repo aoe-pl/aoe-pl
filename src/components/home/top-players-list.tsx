@@ -41,8 +41,8 @@ export function TopPlayersList({ players }: TopPlayersListProps) {
                 isLast ? "" : "border-b border-[var(--medieval-parchment)]"
               }`}
             >
-              <div className="flex flex-1 items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center text-xl font-bold">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center text-xl font-bold">
                   {rank === 1 ? (
                     "🥇"
                   ) : rank === 2 ? (
@@ -53,14 +53,14 @@ export function TopPlayersList({ players }: TopPlayersListProps) {
                     <span className="text-accent text-sm">{rank}</span>
                   )}
                 </div>
-                <div className="text-foreground flex-1 font-semibold">
+                <div className="text-foreground min-w-0 flex-1 truncate font-semibold">
                   <PlayerLink
                     playerNumber={player.playerNumber ?? undefined}
                     name={player.name}
                   />
                 </div>
               </div>
-              <div className="text-right">
+              <div className="shrink-0 pl-2 text-right">
                 <div className="text-accent font-bold">{player.rating}</div>
               </div>
             </div>
