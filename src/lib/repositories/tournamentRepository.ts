@@ -195,15 +195,6 @@ export const tournamentRepository = {
   },
   async deleteTournament(id: string) {
     return db.$transaction(async (tx) => {
-      // Bracket matches aren't cascade-deleted when their bracket is removed
-      // (TournamentBracketNode.matchId has no cascade), so they'd be left
-      // orphaned. Detach and delete them explicitly first - this cascades
-      // Game/GameParticipant/TournamentMatchParticipant/streams.
-      await tx.tournamentBracketNode.updateMany({
-        where: { bracket: { tournamentId: id } },
-        data: { matchId: null },
-      });
-
       const matches = await tx.tournamentMatch.findMany({
         where: {
           OR: [
@@ -217,6 +208,13 @@ export const tournamentRepository = {
         },
         select: { id: true },
       });
+
+      // Detach the bracket nodes before removing their matches.
+      await tx.tournamentBracketNode.updateMany({
+        where: { bracket: { tournamentId: id } },
+        data: { matchId: null },
+      });
+
       await tx.tournamentMatch.deleteMany({
         where: { id: { in: matches.map((m) => m.id) } },
       });
