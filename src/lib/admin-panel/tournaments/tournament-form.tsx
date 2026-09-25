@@ -1,22 +1,24 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  FormMessage,
-  FormDescription,
+  Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  Form,
+  FormMessage,
 } from "@/components/ui/form";
-import {
-  type tournamentFormSchema,
-  TournamentFormat,
-  formatLabels,
-  TournamentStatus,
-} from "./tournament";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -24,22 +26,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import type { z } from "zod";
+import { Textarea } from "@/components/ui/textarea";
+import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
+import { storagePaths } from "@/lib/storage/paths";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { TournamentSeriesSelector } from "./tournament-series-selector";
-import type { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
+import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
+import {
+  type tournamentFormSchema,
+  formatLabels,
+  TournamentFormat,
+  TournamentStatus,
+} from "./tournament";
+import { TournamentSeriesSelector } from "./tournament-series-selector";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
@@ -49,6 +51,8 @@ type TournamentFormProps = {
   isPending: boolean;
   /** True when editing: format can't be changed after creation. */
   formatLocked?: boolean;
+  /** Preview URL for an already-saved banner image (edit mode). */
+  bannerPreviewUrl?: string | null;
 };
 
 export function TournamentForm({
@@ -56,9 +60,14 @@ export function TournamentForm({
   form,
   isPending,
   formatLocked = false,
+  bannerPreviewUrl,
 }: TournamentFormProps) {
   const t = useTranslations("admin.tournaments.form");
   const tGlobal = useTranslations();
+
+  // Store banner uploads under a folder derived from the tournament url key.
+  const urlKey = form.watch("urlKey");
+  const bannerPath = storagePaths.tournamentBanners(urlKey || "unassigned");
 
   // Create tournament statuses with translated labels
   const tournamentStatuses = [
@@ -153,6 +162,25 @@ export function TournamentForm({
                     placeholder={t("description_placeholder")}
                     className="min-h-24"
                     {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="imageKey"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("image")}</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    path={bannerPath}
+                    previewUrl={bannerPreviewUrl}
                   />
                 </FormControl>
                 <FormMessage />

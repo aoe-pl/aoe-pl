@@ -107,6 +107,7 @@ export const tournamentRepository = {
     tournamentSeriesId: string;
     format: TournamentFormat;
     description?: string;
+    imageKey?: string | null;
     isTeamBased: boolean;
     startDate: Date;
     endDate?: Date;
@@ -123,6 +124,7 @@ export const tournamentRepository = {
         registrationMode: data.registrationMode,
         format: data.format,
         description: data.description,
+        imageKey: data.imageKey,
         isTeamBased: data.isTeamBased,
         startDate: data.startDate,
         endDate: data.endDate,
@@ -155,6 +157,7 @@ export const tournamentRepository = {
       tournamentSeriesId: string;
       format: TournamentFormat;
       description: string;
+      imageKey?: string | null;
       isTeamBased: boolean;
       startDate: Date;
       endDate?: Date;
@@ -173,6 +176,7 @@ export const tournamentRepository = {
         registrationMode: data.registrationMode,
         format: data.format,
         description: data.description,
+        imageKey: data.imageKey,
         isTeamBased: data.isTeamBased,
         startDate: data.startDate,
         endDate: data.endDate,

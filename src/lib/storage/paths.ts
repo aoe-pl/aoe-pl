@@ -65,6 +65,10 @@ export const storagePaths = {
   tournamentImages: (tournamentName: string) =>
     buildStoragePath("tournaments", tournamentName, "images"),
 
+  /** tournaments/<tournamentName>/banners */
+  tournamentBanners: (tournamentName: string) =>
+    buildStoragePath("tournaments", tournamentName, "banners"),
+
   /** tournaments/<tournamentName>/games/<matchNumber> */
   tournamentMatchGames: (tournamentName: string, matchNumber: string) =>
     buildStoragePath("tournaments", tournamentName, "games", matchNumber),

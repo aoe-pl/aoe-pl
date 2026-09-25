@@ -1,7 +1,12 @@
 "use client";
 
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import {
+  TournamentsMobileMenu,
+  TournamentsNavLink,
+} from "@/components/layout/tournaments-nav-link";
 import { Button } from "@/components/ui";
+import type { TournamentNavGroup } from "@/lib/helpers/tournament-nav";
 import { Menu, X } from "lucide-react";
 import type { Session } from "next-auth";
 import { useTranslations } from "next-intl";
@@ -12,6 +17,7 @@ import { useState } from "react";
 interface NavigationProps {
   session: Session | null;
   isAdmin: boolean;
+  tournamentGroups: TournamentNavGroup[];
 }
 
 interface NavLinkProps {
@@ -19,7 +25,11 @@ interface NavLinkProps {
   href: string;
 }
 
-export function Navigation({ session, isAdmin }: NavigationProps) {
+export function Navigation({
+  session,
+  isAdmin,
+  tournamentGroups,
+}: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = useTranslations("navigation");
 
@@ -58,6 +68,7 @@ export function Navigation({ session, isAdmin }: NavigationProps) {
             navItems={navItems}
             isAdmin={isAdmin}
             session={session}
+            tournamentGroups={tournamentGroups}
             t={t}
           />
 
@@ -72,6 +83,7 @@ export function Navigation({ session, isAdmin }: NavigationProps) {
           navItems={navItems}
           isAdmin={isAdmin}
           session={session}
+          tournamentGroups={tournamentGroups}
           t={t}
           onClose={() => setMobileMenuOpen(false)}
         />
@@ -84,11 +96,13 @@ function DesktopNavigation({
   navItems,
   isAdmin,
   session,
+  tournamentGroups,
   t,
 }: {
   navItems: NavLinkProps[];
   isAdmin: boolean;
   session: Session | null;
+  tournamentGroups: TournamentNavGroup[];
   t: (key: string) => string;
 }) {
   const navLinkClass =
@@ -96,15 +110,24 @@ function DesktopNavigation({
 
   return (
     <div className="hidden items-center gap-1 md:flex md:gap-2">
-      {navItems.map((item) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          className={navLinkClass}
-        >
-          {item.label}
-        </Link>
-      ))}
+      {navItems.map((item) =>
+        item.href === "/tournaments" ? (
+          <TournamentsNavLink
+            key={item.label}
+            groups={tournamentGroups}
+            label={item.label}
+            className={navLinkClass}
+          />
+        ) : (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={navLinkClass}
+          >
+            {item.label}
+          </Link>
+        ),
+      )}
 
       {session && (
         <Link
@@ -169,6 +192,7 @@ function MobileMenu({
   navItems,
   isAdmin,
   session,
+  tournamentGroups,
   t,
   onClose,
 }: {
@@ -176,6 +200,7 @@ function MobileMenu({
   navItems: NavLinkProps[];
   isAdmin: boolean;
   session: Session | null;
+  tournamentGroups: TournamentNavGroup[];
   t: (key: string) => string;
   onClose: () => void;
 }) {
@@ -184,16 +209,26 @@ function MobileMenu({
   return (
     <div className="border-primary/10 mt-4 border-t pt-4 md:hidden">
       <div className="flex flex-col space-y-3">
-        {navItems.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="text-foreground/80 hover:text-accent hover:bg-accent/10 rounded-md px-4 py-2 text-base font-semibold transition-colors"
-            onClick={onClose}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {navItems.map((item) =>
+          item.href === "/tournaments" ? (
+            <TournamentsMobileMenu
+              key={item.label}
+              groups={tournamentGroups}
+              label={item.label}
+              linkClassName="text-foreground/80 hover:text-accent hover:bg-accent/10 rounded-md px-4 py-2 text-base font-semibold transition-colors"
+              onNavigate={onClose}
+            />
+          ) : (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="text-foreground/80 hover:text-accent hover:bg-accent/10 rounded-md px-4 py-2 text-base font-semibold transition-colors"
+              onClick={onClose}
+            >
+              {item.label}
+            </Link>
+          ),
+        )}
 
         {session && (
           <Link

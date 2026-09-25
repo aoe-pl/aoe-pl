@@ -10,6 +10,14 @@
     "logout": "Wyloguj",
     "login": "Zaloguj się"
   },
+  "image_upload": {
+    "upload": "Wgraj obraz",
+    "replace": "Zmień obraz",
+    "remove": "Usuń obraz",
+    "uploading": "Wgrywanie...",
+    "empty": "Nie wybrano obrazu",
+    "error": "Nie udało się wgrać obrazu"
+  },
   "home": {
     "hero": {
       "title": "Age of Empires 2",
@@ -106,6 +114,8 @@
         "url_key_description": "Używany w URL turnieju. Używaj małych liter, cyfr i myślników.",
         "description": "Opis (Opcjonalny)",
         "description_placeholder": "Wprowadź opis turnieju",
+        "image": "Obraz banera",
+        "image_description": "Obraz wyświetlany na liście turniejów. Najlepiej wyglądają obrazy poziome (np. 16:9).",
         "status": "Status",
         "status_placeholder": "Wybierz status",
         "format": "Format",
