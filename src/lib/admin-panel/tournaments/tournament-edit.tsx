@@ -1,15 +1,14 @@
 "use client";
 
-import { api } from "@/trpc/react";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { tournamentFormSchema, type Tournament } from "./tournament";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
-import { useRouter } from "next/navigation";
-import { TournamentForm } from "./tournament-form";
-import React from "react";
 import { ErrorToast } from "@/components/ui/error-toast-content";
+import { api } from "@/trpc/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
+import { tournamentFormSchema, type Tournament } from "./tournament";
+import { TournamentForm } from "./tournament-form";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
 
@@ -25,6 +24,7 @@ export function TournamentEdit({ tournament }: { tournament: Tournament }) {
       registrationMode: tournament.registrationMode,
       format: tournament.format,
       description: tournament.description ?? undefined,
+      imageKey: tournament.imageKey ?? undefined,
       isTeamBased: tournament.isTeamBased,
       startDate: tournament.startDate ?? undefined,
       endDate: tournament.endDate ?? undefined,
@@ -67,6 +67,9 @@ export function TournamentEdit({ tournament }: { tournament: Tournament }) {
       form={form}
       onSubmit={onSubmit}
       formatLocked
+      bannerPreviewUrl={
+        tournament.imageKey ? `/api/tournaments/${tournament.id}/banner` : null
+      }
     />
   );
 }

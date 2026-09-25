@@ -200,6 +200,7 @@ model Tournament {
   matchModeId           String?
   format                TournamentFormat
   description           String?
+  imageKey              String?
   isTeamBased           Boolean                 @default(false)
   startDate             DateTime
   endDate               DateTime?

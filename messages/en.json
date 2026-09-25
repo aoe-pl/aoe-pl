@@ -10,6 +10,14 @@
     "logout": "Log out",
     "login": "Log in"
   },
+  "image_upload": {
+    "upload": "Upload image",
+    "replace": "Replace image",
+    "remove": "Remove image",
+    "uploading": "Uploading...",
+    "empty": "No image selected",
+    "error": "Failed to upload image"
+  },
   "home": {
     "hero": {
       "title": "Age of Empires 2",
@@ -106,6 +114,8 @@
         "url_key_description": "Used in the tournament URL. Use lowercase letters, numbers and hyphens.",
         "description": "Description (Optional)",
         "description_placeholder": "Enter tournament description",
+        "image": "Banner image",
+        "image_description": "Image shown on the tournaments list. Landscape images (e.g. 16:9) look best.",
         "status": "Status",
         "status_placeholder": "Select status",
         "format": "Format",

@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import { Navigation } from "@/components/layout/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getTournamentNavGroups } from "@/lib/helpers/tournament-nav";
 import { getIsAdmin, getSession } from "@/lib/session";
 import { TRPCReactProvider } from "@/trpc/react";
 import { type Metadata } from "next";
@@ -26,6 +27,7 @@ export default async function RootLayout({
   const messages = await getMessages();
   const session = await getSession();
   const isAdmin = session ? await getIsAdmin() : false;
+  const tournamentGroups = await getTournamentNavGroups();
 
   return (
     <html
@@ -37,6 +39,7 @@ export default async function RootLayout({
           <Navigation
             session={session}
             isAdmin={isAdmin}
+            tournamentGroups={tournamentGroups}
           />
 
           <TRPCReactProvider>

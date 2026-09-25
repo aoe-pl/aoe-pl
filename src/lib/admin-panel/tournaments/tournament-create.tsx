@@ -1,17 +1,17 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
 import {
   RegistrationMode,
   TournamentFormat,
   tournamentFormSchema,
   TournamentStatus,
 } from "./tournament";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
-import { useRouter } from "next/navigation";
 import { TournamentForm } from "./tournament-form";
 
 type TournamentFormData = z.infer<typeof tournamentFormSchema>;
@@ -28,6 +28,7 @@ export function TournamentCreate() {
       registrationMode: RegistrationMode.INDIVIDUAL,
       format: TournamentFormat.GROUP,
       description: "",
+      imageKey: undefined,
       isTeamBased: false,
       startDate: undefined,
       endDate: undefined,
