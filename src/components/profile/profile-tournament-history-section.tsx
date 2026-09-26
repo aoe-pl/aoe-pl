@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { slugify } from "@/lib/utils";
-import { Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
@@ -39,10 +38,7 @@ export function ProfileTournamentHistorySection({
 
   return (
     <div>
-      <div className="panel-header flex items-center gap-2">
-        <Trophy className="h-5 w-5" />
-        {t("title")}
-      </div>
+      <div className="panel-header flex items-center gap-2">{t("title")}</div>
       <div>
         {participants.length > 0 ? (
           <div className="rounded border">

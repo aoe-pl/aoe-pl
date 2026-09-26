@@ -21,22 +21,26 @@ export default async function TournamentRegistrationPage({
   const content =
     section?.translations.find((tr) => tr.locale === locale)?.content ?? "";
 
-  const existing = session?.user?.id
-    ? await db.tournamentParticipant.findFirst({
-        where: { userId: session.user.id, tournamentId: tournament.id },
-        select: { id: true },
-      })
-    : null;
+  const [existing, user] = session?.user?.id
+    ? await Promise.all([
+        db.tournamentParticipant.findFirst({
+          where: { userId: session.user.id, tournamentId: tournament.id },
+          select: { id: true },
+        }),
+        db.user.findUnique({
+          where: { id: session.user.id },
+          select: { aoe2companionUrl: true },
+        }),
+      ])
+    : [null, null];
 
   return (
-    <div className="space-y-4">
-      {content && <TournamentSectionContent content={content} />}
-
-      <RegistrationPanel
-        tournamentId={tournament.id}
-        isLoggedIn={!!session?.user}
-        isAlreadyRegistered={!!existing}
-      />
-    </div>
+    <RegistrationPanel
+      tournamentId={tournament.id}
+      isLoggedIn={!!session?.user}
+      isAlreadyRegistered={!!existing}
+      hasAoe2CompanionLinked={Boolean(user?.aoe2companionUrl)}
+      intro={content ? <TournamentSectionContent content={content} /> : null}
+    />
   );
 }

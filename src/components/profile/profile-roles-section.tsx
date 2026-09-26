@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/trpc/react";
 import type { Role } from "@prisma/client";
-import { Plus, Shield, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -78,10 +78,7 @@ export function ProfileRolesSection({
 
   return (
     <div>
-      <div className="panel-header flex items-center gap-2">
-        <Shield className="h-5 w-5" />
-        {t("title")}
-      </div>
+      <div className="panel-header flex items-center gap-2">{t("title")}</div>
       <div className="space-y-4">
         {currentRoles.length > 0 ? (
           <div className="flex flex-wrap gap-2">

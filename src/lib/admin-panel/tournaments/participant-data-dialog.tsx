@@ -17,6 +17,7 @@ import type {
   TournamentRegistrationFieldTranslation,
 } from "@prisma/client";
 import { ClipboardList } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ export function ParticipantDataDialog({
   registrationFields,
   locale,
 }: ParticipantDataDialogProps) {
+  const tReg = useTranslations("admin.tournaments.sections.registration");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<Record<string, string | number | boolean>>(
@@ -73,6 +75,8 @@ export function ParticipantDataDialog({
     });
 
   function getLabel(field: RegistrationFieldWithTranslations): string {
+    if (field.slug) return tReg(`presets.${field.slug}`);
+
     return (
       field.translations.find((tr) => tr.locale === locale)?.label ??
       "Missing label!"

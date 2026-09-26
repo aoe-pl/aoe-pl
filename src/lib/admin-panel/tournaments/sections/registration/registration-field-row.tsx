@@ -41,8 +41,9 @@ export function RegistrationFieldRow({
   const t = useTranslations("admin.tournaments.sections.registration");
   const locale = useLocale();
 
-  const label =
-    field.translations.find((tr) => tr.locale === locale)?.label ?? "";
+  const label = field.slug
+    ? t(`presets.${field.slug}`)
+    : (field.translations.find((tr) => tr.locale === locale)?.label ?? "");
 
   const { mutate: deleteField, isPending: deletePending } =
     api.tournaments.registrationFields.delete.useMutation({
