@@ -59,7 +59,7 @@ const aoe2CompanionProfilePath = /^\/players\/(\d{1,10})\/?$/;
 const aoe2CompanionProfileMaxDigits = 10;
 
 /**
- * Strictly parses an AoE2Companion profile URL, e.g.
+ * Strictly parses an AoE2Companion profile URL.
  * @returns The numeric profile ID, or null when the URL is not a valid profile URL.
  */
 export function parseCompanionProfileUrl(url: string): number | null {
