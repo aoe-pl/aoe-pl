@@ -7,6 +7,7 @@ import { ErrorToast } from "@/components/ui/error-toast-content";
 import { Form, FormField } from "@/components/ui/form";
 import { MarkdownEditorField } from "@/components/ui/markdown-editor-field";
 import { locales, type Locale } from "@/lib/locales";
+import { registrationFieldPresetList } from "@/lib/tournaments/registration-field-presets";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
@@ -27,6 +28,7 @@ import {
 } from "../tournament-section-types";
 import { RegistrationFieldDialog } from "./registration-field-dialog";
 import { RegistrationFieldRow } from "./registration-field-row";
+import { RegistrationPresetRow } from "./registration-preset-row";
 
 type FieldWithTranslations = TournamentRegistrationField & {
   translations: TournamentRegistrationFieldTranslation[];
@@ -104,16 +106,21 @@ export function TournamentRegistrationSectionCard({
       },
     });
 
+  const presetFields = fields.filter((field) => field.slug !== null);
+  const customFields = fields.filter((field) => field.slug === null);
+
   function moveField(index: number, direction: "up" | "down") {
-    const next = [...fields];
     const swapWith = direction === "up" ? index - 1 : index + 1;
+    const current = customFields[index];
+    const target = customFields[swapWith];
 
-    [next[index], next[swapWith]] = [next[swapWith]!, next[index]!];
-
-    const updated = next.map((f, i) => ({ ...f, displayOrder: i }));
+    if (!current || !target) return;
 
     reorderFields({
-      updates: updated.map((f) => ({ id: f.id, displayOrder: f.displayOrder })),
+      updates: [
+        { id: current.id, displayOrder: target.displayOrder },
+        { id: target.id, displayOrder: current.displayOrder },
+      ],
     });
   }
 
@@ -237,35 +244,61 @@ export function TournamentRegistrationSectionCard({
         </Form>
 
         {/* ── Registration fields ── */}
-        <div className="space-y-2 border-t pt-4">
-          <p className="text-muted-foreground mb-3 text-xs">
+        <div className="space-y-4 border-t pt-4">
+          <p className="text-muted-foreground text-xs">
             {tReg("fields_description")}
           </p>
 
-          {fields.length === 0 && (
-            <p className="text-muted-foreground text-sm">{tReg("no_fields")}</p>
-          )}
+          {/* Predefined fields */}
+          <div className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium uppercase">
+              {tReg("predefined_title")}
+            </p>
+            {registrationFieldPresetList.map((preset) => (
+              <RegistrationPresetRow
+                key={preset.slug}
+                tournamentId={section.tournamentId}
+                preset={preset}
+                field={presetFields.find((f) => f.slug === preset.slug)}
+                nextDisplayOrder={fields.length}
+                onSaved={() => void refetchFields()}
+              />
+            ))}
+          </div>
 
-          {(fields as FieldWithTranslations[]).map((field, index) => (
-            <RegistrationFieldRow
-              key={field.id}
-              field={field}
-              isFirst={index === 0}
-              isLast={index === fields.length - 1}
-              movePending={reorderPending}
-              onMoveUp={() => moveField(index, "up")}
-              onMoveDown={() => moveField(index, "down")}
-              onEdit={() => setEditingField(field)}
-              onSaved={() => void refetchFields()}
-            />
-          ))}
+          {/* Custom fields */}
+          <div className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium uppercase">
+              {tReg("custom_title")}
+            </p>
 
-          <div className="pt-1">
-            <RegistrationFieldDialog
-              tournamentId={section.tournamentId}
-              nextDisplayOrder={fields.length}
-              onSaved={() => void refetchFields()}
-            />
+            {customFields.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                {tReg("no_fields")}
+              </p>
+            )}
+
+            {(customFields as FieldWithTranslations[]).map((field, index) => (
+              <RegistrationFieldRow
+                key={field.id}
+                field={field}
+                isFirst={index === 0}
+                isLast={index === customFields.length - 1}
+                movePending={reorderPending}
+                onMoveUp={() => moveField(index, "up")}
+                onMoveDown={() => moveField(index, "down")}
+                onEdit={() => setEditingField(field)}
+                onSaved={() => void refetchFields()}
+              />
+            ))}
+
+            <div className="pt-1">
+              <RegistrationFieldDialog
+                tournamentId={section.tournamentId}
+                nextDisplayOrder={fields.length}
+                onSaved={() => void refetchFields()}
+              />
+            </div>
           </div>
 
           {editingField && (

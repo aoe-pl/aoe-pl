@@ -261,6 +261,11 @@
         },
         "registration": {
           "fields_description": "Define additional fields that participants must fill out when registering.",
+          "predefined_title": "Predefined fields",
+          "custom_title": "Custom fields",
+          "presets": {
+            "aoe2companion": "AoE2Companion profile link"
+          },
           "no_fields": "No registration fields defined.",
           "add_field": "Add field",
           "save": "Save",
@@ -287,7 +292,9 @@
           "toast": {
             "field_created": "Field added.",
             "field_saved": "Field saved.",
-            "field_removed": "Field \"{label}\" removed."
+            "field_removed": "Field \"{label}\" removed.",
+            "field_enabled": "Field enabled.",
+            "field_disabled": "Field disabled."
           }
         }
       },
@@ -580,6 +587,17 @@
       "admin": "Admin only"
     },
     "registration": {
+      "title": "Tournament registration",
+      "required_hint": "Fields marked with * are required.",
+      "yes": "Yes",
+      "no": "No",
+      "presets": {
+        "aoe2companion": "AoE2Companion profile link",
+        "aoe2companion_placeholder": "https://www.aoe2companion.com/players/245082",
+        "aoe2companion_checking": "Checking AoE2Companion...",
+        "aoe2companion_found": "Found: {name}",
+        "aoe2companion_not_found": "No AoE2Companion account found for this link."
+      },
       "already_registered": "You are already registered for this tournament.",
       "register": "Register",
       "registering": "Registering...",
@@ -587,7 +605,8 @@
       "must_be_logged_in": "You must be logged in to register for the tournament.",
       "field_required_error": "This field is required.",
       "field_number_error": "This field must be a valid number.",
-      "field_text_max_length_error": "Maximum 60 characters reached."
+      "field_text_max_length_error": "Maximum 60 characters reached.",
+      "field_companion_url_error": "Enter a valid AoE2Companion profile link, e.g. https://www.aoe2companion.com/players/245082"
     },
     "detail": {
       "not_found": "Tournament not found.",

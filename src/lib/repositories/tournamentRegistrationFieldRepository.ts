@@ -12,6 +12,7 @@ export const tournamentRegistrationFieldRepository = {
 
   async create(data: {
     tournamentId: string;
+    slug?: string | null;
     translations: { locale: string; label: string }[];
     type: RegistrationFieldType;
     required: boolean;
@@ -24,6 +25,12 @@ export const tournamentRegistrationFieldRepository = {
         translations: { create: translations },
       },
       include: { translations: true },
+    });
+  },
+
+  async findBySlug(tournamentId: string, slug: string) {
+    return db.tournamentRegistrationField.findFirst({
+      where: { tournamentId, slug },
     });
   },
 

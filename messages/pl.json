@@ -261,6 +261,11 @@
         },
         "registration": {
           "fields_description": "Dodatkowe pola, które uczestnicy muszą wypełnić podczas rejestracji.",
+          "predefined_title": "Pola predefiniowane",
+          "custom_title": "Pola własne",
+          "presets": {
+            "aoe2companion": "Link do profilu AoE2Companion"
+          },
           "no_fields": "Brak zdefiniowanych pól rejestracji.",
           "add_field": "Dodaj pole",
           "save": "Zapisz",
@@ -287,7 +292,9 @@
           "toast": {
             "field_created": "Pole dodane.",
             "field_saved": "Pole zapisane.",
-            "field_removed": "Pole \"{label}\" usunięte."
+            "field_removed": "Pole \"{label}\" usunięte.",
+            "field_enabled": "Pole włączone.",
+            "field_disabled": "Pole wyłączone."
           }
         }
       },
@@ -580,6 +587,17 @@
       "admin": "Tylko admin"
     },
     "registration": {
+      "title": "Zapisy na turniej",
+      "required_hint": "Pola oznaczone * są wymagane.",
+      "yes": "Tak",
+      "no": "Nie",
+      "presets": {
+        "aoe2companion": "Link do profilu AoE2Companion",
+        "aoe2companion_placeholder": "https://www.aoe2companion.com/players/245082",
+        "aoe2companion_checking": "Sprawdzanie AoE2Companion...",
+        "aoe2companion_found": "Znaleziono: {name}",
+        "aoe2companion_not_found": "Nie znaleziono konta AoE2Companion dla tego linku."
+      },
       "already_registered": "Jesteś już zapisany na ten turniej.",
       "register": "Zarejestruj się",
       "registering": "Rejestrowanie...",
@@ -587,7 +605,8 @@
       "must_be_logged_in": "Musisz być zalogowany, aby zarejestrować się na turniej.",
       "field_required_error": "To pole jest wymagane.",
       "field_number_error": "To pole musi być prawidłową liczbą.",
-      "field_text_max_length_error": "Osiągnięto limit 60 znaków."
+      "field_text_max_length_error": "Osiągnięto limit 60 znaków.",
+      "field_companion_url_error": "Podaj prawidłowy link do profilu AoE2Companion, np. https://www.aoe2companion.com/players/245082"
     },
     "detail": {
       "not_found": "Nie znaleziono turnieju.",

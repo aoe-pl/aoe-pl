@@ -1,3 +1,4 @@
+import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
 import { tournamentFormSchema } from "@/lib/admin-panel/tournaments/tournament";
 import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
@@ -10,6 +11,11 @@ import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
 import { tournamentSeriesRepository } from "@/lib/repositories/tournamentSeriesRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
+import {
+  aoe2companionRegistrationFieldSlug,
+  getRegistrationFieldPreset,
+} from "@/lib/tournaments/registration-field-presets";
+import { parseCompanionProfileUrl } from "@/lib/utils";
 import {
   adminProcedure,
   createTRPCRouter,
@@ -303,6 +309,30 @@ export const tournamentRouter = createTRPCRouter({
               message: `Field ${key} must be a string of at most 60 characters`,
             });
           }
+
+          if (
+            field.slug === aoe2companionRegistrationFieldSlug &&
+            typeof val === "string" &&
+            val.trim().length > 0
+          ) {
+            const profileId = parseCompanionProfileUrl(val);
+
+            if (profileId === null) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `Field ${key} must be a valid AoE2Companion profile URL`,
+              });
+            }
+
+            const profile = await fetchAoe2CompanionProfile(profileId);
+
+            if (!profile) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `No AoE2Companion account found for ${val.trim()}`,
+              });
+            }
+          }
         }
 
         const missingRequired = fields
@@ -316,17 +346,36 @@ export const tournamentRouter = createTRPCRouter({
           throw new TRPCError({
             code: "UNPROCESSABLE_CONTENT",
             message: `Missing required fields: ${missingRequired
-              .map((f) => f.translations[0]?.label)
+              .map((f) => f.translations[0]?.label ?? f.slug ?? f.id)
               .join(", ")}`,
           });
         }
 
-        return tournamentParticipantRepository.registerParticipant(
-          input.tournamentId,
-          userId,
-          nickname,
-          input.formData ?? {},
+        const participant =
+          await tournamentParticipantRepository.registerParticipant(
+            input.tournamentId,
+            userId,
+            nickname,
+            input.formData ?? {},
+          );
+
+        // A predefined AoE2Companion field links the provided URL to the user's
+        // profile so their ranking stats become available across the site.
+        const companionField = fields.find(
+          (f) => f.slug === aoe2companionRegistrationFieldSlug,
         );
+        const companionValue = companionField
+          ? input.formData?.[companionField.id]
+          : undefined;
+
+        if (typeof companionValue === "string" && companionValue.trim()) {
+          await usersRepository.updateOwnAoe2CompanionUrl(
+            userId,
+            companionValue.trim(),
+          );
+        }
+
+        return participant;
       }),
 
     remove: adminProcedure
@@ -1032,10 +1081,24 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentRegistrationFieldRepository.list(input.tournamentId);
       }),
 
+    // Verifies an AoE2Companion profile URL and returns the linked account name.
+    companionProfile: publicProcedure
+      .input(z.object({ url: z.string() }))
+      .query(async ({ input }) => {
+        const profileId = parseCompanionProfileUrl(input.url);
+        if (profileId === null) return null;
+
+        const profile = await fetchAoe2CompanionProfile(profileId);
+        if (!profile) return null;
+
+        return { profileId: profile.profileId, name: profile.name };
+      }),
+
     create: adminProcedure
       .input(
         z.object({
           tournamentId: z.string(),
+          slug: z.string().optional(),
           translations: z.array(
             z.object({ locale: z.string(), label: z.string().min(1) }),
           ),
@@ -1046,6 +1109,46 @@ export const tournamentRouter = createTRPCRouter({
       )
       .mutation(async ({ input }) => {
         return tournamentRegistrationFieldRepository.create(input);
+      }),
+
+    enablePreset: adminProcedure
+      .input(
+        z.object({
+          tournamentId: z.string(),
+          slug: z.string(),
+          displayOrder: z.number().int().min(0).optional(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const preset = getRegistrationFieldPreset(input.slug);
+
+        if (!preset) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Unknown registration field preset: ${input.slug}`,
+          });
+        }
+
+        const existing = await tournamentRegistrationFieldRepository.findBySlug(
+          input.tournamentId,
+          preset.slug,
+        );
+
+        if (existing) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This field is already enabled.",
+          });
+        }
+
+        return tournamentRegistrationFieldRepository.create({
+          tournamentId: input.tournamentId,
+          slug: preset.slug,
+          type: preset.type,
+          required: preset.required,
+          translations: [],
+          displayOrder: input.displayOrder,
+        });
       }),
 
     update: adminProcedure

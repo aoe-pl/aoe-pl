@@ -337,12 +337,14 @@ model TournamentBracketParticipant {
 model TournamentRegistrationField {
   id           String                                   @id @default(cuid())
   tournamentId String
+  slug         String?
   type         RegistrationFieldType
   required     Boolean                                  @default(false)
   displayOrder Int                                      @default(0)
   tournament   Tournament                               @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   translations TournamentRegistrationFieldTranslation[]
 
+  @@unique([tournamentId, slug])
   @@index([tournamentId])
 }
 

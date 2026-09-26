@@ -53,3 +53,38 @@ export function getPlayerProfileIdFromCompanionUrl(url: string): number | null {
   const profileId = Number(match[1]);
   return Number.isNaN(profileId) ? null : profileId;
 }
+
+const aoe2CompanionHostname = "aoe2companion.com";
+const aoe2CompanionProfilePath = /^\/players\/(\d{1,10})\/?$/;
+const aoe2CompanionProfileMaxDigits = 10;
+
+/**
+ * Strictly parses an AoE2Companion profile URL.
+ * @returns The numeric profile ID, or null when the URL is not a valid profile URL.
+ */
+export function parseCompanionProfileUrl(url: string): number | null {
+  const trimmed = url?.trim();
+  if (!trimmed) return null;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    try {
+      parsed = new URL(`https://${trimmed}`);
+    } catch {
+      return null;
+    }
+  }
+
+  const host = parsed.hostname.replace(/^www\./, "");
+  if (host !== aoe2CompanionHostname) return null;
+
+  const match = aoe2CompanionProfilePath.exec(parsed.pathname);
+  if (!match) return null;
+
+  const id = match[1]!;
+  if (id.length > aoe2CompanionProfileMaxDigits) return null;
+
+  return Number(id);
+}
