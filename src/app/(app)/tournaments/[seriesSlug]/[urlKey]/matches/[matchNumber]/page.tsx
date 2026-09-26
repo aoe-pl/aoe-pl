@@ -164,7 +164,7 @@ export default async function TournamentMatchPage({
 
   return (
     <MatchSpoilerProvider isApproved={isApproved}>
-      <div className="panel">
+      <div>
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_15rem]">
           <div className="flex flex-col gap-6">
             <MatchScoreboard

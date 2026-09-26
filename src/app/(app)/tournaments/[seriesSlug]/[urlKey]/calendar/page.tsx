@@ -29,7 +29,7 @@ export default async function TournamentCalendarPage({
   const base = `/tournaments/${seriesSlug}/${urlKey}`;
 
   return (
-    <div className="panel">
+    <div>
       <TournamentCalendar
         matches={matches}
         matchUrlBase={`${base}/matches`}

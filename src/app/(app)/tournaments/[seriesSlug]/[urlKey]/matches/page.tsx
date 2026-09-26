@@ -35,7 +35,7 @@ export default async function TournamentMatchesPage({
   return (
     <div className="space-y-4">
       {content && <TournamentSectionContent content={content} />}
-      <div className="panel">
+      <div className="panel-inset p-4">
         <MatchList
           matches={matches}
           matchUrlBase={matchUrlBase}

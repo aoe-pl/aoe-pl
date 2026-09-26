@@ -31,7 +31,7 @@ export function TournamentNav({ links }: TournamentNavProps) {
   const active = useActiveLink(links);
 
   return (
-    <nav className="panel flex flex-col gap-1">
+    <nav className="flex flex-col gap-1">
       {links.map((link) => {
         const isActive = active?.href === link.href;
         return (
@@ -40,10 +40,8 @@ export function TournamentNav({ links }: TournamentNavProps) {
             href={link.href}
             replace
             className={cn(
-              "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-primary/10 text-primary border-primary/10 border"
-                : "hover:bg-muted",
+              "text-accent flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              isActive ? "bg-accent/25 text-primary" : "hover:bg-accent/15",
             )}
           >
             {link.label}
@@ -63,7 +61,7 @@ export function TournamentNavMobile({ links }: TournamentNavProps) {
       value={active?.href ?? links[0]?.href}
       onValueChange={(href) => router.replace(href)}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full border-[color:var(--medieval-wood-border)] bg-[color:var(--medieval-wood)] text-[color:var(--medieval-parchment-foreground)]">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

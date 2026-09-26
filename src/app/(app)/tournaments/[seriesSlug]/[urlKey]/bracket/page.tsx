@@ -19,7 +19,7 @@ export default async function TournamentBracketPage({
   });
 
   return (
-    <div className="panel space-y-4">
+    <div className="space-y-4">
       <PublicBracketList brackets={brackets} />
     </div>
   );

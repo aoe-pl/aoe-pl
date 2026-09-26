@@ -18,7 +18,7 @@ export default async function TournamentPlayersPage({
     );
 
   return (
-    <div className="panel space-y-4">
+    <div className="space-y-4">
       <TournamentPlayerList tournamentParticipants={tournamentParticipants} />
     </div>
   );
