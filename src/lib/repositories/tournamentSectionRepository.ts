@@ -1,5 +1,6 @@
-import { db } from "@/server/db";
 import { predefinedTournamentSections } from "@/lib/tournaments/section-constants";
+import { db } from "@/server/db";
+import { TournamentFormat } from "@prisma/client";
 
 export const tournamentSectionRepository = {
   async getSectionsByTournamentId(tournamentId: string) {
@@ -91,6 +92,17 @@ export const tournamentSectionRepository = {
   },
 
   async createPredefinedSections(tournamentId: string) {
+    const tournament = await db.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { format: true },
+    });
+
+    // The bracket and groups pages are format-specific: only add the one that
+    // matches the tournament's format.
+    const formatSpecificSlug =
+      tournament?.format === TournamentFormat.GROUP ? "groups" : "bracket";
+    const excludedSlug = formatSpecificSlug === "groups" ? "bracket" : "groups";
+
     const existing = await db.tournamentSection.findMany({
       where: { tournamentId },
       select: { slug: true },
@@ -98,7 +110,7 @@ export const tournamentSectionRepository = {
     const existingSlugs = new Set(existing.map((s) => s.slug));
 
     const sectionsToCreate = predefinedTournamentSections.filter(
-      (s) => !existingSlugs.has(s.slug),
+      (s) => !existingSlugs.has(s.slug) && s.slug !== excludedSlug,
     );
 
     if (sectionsToCreate.length === 0) return [];
