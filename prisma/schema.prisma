@@ -312,6 +312,10 @@ model TournamentGroup {
   isTeamBased                Boolean?
   isMixed                    Boolean?
   color                      String?
+  /** aoe2cm.net preset URL used to generate the civilization draft for matches in this group. */
+  civDraftPresetUrl          String?
+  /** aoe2cm.net preset URL used to generate the map draft for matches in this group. */
+  mapDraftPresetUrl          String?
   matchMode                  TournamentMatchMode?         @relation(fields: [matchModeId], references: [id])
   tournament                 Tournament                   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")

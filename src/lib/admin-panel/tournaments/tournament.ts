@@ -1,3 +1,4 @@
+import { parsePresetKey } from "@/lib/aoe2cm";
 import {
   BracketType,
   MatchStatus,
@@ -129,6 +130,20 @@ const tournamentGroupFormSchema = z.object({
   isTeamBased: z.boolean().optional(),
   isMixed: z.boolean().optional(),
   color: z.string().optional(),
+  civDraftPresetUrl: z
+    .string()
+    .optional()
+    .refine((value) => !value || parsePresetKey(value) !== null, {
+      message:
+        "Enter a valid aoe2cm preset URL (e.g. https://aoe2cm.net/preset/xxxxx)",
+    }),
+  mapDraftPresetUrl: z
+    .string()
+    .optional()
+    .refine((value) => !value || parsePresetKey(value) !== null, {
+      message:
+        "Enter a valid aoe2cm preset URL (e.g. https://aoe2cm.net/preset/xxxxx)",
+    }),
   participantIds: z.array(z.string()).optional(),
 });
 

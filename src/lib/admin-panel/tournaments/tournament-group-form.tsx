@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -13,20 +13,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
+import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import {
   tournamentGroupFormSchema,
   type TournamentGroup,
   type TournamentGroupFormSchema,
   type TournamentGroupWithParticipants,
 } from "./tournament";
-import { Checkbox } from "@/components/ui/checkbox";
+import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
 import { TournamentParticipantsSelector } from "./tournament-participants-selector";
-import { DrawerFooter } from "@/components/ui/drawer";
-import { useEffect } from "react";
 
 type TournamentGroupFormProps = {
   initialData?: TournamentGroupWithParticipants;
@@ -64,6 +64,8 @@ export function TournamentGroupForm({
       isMixed: initialData?.isMixed ?? false,
       matchModeId: initialData?.matchModeId ?? "",
       color: initialData?.color ?? "",
+      civDraftPresetUrl: initialData?.civDraftPresetUrl ?? "",
+      mapDraftPresetUrl: initialData?.mapDraftPresetUrl ?? "",
       participantIds:
         initialData?.TournamentGroupParticipant?.map(
           (p) => p.tournamentParticipantId,
@@ -245,6 +247,48 @@ export function TournamentGroupForm({
                   </FormControl>
                   <FormDescription>
                     Choose a color to visually distinguish this group
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="civDraftPresetUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Civilization Draft Preset URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://aoe2cm.net/preset/xxxxx"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    aoe2cm preset used to generate the civilization draft for
+                    this group&apos;s matches (optional).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="mapDraftPresetUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Map Draft Preset URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://aoe2cm.net/preset/xxxxx"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    aoe2cm preset used to generate the map draft for this
+                    group&apos;s matches (optional).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

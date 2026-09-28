@@ -1,9 +1,9 @@
-import { db } from "@/server/db";
 import {
   generateNewMatches,
-  getMatchesToDelete,
   getMatchesToCreate,
+  getMatchesToDelete,
 } from "@/lib/tournaments/match-generation/group-matches";
+import { db } from "@/server/db";
 import { MatchStatus } from "@prisma/client";
 
 export type TournamentGroupCreateData = {
@@ -14,6 +14,8 @@ export type TournamentGroupCreateData = {
   isTeamBased?: boolean;
   isMixed?: boolean;
   color?: string;
+  civDraftPresetUrl?: string;
+  mapDraftPresetUrl?: string;
   participantIds?: string[];
 };
 
@@ -128,6 +130,8 @@ export const tournamentGroupRepository = {
           isTeamBased: data.isTeamBased,
           isMixed: data.isMixed,
           color: data.color,
+          civDraftPresetUrl: data.civDraftPresetUrl,
+          mapDraftPresetUrl: data.mapDraftPresetUrl,
           tournament: { connect: { id: tournamentId } },
           TournamentGroupParticipant:
             participantsIds && participantsIds.length > 0
@@ -297,6 +301,8 @@ export const tournamentGroupRepository = {
         isTeamBased: data.isTeamBased,
         isMixed: data.isMixed,
         color: data.color,
+        civDraftPresetUrl: data.civDraftPresetUrl,
+        mapDraftPresetUrl: data.mapDraftPresetUrl,
         TournamentGroupParticipant: participantsIds
           ? {
               // Delete all participants that are not in the new list

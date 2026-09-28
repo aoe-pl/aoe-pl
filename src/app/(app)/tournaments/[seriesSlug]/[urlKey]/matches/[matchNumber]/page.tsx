@@ -1,5 +1,6 @@
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
 import { MatchApprovalPanel } from "@/components/tournaments/matches/match-approval-panel";
+import { MatchDraftsPanel } from "@/components/tournaments/matches/match-drafts-panel";
 import {
   MatchGamesTable,
   type MatchGameRow,
@@ -9,6 +10,7 @@ import { MatchSchedulePanel } from "@/components/tournaments/matches/match-sched
 import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboard";
 import { MatchSpoilerProvider } from "@/components/tournaments/matches/match-spoiler-context";
 import { MatchSpoilerToggle } from "@/components/tournaments/matches/match-spoiler-toggle";
+import { parsePresetKey } from "@/lib/aoe2cm";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
@@ -249,10 +251,18 @@ export default async function TournamentMatchPage({
               gamesWithRecordings={gamesWithRecordings}
             />
 
-            <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
-              <DraftLink label="Civ Draft" />
-              <DraftLink label="Map Draft" />
-            </div>
+            <MatchDraftsPanel
+              matchId={match.id}
+              civDraftKey={match.civDraftKey}
+              mapDraftKey={match.mapDraftKey}
+              hasCivPreset={
+                parsePresetKey(match.group?.civDraftPresetUrl) !== null
+              }
+              hasMapPreset={
+                parsePresetKey(match.group?.mapDraftPresetUrl) !== null
+              }
+              canManage={isAdmin || isParticipant}
+            />
 
             {isAdmin && canApprove && (
               <MatchApprovalPanel
@@ -264,14 +274,5 @@ export default async function TournamentMatchPage({
         </div>
       </div>
     </MatchSpoilerProvider>
-  );
-}
-
-/** Placeholder link for the (not yet implemented) civ/map drafts. */
-function DraftLink({ label }: { label: string }) {
-  return (
-    <span className="flex cursor-not-allowed items-center gap-1 text-[color:var(--medieval-gold)] underline decoration-dotted underline-offset-4">
-      {label}
-    </span>
   );
 }

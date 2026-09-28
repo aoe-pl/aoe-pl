@@ -1,0 +1,207 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ErrorToast } from "@/components/ui/error-toast-content";
+import { getDraftUrl } from "@/lib/aoe2cm";
+import { api } from "@/trpc/react";
+import { ExternalLink, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+
+type DraftType = "civ" | "map";
+
+interface DraftConfig {
+  type: DraftType;
+  label: string;
+  draftKey: string;
+  hasPreset: boolean;
+}
+
+interface MatchDraftsPanelProps {
+  matchId: string;
+  civDraftKey: string;
+  mapDraftKey: string;
+  hasCivPreset: boolean;
+  hasMapPreset: boolean;
+  /** Admins and match participants may generate/clear drafts. */
+  canManage: boolean;
+}
+
+/**
+ * Right-panel civ/map draft controls. Shows links to the generated aoe2cm drafts
+ * and - for admins and match participants - lets them generate a fresh draft
+ * from the group's preset or clear the current one.
+ */
+export function MatchDraftsPanel({
+  matchId,
+  civDraftKey,
+  mapDraftKey,
+  hasCivPreset,
+  hasMapPreset,
+  canManage,
+}: MatchDraftsPanelProps) {
+  const router = useRouter();
+  const t = useTranslations("tournament.matches.drafts");
+  const [pending, setPending] = useState<DraftType | null>(null);
+
+  const { mutateAsync: generateDraft } =
+    api.tournaments.matches.generateDraft.useMutation();
+  const { mutateAsync: clearDraft } =
+    api.tournaments.matches.clearDraft.useMutation();
+
+  // Nothing to show spectators until at least one draft has been generated.
+  if (!canManage && !civDraftKey && !mapDraftKey) return null;
+
+  const drafts: DraftConfig[] = [
+    {
+      type: "civ",
+      label: t("civ"),
+      draftKey: civDraftKey,
+      hasPreset: hasCivPreset,
+    },
+    {
+      type: "map",
+      label: t("map"),
+      draftKey: mapDraftKey,
+      hasPreset: hasMapPreset,
+    },
+  ];
+
+  const handleGenerate = async (type: DraftType) => {
+    setPending(type);
+    try {
+      await generateDraft({ matchId, type });
+      toast.success(t("generated_toast"));
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        <ErrorToast
+          message={error instanceof Error ? error.message : t("generate_error")}
+        />,
+      );
+    } finally {
+      setPending(null);
+    }
+  };
+
+  const handleClear = async (type: DraftType) => {
+    setPending(type);
+    try {
+      await clearDraft({ matchId, type });
+      toast.success(t("cleared_toast"));
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        <ErrorToast
+          message={error instanceof Error ? error.message : t("clear_error")}
+        />,
+      );
+    } finally {
+      setPending(null);
+    }
+  };
+
+  return (
+    <div className="space-y-3 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+      <div className="text-[color:var(--medieval-gold-muted)]">
+        {t("title")}
+      </div>
+
+      {drafts.map((draft) => {
+        const isPending = pending === draft.type;
+        const canGenerate = canManage && draft.hasPreset;
+
+        return (
+          <div
+            key={draft.type}
+            className="space-y-2"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span>{draft.label}</span>
+              {draft.draftKey ? (
+                <a
+                  href={getDraftUrl(draft.draftKey)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-[color:var(--medieval-gold)] underline underline-offset-4"
+                >
+                  {t("open")}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                <span className="text-[color:var(--medieval-gold-muted)]">
+                  {t("not_generated")}
+                </span>
+              )}
+            </div>
+
+            {canManage && (
+              <div className="flex gap-2">
+                {draft.draftKey ? (
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="wood"
+                        className="flex-1"
+                        disabled={isPending || !canGenerate}
+                      >
+                        <RefreshCw />
+                        {isPending ? t("working") : t("regenerate")}
+                      </Button>
+                    }
+                    title={t("regenerate_confirm_title")}
+                    description={t("regenerate_confirm_description")}
+                    cancelLabel={t("cancel")}
+                    confirmLabel={t("regenerate")}
+                    onConfirm={() => void handleGenerate(draft.type)}
+                  />
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="gold"
+                    className="flex-1"
+                    disabled={isPending || !canGenerate}
+                    onClick={() => void handleGenerate(draft.type)}
+                  >
+                    <Plus />
+                    {isPending ? t("working") : t("generate")}
+                  </Button>
+                )}
+
+                {draft.draftKey && (
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="wine"
+                        disabled={isPending}
+                      >
+                        <Trash2 />
+                        {t("clear")}
+                      </Button>
+                    }
+                    title={t("clear_confirm_title")}
+                    description={t("clear_confirm_description")}
+                    cancelLabel={t("cancel")}
+                    confirmLabel={t("clear")}
+                    onConfirm={() => void handleClear(draft.type)}
+                  />
+                )}
+              </div>
+            )}
+
+            {canManage && !draft.hasPreset && (
+              <p className="text-xs text-[color:var(--medieval-gold-muted)]">
+                {t("no_preset")}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
