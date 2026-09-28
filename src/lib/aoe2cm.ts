@@ -1,8 +1,8 @@
 /**
  * Client for the public aoe2cm.net (AoE2 Captains Mode) API.
  *
- * Drafts are created from a preset: the preset (identified by a short key) is
- * fetched, then posted to the "new draft" endpoint which returns a fresh draft
+ * Drafts are created from a preset
+ * Tthe preset is fetched, then posted to the "new draft" endpoint which returns a fresh draft
  * id that is viewable at https://aoe2cm.net/draft/{draftId}.
  */
 
@@ -12,13 +12,31 @@ const aoe2cmBaseUrl = "https://aoe2cm.net";
 /** Which kind of draft a preset/match draft represents. */
 export type DraftType = "civ" | "map";
 
-/** A raw aoe2cm preset object as returned by the preset API. */
-export type Aoe2cmPreset = Record<string, unknown>;
+/** A single turn (ban/pick/snipe step) in an aoe2cm preset. */
+interface Aoe2cmPresetTurn {
+  id: string;
+  player: string;
+  action: string;
+  exclusivity: string;
+  hidden: boolean;
+  executingPlayer: string;
+  parallel: boolean;
+}
+
+/**
+ * A preset as returned by the aoe2cm preset API.
+ */
+interface Aoe2cmPreset {
+  name: string;
+  presetId: string;
+  encodedCivilisations: string;
+  turns: Aoe2cmPresetTurn[];
+}
 
 /**
  * Extracts the preset key from an aoe2cm preset URL (or a bare key).
  * @param value A preset URL like "https://aoe2cm.net/preset/cOKpq" or the key "cOKpq".
- * @returns The preset key, or null when the value is empty or invalid.
+ * @returns The preset key (or null)
  */
 export function parsePresetKey(
   value: string | null | undefined,
@@ -33,11 +51,6 @@ export function parsePresetKey(
   if (/^[A-Za-z0-9_-]+$/.test(trimmed)) return trimmed;
 
   return null;
-}
-
-/** Builds the public aoe2cm preset page URL for a preset key. */
-export function getPresetUrl(presetKey: string): string {
-  return `${aoe2cmBaseUrl}/preset/${presetKey}`;
 }
 
 /** Builds the public aoe2cm draft page URL for a draft key. */

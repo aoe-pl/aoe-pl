@@ -739,10 +739,7 @@
         "title": "Drafty",
         "civ": "Civ Draft",
         "map": "Map Draft",
-        "open": "Otwórz",
-        "not_generated": "Nie wygenerowano",
-        "generate": "Wygeneruj",
-        "regenerate": "Wygeneruj ponownie",
+        "generate": "Wygeneruj {draft}",
         "clear": "Wyczyść",
         "cancel": "Anuluj",
         "working": "Przetwarzanie…",
@@ -751,10 +748,8 @@
         "generate_error": "Nie udało się utworzyć draftu",
         "clear_error": "Nie udało się wyczyścić draftu",
         "no_preset": "Dla tej grupy nie skonfigurowano presetu draftu.",
-        "regenerate_confirm_title": "Zastąpić draft?",
-        "regenerate_confirm_description": "Spowoduje to utworzenie nowego draftu i zastąpienie obecnego. Stary link do draftu nie będzie już tu wyświetlany.",
         "clear_confirm_title": "Wyczyścić draft?",
-        "clear_confirm_description": "Spowoduje to usunięcie linku do draftu z meczu. Sam draft nie zostanie usunięty i nadal będzie dostępny pod swoim linkiem."
+        "clear_confirm_description": "Spowoduje to usunięcie linku do draftu z meczu."
       },
       "no_matches": "Brak zaplanowanych meczów.",
       "date": "Data",

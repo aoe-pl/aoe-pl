@@ -739,10 +739,7 @@
         "title": "Drafts",
         "civ": "Civ Draft",
         "map": "Map Draft",
-        "open": "Open",
-        "not_generated": "Not generated",
-        "generate": "Generate",
-        "regenerate": "Regenerate",
+        "generate": "Generate {draft}",
         "clear": "Clear",
         "cancel": "Cancel",
         "working": "Working…",
@@ -751,10 +748,8 @@
         "generate_error": "Failed to create the draft",
         "clear_error": "Failed to clear the draft",
         "no_preset": "No draft preset is configured for this group.",
-        "regenerate_confirm_title": "Replace draft?",
-        "regenerate_confirm_description": "This creates a new draft and replaces the current one. The old draft link will no longer be shown here.",
         "clear_confirm_title": "Clear draft?",
-        "clear_confirm_description": "This removes the draft link from the match. The draft itself is not deleted and can still be opened via its link."
+        "clear_confirm_description": "This removes the draft link from the match."
       },
       "no_matches": "No upcoming matches",
       "date": "Date",

@@ -267,7 +267,7 @@ export function TournamentGroupForm({
                   </FormControl>
                   <FormDescription>
                     aoe2cm preset used to generate the civilization draft for
-                    this group&apos;s matches (optional).
+                    this group&apos;s matches.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -288,7 +288,7 @@ export function TournamentGroupForm({
                   </FormControl>
                   <FormDescription>
                     aoe2cm preset used to generate the map draft for this
-                    group&apos;s matches (optional).
+                    group&apos;s matches.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
