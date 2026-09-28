@@ -735,6 +735,22 @@
       "no_players": "Brak zarejestrowanych graczy."
     },
     "matches": {
+      "drafts": {
+        "title": "Drafty",
+        "civ": "Civ Draft",
+        "map": "Map Draft",
+        "generate": "Wygeneruj {draft}",
+        "clear": "Wyczyść",
+        "cancel": "Anuluj",
+        "working": "Przetwarzanie…",
+        "generated_toast": "Utworzono draft",
+        "cleared_toast": "Wyczyszczono draft",
+        "generate_error": "Nie udało się utworzyć draftu",
+        "clear_error": "Nie udało się wyczyścić draftu",
+        "no_preset": "Dla tej grupy nie skonfigurowano presetu draftu.",
+        "clear_confirm_title": "Wyczyścić draft?",
+        "clear_confirm_description": "Spowoduje to usunięcie linku do draftu z meczu."
+      },
       "no_matches": "Brak zaplanowanych meczów.",
       "date": "Data",
       "date_tbd": "Data do ustalenia",

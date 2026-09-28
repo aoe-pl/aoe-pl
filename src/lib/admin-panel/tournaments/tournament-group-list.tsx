@@ -150,6 +150,8 @@ export function TournamentGroupList({
     isTeamBased?: boolean | undefined;
     isMixed?: boolean | undefined;
     color?: string | undefined;
+    civDraftPresetUrl?: string | undefined;
+    mapDraftPresetUrl?: string | undefined;
     participantIds?: string[] | undefined;
   }) => {
     const groupData = {
@@ -160,6 +162,8 @@ export function TournamentGroupList({
       isTeamBased: data.isTeamBased,
       isMixed: data.isMixed,
       color: data.color,
+      civDraftPresetUrl: data.civDraftPresetUrl,
+      mapDraftPresetUrl: data.mapDraftPresetUrl,
       participantIds: data.participantIds ?? [],
     };
 

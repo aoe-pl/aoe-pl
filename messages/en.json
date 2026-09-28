@@ -735,6 +735,22 @@
       }
     },
     "matches": {
+      "drafts": {
+        "title": "Drafts",
+        "civ": "Civ Draft",
+        "map": "Map Draft",
+        "generate": "Generate {draft}",
+        "clear": "Clear",
+        "cancel": "Cancel",
+        "working": "Working…",
+        "generated_toast": "Draft created",
+        "cleared_toast": "Draft cleared",
+        "generate_error": "Failed to create the draft",
+        "clear_error": "Failed to clear the draft",
+        "no_preset": "No draft preset is configured for this group.",
+        "clear_confirm_title": "Clear draft?",
+        "clear_confirm_description": "This removes the draft link from the match."
+      },
       "no_matches": "No upcoming matches",
       "date": "Date",
       "date_tbd": "Date TBD",

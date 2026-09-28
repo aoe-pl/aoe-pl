@@ -1,5 +1,10 @@
-import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
 import { tournamentFormSchema } from "@/lib/admin-panel/tournaments/tournament";
+import {
+  createAoe2cmDraft,
+  fetchAoe2cmPreset,
+  parsePresetKey,
+} from "@/lib/aoe2cm";
+import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
 import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
@@ -57,14 +62,16 @@ export type TournamentWithRelations = Tournament & {
 };
 
 /**
- * Ensures the current user may manage the given match's recordings, i.e. is an
- * admin or a participant in the match.
+ * Loads a match together with the data needed to authorise management actions
+ * (its participants and group), throwing when the current user may not manage
+ * the match, i.e. is neither an admin nor a participant in the match.
  */
-async function assertCanManageMatchRecordings(userId: string, matchId: string) {
+async function getManageableMatch(userId: string, matchId: string) {
   const match = await db.tournamentMatch.findUnique({
     where: { id: matchId },
     include: {
       TournamentMatchParticipant: { include: { participant: true } },
+      group: true,
     },
   });
 
@@ -76,6 +83,16 @@ async function assertCanManageMatchRecordings(userId: string, matchId: string) {
   );
 
   if (!admin && !isParticipant) throw new TRPCError({ code: "FORBIDDEN" });
+
+  return { match, admin, isParticipant };
+}
+
+/**
+ * Ensures the current user may manage the given match's recordings, i.e. is an
+ * admin or a participant in the match.
+ */
+async function assertCanManageMatchRecordings(userId: string, matchId: string) {
+  await getManageableMatch(userId, matchId);
 }
 
 export const tournamentRouter = createTRPCRouter({
@@ -515,6 +532,8 @@ export const tournamentRouter = createTRPCRouter({
             isTeamBased: z.boolean().optional(),
             isMixed: z.boolean().optional(),
             color: z.string().optional(),
+            civDraftPresetUrl: z.string().optional(),
+            mapDraftPresetUrl: z.string().optional(),
             participantIds: z.array(z.string()).optional(),
           }),
         }),
@@ -537,6 +556,8 @@ export const tournamentRouter = createTRPCRouter({
             isTeamBased: z.boolean().optional(),
             isMixed: z.boolean().optional(),
             color: z.string().optional(),
+            civDraftPresetUrl: z.string().optional(),
+            mapDraftPresetUrl: z.string().optional(),
             participantIds: z.array(z.string()).optional(),
           }),
         }),
@@ -863,6 +884,89 @@ export const tournamentRouter = createTRPCRouter({
         );
 
         return tournamentGameRepository.clearMatchRecordings(input.matchId);
+      }),
+
+    /**
+     * Generates a fresh civ or map draft for a match from the preset configured
+     * on the match's group, storing the resulting draft key on the match.
+     * Restricted to admins and the match's participants.
+     */
+    generateDraft: protectedProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          type: z.enum(["civ", "map"]),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const { match } = await getManageableMatch(
+          ctx.session.user.id,
+          input.matchId,
+        );
+
+        const presetKey = parsePresetKey(
+          input.type === "civ"
+            ? match.group?.civDraftPresetUrl
+            : match.group?.mapDraftPresetUrl,
+        );
+
+        if (!presetKey) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "No draft preset is configured for this group.",
+          });
+        }
+
+        const preset = await fetchAoe2cmPreset(presetKey);
+
+        if (!preset) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: "Could not load the draft preset.",
+          });
+        }
+
+        const draftKey = await createAoe2cmDraft(preset);
+
+        if (!draftKey) {
+          throw new TRPCError({
+            code: "BAD_GATEWAY",
+            message: "Could not create the draft.",
+          });
+        }
+
+        await db.tournamentMatch.update({
+          where: { id: input.matchId },
+          data:
+            input.type === "civ"
+              ? { civDraftKey: draftKey }
+              : { mapDraftKey: draftKey },
+        });
+
+        return { draftKey };
+      }),
+
+    /**
+     * Clears a generated civ or map draft from a match. Restricted to admins and
+     * the match's participants.
+     */
+    clearDraft: protectedProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          type: z.enum(["civ", "map"]),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        await getManageableMatch(ctx.session.user.id, input.matchId);
+
+        await db.tournamentMatch.update({
+          where: { id: input.matchId },
+          data:
+            input.type === "civ" ? { civDraftKey: "" } : { mapDraftKey: "" },
+        });
+
+        return { success: true };
       }),
     updateParticipant: adminProcedure
       .input(

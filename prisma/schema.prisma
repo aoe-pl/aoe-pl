@@ -277,7 +277,6 @@ model TournamentBracket {
   bracketSize     Int
   isSeeded        Boolean                 @default(true)
   isManualSeeding Boolean                 @default(false)
-  /** Per-round BestOf config, keyed like "wb:1", "lb:1", "wb:4" (grand final). */
   roundBestOfs    Json?
   tournament      Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   bracketNodes    TournamentBracketNode[]
@@ -312,6 +311,8 @@ model TournamentGroup {
   isTeamBased                Boolean?
   isMixed                    Boolean?
   color                      String?
+  civDraftPresetUrl          String?
+  mapDraftPresetUrl          String?
   matchMode                  TournamentMatchMode?         @relation(fields: [matchModeId], references: [id])
   tournament                 Tournament                   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
