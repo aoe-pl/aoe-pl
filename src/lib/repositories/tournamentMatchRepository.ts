@@ -859,4 +859,89 @@ export const tournamentMatchRepository = {
       orderBy: { matchDate: "asc" },
     });
   },
+
+  /**
+   * Upcoming (pending or scheduled) matches for a user's tournament
+   * participations, covering both individual and team-based entries.
+   */
+  async getUpcomingMatchesForUser(
+    participantIds: string[],
+    teamIds: string[] = [],
+  ) {
+    const ownershipFilters: Prisma.TournamentMatchParticipantWhereInput[] = [];
+    if (participantIds.length > 0) {
+      ownershipFilters.push({ participantId: { in: participantIds } });
+    }
+    if (teamIds.length > 0) {
+      ownershipFilters.push({ teamId: { in: teamIds } });
+    }
+    if (ownershipFilters.length === 0) {
+      return [];
+    }
+
+    return db.tournamentMatch.findMany({
+      where: {
+        status: { in: ["PENDING", "SCHEDULED"] },
+        TournamentMatchParticipant: { some: { OR: ownershipFilters } },
+      },
+      select: {
+        id: true,
+        matchNumber: true,
+        matchDate: true,
+        status: true,
+        bestOf: true,
+        group: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+            tournament: {
+              select: {
+                name: true,
+                urlKey: true,
+                tournamentSeries: { select: { name: true } },
+              },
+            },
+          },
+        },
+        bracketNodes: {
+          select: {
+            bracket: {
+              select: {
+                name: true,
+                tournament: {
+                  select: {
+                    name: true,
+                    urlKey: true,
+                    tournamentSeries: { select: { name: true } },
+                  },
+                },
+              },
+            },
+          },
+          take: 1,
+        },
+        TournamentMatchParticipant: {
+          select: {
+            participantId: true,
+            teamId: true,
+            isWinner: true,
+            participant: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+            team: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [{ matchDate: "asc" }],
+    });
+  },
 };

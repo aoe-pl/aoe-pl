@@ -2,7 +2,6 @@ import {
   getAoe2Companion1v1,
   type Aoe2CompanionProfile,
 } from "@/lib/aoe2companion";
-import { Swords } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface ProfileAoe2StatsProps {
@@ -24,10 +23,7 @@ export function ProfileAoe2Stats({ profile }: ProfileAoe2StatsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="panel-header flex items-center gap-2">
-        <Swords className="h-5 w-5" />
-        {t("title")}
-      </div>
+      <div className="panel-header flex items-center gap-2">{t("title")}</div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
