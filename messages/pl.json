@@ -667,6 +667,7 @@
       "today": "Dziś",
       "month": "Miesiąc",
       "week": "Tydzień",
+      "streamed": "Streamowany",
       "matches_count": "{visible}/{total} meczów",
       "matches": "{count, plural, one {# mecz} few {# mecze} other {# meczów}}",
       "no_matches_on_day": "Brak meczów w tym dniu.",
@@ -778,6 +779,21 @@
       "match_mode": {
         "label": "Tryb meczu"
       },
+      "stream": {
+        "title": "Stream",
+        "label": "Streamuje",
+        "mark_button": "Będę streamować",
+        "unmark_button": "Usuń stream",
+        "marked_toast": "Mecz oznaczony jako planowany do streamowania",
+        "unmarked_toast": "Stream usunięty",
+        "dialog_title": "Streamuj ten mecz",
+        "dialog_description": "Dodaj link do swojego streama. Zostanie zapisany w Twoim profilu i użyty w przyszłych meczach.",
+        "placeholder": "https://twitch.tv/...",
+        "link_saved_hint": "Link zostanie zapisany w Twoim profilu.",
+        "confirm": "Zapisz i oznacz",
+        "cancel": "Anuluj",
+        "unknown_streamer": "Nieznany streamer"
+      },
       "recordings": {
         "upload_button": "Wrzuć nagrania",
         "download_button": "Pobierz nagrania",
@@ -838,6 +854,20 @@
   "profile": {
     "roles": {
       "expired": "wygasła"
+    },
+    "streams": {
+      "linked": "Stream powiązany",
+      "not_linked": "Brak powiązanego streama",
+      "linked_button": "Stream powiązany",
+      "not_linked_button": "Powiąż stream",
+      "dialog_title": "Link do streama",
+      "dialog_description": "Wklej link do swojego streama, aby widzowie mogli go znaleźć i abyś mógł oznaczać mecze jako streamowane.",
+      "placeholder": "https://twitch.tv/...",
+      "save_success": "Link do streama został zapisany.",
+      "unlink_success": "Link do streama został usunięty.",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "unlink": "Usuń powiązanie"
     },
     "aoe2companion": {
       "title": "AoE2Companion",

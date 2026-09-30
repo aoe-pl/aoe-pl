@@ -1,6 +1,7 @@
 import { isBrightColor } from "@/lib/utils";
 import { format } from "date-fns";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { CalendarGroup, CalendarMatch, CalendarPlayer } from "./types";
 
@@ -19,6 +20,7 @@ export function MatchTile({
   player2,
   href,
 }: MatchTileProps) {
+  const t = useTranslations("tournament.calendar");
   const { isStreamed = false, isVerified = false } = match;
   const textColor = isBrightColor(group.color) ? "#000000" : "#ffffff";
 
@@ -33,7 +35,8 @@ export function MatchTile({
       {isStreamed && (
         <span
           className="absolute -top-1 -right-1.5 h-4 w-4 rounded-full bg-red-500"
-          title="Streamed"
+          title={t("streamed")}
+          aria-label={t("streamed")}
         />
       )}
 

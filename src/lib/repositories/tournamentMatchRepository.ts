@@ -40,6 +40,13 @@ export type UpcomingMatch = Prisma.TournamentMatchGetPayload<{
   include: typeof upcomingMatchesInclude;
 }>;
 
+/** Streams attached to a match, including the public streamer info. */
+export const matchStreamsInclude = {
+  streamer: {
+    select: { id: true, name: true, playerNumber: true, streamUrl: true },
+  },
+} satisfies Prisma.TournamentMatchStreamInclude;
+
 export type TournamentMatchCreateData = {
   groupId?: string;
   matchDate?: Date;
@@ -251,6 +258,7 @@ export const tournamentMatchRepository = {
           },
         },
         TournamentMatchMode: true,
+        TournamentMatchStream: { include: matchStreamsInclude },
       },
     });
   },
@@ -449,6 +457,47 @@ export const tournamentMatchRepository = {
     return db.tournamentMatch.update({
       where: { id },
       data: { status: approved ? "ADMIN_APPROVED" : "COMPLETED" },
+    });
+  },
+
+  /**
+   * Marks (or re-marks) a match as going to be streamed by the given streamer.
+   * A streamer can only have a single stream entry per match.
+   */
+  async markMatchAsStreamed(
+    matchId: string,
+    streamerId: string,
+    streamUrl: string | null,
+    scheduledStartTime: Date | null = null,
+  ) {
+    return db.tournamentMatchStream.upsert({
+      where: {
+        tournamentMatchId_streamerId: {
+          tournamentMatchId: matchId,
+          streamerId,
+        },
+      },
+      create: {
+        tournamentMatchId: matchId,
+        streamerId,
+        status: "SCHEDULED",
+        streamUrl,
+        scheduledStartTime,
+        scheduledStreamLive: true,
+      },
+      update: {
+        status: "SCHEDULED",
+        streamUrl,
+        scheduledStartTime,
+      },
+      include: matchStreamsInclude,
+    });
+  },
+
+  /** Removes the stream entry a streamer created for a match. */
+  async unmarkMatchAsStreamed(matchId: string, streamerId: string) {
+    return db.tournamentMatchStream.deleteMany({
+      where: { tournamentMatchId: matchId, streamerId },
     });
   },
 
@@ -834,6 +883,7 @@ export const tournamentMatchRepository = {
             team: true,
           },
         },
+        TournamentMatchStream: { include: matchStreamsInclude },
       },
       orderBy: { matchDate: "asc" },
     });
@@ -854,7 +904,7 @@ export const tournamentMatchRepository = {
             team: true,
           },
         },
-        TournamentMatchStream: true,
+        TournamentMatchStream: { include: matchStreamsInclude },
       },
       orderBy: { matchDate: "asc" },
     });

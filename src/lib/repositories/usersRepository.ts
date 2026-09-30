@@ -15,6 +15,7 @@ export const usersRepository = {
         color: true,
         adminComment: true,
         aoe2companionUrl: true,
+        streamUrl: true,
         userRoles: {
           select: {
             role: {
@@ -58,6 +59,7 @@ export const usersRepository = {
         playerNumber: true,
         name: true,
         aoe2companionUrl: true,
+        streamUrl: true,
         adminComment: true,
         userRoles: {
           select: {
@@ -184,6 +186,14 @@ export const usersRepository = {
       where: { id: userId },
       data: { aoe2companionUrl: url },
       select: { id: true, aoe2companionUrl: true },
+    });
+  },
+
+  async updateOwnStreamUrl(userId: string, url: string | null) {
+    return db.user.update({
+      where: { id: userId },
+      data: { streamUrl: url },
+      select: { id: true, streamUrl: true },
     });
   },
 
@@ -343,5 +353,21 @@ export const usersRepository = {
       select: { userId: true },
     });
     return adminRole !== null;
+  },
+
+  async isUserStreamer(userId: string) {
+    const streamerRole = await db.userRole.findFirst({
+      where: { userId, role: { type: "STREAMER" } },
+      select: { userId: true },
+    });
+    return streamerRole !== null;
+  },
+
+  async getUserStreamUrl(userId: string) {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { streamUrl: true },
+    });
+    return user?.streamUrl ?? null;
   },
 };
