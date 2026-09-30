@@ -1,3 +1,5 @@
+import { getAchievedRanks } from "@/lib/helpers/tournament-rank";
+import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { db } from "@/server/db";
 
 export const usersRepository = {
@@ -49,7 +51,7 @@ export const usersRepository = {
   },
 
   async getPublicProfile(playerNumber: number) {
-    return db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { playerNumber },
       select: {
         id: true,
@@ -77,12 +79,21 @@ export const usersRepository = {
             nickname: true,
             registrationDate: true,
             status: true,
+            teamId: true,
+            TournamentGroupParticipant: {
+              select: {
+                tournamentGroup: {
+                  select: { id: true, name: true, color: true },
+                },
+              },
+            },
             tournament: {
               select: {
                 id: true,
                 name: true,
                 urlKey: true,
                 status: true,
+                format: true,
                 tournamentSeries: {
                   select: { name: true },
                 },
@@ -93,6 +104,39 @@ export const usersRepository = {
         },
       },
     });
+
+    if (!user) return null;
+
+    const participantIds = user.TournamentParticipant.map((p) => p.id);
+    const teamIds = user.TournamentParticipant.map((p) => p.teamId).filter(
+      (id): id is string => Boolean(id),
+    );
+
+    const [upcomingMatches, ranks] = await Promise.all([
+      tournamentMatchRepository.getUpcomingMatchesForUser(
+        participantIds,
+        teamIds,
+      ),
+      getAchievedRanks(
+        user.TournamentParticipant.map((p) => ({
+          participantId: p.id,
+          tournamentId: p.tournament.id,
+          tournamentStatus: p.tournament.status,
+          tournamentFormat: p.tournament.format,
+          teamId: p.teamId,
+          groupIds: p.TournamentGroupParticipant.map(
+            (gp) => gp.tournamentGroup.id,
+          ),
+        })),
+      ),
+    ]);
+
+    const TournamentParticipant = user.TournamentParticipant.map((p) => ({
+      ...p,
+      rank: ranks.get(p.id) ?? null,
+    }));
+
+    return { ...user, TournamentParticipant, upcomingMatches };
   },
 
   async getUserWithDetails(id: string) {

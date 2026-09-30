@@ -837,18 +837,7 @@
   },
   "profile": {
     "roles": {
-      "title": "Roles",
-      "expired": "expired",
-      "none": "No roles assigned.",
-      "add_role": "Add role",
-      "add_role_placeholder": "Select a role...",
-      "assign_success": "Role assigned.",
-      "remove_success": "Role removed.",
-      "remove_role": "Remove role",
-      "remove_confirm_title": "Remove role",
-      "remove_confirm_description": "Remove the \"{role}\" role? This action cannot be undone.",
-      "remove_confirm": "Remove",
-      "remove_cancel": "Cancel"
+      "expired": "expired"
     },
     "aoe2companion": {
       "title": "AoE2Companion",
@@ -866,20 +855,37 @@
       "cancel": "Cancel",
       "unlink": "Unlink",
       "stats": {
-        "title": "Ranked stats (1v1)",
+        "title": "Ranked stats 1v1",
         "rating": "Rating",
         "rank": "Rank",
         "games": "Games",
         "win_rate": "Win rate"
+      },
+      "matches": {
+        "title": "Recent 1v1 matches",
+        "none": "No recent 1v1 matches found.",
+        "win": "Win",
+        "loss": "Loss",
+        "unknown": "Unknown",
+        "unknown_opponent": "Unknown opponent",
+        "vs": "vs"
       }
     },
     "tournaments": {
       "title": "Tournament History",
       "tournament": "Tournament",
-      "nickname": "Nickname",
+      "group": "Group",
+      "rank": "Rank",
       "status": "Status",
-      "registered": "Registered",
       "none": "No tournament participations."
+    },
+    "upcoming_matches": {
+      "title": "Upcoming matches",
+      "none": "No upcoming matches scheduled.",
+      "vs": "vs",
+      "tbd": "TBD",
+      "pending": "Pending",
+      "scheduled": "Scheduled"
     },
     "admin_note": {
       "title": "Admin note",

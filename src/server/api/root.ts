@@ -1,4 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
+import { aoe2CompanionRouter } from "./aoe2companion";
 import { baseMapRouter } from "./baseMap";
 import { civRouter } from "./civ";
 import { leaderboardRouter } from "./leaderboard";
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   roles: rolesRouter,
   leaderboard: leaderboardRouter,
   news: newsRouter,
+  aoe2companion: aoe2CompanionRouter,
 });
 
 // export type definition of API

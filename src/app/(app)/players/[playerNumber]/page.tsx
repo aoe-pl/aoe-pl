@@ -1,9 +1,10 @@
 import { ProfileAdminNoteSection } from "@/components/profile/profile-admin-note-section";
+import { ProfileAoe2Matches } from "@/components/profile/profile-aoe2-matches";
 import { ProfileAoe2Stats } from "@/components/profile/profile-aoe2-stats";
 import { ProfileAoe2CompanionButton } from "@/components/profile/profile-aoe2companion-button";
-import { ProfileRolesSection } from "@/components/profile/profile-roles-section";
+import { ProfileRoleBadges } from "@/components/profile/profile-role-badges";
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
-import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
+import { ProfileUpcomingMatchesSection } from "@/components/profile/profile-upcoming-matches-section";
 import { getIsAdmin, getSession } from "@/lib/session";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { api } from "@/trpc/server";
@@ -26,27 +27,44 @@ export default async function PlayerProfilePage({
   if (!profile) notFound();
 
   const session = await getSession();
-  const availableRoles = isAdmin ? await api.roles.list() : [];
 
   const isOwnProfile = session?.user?.id === profile.id;
+
+  const participantIds = profile.TournamentParticipant.map((p) => p.id);
+  const teamIds = profile.TournamentParticipant.map((p) => p.teamId).filter(
+    (id): id is string => Boolean(id),
+  );
 
   const companionProfileId = profile.aoe2companionUrl
     ? getPlayerProfileIdFromCompanionUrl(profile.aoe2companionUrl)
     : null;
-  const companionProfile = companionProfileId
-    ? await fetchAoe2CompanionProfile(companionProfileId)
-    : null;
+
+  const [companionProfile, companionMatches] = await Promise.all([
+    companionProfileId
+      ? api.aoe2companion.getProfile({ profileId: companionProfileId })
+      : Promise.resolve(null),
+    companionProfileId
+      ? api.aoe2companion.getMatches({
+          profileId: companionProfileId,
+          leaderboardId: "rm_1v1",
+          count: 5,
+        })
+      : Promise.resolve([]),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-24">
       <div className="panel">
-        <header className="flex flex-wrap items-center justify-between gap-4 pb-6">
-          <h1
-            className="text-3xl font-bold"
-            style={{ color: "var(--medieval-gold)" }}
-          >
-            {profile.name}
-          </h1>
+        <header className="flex flex-wrap items-start justify-between gap-4 pb-6">
+          <div className="space-y-2">
+            <h1
+              className="text-3xl font-bold"
+              style={{ color: "var(--medieval-gold)" }}
+            >
+              {profile.name}
+            </h1>
+            <ProfileRoleBadges roles={profile.userRoles} />
+          </div>
 
           <ProfileAoe2CompanionButton
             userId={profile.id}
@@ -62,15 +80,14 @@ export default async function PlayerProfilePage({
             </section>
           )}
 
-          <section className="py-6">
-            <ProfileRolesSection
-              userId={profile.id}
-              currentUserId={session?.user?.id ?? ""}
-              currentRoles={profile.userRoles}
-              availableRoles={availableRoles}
-              isAdmin={isAdmin}
-            />
-          </section>
+          {companionProfileId && companionMatches.length > 0 && (
+            <section className="py-6">
+              <ProfileAoe2Matches
+                profileId={companionProfileId}
+                matches={companionMatches}
+              />
+            </section>
+          )}
 
           {isAdmin && (
             <section className="py-6">
@@ -80,6 +97,14 @@ export default async function PlayerProfilePage({
               />
             </section>
           )}
+
+          <section className="py-6">
+            <ProfileUpcomingMatchesSection
+              matches={profile.upcomingMatches}
+              participantIds={participantIds}
+              teamIds={teamIds}
+            />
+          </section>
 
           <section className="py-6">
             <ProfileTournamentHistorySection
