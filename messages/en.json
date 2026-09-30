@@ -667,6 +667,7 @@
       "today": "Today",
       "month": "Month",
       "week": "Week",
+      "streamed": "Streamed",
       "matches_count": "{visible}/{total} matches",
       "matches": "{count, plural, one {# match} other {# matches}}",
       "no_matches_on_day": "No matches on this day.",
@@ -778,6 +779,20 @@
       "match_mode": {
         "label": "Match mode"
       },
+      "stream": {
+        "title": "Stream",
+        "label": "Streamed by",
+        "mark_button": "I will stream",
+        "unmark_button": "Remove stream",
+        "marked_toast": "Match marked as going to be streamed",
+        "unmarked_toast": "Stream removed",
+        "dialog_title": "Stream this match",
+        "dialog_description": "Add the link to your stream. It will be saved to your profile and reused for future matches.",
+        "placeholder": "https://twitch.tv/...",
+        "confirm": "Save & mark",
+        "cancel": "Cancel",
+        "unknown_streamer": "Unknown streamer"
+      },
       "recordings": {
         "upload_button": "Upload recs",
         "download_button": "Download recs",
@@ -838,6 +853,20 @@
   "profile": {
     "roles": {
       "expired": "expired"
+    },
+    "streams": {
+      "linked": "Stream linked",
+      "not_linked": "No stream linked",
+      "linked_button": "Stream linked",
+      "not_linked_button": "Link stream",
+      "dialog_title": "Stream link",
+      "dialog_description": "Paste the link to your stream so viewers can find it and so you can mark matches as streamed.",
+      "placeholder": "https://twitch.tv/...",
+      "save_success": "Stream link saved.",
+      "unlink_success": "Stream link removed.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "unlink": "Unlink"
     },
     "aoe2companion": {
       "title": "AoE2Companion",

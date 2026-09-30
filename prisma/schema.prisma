@@ -44,6 +44,7 @@ model User {
   color                 String?
   adminComment          String?
   aoe2companionUrl      String?
+  streamUrl             String?
   accounts              Account[]
   sessions              Session[]
   TournamentMatchStream TournamentMatchStream[]
@@ -428,6 +429,8 @@ model TournamentMatchStream {
   scheduledStreamLive Boolean
   streamer            User            @relation(fields: [streamerId], references: [id])
   tournamentMatch     TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentMatchId, streamerId])
 }
 
 model TournamentMatchParticipant {
@@ -479,6 +482,7 @@ enum RegistrationFieldType {
 enum RoleType {
   ADMIN
   MODERATOR
+  STREAMER
 }
 
 enum TournamentMatchModeType {

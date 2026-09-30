@@ -10,6 +10,7 @@ import { MatchSchedulePanel } from "@/components/tournaments/matches/match-sched
 import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboard";
 import { MatchSpoilerProvider } from "@/components/tournaments/matches/match-spoiler-context";
 import { MatchSpoilerToggle } from "@/components/tournaments/matches/match-spoiler-toggle";
+import { MatchStreamPanel } from "@/components/tournaments/matches/match-stream-panel";
 import { parsePresetKey } from "@/lib/aoe2cm";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
@@ -39,6 +40,23 @@ export default async function TournamentMatchPage({
 
   const isAdmin = session?.user?.id
     ? await usersRepository.isUserAdmin(session.user.id)
+    : false;
+
+  // Admins and users with the "Streamer" role may mark the match as streamed.
+  const isStreamer = session?.user?.id
+    ? await usersRepository.isUserStreamer(session.user.id)
+    : false;
+
+  const canMarkStream = isAdmin || isStreamer;
+
+  const streams = match.TournamentMatchStream;
+
+  const ownStreamUrl = session?.user?.id
+    ? await usersRepository.getUserStreamUrl(session.user.id)
+    : null;
+
+  const isMarkedByMe = session?.user?.id
+    ? streams.some((stream) => stream.streamerId === session.user.id)
     : false;
 
   const dateFnsLocale = getDateFnsLocale(locale);
@@ -212,6 +230,45 @@ export default async function TournamentMatchPage({
                   <div className="font-medium">{matchModeLabel}</div>
                 </div>
               )}
+              {streams.length > 0 && (
+                <div>
+                  <div className="text-[color:var(--medieval-gold-muted)]">
+                    {t("stream.label")}
+                  </div>
+                  <div className="space-y-1">
+                    {streams.map((stream) => {
+                      const streamerName =
+                        stream.streamer.name ?? t("stream.unknown_streamer");
+                      const streamUrl =
+                        stream.streamUrl ?? stream.streamer.streamUrl;
+
+                      return (
+                        <div
+                          key={stream.id}
+                          className="flex items-center gap-2 font-medium"
+                        >
+                          <span
+                            className="inline-block size-2.5 shrink-0 rounded-full bg-red-500"
+                            aria-hidden
+                          />
+                          {streamUrl ? (
+                            <a
+                              href={streamUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[color:var(--medieval-gold)] hover:underline"
+                            >
+                              {streamerName}
+                            </a>
+                          ) : (
+                            <span>{streamerName}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             <MatchSpoilerToggle hasResults={hasResults} />
@@ -263,6 +320,14 @@ export default async function TournamentMatchPage({
               }
               canManage={isAdmin || isParticipant}
             />
+
+            {canMarkStream && (
+              <MatchStreamPanel
+                matchId={match.id}
+                streamUrl={ownStreamUrl}
+                isMarkedByMe={isMarkedByMe}
+              />
+            )}
 
             {isAdmin && canApprove && (
               <MatchApprovalPanel

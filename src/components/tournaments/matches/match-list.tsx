@@ -9,6 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { isBrightColor } from "@/lib/utils";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
@@ -28,6 +33,10 @@ export interface MatchListRow {
       user: { name: string | null } | null;
     } | null;
     team: { id: string; name: string } | null;
+  }[];
+  TournamentMatchStream: {
+    id: string;
+    streamer: { id: string; name: string | null; playerNumber: number };
   }[];
 }
 
@@ -154,6 +163,25 @@ export function MatchList({ matches, matchUrlBase }: MatchListProps) {
                   </span>
                   {player2}
                 </span>
+                {match.TournamentMatchStream.length > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex shrink-0 cursor-default items-center">
+                        <span
+                          className="inline-block size-3 rounded-full bg-red-500"
+                          aria-hidden
+                        />
+                        <span className="sr-only">{t("stream.label")}</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {match.TournamentMatchStream.map(
+                        (stream) =>
+                          stream.streamer.name ?? t("stream.unknown_streamer"),
+                      ).join(", ")}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 <span className="text-muted-foreground hidden shrink-0 text-sm sm:block">
                   {getStatusLabel(match)}
                 </span>

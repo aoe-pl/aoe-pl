@@ -107,6 +107,30 @@ export const usersRouter = createTRPCRouter({
       );
     }),
 
+  updateStreamUrl: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        url: z.string().url("Invalid URL").optional().or(z.literal("")),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const targetUserId = input.userId ?? ctx.session.user.id;
+
+      // Users may edit their own link; editing another player requires admin.
+      if (
+        targetUserId !== ctx.session.user.id &&
+        !(await usersRepository.isUserAdmin(ctx.session.user.id))
+      ) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      return usersRepository.updateOwnStreamUrl(
+        targetUserId,
+        input.url ?? null,
+      );
+    }),
+
   updateAdminNote: adminProcedure
     .input(z.object({ userId: z.string(), note: z.string() }))
     .mutation(async ({ input }) => {

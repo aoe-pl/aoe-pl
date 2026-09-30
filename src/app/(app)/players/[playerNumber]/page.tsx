@@ -3,6 +3,7 @@ import { ProfileAoe2Matches } from "@/components/profile/profile-aoe2-matches";
 import { ProfileAoe2Stats } from "@/components/profile/profile-aoe2-stats";
 import { ProfileAoe2CompanionButton } from "@/components/profile/profile-aoe2companion-button";
 import { ProfileRoleBadges } from "@/components/profile/profile-role-badges";
+import { ProfileStreamButton } from "@/components/profile/profile-stream-button";
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
 import { ProfileUpcomingMatchesSection } from "@/components/profile/profile-upcoming-matches-section";
 import { getIsAdmin, getSession } from "@/lib/session";
@@ -66,11 +67,18 @@ export default async function PlayerProfilePage({
             <ProfileRoleBadges roles={profile.userRoles} />
           </div>
 
-          <ProfileAoe2CompanionButton
-            userId={profile.id}
-            currentUrl={profile.aoe2companionUrl}
-            isEditable={isOwnProfile || isAdmin}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <ProfileAoe2CompanionButton
+              userId={profile.id}
+              currentUrl={profile.aoe2companionUrl}
+              isEditable={isOwnProfile || isAdmin}
+            />
+            <ProfileStreamButton
+              userId={profile.id}
+              currentUrl={profile.streamUrl}
+              isEditable={isOwnProfile || isAdmin}
+            />
+          </div>
         </header>
 
         <div className="divide-y divide-[color:var(--medieval-wood-border)] border-t border-[color:var(--medieval-wood-border)]">

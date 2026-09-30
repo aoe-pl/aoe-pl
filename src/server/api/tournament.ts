@@ -95,6 +95,19 @@ async function assertCanManageMatchRecordings(userId: string, matchId: string) {
   await getManageableMatch(userId, matchId);
 }
 
+/**
+ * Ensures the current user may mark matches as going to be streamed, i.e. is an
+ * admin or has the "Streamer" role.
+ */
+async function assertCanMarkStream(userId: string) {
+  const [admin, streamer] = await Promise.all([
+    usersRepository.isUserAdmin(userId),
+    usersRepository.isUserStreamer(userId),
+  ]);
+
+  if (!admin && !streamer) throw new TRPCError({ code: "FORBIDDEN" });
+}
+
 export const tournamentRouter = createTRPCRouter({
   list: publicProcedure
     .input(
@@ -1024,6 +1037,66 @@ export const tournamentRouter = createTRPCRouter({
         return tournamentMatchRepository.setMatchApproval(
           input.matchId,
           input.approved,
+        );
+      }),
+
+    /**
+     * Marks a match as going to be streamed by the current user. Available to
+     * admins and users with the "Streamer" role. When the user has no stream
+     * link stored yet, one can be provided and is saved on their profile.
+     */
+    markStream: protectedProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          streamUrl: z.string().url().optional().or(z.literal("")),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.session.user.id;
+        await assertCanMarkStream(userId);
+
+        const match = await db.tournamentMatch.findUnique({
+          where: { id: input.matchId },
+          select: { id: true, matchDate: true },
+        });
+
+        if (!match) throw new TRPCError({ code: "NOT_FOUND" });
+
+        // Persist a newly provided link on the user's profile.
+        const providedUrl = input.streamUrl?.trim();
+        if (providedUrl) {
+          await usersRepository.updateOwnStreamUrl(userId, providedUrl);
+        }
+
+        const streamUrl =
+          providedUrl ?? (await usersRepository.getUserStreamUrl(userId));
+
+        if (!streamUrl) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "STREAM_URL_REQUIRED",
+          });
+        }
+
+        return tournamentMatchRepository.markMatchAsStreamed(
+          match.id,
+          userId,
+          streamUrl,
+          match.matchDate,
+        );
+      }),
+
+    /** Removes the current user's stream entry from a match. */
+    unmarkStream: protectedProcedure
+      .input(z.object({ matchId: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.session.user.id;
+        await assertCanMarkStream(userId);
+
+        return tournamentMatchRepository.unmarkMatchAsStreamed(
+          input.matchId,
+          userId,
         );
       }),
 
