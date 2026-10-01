@@ -5,6 +5,7 @@ import {
   parsePresetKey,
 } from "@/lib/aoe2cm";
 import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
+import { notifyMatchScheduled, notifyMatchUnscheduled } from "@/lib/discord";
 import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
@@ -793,10 +794,24 @@ export const tournamentRouter = createTRPCRouter({
         }),
       )
       .mutation(async ({ input }) => {
-        return tournamentMatchRepository.updateTournamentMatch(
+        const before = await db.tournamentMatch.findUnique({
+          where: { id: input.id },
+          select: { status: true },
+        });
+
+        const updated = await tournamentMatchRepository.updateTournamentMatch(
           input.id,
           input.data,
         );
+
+        if (
+          input.data.status === MatchStatus.SCHEDULED &&
+          before?.status !== MatchStatus.SCHEDULED
+        ) {
+          await notifyMatchScheduled(input.id);
+        }
+
+        return updated;
       }),
     addParticipant: adminProcedure
       .input(
@@ -1121,10 +1136,17 @@ export const tournamentRouter = createTRPCRouter({
         if (!admin && !isParticipant)
           throw new TRPCError({ code: "FORBIDDEN" });
 
-        return tournamentMatchRepository.updateTournamentMatch(input.id, {
-          status: MatchStatus.SCHEDULED,
-          matchDate: input.matchDate,
-        });
+        const updated = await tournamentMatchRepository.updateTournamentMatch(
+          input.id,
+          {
+            status: MatchStatus.SCHEDULED,
+            matchDate: input.matchDate,
+          },
+        );
+
+        await notifyMatchScheduled(input.id);
+
+        return updated;
       }),
 
     unscheduleMatch: protectedProcedure
@@ -1147,10 +1169,14 @@ export const tournamentRouter = createTRPCRouter({
         if (!admin && !isParticipant)
           throw new TRPCError({ code: "FORBIDDEN" });
 
-        return db.tournamentMatch.update({
+        const updated = await db.tournamentMatch.update({
           where: { id: input.id },
           data: { status: MatchStatus.PENDING, matchDate: null },
         });
+
+        await notifyMatchUnscheduled(input.id);
+
+        return updated;
       }),
   }),
   games: createTRPCRouter({
