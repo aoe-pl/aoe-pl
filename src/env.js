@@ -23,6 +23,8 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    DISCORD_WEBHOOK_URL: z.string().url().optional(),
+    SITE_URL: z.string().url().optional(),
   },
 
   /**
@@ -51,6 +53,8 @@ export const env = createEnv({
     POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
     POSTGRES_DB: process.env.POSTGRES_DB,
     NODE_ENV: process.env.NODE_ENV,
+    DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
+    SITE_URL: process.env.SITE_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
