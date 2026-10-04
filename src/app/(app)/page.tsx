@@ -2,8 +2,12 @@ import { FeaturedNews } from "@/components/home/featured-news";
 import { LatestNews } from "@/components/home/latest-news";
 import { TopPlayers, TopPlayersLoading } from "@/components/home/top-players";
 import { UpcomingMatches } from "@/components/home/upcoming-matches";
+import { DiscordIcon } from "@/components/icons";
+import { Button } from "@/components/ui";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
+
+const DISCORD_INVITE_URL = "https://discord.gg/9rBsfHfk";
 
 export default function Home() {
   const t = useTranslations("home.hero");
@@ -20,6 +24,23 @@ export default function Home() {
               {t("subtitle")}
             </span>
             <div className="from-accent to-accent h-1 w-12 bg-gradient-to-l" />
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <Button
+              asChild
+              size="lg"
+              className="text-primary-foreground bg-accent gap-2 font-semibold shadow-lg"
+            >
+              <a
+                href={DISCORD_INVITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <DiscordIcon className="size-5" />
+                {t("discord_button")}
+              </a>
+            </Button>
           </div>
         </div>
       </div>

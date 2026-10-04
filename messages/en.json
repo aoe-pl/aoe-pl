@@ -21,7 +21,8 @@
   "home": {
     "hero": {
       "title": "Age of Empires 2",
-      "subtitle": "Polish Community"
+      "subtitle": "Polish Community",
+      "discord_button": "Join our Discord"
     },
     "news": {
       "title": "Latest News",
