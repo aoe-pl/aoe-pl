@@ -15,7 +15,9 @@ export function GroupsPageContent({
   groupsData: GroupPageData[];
   matchUrlBase: string;
 }) {
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(
+    () => groupsData[0]?.groupId ?? null,
+  );
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const t = useTranslations("tournament.groups");
 
