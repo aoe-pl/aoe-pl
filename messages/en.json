@@ -25,6 +25,7 @@
     },
     "news": {
       "title": "Latest News",
+      "featured_badge": "Featured",
       "all_news_button": "All news",
       "no_news": "No news",
       "hours_ago": "{hours, plural, one {# hour ago} other {# hours ago}}"
@@ -655,8 +656,10 @@
         "description_placeholder": "Short description visible in the list (optional)",
         "content_label": "Content",
         "content_placeholder": "Full news content",
+        "image_label": "Cover image",
+        "image_description": "Optional image shown on the news card.",
         "featured_label": "Featured news",
-        "featured_description": "Featured news appears at the top of the list.",
+        "featured_description": "The featured news is displayed at the top of the home page. Only one news can be featured at a time.",
         "submit_add": "Add news",
         "submit_save": "Save changes"
       }

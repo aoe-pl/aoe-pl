@@ -17,6 +17,7 @@ export const newsRepository = {
 
   async create(data: {
     featured: boolean;
+    imageKey?: string | null;
     authorId?: string;
     translations: {
       locale: string;
@@ -25,22 +26,33 @@ export const newsRepository = {
       content: string;
     }[];
   }) {
-    return db.newsPost.create({
-      data: {
-        featured: data.featured,
-        authorId: data.authorId,
-        translations: {
-          create: data.translations.map(
-            ({ locale, title, description, content }) => ({
-              locale,
-              title,
-              description,
-              content,
-            }),
-          ),
+    return db.$transaction(async (tx) => {
+      // Only one news post can be featured at a time.
+      if (data.featured) {
+        await tx.newsPost.updateMany({
+          where: { featured: true },
+          data: { featured: false },
+        });
+      }
+
+      return tx.newsPost.create({
+        data: {
+          featured: data.featured,
+          imageKey: data.imageKey ?? null,
+          authorId: data.authorId,
+          translations: {
+            create: data.translations.map(
+              ({ locale, title, description, content }) => ({
+                locale,
+                title,
+                description,
+                content,
+              }),
+            ),
+          },
         },
-      },
-      include: { translations: true },
+        include: { translations: true },
+      });
     });
   },
 
@@ -48,6 +60,7 @@ export const newsRepository = {
     id: string,
     data: {
       featured?: boolean;
+      imageKey?: string | null;
       translations?: {
         locale: string;
         title?: string;
@@ -56,10 +69,15 @@ export const newsRepository = {
       }[];
     },
   ) {
-    if (data.translations?.length) {
-      await db.$transaction(
-        data.translations.map(({ locale, title, description, content }) =>
-          db.newsPostTranslation.upsert({
+    return db.$transaction(async (tx) => {
+      if (data.translations?.length) {
+        for (const {
+          locale,
+          title,
+          description,
+          content,
+        } of data.translations) {
+          await tx.newsPostTranslation.upsert({
             where: { newsPostId_locale: { newsPostId: id, locale } },
             update: {
               ...(title !== undefined && { title }),
@@ -73,22 +91,34 @@ export const newsRepository = {
               description,
               content: content ?? "",
             },
-          }),
-        ),
-      );
-    }
+          });
+        }
+      }
 
-    if (data.featured !== undefined) {
-      return db.newsPost.update({
+      // Only one news post can be featured at a time.
+      if (data.featured) {
+        await tx.newsPost.updateMany({
+          where: { featured: true, id: { not: id } },
+          data: { featured: false },
+        });
+      }
+
+      const postData: { featured?: boolean; imageKey?: string | null } = {};
+      if (data.featured !== undefined) postData.featured = data.featured;
+      if (data.imageKey !== undefined) postData.imageKey = data.imageKey;
+
+      if (Object.keys(postData).length > 0) {
+        return tx.newsPost.update({
+          where: { id },
+          data: postData,
+          include: { translations: true },
+        });
+      }
+
+      return tx.newsPost.findUniqueOrThrow({
         where: { id },
-        data: { featured: data.featured },
         include: { translations: true },
       });
-    }
-
-    return db.newsPost.findUniqueOrThrow({
-      where: { id },
-      include: { translations: true },
     });
   },
 

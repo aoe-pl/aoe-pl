@@ -1,4 +1,5 @@
 import { FeaturedNews } from "@/components/home/featured-news";
+import { LatestNews } from "@/components/home/latest-news";
 import { TopPlayers, TopPlayersLoading } from "@/components/home/top-players";
 import { UpcomingMatches } from "@/components/home/upcoming-matches";
 import { useTranslations } from "next-intl";
@@ -24,11 +25,13 @@ export default function Home() {
       </div>
 
       <main className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 pb-16">
+        <FeaturedNews />
+
         <div className="panel">
           <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
             <section className="lg:col-span-2 lg:border-r lg:border-[color:var(--medieval-wood-border)] lg:pr-8">
               <div className="pb-8">
-                <FeaturedNews />
+                <LatestNews />
               </div>
 
               <div className="border-t border-[color:var(--medieval-wood-border)] pt-8 lg:border-t-0 lg:pt-0">

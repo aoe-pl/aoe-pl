@@ -42,6 +42,7 @@ export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
     title: tr?.title ?? "",
     description: tr?.description,
     content: tr?.content ?? "",
+    imageKey: post.imageKey,
   };
 
   return (

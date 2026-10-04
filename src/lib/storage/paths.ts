@@ -54,6 +54,9 @@ export function buildObjectKey(path: string, fileName: string): string {
  * hand-written strings so the folder structure stays consistent.
  */
 export const storagePaths = {
+  /** news/<fileName> */
+  news: () => "news",
+
   /** Root for everything tournament related. */
   tournaments: () => "tournaments",
 

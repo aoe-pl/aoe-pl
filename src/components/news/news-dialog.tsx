@@ -19,10 +19,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { MarkdownEditorField } from "@/components/ui/markdown-editor-field";
 import { Textarea } from "@/components/ui/textarea";
 import { locales, type Locale } from "@/lib/locales";
+import { storagePaths } from "@/lib/storage/paths";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
@@ -40,6 +42,7 @@ const translationSchema = z.object({
 
 const formSchema = z.object({
   featured: z.boolean(),
+  imageKey: z.string().nullish(),
   translations: z.record(z.string(), translationSchema),
 });
 
@@ -47,6 +50,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const defaultValues: FormValues = {
   featured: false,
+  imageKey: null,
   translations: Object.fromEntries(
     locales.supported.map((locale) => [
       locale,
@@ -99,7 +103,11 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
           ];
         }),
       );
-      form.reset({ featured: existingPost.featured, translations });
+      form.reset({
+        featured: existingPost.featured,
+        imageKey: existingPost.imageKey ?? null,
+        translations,
+      });
     } else {
       form.reset(defaultValues);
     }
@@ -136,9 +144,18 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
       ([locale, data]) => ({ locale, ...data }),
     );
     if (id) {
-      updatePost({ id, featured: values.featured, translations });
+      updatePost({
+        id,
+        featured: values.featured,
+        imageKey: values.imageKey ?? null,
+        translations,
+      });
     } else {
-      createPost({ featured: values.featured, translations });
+      createPost({
+        featured: values.featured,
+        imageKey: values.imageKey ?? null,
+        translations,
+      });
     }
   }
 
@@ -238,6 +255,33 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
                 />
               </div>
             ))}
+
+            {/* Cover image */}
+            <FormField
+              control={form.control}
+              name="imageKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("form.image_label")}</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      path={storagePaths.news()}
+                      previewUrl={
+                        existingPost?.imageKey
+                          ? `/api/news/${existingPost.id}/image`
+                          : null
+                      }
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t("form.image_description")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Pinned news field */}
             <FormField

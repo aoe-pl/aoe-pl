@@ -28,12 +28,14 @@ export const newsRouter = createTRPCRouter({
     .input(
       z.object({
         featured: z.boolean().default(false),
+        imageKey: z.string().nullish(),
         translations: z.array(translationSchema).min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       return newsRepository.create({
         featured: input.featured,
+        imageKey: input.imageKey,
         authorId: ctx.session!.user.id, // Must be logged in as admin to create news posts, can assert session is not null
         translations: input.translations,
       });
@@ -44,6 +46,7 @@ export const newsRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         featured: z.boolean().optional(),
+        imageKey: z.string().nullish(),
         translations: z
           .array(
             z.object({

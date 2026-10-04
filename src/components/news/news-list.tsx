@@ -26,6 +26,7 @@ export function NewsList({ isAdmin }: { isAdmin: boolean }) {
         title: tr?.title ?? "",
         description: tr?.description,
         content: tr?.content ?? "",
+        imageKey: post.imageKey,
       };
     })
     .filter((news) => news.title.toLowerCase().includes(query.toLowerCase()));

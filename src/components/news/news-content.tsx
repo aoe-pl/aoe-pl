@@ -1,8 +1,9 @@
 "use client";
 
-import type { NewsPost } from "@/components/news/news-card";
+import { getNewsImageUrl, type NewsPost } from "@/components/news/news-card";
 import { Calendar } from "lucide-react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 const MDPreview = dynamic(
@@ -16,11 +17,25 @@ interface NewsContentProps {
 }
 
 export function NewsContent({ news, actions }: NewsContentProps) {
+  const imageUrl = getNewsImageUrl(news);
+
   return (
     <article className="panel prose prose-zinc max-w-none">
       {actions && (
         <div className="not-prose mb-6 flex flex-wrap items-center justify-between gap-2">
           {actions}
+        </div>
+      )}
+
+      {imageUrl && (
+        <div className="not-prose relative mb-6 aspect-video w-full overflow-hidden rounded-lg">
+          <Image
+            src={imageUrl}
+            alt={news.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
         </div>
       )}
 
