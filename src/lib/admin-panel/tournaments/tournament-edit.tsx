@@ -40,6 +40,7 @@ export function TournamentEdit({ tournament }: { tournament: Tournament }) {
   const createTournamentMutation = api.tournaments.update.useMutation({
     onSuccess: () => {
       router.push(`/admin/tournaments/view/${tournament.id}`);
+      router.refresh();
     },
     onError: (error) => {
       toast.error(

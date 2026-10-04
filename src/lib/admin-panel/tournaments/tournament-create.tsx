@@ -45,6 +45,7 @@ export function TournamentCreate() {
   const createTournamentMutation = api.tournaments.create.useMutation({
     onSuccess: () => {
       router.push(`/admin/tournaments`);
+      router.refresh();
     },
     onError: (error) => {
       toast.error(`Failed to create tournament: ${error.message}`);
