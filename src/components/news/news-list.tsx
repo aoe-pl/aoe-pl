@@ -46,7 +46,7 @@ export function NewsList({ isAdmin }: { isAdmin: boolean }) {
         {isAdmin && <NewsDialog />}
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-3">
         {isPending ? (
           <p className="text-muted-foreground py-12 text-center">
             {t("loading")}

@@ -37,12 +37,10 @@ interface NewsCardProps {
 
 /**
  * News card with an image on the left and the text on the right.
- *
- * The image occupies roughly 30% of the card width and fades out towards the
- * text using a CSS mask, so it blends into the parchment background.
  */
 export function NewsCard({ news, variant = "default", badge }: NewsCardProps) {
   const isFeatured = variant === "featured";
+  const showFeaturedAccent = news.featured && !isFeatured;
   const imageUrl = getNewsImageUrl(news);
 
   return (
@@ -50,34 +48,39 @@ export function NewsCard({ news, variant = "default", badge }: NewsCardProps) {
       className={cn(
         "panel-parchment flex overflow-hidden",
         isFeatured
-          ? "gap-6 border-l-4 border-[#e6c052] p-6"
-          : "gap-4 transition-shadow hover:shadow-lg",
+          ? "gap-6 border-x-4 border-[#e6c052] p-6"
+          : "h-32 gap-3 p-3 transition-shadow hover:shadow-lg",
+        showFeaturedAccent && "border-x-4 border-[#e6c052]",
       )}
     >
       {imageUrl && (
         <div
           className={cn(
-            "relative w-[30%] shrink-0 overflow-hidden rounded-lg",
-            isFeatured ? "aspect-video" : "aspect-[4/3]",
+            "relative shrink-0 overflow-hidden rounded-lg",
+            isFeatured ? "aspect-video w-[30%]" : "w-28 sm:w-36",
           )}
         >
           <Image
             src={imageUrl}
             alt={news.title}
             fill
-            sizes="(max-width: 1024px) 40vw, 320px"
-            className="[mask-image:linear-gradient(to_right,#000_55%,transparent)] object-cover"
+            sizes={
+              isFeatured
+                ? "(max-width: 1024px) 40vw, 320px"
+                : "(min-width: 640px) 144px, 112px"
+            }
+            className="object-cover"
           />
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         {badge}
 
         <h3
           className={cn(
             "text-foreground font-bold",
-            isFeatured ? "text-2xl sm:text-3xl" : "text-base",
+            isFeatured ? "text-2xl sm:text-3xl" : "line-clamp-1 text-base",
           )}
         >
           {news.title}
@@ -86,15 +89,15 @@ export function NewsCard({ news, variant = "default", badge }: NewsCardProps) {
         {news.description && (
           <p
             className={cn(
-              "text-foreground line-clamp-3",
-              isFeatured ? "text-base" : "text-sm",
+              "text-foreground",
+              isFeatured ? "line-clamp-3 text-base" : "line-clamp-2 text-sm",
             )}
           >
             {news.description}
           </p>
         )}
 
-        <div className="mt-auto flex gap-2 pt-2 text-xs font-semibold">
+        <div className="mt-auto flex gap-2 text-xs font-semibold">
           <span>📅 {new Date(news.createdAt).toLocaleDateString("pl-PL")}</span>
         </div>
       </div>
