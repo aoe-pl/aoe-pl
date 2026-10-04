@@ -25,7 +25,6 @@
     },
     "news": {
       "title": "Latest News",
-      "featured_badge": "Featured",
       "all_news_button": "All news",
       "no_news": "No news",
       "hours_ago": "{hours, plural, one {# hour ago} other {# hours ago}}"
@@ -629,10 +628,12 @@
   },
   "news": {
     "title": "News",
+    "loading": "Loading news...",
     "search_placeholder": "Search...",
     "no_results": "No search results.",
     "no_posts": "No news posts yet.",
     "detail": {
+      "loading": "Loading news...",
       "not_found": "News not found",
       "back_to_list": "Back to list",
       "edit": "Edit",

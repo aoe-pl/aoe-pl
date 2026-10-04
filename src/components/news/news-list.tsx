@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export function NewsList({ isAdmin }: { isAdmin: boolean }) {
-  const { data: posts = [] } = api.news.list.useQuery();
+  const { data: posts = [], isPending } = api.news.list.useQuery();
   const t = useTranslations("news");
   const locale = useLocale();
   const [query, setQuery] = useState("");
@@ -47,7 +47,11 @@ export function NewsList({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       <div className="grid gap-6">
-        {filteredNews.length === 0 ? (
+        {isPending ? (
+          <p className="text-muted-foreground py-12 text-center">
+            {t("loading")}
+          </p>
+        ) : filteredNews.length === 0 ? (
           <p className="py-12 text-center">
             {query ? t("no_results") : t("no_posts")}
           </p>
