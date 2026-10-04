@@ -29,6 +29,7 @@ const upcomingMatchesInclude = {
       tournament: {
         include: {
           matchMode: true,
+          tournamentSeries: true,
         },
       },
     },

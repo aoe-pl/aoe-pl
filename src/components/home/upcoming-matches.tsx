@@ -1,10 +1,11 @@
 "use client";
 
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
-import { isBrightColor } from "@/lib/utils";
+import { isBrightColor, slugify } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Clock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 
 export function UpcomingMatches() {
   const t = useTranslations("home.upcoming_matches");
@@ -57,9 +58,18 @@ export function UpcomingMatches() {
             (key, params) => tGlobal(key, params),
           );
 
-          const tournament = match.group?.tournament?.name;
+          const tournament = match.group?.tournament;
           const participants = match.TournamentMatchParticipant;
           const groupColor = match.group?.color;
+
+          // Link to the dedicated match page. Matches on the home page always
+          // belong to a group tournament, but the series is optional in the
+          // schema, so guard against a missing slug.
+          const seriesName = tournament?.tournamentSeries?.name;
+          const matchHref =
+            tournament && seriesName
+              ? `/tournaments/${slugify(seriesName)}/${tournament.urlKey}/matches/${match.matchNumber}`
+              : null;
 
           const player1 =
             participants[0]?.participant?.user?.name ??
@@ -83,11 +93,8 @@ export function UpcomingMatches() {
           const tagStyle =
             "bg-secondary/40 text-foreground/80 rounded px-2 py-0.5 text-xs font-semibold whitespace-nowrap";
 
-          return (
-            <div
-              key={match.id}
-              className="panel-parchment transition-colors"
-            >
+          const tileContent = (
+            <>
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-foreground text-sm font-semibold">
                   {player1}
@@ -106,7 +113,9 @@ export function UpcomingMatches() {
                   </div>
                 )}
 
-                {tournament && <span className={tagStyle}>{tournament}</span>}
+                {tournament && (
+                  <span className={tagStyle}>{tournament.name}</span>
+                )}
 
                 {group && (
                   <span
@@ -122,6 +131,27 @@ export function UpcomingMatches() {
 
                 <span className={tagStyle}>{matchModeText}</span>
               </div>
+            </>
+          );
+
+          if (matchHref) {
+            return (
+              <Link
+                key={match.id}
+                href={matchHref}
+                className="panel-parchment hover:ring-medieval-gold/60 block transition-all hover:ring-2"
+              >
+                {tileContent}
+              </Link>
+            );
+          }
+
+          return (
+            <div
+              key={match.id}
+              className="panel-parchment transition-colors"
+            >
+              {tileContent}
             </div>
           );
         })}
