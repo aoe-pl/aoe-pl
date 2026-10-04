@@ -3,7 +3,7 @@
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { isBrightColor } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { Clock, Sword } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 export function UpcomingMatches() {
@@ -15,11 +15,8 @@ export function UpcomingMatches() {
 
   if (isLoading) {
     return (
-      <div className="panel">
-        <div className="panel-header flex items-center gap-2">
-          <Sword className="h-5 w-5" />
-          {t("title")}
-        </div>
+      <div>
+        <div className="panel-header text-center">{t("title")}</div>
         <div className="text-muted-foreground p-4 text-center text-sm">
           {t("loading")}
         </div>
@@ -30,11 +27,8 @@ export function UpcomingMatches() {
   // If no matches are found
   if (!matches || matches.length === 0) {
     return (
-      <div className="panel">
-        <div className="panel-header flex items-center gap-2">
-          <Sword className="h-5 w-5" />
-          {t("title")}
-        </div>
+      <div>
+        <div className="panel-header text-center">{t("title")}</div>
         <div className="text-muted-foreground p-4 text-center text-sm">
           {t("no_matches")}
         </div>
@@ -43,11 +37,8 @@ export function UpcomingMatches() {
   }
 
   return (
-    <div className="panel">
-      <div className="panel-header flex items-center gap-2">
-        <Sword className="h-5 w-5" />
-        {t("title")}
-      </div>
+    <div>
+      <div className="panel-header text-center">{t("title")}</div>
 
       <div className="space-y-2">
         {matches.map((match) => {

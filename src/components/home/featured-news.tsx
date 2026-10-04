@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { ArrowRight, Flame } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { NewsCard } from "../news/news-card";
@@ -29,11 +29,8 @@ export function FeaturedNews() {
   });
 
   return (
-    <div className="panel">
-      <div className="panel-header flex items-center gap-2">
-        <Flame className="h-5 w-5" />
-        {t("title")}
-      </div>
+    <div>
+      <div className="panel-header text-center">{t("title")}</div>
 
       <div className="space-y-2">
         {featuredPosts.length === 0 ? (

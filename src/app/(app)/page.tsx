@@ -23,18 +23,25 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="relative z-10 mx-auto -mt-14 max-w-6xl px-4">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <section className="space-y-8 lg:col-span-2">
-            <FeaturedNews />
-            <UpcomingMatches />
-          </section>
+      <main className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 pb-16">
+        <div className="panel">
+          <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
+            <section className="lg:col-span-2 lg:border-r lg:border-[color:var(--medieval-wood-border)] lg:pr-8">
+              <div className="pb-8">
+                <FeaturedNews />
+              </div>
 
-          <aside>
-            <Suspense fallback={<TopPlayersLoading />}>
-              <TopPlayers />
-            </Suspense>
-          </aside>
+              <div className="border-t border-[color:var(--medieval-wood-border)] pt-8 lg:border-t-0 lg:pt-0">
+                <UpcomingMatches />
+              </div>
+            </section>
+
+            <aside className="mt-8 border-t border-[color:var(--medieval-wood-border)] pt-8 lg:mt-0 lg:border-t-0 lg:pt-0">
+              <Suspense fallback={<TopPlayersLoading />}>
+                <TopPlayers />
+              </Suspense>
+            </aside>
+          </div>
         </div>
       </main>
     </div>
