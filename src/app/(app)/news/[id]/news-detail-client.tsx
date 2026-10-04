@@ -16,19 +16,31 @@ interface NewsDetailContentProps {
 export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
   const t = useTranslations("news.detail");
   const locale = useLocale();
-  const { data: post } = api.news.getById.useQuery({ id });
+  const { data: post, isPending } = api.news.getById.useQuery({ id });
+
+  if (isPending) {
+    return (
+      <div className="container mx-auto mt-10 max-w-3xl px-4 py-8 pt-24">
+        <div className="panel text-secondary-foreground py-12 text-center">
+          {t("loading")}
+        </div>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
-      <div className="container mx-auto px-4 py-8 pt-24 text-center">
-        <h1 className="text-2xl font-bold">{t("not_found")}</h1>
-        <Button
-          variant="wood"
-          asChild
-          className="mt-4"
-        >
-          <Link href="/news">{t("back_to_list")}</Link>
-        </Button>
+      <div className="container mx-auto mt-10 max-w-3xl px-4 py-8 pt-24">
+        <div className="panel text-secondary-foreground py-12 text-center">
+          <h1 className="text-2xl font-bold">{t("not_found")}</h1>
+          <Button
+            variant="wood"
+            asChild
+            className="mt-4"
+          >
+            <Link href="/news">{t("back_to_list")}</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -42,6 +54,7 @@ export function NewsDetailContent({ id, isAdmin }: NewsDetailContentProps) {
     title: tr?.title ?? "",
     description: tr?.description,
     content: tr?.content ?? "",
+    imageKey: post.imageKey,
   };
 
   return (

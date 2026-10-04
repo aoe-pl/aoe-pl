@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { CheckIcon, MinusIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import type { GameStep } from "./types";
 
 interface StepIndicatorProps {
@@ -16,7 +15,6 @@ export function StepIndicator({
   currentStep,
   steps,
 }: StepIndicatorProps) {
-  const t = useTranslations("tournament.matches.recordings");
   const totalSteps = totalGames + 1;
 
   return (

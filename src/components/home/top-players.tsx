@@ -9,7 +9,7 @@ export function TopPlayersLoading() {
   const t = useTranslations("home.top_players");
 
   return (
-    <div className="panel">
+    <div>
       <div className="panel-header text-center">{t("title")}</div>
       <div className="flex items-center justify-center py-12">
         <Loader2 className="text-accent h-8 w-8 animate-spin" />
@@ -30,7 +30,7 @@ export async function TopPlayers() {
     const players = await api.leaderboard.getTopPolishPlayers({ count: 50 });
 
     return (
-      <div className="panel">
+      <div>
         <div className="panel-header flex items-center gap-2">
           <span
             className="w-6"
@@ -46,7 +46,7 @@ export async function TopPlayers() {
   } catch (error) {
     console.error("Failed to fetch top players:", error);
     return (
-      <div className="panel">
+      <div>
         <div className="panel-header flex items-center gap-2">
           <Medal className="h-5 w-5" />
           {t("title")}

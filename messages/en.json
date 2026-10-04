@@ -628,10 +628,12 @@
   },
   "news": {
     "title": "News",
+    "loading": "Loading news...",
     "search_placeholder": "Search...",
     "no_results": "No search results.",
     "no_posts": "No news posts yet.",
     "detail": {
+      "loading": "Loading news...",
       "not_found": "News not found",
       "back_to_list": "Back to list",
       "edit": "Edit",
@@ -655,8 +657,10 @@
         "description_placeholder": "Short description visible in the list (optional)",
         "content_label": "Content",
         "content_placeholder": "Full news content",
+        "image_label": "Cover image",
+        "image_description": "Optional image shown on the news card.",
         "featured_label": "Featured news",
-        "featured_description": "Featured news appears at the top of the list.",
+        "featured_description": "The featured news is displayed at the top of the home page. Only one news can be featured at a time.",
         "submit_add": "Add news",
         "submit_save": "Save changes"
       }

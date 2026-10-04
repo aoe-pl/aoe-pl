@@ -628,10 +628,12 @@
   },
   "news": {
     "title": "Wiadomości",
+    "loading": "Ładowanie wiadomości...",
     "search_placeholder": "Szukaj...",
     "no_results": "Brak wyników wyszukiwania.",
     "no_posts": "Brak wiadomości.",
     "detail": {
+      "loading": "Ładowanie wiadomości...",
       "not_found": "Nie znaleziono wiadomości",
       "back_to_list": "Wróć do listy",
       "edit": "Edytuj",
@@ -655,8 +657,10 @@
         "description_placeholder": "Krótki opis widoczny na liście (opcjonalnie)",
         "content_label": "Treść",
         "content_placeholder": "Pełna treść wiadomości",
-        "featured_label": "Przypięta wiadomość",
-        "featured_description": "Przypięte wiadomości pojawiają się na górze listy.",
+        "image_label": "Obraz okładki",
+        "image_description": "Opcjonalny obraz wyświetlany na karcie wiadomości.",
+        "featured_label": "Wyróżniona wiadomość",
+        "featured_description": "Wyróżniona wiadomość jest wyświetlana na górze strony głównej. Tylko jedna wiadomość może być wyróżniona.",
         "submit_add": "Dodaj wiadomość",
         "submit_save": "Zapisz zmiany"
       }
