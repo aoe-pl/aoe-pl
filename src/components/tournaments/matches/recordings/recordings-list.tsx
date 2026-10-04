@@ -20,11 +20,11 @@ export function RecordingsList({ recordings }: RecordingsListProps) {
       {recordings.map((recording, index) => (
         <li
           key={`${recording.fileName}-${index}`}
-          className="space-y-1 rounded-xl border border-[color:var(--medieval-wood-border)] p-3 text-sm"
+          className="border-medieval-wood-border space-y-1 rounded-xl border p-3 text-sm"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
         >
           <p
-            className="truncate text-xs font-medium text-[color:var(--medieval-gold)]"
+            className="text-medieval-gold truncate text-xs font-medium"
             title={recording.fileName}
           >
             {recording.fileName}
@@ -54,12 +54,12 @@ export function RecordingsList({ recordings }: RecordingsListProps) {
             label={t("winner")}
             value={
               recording.winner === null ? (
-                <span className="text-[color:var(--medieval-gold-muted)]">
+                <span className="text-medieval-gold-muted">
                   {t("winner_unknown")}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 font-semibold text-[color:var(--medieval-parchment-foreground)]">
-                  <Crown className="size-3.5 text-[color:var(--medieval-gold)]" />
+                <span className="text-medieval-parchment-foreground inline-flex items-center gap-1 font-semibold">
+                  <Crown className="text-medieval-gold size-3.5" />
                   {recording.winner === 1
                     ? recording.player1Data.name
                     : recording.player2Data.name}
@@ -76,10 +76,8 @@ export function RecordingsList({ recordings }: RecordingsListProps) {
 function RecordingField({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex gap-2">
-      <span className="w-20 shrink-0 text-[color:var(--medieval-gold-muted)]">
-        {label}
-      </span>
-      <span className="min-w-0 break-words text-[color:var(--medieval-parchment-foreground)]">
+      <span className="text-medieval-gold-muted w-20 shrink-0">{label}</span>
+      <span className="text-medieval-parchment-foreground min-w-0 break-words">
         {value}
       </span>
     </div>

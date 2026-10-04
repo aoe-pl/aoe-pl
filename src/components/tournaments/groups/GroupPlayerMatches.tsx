@@ -11,7 +11,7 @@ type GroupMatch = GroupPageData["matches"][number];
 type MatchSlot = GroupMatch["TournamentMatchParticipant"][number];
 
 const STATUS_BADGE_CLASSES = {
-  PENDING: "bg-black/25 text-[color:var(--medieval-gold-muted)]",
+  PENDING: "bg-black/25 text-medieval-gold-muted",
   SCHEDULED: "bg-orange-500/20 text-orange-300",
   COMPLETED: "bg-emerald-500/10 text-emerald-400/80",
   ADMIN_APPROVED: "bg-emerald-500/20 text-emerald-300",
@@ -66,16 +66,16 @@ export function GroupPlayerMatches({
 
   return (
     <div className="w-full space-y-3">
-      <h3 className="text-center text-lg font-bold text-[color:var(--medieval-gold)]">
+      <h3 className="text-medieval-gold text-center text-lg font-bold">
         {t("player_matches.title", { name: playerName })}
       </h3>
 
       {playerMatches.length === 0 ? (
-        <p className="text-center text-sm text-[color:var(--medieval-gold-muted)]">
+        <p className="text-medieval-gold-muted text-center text-sm">
           {t("player_matches.no_matches")}
         </p>
       ) : (
-        <div className="w-full divide-y divide-[color:var(--medieval-wood-border)] overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
+        <div className="divide-medieval-wood-border border-medieval-wood-border w-full divide-y overflow-hidden rounded-xl border">
           {playerMatches.map((match) => {
             const playerSlot = match.TournamentMatchParticipant.find(
               (slot) => slot.participantId === playerId,
@@ -108,7 +108,7 @@ export function GroupPlayerMatches({
                 className="flex w-full items-center gap-3 px-3 py-3 transition-colors hover:bg-black/10"
               >
                 <span className="text-primary min-w-0 flex-1 truncate">
-                  <span className="mr-1.5 text-[color:var(--medieval-gold-muted)]">
+                  <span className="text-medieval-gold-muted mr-1.5">
                     {t("player_matches.vs")}
                   </span>
                   {opponentName}
@@ -123,7 +123,7 @@ export function GroupPlayerMatches({
                   {statusLabels[match.status]}
                 </span>
 
-                <span className="hidden w-32 shrink-0 text-right text-xs text-[color:var(--medieval-gold-muted)] tabular-nums sm:block">
+                <span className="text-medieval-gold-muted hidden w-32 shrink-0 text-right text-xs tabular-nums sm:block">
                   {dateLabel}
                 </span>
 

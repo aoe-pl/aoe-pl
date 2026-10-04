@@ -67,7 +67,7 @@ export function GroupsPageContent({
           </div>
 
           <aside
-            className="h-fit rounded-xl border border-[color:var(--medieval-wood-border)] p-4"
+            className="border-medieval-wood-border h-fit rounded-xl border p-4"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
           >
             <GroupProgressPanel groupData={selectedGroupData} />

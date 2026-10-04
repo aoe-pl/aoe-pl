@@ -1,23 +1,23 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { MatchStatus } from "@prisma/client";
+import { format } from "date-fns";
 import {
   Calendar,
+  Download,
   Edit,
+  Hand,
   MapPin,
   Sword,
-  Users,
-  Hand,
-  Trash2,
   Swords,
-  Download,
+  Trash2,
+  Users,
 } from "lucide-react";
-import { format } from "date-fns";
-import type { ExtendedTournamentMatch } from "./match";
-import type { MatchStatus } from "@prisma/client";
 import { matchStatusesLabels } from "../tournament";
+import type { ExtendedTournamentMatch } from "./match";
 import { SpoilerText } from "./spoiler-protection";
 
 interface MatchCardProps {
@@ -273,7 +273,7 @@ export function MatchCard({
   };
 
   return (
-    <Card className="w-full transition-shadow hover:shadow-md">
+    <Card className="border-medieval-wood bg-medieval-wood-light w-full transition-shadow [--border:var(--medieval-wood)] hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="space-y-2">
           <div className="flex items-center justify-between">

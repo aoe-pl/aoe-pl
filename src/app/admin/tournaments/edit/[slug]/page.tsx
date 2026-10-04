@@ -1,10 +1,10 @@
 import {
   Breadcrumb,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumbs";
 import { TournamentEdit } from "@/lib/admin-panel/tournaments/tournament-edit";
 import { api } from "@/trpc/server";
@@ -46,7 +46,7 @@ export default async function AdminTournamentEditPage({
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="rounded-xl p-8 text-white">
+      <div className="text-foreground py-2">
         <TournamentEdit tournament={tournament} />
       </div>
     </>

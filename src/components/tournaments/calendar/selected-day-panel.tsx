@@ -84,7 +84,7 @@ export function SelectedDayPanel({
             day: "numeric",
           })}
           {dayMatches.length > 0 && (
-            <span className="ml-2 text-sm font-normal text-[color:var(--medieval-gold-muted)]">
+            <span className="text-medieval-gold-muted ml-2 text-sm font-normal">
               {t("matches", { count: dayMatches.length })}
             </span>
           )}
@@ -92,7 +92,7 @@ export function SelectedDayPanel({
       </div>
 
       {dayMatches.length === 0 ? (
-        <p className="text-sm text-[color:var(--medieval-gold-muted)]">
+        <p className="text-medieval-gold-muted text-sm">
           {isFiltered
             ? t("no_matches_on_day_filtered")
             : t("no_matches_on_day")}
@@ -125,7 +125,7 @@ export function SelectedDayPanel({
 
       {userPendingRows.length > 0 && (
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-[color:var(--medieval-gold-muted)]">
+          <p className="text-medieval-gold-muted text-sm">
             {t("schedule.unscheduled_count", { count: userPendingRows.length })}
           </p>
           <Button

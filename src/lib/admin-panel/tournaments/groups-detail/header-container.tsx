@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { GroupHeader } from "./group-header";
-import type {
-  TournamentGroupFormSchema,
-  TournamentGroupWithParticipants,
-  Tournament,
-} from "../tournament";
 import {
   Drawer,
-  DrawerTitle,
   DrawerContent,
-  DrawerHeader,
   DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
 } from "@/components/ui/drawer";
-import { TournamentGroupForm } from "../tournament-group-form";
-import { api } from "@/trpc/react";
-import { toast } from "sonner";
 import { ErrorToast } from "@/components/ui/error-toast-content";
+import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import type {
+  Tournament,
+  TournamentGroupFormSchema,
+  TournamentGroupWithParticipants,
+} from "../tournament";
+import { TournamentGroupForm } from "../tournament-group-form";
+import { GroupHeader } from "./group-header";
 
 type HeaderContainerProps = {
   group: TournamentGroupWithParticipants & { tournament: Tournament };
@@ -57,8 +57,6 @@ export function HeaderContainer({
       data,
     });
   }
-
-  console.log("INITIAL group", group);
 
   return (
     <>

@@ -61,7 +61,7 @@ export function TournamentNavMobile({ links }: TournamentNavProps) {
       value={active?.href ?? links[0]?.href}
       onValueChange={(href) => router.replace(href)}
     >
-      <SelectTrigger className="w-full border-[color:var(--medieval-wood-border)] bg-[color:var(--medieval-wood)] text-[color:var(--medieval-parchment-foreground)]">
+      <SelectTrigger className="border-medieval-wood-border bg-medieval-wood text-medieval-parchment-foreground w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

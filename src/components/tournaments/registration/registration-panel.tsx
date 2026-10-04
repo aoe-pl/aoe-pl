@@ -35,7 +35,7 @@ type FormValue = string | number | boolean;
 const debounceMs = 2000; //How long to wait after the last change before checking the API.
 
 const inputBaseClassName =
-  "h-10 max-w-sm border-[color:var(--medieval-wood-border)] text-[color:var(--medieval-parchment-foreground)] shadow-inner placeholder:text-[color:var(--medieval-gold-muted)]/60 focus-visible:border-[color:var(--medieval-gold)] focus-visible:ring-[color:var(--medieval-gold)]/25 dark:bg-white/5";
+  "h-10 max-w-sm border-medieval-wood-border text-medieval-parchment-foreground shadow-inner placeholder:text-medieval-gold-muted/60 focus-visible:border-medieval-gold focus-visible:ring-medieval-gold/25 dark:bg-white/5";
 
 export function RegistrationPanel({
   tournamentId,
@@ -264,7 +264,7 @@ export function RegistrationPanel({
 
         <div className="flex flex-col items-center gap-3">
           {hasRequiredFields && (
-            <p className="text-xs text-[color:var(--medieval-gold-muted)]">
+            <p className="text-medieval-gold-muted text-xs">
               {t("required_hint")}
             </p>
           )}
@@ -286,18 +286,18 @@ export function RegistrationPanel({
   return (
     <section className="mx-auto max-w-2xl">
       <header className="flex items-center gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)] shadow-[0_0_0_3px_rgba(0,0,0,0.3)]">
+        <span className="bg-medieval-gold text-medieval-wood flex size-11 shrink-0 items-center justify-center rounded-full shadow-[0_0_0_3px_rgba(0,0,0,0.3)]">
           <ScrollText className="size-5" />
         </span>
-        <h2 className="text-xl leading-tight font-bold text-[color:var(--medieval-gold)]">
+        <h2 className="text-medieval-gold text-xl leading-tight font-bold">
           {t("title")}
         </h2>
       </header>
 
-      <div className="mt-4 mb-6 h-px bg-gradient-to-r from-[color:var(--medieval-gold)]/50 via-[color:var(--medieval-wood-border)] to-transparent" />
+      <div className="from-medieval-gold/50 via-medieval-wood-border mt-4 mb-6 h-px bg-gradient-to-r to-transparent" />
 
       {intro && (
-        <div className="prose prose-sm prose-invert prose-headings:text-[color:var(--medieval-gold)] prose-a:text-[color:var(--medieval-gold)] prose-li:marker:text-[color:var(--medieval-gold-muted)] mb-6 max-w-none rounded-xl border border-[color:var(--medieval-wood-border)] bg-black/15 p-4">
+        <div className="prose prose-sm prose-invert prose-headings:text-medieval-gold prose-a:text-medieval-gold prose-li:marker:text-medieval-gold-muted border-medieval-wood-border mb-6 max-w-none rounded-xl border bg-black/15 p-4">
           {intro}
         </div>
       )}
@@ -333,7 +333,7 @@ function FieldRow({
       : undefined;
 
   const requiredMark = field.required ? (
-    <span className="ml-1 text-[color:var(--medieval-gold)]">*</span>
+    <span className="text-medieval-gold ml-1">*</span>
   ) : null;
 
   if (field.type === "BOOLEAN") {
@@ -343,7 +343,7 @@ function FieldRow({
       <div className="space-y-1.5">
         <Label
           htmlFor={inputId}
-          className="cursor-pointer text-[color:var(--medieval-parchment-foreground)]"
+          className="text-medieval-parchment-foreground cursor-pointer"
         >
           {label}
           {requiredMark}
@@ -371,7 +371,7 @@ function FieldRow({
     <div className="space-y-1.5">
       <Label
         htmlFor={inputId}
-        className="text-[color:var(--medieval-parchment-foreground)]"
+        className="text-medieval-parchment-foreground"
       >
         {label}
         {requiredMark}
@@ -426,7 +426,7 @@ function CompanionHint({
 
   if (checking) {
     return (
-      <p className="text-xs text-[color:var(--medieval-gold-muted)]">
+      <p className="text-medieval-gold-muted text-xs">
         {t("presets.aoe2companion_checking")}
       </p>
     );
@@ -473,13 +473,13 @@ function StatusNotice({
           "flex size-12 items-center justify-center rounded-full",
           tone === "success"
             ? "bg-emerald-500/15 text-emerald-400"
-            : "bg-[color:var(--medieval-gold)]/15 text-[color:var(--medieval-gold)]",
+            : "bg-medieval-gold/15 text-medieval-gold",
         )}
       >
         {icon}
       </span>
 
-      <p className="max-w-md text-sm font-medium text-balance text-[color:var(--medieval-parchment-foreground)]">
+      <p className="text-medieval-parchment-foreground max-w-md text-sm font-medium text-balance">
         {title}
       </p>
 

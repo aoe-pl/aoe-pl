@@ -67,7 +67,7 @@ export function MatchTile({
         <span className="text-primary w-full truncate text-center">
           {player1.nickname}
         </span>
-        <span className="text-[10px] leading-none text-[color:var(--medieval-gold-muted)]">
+        <span className="text-medieval-gold-muted text-[10px] leading-none">
           vs
         </span>
         <span className="text-primary w-full truncate text-center">

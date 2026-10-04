@@ -32,15 +32,13 @@ export function AdminOverridePanel({
 
   return (
     <div
-      className="space-y-3 rounded-xl border border-[color:var(--medieval-wood-border)] p-3 text-sm"
+      className="border-medieval-wood-border space-y-3 rounded-xl border p-3 text-sm"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
     >
-      <p className="font-semibold text-[color:var(--medieval-gold)]">
-        {t("admin.title")}
-      </p>
+      <p className="text-medieval-gold font-semibold">{t("admin.title")}</p>
 
       <div className="space-y-1">
-        <p className="text-xs text-[color:var(--medieval-gold-muted)]">
+        <p className="text-medieval-gold-muted text-xs">
           {t("admin.assign_players", { player: player1Name })}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -64,9 +62,7 @@ export function AdminOverridePanel({
       </div>
 
       <div className="space-y-1">
-        <p className="text-xs text-[color:var(--medieval-gold-muted)]">
-          {t("admin.winner")}
-        </p>
+        <p className="text-medieval-gold-muted text-xs">{t("admin.winner")}</p>
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"

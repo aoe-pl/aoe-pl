@@ -266,10 +266,10 @@ export function RecordingsUploadDialog({
 
       <DialogContent className="flex max-h-[90vh] w-full flex-col gap-6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-center text-[color:var(--medieval-gold)]">
+          <DialogTitle className="text-medieval-gold text-center">
             {t("title")}
           </DialogTitle>
-          <p className="text-center text-sm text-[color:var(--medieval-gold-muted)]">
+          <p className="text-medieval-gold-muted text-center text-sm">
             {t("subtitle", { player1: player1Name, player2: player2Name })}
             <br />
             {t("hint")}

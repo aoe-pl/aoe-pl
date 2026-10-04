@@ -20,7 +20,7 @@ export function GroupSelectionView({
 }: Props) {
   return (
     <div
-      className="w-full rounded-2xl border-2 border-[color:var(--medieval-wood-border)] px-4 py-4 sm:px-6 sm:py-5"
+      className="border-medieval-wood-border w-full rounded-2xl border-2 px-4 py-4 sm:px-6 sm:py-5"
       style={{
         background:
           "linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.18)), var(--medieval-wood)",
@@ -37,10 +37,10 @@ export function GroupSelectionView({
             <Button
               key={g.groupId}
               className={cn(
-                "h-12 rounded-lg border-2 border-[color:var(--medieval-wood-border)] px-6 text-base font-bold tracking-wide transition-all [text-shadow:0_1px_2px_rgba(0,0,0,0.45)] sm:h-14 sm:px-8",
+                "border-medieval-wood-border h-12 rounded-lg border-2 px-6 text-base font-bold tracking-wide transition-all [text-shadow:0_1px_2px_rgba(0,0,0,0.45)] sm:h-14 sm:px-8",
                 isSelected
-                  ? "border-[color:var(--medieval-gold)]"
-                  : "opacity-80 hover:-translate-y-0.5 hover:border-[color:var(--medieval-gold)]/70 hover:opacity-100",
+                  ? "border-medieval-gold"
+                  : "hover:border-medieval-gold/70 opacity-80 hover:-translate-y-0.5 hover:opacity-100",
               )}
               style={{
                 background: color

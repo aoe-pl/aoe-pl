@@ -45,11 +45,11 @@ export function MonthView({
   return (
     <div className="panel-inset overflow-hidden">
       {/* Day of week header */}
-      <div className="grid grid-cols-7 border-b border-[color:var(--medieval-wood-border)]">
+      <div className="border-medieval-wood-border grid grid-cols-7 border-b">
         {weekdays.map((d) => (
           <div
             key={d}
-            className="py-2 text-center text-sm font-semibold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase"
+            className="text-medieval-gold-muted py-2 text-center text-sm font-semibold tracking-wide uppercase"
           >
             {d}
           </div>
@@ -71,13 +71,13 @@ export function MonthView({
               key={day.toISOString()}
               onClick={() => onDaySelect(day)}
               className={cn(
-                "flex min-h-8 cursor-pointer flex-col border-r border-b border-[color:var(--medieval-wood-border)] p-1 transition-colors",
+                "border-medieval-wood-border flex min-h-8 cursor-pointer flex-col border-r border-b p-1 transition-colors",
                 isLastRow && "border-b-0",
                 (idx + 1) % 7 === 0 && "border-r-0",
 
                 !isCurrentMonth && "bg-black/20",
                 isSelected
-                  ? "bg-[color:var(--medieval-gold)]/10 ring-1 ring-[color:var(--medieval-gold)]/50 ring-inset"
+                  ? "bg-medieval-gold/10 ring-medieval-gold/50 ring-1 ring-inset"
                   : "hover:bg-white/5",
               )}
             >
@@ -87,10 +87,10 @@ export function MonthView({
                   "flex h-6 w-6 items-center justify-center self-end text-sm",
 
                   isSelected
-                    ? "rounded-full bg-[color:var(--medieval-gold)] font-semibold text-[color:var(--medieval-wood)]"
+                    ? "bg-medieval-gold text-medieval-wood rounded-full font-semibold"
                     : isCurrentMonth
                       ? "text-primary"
-                      : "text-[color:var(--medieval-gold-muted)]/50",
+                      : "text-medieval-gold-muted/50",
                 )}
               >
                 {format(day, "d")}
@@ -116,7 +116,7 @@ export function MonthView({
                   );
                 })}
                 {hiddenCount > 0 && (
-                  <span className="text-sm leading-3 font-medium text-[color:var(--medieval-gold-muted)]">
+                  <span className="text-medieval-gold-muted text-sm leading-3 font-medium">
                     +{hiddenCount}
                   </span>
                 )}

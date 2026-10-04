@@ -65,14 +65,14 @@ export function CalendarToolbar({
 
       {/* View toggle. Hidden on mobile since only month view is available there */}
       <div className="hidden items-center sm:flex">
-        <div className="flex overflow-hidden rounded-md border border-[color:var(--medieval-wood-border)]">
+        <div className="border-medieval-wood-border flex overflow-hidden rounded-md border">
           <button
             onClick={() => onSetView("month")}
             className={cn(
               commonButtonStyle,
               view === "month"
-                ? "bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]"
-                : "hover:text-primary text-[color:var(--medieval-gold-muted)] hover:bg-white/5",
+                ? "bg-medieval-gold text-medieval-wood"
+                : "hover:text-primary text-medieval-gold-muted hover:bg-white/5",
             )}
           >
             <Calendar className="h-4 w-4" />
@@ -83,8 +83,8 @@ export function CalendarToolbar({
             className={cn(
               commonButtonStyle,
               view === "week"
-                ? "bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]"
-                : "hover:text-primary text-[color:var(--medieval-gold-muted)] hover:bg-white/5",
+                ? "bg-medieval-gold text-medieval-wood"
+                : "hover:text-primary text-medieval-gold-muted hover:bg-white/5",
             )}
           >
             <CalendarDays className="h-4 w-4" />

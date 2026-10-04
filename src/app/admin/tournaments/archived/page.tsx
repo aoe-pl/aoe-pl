@@ -1,5 +1,5 @@
-import { getTranslations } from "next-intl/server";
 import { ArchivedTournamentList } from "@/lib/admin-panel/tournaments/ArchivedTournamentList";
+import { getTranslations } from "next-intl/server";
 
 export default async function ArchivedTournamentsPage() {
   const t = await getTranslations("admin.tournaments");
@@ -7,7 +7,7 @@ export default async function ArchivedTournamentsPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between">
-        <h1 className="text-foreground text-3xl font-bold tracking-tight">
+        <h1 className="text-medieval-gold text-3xl font-bold tracking-tight">
           {t("archived_title")}
         </h1>
       </div>

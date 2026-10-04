@@ -32,7 +32,7 @@ export function MatchScoreboard({
 
   return (
     <div
-      className="w-full rounded-2xl border-2 border-[color:var(--medieval-wood-border)] px-4 py-4 sm:px-6 sm:py-5"
+      className="border-medieval-wood-border w-full rounded-2xl border-2 px-4 py-4 sm:px-6 sm:py-5"
       style={{
         background:
           "linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.18)), var(--medieval-wood)",
@@ -43,9 +43,7 @@ export function MatchScoreboard({
       <div className="flex items-center justify-center gap-2 sm:gap-8">
         <span
           className={`flex-1 truncate text-right text-sm font-bold sm:text-2xl ${
-            player1Leading
-              ? "text-[color:var(--medieval-gold)]"
-              : "text-primary"
+            player1Leading ? "text-medieval-gold" : "text-primary"
           }`}
         >
           <PlayerLink
@@ -56,23 +54,13 @@ export function MatchScoreboard({
 
         <span className="shrink-0 text-xl font-black tabular-nums sm:text-4xl">
           <span
-            className={
-              player1Leading
-                ? "text-[color:var(--medieval-gold)]"
-                : "text-primary"
-            }
+            className={player1Leading ? "text-medieval-gold" : "text-primary"}
           >
             {revealed ? player1Score : "?"}
           </span>
-          <span className="mx-2 text-[color:var(--medieval-gold-muted)]">
-            :
-          </span>
+          <span className="text-medieval-gold-muted mx-2">:</span>
           <span
-            className={
-              player2Leading
-                ? "text-[color:var(--medieval-gold)]"
-                : "text-primary"
-            }
+            className={player2Leading ? "text-medieval-gold" : "text-primary"}
           >
             {revealed ? player2Score : "?"}
           </span>
@@ -80,9 +68,7 @@ export function MatchScoreboard({
 
         <span
           className={`flex-1 truncate text-left text-sm font-bold sm:text-2xl ${
-            player2Leading
-              ? "text-[color:var(--medieval-gold)]"
-              : "text-primary"
+            player2Leading ? "text-medieval-gold" : "text-primary"
           }`}
         >
           <PlayerLink

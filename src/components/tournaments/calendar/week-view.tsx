@@ -41,7 +41,7 @@ export function WeekView({
   return (
     <div className="panel-inset overflow-hidden">
       {/* Day headers */}
-      <div className="grid grid-cols-7 border-b border-[color:var(--medieval-wood-border)]">
+      <div className="border-medieval-wood-border grid grid-cols-7 border-b">
         {days.map((day) => {
           const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
           return (
@@ -50,25 +50,25 @@ export function WeekView({
               className={cn(
                 "cursor-pointer py-2 text-center transition-colors",
                 isSelected
-                  ? "bg-[color:var(--medieval-gold)]/10 ring-1 ring-[color:var(--medieval-gold)]/50 ring-inset"
+                  ? "bg-medieval-gold/10 ring-medieval-gold/50 ring-1 ring-inset"
                   : "hover:bg-white/5",
               )}
               onClick={() => onDaySelect?.(day)}
             >
-              <p className="py-2 text-center text-sm font-semibold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+              <p className="text-medieval-gold-muted py-2 text-center text-sm font-semibold tracking-wide uppercase">
                 {format(day, "EEEE", { locale })}
               </p>
               <span
                 className={cn(
                   "mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
                   isSelected
-                    ? "bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]"
+                    ? "bg-medieval-gold text-medieval-wood"
                     : "text-primary",
                 )}
               >
                 {format(day, "d")}
               </span>
-              <p className="text-sm text-[color:var(--medieval-gold-muted)]">
+              <p className="text-medieval-gold-muted text-sm">
                 {format(day, "MMM", { locale })}
               </p>
             </div>
@@ -77,7 +77,7 @@ export function WeekView({
       </div>
 
       {/* Match columns */}
-      <div className="grid grid-cols-7 divide-x divide-[color:var(--medieval-wood-border)]">
+      <div className="divide-medieval-wood-border grid grid-cols-7 divide-x">
         {days.map((day) => {
           const dayMatches = matchesForDay(day);
 

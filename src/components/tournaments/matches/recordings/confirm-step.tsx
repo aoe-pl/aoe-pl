@@ -49,21 +49,17 @@ export function ConfirmStep({
 
   return (
     <div className="space-y-4">
-      <p className="text-center text-sm text-[color:var(--medieval-gold-muted)]">
+      <p className="text-medieval-gold-muted text-center text-sm">
         {t("confirm.review")}
       </p>
 
-      <p className="text-center text-lg font-medium text-[color:var(--medieval-parchment-foreground)]">
+      <p className="text-medieval-parchment-foreground text-center text-lg font-medium">
         <span>{player1Name}</span>{" "}
-        <span
-          className={p1Wins > p2Wins ? "text-[color:var(--medieval-gold)]" : ""}
-        >
+        <span className={p1Wins > p2Wins ? "text-medieval-gold" : ""}>
           {p1Wins}
         </span>
-        <span className="mx-1 text-[color:var(--medieval-gold-muted)]">:</span>
-        <span
-          className={p2Wins > p1Wins ? "text-[color:var(--medieval-gold)]" : ""}
-        >
+        <span className="text-medieval-gold-muted mx-1">:</span>
+        <span className={p2Wins > p1Wins ? "text-medieval-gold" : ""}>
           {p2Wins}
         </span>{" "}
         <span>{player2Name}</span>
@@ -83,19 +79,19 @@ export function ConfirmStep({
           return (
             <div
               key={gameNumber}
-              className="space-y-1 rounded-xl border border-[color:var(--medieval-wood-border)] px-3 py-2 text-sm"
+              className="border-medieval-wood-border space-y-1 rounded-xl border px-3 py-2 text-sm"
               style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
             >
-              <p className="font-semibold text-[color:var(--medieval-gold)]">
+              <p className="text-medieval-gold font-semibold">
                 {t("confirm.game_label", { number: gameNumber })}
               </p>
-              <p className="text-[color:var(--medieval-gold-muted)]">
+              <p className="text-medieval-gold-muted">
                 {player1Name}: {player1Civ ?? "-"}
               </p>
-              <p className="text-[color:var(--medieval-gold-muted)]">
+              <p className="text-medieval-gold-muted">
                 {player2Name}: {player2Civ ?? "-"}
               </p>
-              <p className="text-[color:var(--medieval-gold-muted)]">
+              <p className="text-medieval-gold-muted">
                 {t("map")}: {recording?.map ?? "-"}
               </p>
             </div>

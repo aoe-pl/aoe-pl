@@ -73,26 +73,26 @@ export function GroupLeaderboardTable({
 
   return (
     <div className="w-full">
-      <div className="w-full overflow-hidden rounded-xl border border-[color:var(--medieval-wood-border)]">
+      <div className="border-medieval-wood-border w-full overflow-hidden rounded-xl border">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-[color:var(--medieval-wood-border)] bg-black/20 hover:bg-black/20">
-              <TableHead className="w-12 px-3 text-center text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+            <TableRow className="border-medieval-wood-border border-b bg-black/20 hover:bg-black/20">
+              <TableHead className="text-medieval-gold-muted w-12 px-3 text-center text-xs font-bold tracking-wide uppercase">
                 {t("rank")}
               </TableHead>
-              <TableHead className="w-full px-3 text-left text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+              <TableHead className="text-medieval-gold-muted w-full px-3 text-left text-xs font-bold tracking-wide uppercase">
                 {t("player")}
               </TableHead>
-              <TableHead className="px-3 text-center text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+              <TableHead className="text-medieval-gold-muted px-3 text-center text-xs font-bold tracking-wide uppercase">
                 {t("played")}
               </TableHead>
-              <TableHead className="px-3 text-center text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+              <TableHead className="text-medieval-gold-muted px-3 text-center text-xs font-bold tracking-wide uppercase">
                 {t("won")}
               </TableHead>
-              <TableHead className="px-3 text-center text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+              <TableHead className="text-medieval-gold-muted px-3 text-center text-xs font-bold tracking-wide uppercase">
                 {t("lost")}
               </TableHead>
-              <TableHead className="px-3 text-center text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+              <TableHead className="text-medieval-gold-muted px-3 text-center text-xs font-bold tracking-wide uppercase">
                 {t("total_score")}
               </TableHead>
             </TableRow>
@@ -104,15 +104,15 @@ export function GroupLeaderboardTable({
                 aria-selected={p.playerId === selectedPlayerId}
                 onClick={() => onSelectPlayer(p.playerId)}
                 className={cn(
-                  "cursor-pointer border-b border-[color:var(--medieval-wood-border)]",
+                  "border-medieval-wood-border cursor-pointer border-b",
                   p.playerId === selectedPlayerId
-                    ? "bg-[color:var(--medieval-gold)]/20 hover:bg-[color:var(--medieval-gold)]/25"
+                    ? "bg-medieval-gold/20 hover:bg-medieval-gold/25"
                     : index % 2 === 1
                       ? "bg-black/10 hover:bg-black/15"
                       : "hover:bg-black/5",
                 )}
               >
-                <TableCell className="px-3 text-center font-bold text-[color:var(--medieval-gold)]">
+                <TableCell className="text-medieval-gold px-3 text-center font-bold">
                   {index + 1}
                 </TableCell>
                 <TableCell className="text-primary px-3 text-left">
@@ -130,7 +130,7 @@ export function GroupLeaderboardTable({
                 <TableCell className="text-primary px-3 text-center tabular-nums">
                   {p.matchesLost}
                 </TableCell>
-                <TableCell className="px-3 text-center font-bold text-[color:var(--medieval-gold)] tabular-nums">
+                <TableCell className="text-medieval-gold px-3 text-center font-bold tabular-nums">
                   {p.totalScore}
                 </TableCell>
               </TableRow>

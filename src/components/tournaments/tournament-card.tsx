@@ -23,7 +23,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
       className="block h-full"
     >
       <div className="wood-tile flex h-full flex-col overflow-hidden rounded-xl p-1.5">
-        <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-[color:var(--medieval-wood)]">
+        <div className="bg-medieval-wood relative aspect-video w-full overflow-hidden rounded-lg">
           {bannerUrl ? (
             <Image
               src={bannerUrl}
@@ -33,13 +33,13 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-[color:var(--medieval-gold-muted)]">
+            <div className="text-medieval-gold-muted flex h-full w-full items-center justify-center">
               <Trophy className="h-10 w-10 opacity-60" />
             </div>
           )}
         </div>
-        <div className="mt-1.5 flex flex-1 items-center justify-center rounded-lg border border-[color:var(--medieval-wood-border)] bg-[color:var(--medieval-parchment)] p-4">
-          <h3 className="line-clamp-2 text-center text-base leading-tight font-semibold text-[color:var(--medieval-parchment-foreground)]">
+        <div className="border-medieval-wood-border bg-medieval-parchment mt-1.5 flex flex-1 items-center justify-center rounded-lg border p-4">
+          <h3 className="text-medieval-parchment-foreground line-clamp-2 text-center text-base leading-tight font-semibold">
             {tournament.name}
           </h3>
         </div>

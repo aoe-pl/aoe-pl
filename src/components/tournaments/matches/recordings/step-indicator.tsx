@@ -37,17 +37,17 @@ export function StepIndicator({
               className={cn(
                 "flex size-8 items-center justify-center rounded-full border text-xs font-semibold",
                 isSkipped &&
-                  "border-[color:var(--medieval-gold-muted)]/20 text-[color:var(--medieval-gold-muted)]/40",
+                  "border-medieval-gold-muted/20 text-medieval-gold-muted/40",
                 !isSkipped &&
                   isDone &&
-                  "border-[color:var(--medieval-gold)] bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)]",
+                  "border-medieval-gold bg-medieval-gold text-medieval-wood",
                 !isSkipped &&
                   isActive &&
-                  "border-[color:var(--medieval-gold)] bg-[color:var(--medieval-wood)] text-[color:var(--medieval-gold)] ring-2 ring-[color:var(--medieval-gold)]/30",
+                  "border-medieval-gold bg-medieval-wood text-medieval-gold ring-medieval-gold/30 ring-2",
                 !isSkipped &&
                   !isDone &&
                   !isActive &&
-                  "border-[color:var(--medieval-gold-muted)]/40 text-[color:var(--medieval-gold-muted)]",
+                  "border-medieval-gold-muted/40 text-medieval-gold-muted",
               )}
             >
               {isSkipped ? (

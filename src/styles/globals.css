@@ -15,88 +15,56 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--medieval-parchment-foreground);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: var(--medieval-danger);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --color-game-header-1: oklch(0.92 0.18 135); /* Green */
-  --color-game-header-2: oklch(0.97 0.18 100); /* Yellow */
-  --color-game-header-3: oklch(0.92 0.18 250); /* Blue */
-  --color-game-header-4: oklch(0.92 0.18 30); /* Red/Orange */
 
-  /* Medieval theme */
   --medieval-wood: #463021;
   --medieval-wood-border: #6b4e2e;
+  --medieval-wood-light: #6b4e2e;
   --medieval-gold: #e6c052;
   --medieval-gold-muted: #b8a97f;
   --medieval-parchment: #836135;
   --medieval-parchment-foreground: #f4ecd7;
   --medieval-danger: #7f2b2b;
   --medieval-danger-hover: #973434;
-}
 
-.dark {
   --background: #141e17;
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(65.982% 0.18987 23.895);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: #e6c052;
-  --accent-foreground: #221a10;
+  --foreground: var(--medieval-parchment-foreground);
+  --card: var(--medieval-wood);
+  --card-foreground: var(--medieval-parchment-foreground);
+  --popover: var(--medieval-wood);
+  --popover-foreground: var(--medieval-parchment-foreground);
+  --primary: var(--medieval-gold);
+  --primary-foreground: var(--medieval-wood);
+  --secondary: color-mix(in oklab, var(--medieval-wood) 70%, black);
+  --secondary-foreground: var(--medieval-parchment-foreground);
+  --muted: color-mix(in oklab, var(--medieval-wood) 55%, black);
+  --muted-foreground: var(--medieval-gold-muted);
+  --accent: var(--medieval-gold);
+  --accent-foreground: var(--medieval-wood);
   --destructive: var(--medieval-danger);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --destructive-foreground: var(--medieval-parchment-foreground);
+  --border: var(--medieval-wood-border);
+  --input: var(--medieval-wood-border);
+  --ring: var(--medieval-gold-muted);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-  --color-game-card: oklch(0.18 0 0);
-  --color-game-card-header: oklch(0.13 0 0);
-  --color-game-card-border: oklch(0.25 0 0);
+  --sidebar: var(--medieval-wood);
+  --sidebar-foreground: var(--medieval-parchment-foreground);
+  --sidebar-primary: var(--medieval-gold);
+  --sidebar-primary-foreground: var(--medieval-wood);
+  --sidebar-accent: color-mix(in oklab, var(--medieval-gold) 22%, transparent);
+  --sidebar-accent-foreground: var(--medieval-gold);
+  --sidebar-border: var(--medieval-wood-border);
+  --sidebar-ring: var(--medieval-gold-muted);
+  --color-game-card: var(--medieval-wood);
+  --color-game-card-header: color-mix(
+    in oklab,
+    var(--medieval-wood) 65%,
+    black
+  );
+  --color-game-card-border: var(--medieval-wood-border);
   --color-game-header-1: oklch(0.32 0.18 135); /* Green */
   --color-game-header-2: oklch(0.45 0.18 100); /* Yellow */
   --color-game-header-3: oklch(0.32 0.18 250); /* Blue */
@@ -142,6 +110,16 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-medieval-wood: var(--medieval-wood);
+  --color-medieval-wood-border: var(--medieval-wood-border);
+  --color-medieval-wood-light: var(--medieval-wood-light);
+  --color-medieval-gold: var(--medieval-gold);
+  --color-medieval-gold-muted: var(--medieval-gold-muted);
+  --color-medieval-parchment: var(--medieval-parchment);
+  --color-medieval-parchment-foreground: var(--medieval-parchment-foreground);
+  --color-medieval-danger: var(--medieval-danger);
+  --color-medieval-danger-hover: var(--medieval-danger-hover);
 }
 
 @layer base {

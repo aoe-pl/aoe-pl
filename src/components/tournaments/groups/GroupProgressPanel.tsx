@@ -38,7 +38,7 @@ export function GroupProgressPanel({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-center text-xs font-bold tracking-wide text-[color:var(--medieval-gold-muted)] uppercase">
+      <h3 className="text-medieval-gold-muted text-center text-xs font-bold tracking-wide uppercase">
         {t("progress.title")}
       </h3>
 
@@ -73,7 +73,7 @@ export function GroupProgressPanel({
           <span className="text-primary text-3xl font-black tabular-nums">
             {percent}%
           </span>
-          <span className="text-xs text-[color:var(--medieval-gold-muted)] tabular-nums">
+          <span className="text-medieval-gold-muted text-xs tabular-nums">
             {played} {t("progress.of")} {total}
           </span>
         </div>
@@ -81,7 +81,7 @@ export function GroupProgressPanel({
 
       <div className="space-y-2 text-sm">
         <div className="flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-[color:var(--medieval-gold-muted)]">
+          <span className="text-medieval-gold-muted flex items-center gap-2">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: accentColor }}
@@ -91,7 +91,7 @@ export function GroupProgressPanel({
           <span className="text-primary font-bold tabular-nums">{played}</span>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2 text-[color:var(--medieval-gold-muted)]">
+          <span className="text-medieval-gold-muted flex items-center gap-2">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-black/40" />
             {t("progress.remaining")}
           </span>
@@ -102,9 +102,9 @@ export function GroupProgressPanel({
       </div>
 
       {matchModeLabel && (
-        <div className="border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+        <div className="border-medieval-wood-border border-t pt-4 text-sm">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[color:var(--medieval-gold-muted)]">
+            <span className="text-medieval-gold-muted">
               {t("match_mode.label")}
             </span>
             <span className="text-primary font-bold">{matchModeLabel}</span>

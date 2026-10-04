@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         destructive:
-          "border border-[color:var(--medieval-danger-hover)] bg-[color:var(--medieval-danger)] text-[color:var(--medieval-parchment-foreground)] shadow-xs hover:bg-[color:var(--medieval-danger-hover)] hover:text-[color:var(--medieval-parchment-foreground)]",
+          "border border-medieval-danger-hover bg-medieval-danger text-medieval-parchment-foreground shadow-xs hover:bg-medieval-danger-hover hover:text-medieval-parchment-foreground",
         outline:
           "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
@@ -20,9 +20,9 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        gold: "border border-[color:var(--medieval-wood-border)] bg-[color:var(--medieval-gold)] text-[color:var(--medieval-wood)] shadow-xs hover:bg-[color:var(--medieval-gold)]/90 hover:text-[color:var(--medieval-wood)]",
-        wine: "border border-[color:var(--medieval-danger-hover)] bg-[color:var(--medieval-danger)] text-[color:var(--medieval-parchment-foreground)] shadow-xs hover:bg-[color:var(--medieval-danger-hover)] hover:text-[color:var(--medieval-parchment-foreground)]",
-        wood: "border border-[color:var(--medieval-wood-border)] bg-black/20 text-primary shadow-xs hover:bg-[color:var(--medieval-gold)]/15 hover:text-[color:var(--medieval-gold)]",
+        gold: "border border-medieval-wood-border bg-medieval-gold text-medieval-wood shadow-xs hover:bg-medieval-gold/90 hover:text-medieval-wood",
+        wine: "border border-medieval-danger-hover bg-medieval-danger text-medieval-parchment-foreground shadow-xs hover:bg-medieval-danger-hover hover:text-medieval-parchment-foreground",
+        wood: "border border-medieval-wood-border bg-black/20 text-primary shadow-xs hover:bg-medieval-gold/15 hover:text-medieval-gold",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

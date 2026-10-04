@@ -22,7 +22,7 @@ export function SeriesFilter({
   onSelect,
 }: SeriesFilterProps) {
   return (
-    <div className="border-b border-[color:var(--medieval-wood-border)] pb-4">
+    <div className="border-medieval-wood-border border-b pb-4">
       <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
         {seriesLabel}
       </p>

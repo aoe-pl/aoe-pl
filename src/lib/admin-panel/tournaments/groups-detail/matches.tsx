@@ -8,11 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MatchManagement } from "./match-management";
-import type { ExtendedTournamentMatch } from "./match";
 import type { MatchStatus } from "@prisma/client";
-import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
+import type { ExtendedTournamentMatch } from "./match";
+import { MatchManagement } from "./match-management";
 
 interface Participant {
   id: string;

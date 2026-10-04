@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
 import {
-  SettingsNavigation,
-  CivilizationsList,
   BaseMapsList,
+  CivilizationsList,
   MapsList,
+  SettingsNavigation,
   UsersList,
 } from "@/lib/admin-panel/settings";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 export default function AdminSettingsPage() {
   const t = useTranslations("admin.settings");
@@ -44,7 +44,9 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("page_title")}</h1>
+        <h1 className="text-medieval-gold text-2xl font-bold tracking-tight">
+          {t("page_title")}
+        </h1>
         <p className="text-muted-foreground">{t("page_description")}</p>
       </div>
 

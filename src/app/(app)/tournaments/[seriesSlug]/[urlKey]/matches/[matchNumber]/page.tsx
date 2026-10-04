@@ -200,31 +200,27 @@ export default async function TournamentMatchPage({
           </div>
 
           <aside
-            className="h-fit space-y-5 rounded-xl border border-[color:var(--medieval-wood-border)] p-4"
+            className="border-medieval-wood-border h-fit space-y-5 rounded-xl border p-4"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
           >
             <div className="space-y-3 text-sm">
               <div>
-                <div className="text-[color:var(--medieval-gold-muted)]">
+                <div className="text-medieval-gold-muted">
                   {t("status.label")}
                 </div>
                 <div className="font-medium">{statusLabels[match.status]}</div>
               </div>
               <div>
-                <div className="text-[color:var(--medieval-gold-muted)]">
-                  {t("date")}
-                </div>
+                <div className="text-medieval-gold-muted">{t("date")}</div>
                 <div className="font-medium">{dateLabel}</div>
               </div>
               <div>
-                <div className="text-[color:var(--medieval-gold-muted)]">
-                  {t("group")}
-                </div>
+                <div className="text-medieval-gold-muted">{t("group")}</div>
                 <div className="font-medium">{groupName}</div>
               </div>
               {matchModeLabel && (
                 <div>
-                  <div className="text-[color:var(--medieval-gold-muted)]">
+                  <div className="text-medieval-gold-muted">
                     {t("match_mode.label")}
                   </div>
                   <div className="font-medium">{matchModeLabel}</div>
@@ -232,7 +228,7 @@ export default async function TournamentMatchPage({
               )}
               {streams.length > 0 && (
                 <div>
-                  <div className="text-[color:var(--medieval-gold-muted)]">
+                  <div className="text-medieval-gold-muted">
                     {t("stream.label")}
                   </div>
                   <div className="space-y-1">
@@ -256,7 +252,7 @@ export default async function TournamentMatchPage({
                               href={streamUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[color:var(--medieval-gold)] hover:underline"
+                              className="text-medieval-gold hover:underline"
                             >
                               {streamerName}
                             </a>
@@ -274,7 +270,7 @@ export default async function TournamentMatchPage({
             <MatchSpoilerToggle hasResults={hasResults} />
 
             {canSchedule && (
-              <div className="border-t border-[color:var(--medieval-wood-border)] pt-4">
+              <div className="border-medieval-wood-border border-t pt-4">
                 <MatchSchedulePanel
                   matchId={match.id}
                   matchDate={match.matchDate}

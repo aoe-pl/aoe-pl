@@ -29,17 +29,17 @@ export default function Home() {
 
         <div className="panel">
           <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
-            <section className="lg:col-span-2 lg:border-r lg:border-[color:var(--medieval-wood-border)] lg:pr-8">
+            <section className="lg:border-medieval-wood-border lg:col-span-2 lg:border-r lg:pr-8">
               <div className="pb-8">
                 <LatestNews />
               </div>
 
-              <div className="border-t border-[color:var(--medieval-wood-border)] pt-8 lg:border-t-0 lg:pt-0">
+              <div className="border-medieval-wood-border border-t pt-8 lg:border-t-0 lg:pt-0">
                 <UpcomingMatches />
               </div>
             </section>
 
-            <aside className="mt-8 border-t border-[color:var(--medieval-wood-border)] pt-8 lg:mt-0 lg:border-t-0 lg:pt-0">
+            <aside className="border-medieval-wood-border mt-8 border-t pt-8 lg:mt-0 lg:border-t-0 lg:pt-0">
               <Suspense fallback={<TopPlayersLoading />}>
                 <TopPlayers />
               </Suspense>

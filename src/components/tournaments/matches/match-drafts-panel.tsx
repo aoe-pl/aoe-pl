@@ -100,10 +100,8 @@ export function MatchDraftsPanel({
   };
 
   return (
-    <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
-      <div className="text-[color:var(--medieval-gold-muted)]">
-        {t("title")}
-      </div>
+    <div className="border-medieval-wood-border space-y-2 border-t pt-4 text-sm">
+      <div className="text-medieval-gold-muted">{t("title")}</div>
 
       {drafts.map((draft) => {
         const isPending = pending === draft.type;
@@ -173,7 +171,7 @@ export function MatchDraftsPanel({
             </div>
 
             {canManage && !isGenerated && !draft.hasPreset && (
-              <p className="text-xs text-[color:var(--medieval-gold-muted)]">
+              <p className="text-medieval-gold-muted text-xs">
                 {t("no_preset")}
               </p>
             )}

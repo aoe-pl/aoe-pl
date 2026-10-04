@@ -1,9 +1,9 @@
 "use client";
 
-import { useFieldArray, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DrawerClose, DrawerFooter } from "@/components/ui/drawer";
+import { ErrorToast } from "@/components/ui/error-toast-content";
 import {
   Form,
   FormControl,
@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -20,17 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { DrawerFooter, DrawerClose } from "@/components/ui/drawer";
 import { api } from "@/trpc/react";
-import { toast } from "sonner";
-import { ErrorToast } from "@/components/ui/error-toast-content";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Game, Map } from "@prisma/client";
+import { ChevronDown, ChevronRight, Plus, Trash2, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronRight, Plus, Trash2, Trophy } from "lucide-react";
-import type { Game, Map } from "@prisma/client";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const gameParticipantSchema = z.object({
   matchParticipantId: z.string().min(1, "Player is required"),
@@ -400,16 +400,16 @@ export function TournamentGameForm({
                             }
                           }}
                           disabled={uploadingFiles[gameIndex] ?? isPending}
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                          className="text-medieval-gold-muted file:bg-medieval-gold file:text-medieval-wood hover:file:bg-medieval-gold/90 block w-full text-sm file:mr-4 file:rounded-full file:border-0 file:px-4 file:py-2 file:text-sm file:font-semibold disabled:opacity-50"
                         />
                         {uploadingFiles[gameIndex] && (
-                          <div className="mt-2 text-sm text-blue-600">
+                          <div className="text-medieval-gold-muted mt-2 text-sm">
                             Uploading replay file...
                           </div>
                         )}
                         {uploadedFiles[gameIndex] && (
                           <div className="mt-2 flex items-center gap-2">
-                            <span className="text-sm text-green-600">
+                            <span className="text-medieval-gold text-sm">
                               ✓ Uploaded: {uploadedFiles[gameIndex]?.fileName}
                             </span>
                             <Button
@@ -426,7 +426,7 @@ export function TournamentGameForm({
                         {form.watch(`games.${gameIndex}.recUrl`) &&
                           !uploadedFiles[gameIndex] && (
                             <div className="mt-2 flex items-center gap-2">
-                              <span className="text-sm text-blue-600">
+                              <span className="text-medieval-gold text-sm">
                                 ✓ Existing replay file attached
                               </span>
                               <Button
@@ -441,7 +441,7 @@ export function TournamentGameForm({
                             </div>
                           )}
                       </div>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="text-medieval-gold-muted mt-1 text-sm">
                         Upload an Age of Empires 2 replay file (.aoe2record,
                         .mgz, .mgx)
                       </p>
@@ -555,7 +555,7 @@ export function TournamentGameForm({
                                   type="button"
                                   variant={field.value ? "default" : "ghost"}
                                   size="icon"
-                                  className={`rounded-full border ${field.value ? "bg-yellow-400 text-black" : ""} mx-1`}
+                                  className={`rounded-full border ${field.value ? "border-medieval-wood-border bg-medieval-gold text-medieval-wood" : ""} mx-1`}
                                   onClick={() =>
                                     form.setValue(
                                       `games.${gameIndex}.participants.${participantIndex}.isWinner`,

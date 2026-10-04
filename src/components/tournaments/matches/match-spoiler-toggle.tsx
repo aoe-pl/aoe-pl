@@ -22,7 +22,7 @@ export function MatchSpoilerToggle({ hasResults }: MatchSpoilerToggleProps) {
   if (isApproved || !hasResults) return null;
 
   return (
-    <div className="space-y-2 border-t border-[color:var(--medieval-wood-border)] pt-4 text-sm">
+    <div className="border-medieval-wood-border space-y-2 border-t pt-4 text-sm">
       <Button
         size="lg"
         variant="gold"

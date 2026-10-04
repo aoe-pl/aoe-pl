@@ -60,7 +60,7 @@ export function CalendarFilters({
             <Button variant="wood">
               {t("groups")}
               {selectedGroups.size > 0 && (
-                <span className="bg-accent-foreground rounded-full px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
+                <span className="bg-accent-foreground text-medieval-wood rounded-full px-1 py-px text-[10px] leading-none font-bold">
                   {selectedGroups.size}
                 </span>
               )}
@@ -110,7 +110,7 @@ export function CalendarFilters({
             <Button variant="wood">
               {t("players")}
               {selectedPlayers.size > 0 && (
-                <span className="rounded-full bg-[color:var(--medieval-gold)] px-1 py-px text-[10px] leading-none font-bold text-[color:var(--medieval-wood)]">
+                <span className="bg-medieval-gold text-medieval-wood rounded-full px-1 py-px text-[10px] leading-none font-bold">
                   {selectedPlayers.size}
                 </span>
               )}
@@ -186,7 +186,7 @@ export function CalendarFilters({
           {activePlayers.map((p) => (
             <span
               key={p.id}
-              className="text-primary flex items-center rounded-full bg-[color:var(--medieval-gold)]/20 px-2 py-2 text-xs"
+              className="text-primary bg-medieval-gold/20 flex items-center rounded-full px-2 py-2 text-xs"
             >
               {p.nickname}
               <button

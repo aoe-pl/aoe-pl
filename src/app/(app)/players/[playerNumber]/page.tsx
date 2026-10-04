@@ -81,7 +81,7 @@ export default async function PlayerProfilePage({
           </div>
         </header>
 
-        <div className="divide-y divide-[color:var(--medieval-wood-border)] border-t border-[color:var(--medieval-wood-border)]">
+        <div className="divide-medieval-wood-border border-medieval-wood-border divide-y border-t">
           {companionProfile && (
             <section className="py-6">
               <ProfileAoe2Stats profile={companionProfile} />

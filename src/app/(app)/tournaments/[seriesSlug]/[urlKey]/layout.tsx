@@ -58,7 +58,7 @@ export default async function TournamentDetailLayout({
 
           <div className="flex flex-col gap-6 md:flex-row md:gap-8">
             {/* Desktop sidebar */}
-            <aside className="hidden shrink-0 md:block md:w-44 md:border-r md:border-[color:var(--medieval-wood-border)] md:pr-6">
+            <aside className="md:border-medieval-wood-border hidden shrink-0 md:block md:w-44 md:border-r md:pr-6">
               <div className="sticky top-24">
                 <TournamentNav links={links} />
               </div>
