@@ -209,6 +209,7 @@ model Tournament {
   participantsLimit     Int?
   registrationStartDate DateTime?
   registrationEndDate   DateTime?
+  registrationClosed    Boolean                 @default(false)
   status                TournamentStatus
   isVisible             Boolean
   archived              Boolean                 @default(false)

@@ -94,6 +94,7 @@ const tournamentFormSchema = z
     participantsLimit: z.number().int().positive().optional(),
     registrationStartDate: z.date().optional(),
     registrationEndDate: z.date().optional(),
+    registrationClosed: z.boolean(),
     status: z.nativeEnum(TournamentStatus),
     isVisible: z.boolean(),
   })

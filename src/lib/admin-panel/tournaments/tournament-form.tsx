@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
 import { storagePaths } from "@/lib/storage/paths";
@@ -49,9 +50,8 @@ type TournamentFormProps = {
   onSubmit: (data: TournamentFormData) => void;
   form: UseFormReturn<TournamentFormData>;
   isPending: boolean;
-  /** True when editing: format can't be changed after creation. */
+  isEditing?: boolean;
   formatLocked?: boolean;
-  /** Preview URL for an already-saved banner image (edit mode). */
   bannerPreviewUrl?: string | null;
 };
 
@@ -59,6 +59,7 @@ export function TournamentForm({
   onSubmit,
   form,
   isPending,
+  isEditing = false,
   formatLocked = false,
   bannerPreviewUrl,
 }: TournamentFormProps) {
@@ -468,31 +469,29 @@ export function TournamentForm({
             )}
           />
 
-          {/* TODO: Add team based tournament */}
-          {/* when added remember to update the tournament group form! src/lib/admin-panel/tournaments/tournament-group-form.tsx */}
-
-          {/* <FormField
+          <FormField
             control={form.control}
-            name="isTeamBased"
+            name="registrationClosed"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    {t("team_based")}
+                    {t("registration_closed")}
                     <FormDescription>
-                      {t("team_based_description")}
+                      {t("registration_closed_description")}
                     </FormDescription>
                   </div>
                 </FormLabel>
+                <FormMessage />
               </FormItem>
             )}
-          /> */}
+          />
 
           <FormField
             control={form.control}
@@ -525,8 +524,10 @@ export function TournamentForm({
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t("creating_tournament")}
+                {isEditing ? t("saving_tournament") : t("creating_tournament")}
               </>
+            ) : isEditing ? (
+              t("save_changes")
             ) : (
               t("create_tournament")
             )}

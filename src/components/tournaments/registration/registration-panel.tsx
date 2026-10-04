@@ -3,11 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { RegistrationWindowStatus } from "@/lib/helpers/registration-window";
 import { cn, parseCompanionProfileUrl } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import {
+  CalendarClock,
   Check,
   CircleCheck,
+  Lock,
   LogIn,
   ScrollText,
   ShieldCheck,
@@ -22,6 +25,7 @@ interface RegistrationPanelProps {
   tournamentId: string;
   isLoggedIn: boolean;
   isAlreadyRegistered: boolean;
+  registrationStatus: RegistrationWindowStatus;
   hasAoe2CompanionLinked?: boolean;
   intro?: ReactNode;
 }
@@ -37,6 +41,7 @@ export function RegistrationPanel({
   tournamentId,
   isLoggedIn,
   isAlreadyRegistered,
+  registrationStatus,
   hasAoe2CompanionLinked = false,
   intro,
 }: RegistrationPanelProps) {
@@ -47,10 +52,12 @@ export function RegistrationPanel({
   const [formData, setFormData] = useState<Record<string, FormValue>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const registrationOpen = registrationStatus === "OPEN";
+
   const { data: fields = [] } =
     api.tournaments.registrationFields.list.useQuery(
       { tournamentId },
-      { enabled: isLoggedIn && !isAlreadyRegistered },
+      { enabled: isLoggedIn && !isAlreadyRegistered && registrationOpen },
     );
 
   const { mutate: register, isPending } =
@@ -150,6 +157,8 @@ export function RegistrationPanel({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!registrationOpen) return;
+
     if (companionNotReady) return;
 
     if (!validate()) return;
@@ -193,6 +202,20 @@ export function RegistrationPanel({
       <StatusNotice
         icon={<ShieldCheck className="size-6" />}
         title={t("already_registered")}
+      />
+    );
+  } else if (registrationStatus === "CLOSED") {
+    body = (
+      <StatusNotice
+        icon={<Lock className="size-6" />}
+        title={t("registration_closed")}
+      />
+    );
+  } else if (registrationStatus === "NOT_OPENED") {
+    body = (
+      <StatusNotice
+        icon={<CalendarClock className="size-6" />}
+        title={t("registration_not_open")}
       />
     );
   } else if (registered) {

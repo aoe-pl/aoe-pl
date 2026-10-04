@@ -31,6 +31,7 @@ export function TournamentEdit({ tournament }: { tournament: Tournament }) {
       participantsLimit: tournament.participantsLimit ?? undefined,
       registrationStartDate: tournament.registrationStartDate ?? undefined,
       registrationEndDate: tournament.registrationEndDate ?? undefined,
+      registrationClosed: tournament.registrationClosed,
       status: tournament.status,
       isVisible: tournament.isVisible,
     },
@@ -66,6 +67,7 @@ export function TournamentEdit({ tournament }: { tournament: Tournament }) {
       isPending={createTournamentMutation.isPending}
       form={form}
       onSubmit={onSubmit}
+      isEditing
       formatLocked
       bannerPreviewUrl={
         tournament.imageKey ? `/api/tournaments/${tournament.id}/banner` : null
