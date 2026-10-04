@@ -100,7 +100,7 @@ export function UpcomingMatches() {
 
               <div className="flex flex-wrap items-center gap-2">
                 {timeText && (
-                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <div className="text-primary flex items-center gap-1 text-xs">
                     <Clock className="h-3 w-3" />
                     <span className="whitespace-nowrap">{timeText}</span>
                   </div>

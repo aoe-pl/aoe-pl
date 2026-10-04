@@ -5,10 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { type Tournament } from "./tournament";
+import { formatRegistrationModeLabel } from "@/lib/helpers/registration-mode";
+import { getRegistrationWindowStatus } from "@/lib/helpers/registration-window";
 import type { TournamentSeries } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
-import { formatRegistrationModeLabel } from "@/lib/helpers/registration-mode";
+import { type Tournament } from "./tournament";
 
 export async function TournamentInfo({
   tournament,
@@ -20,6 +21,8 @@ export async function TournamentInfo({
   tournamentSeries: TournamentSeries;
 }) {
   const t = await getTranslations();
+
+  const registrationStatus = getRegistrationWindowStatus(tournament);
 
   return (
     <Card className="w-full">
@@ -77,6 +80,19 @@ export async function TournamentInfo({
             </span>
             <span>
               {formatRegistrationModeLabel(tournament.registrationMode, t)}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground font-semibold">
+              {t("admin.tournaments.view.info.registration_status")}
+            </span>
+            <span>
+              {registrationStatus === "OPEN" &&
+                t("admin.tournaments.view.info.registration_open")}
+              {registrationStatus === "CLOSED" &&
+                t("admin.tournaments.view.info.registration_closed")}
+              {registrationStatus === "NOT_OPENED" &&
+                t("admin.tournaments.view.info.registration_not_opened")}
             </span>
           </div>
           <div className="flex flex-col gap-1">

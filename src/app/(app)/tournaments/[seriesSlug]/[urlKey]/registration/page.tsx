@@ -1,5 +1,6 @@
 import { RegistrationPanel } from "@/components/tournaments/registration/registration-panel";
 import { TournamentSectionContent } from "@/components/tournaments/tournament-section-content";
+import { getRegistrationWindowStatus } from "@/lib/helpers/registration-window";
 import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
@@ -39,6 +40,7 @@ export default async function TournamentRegistrationPage({
       tournamentId={tournament.id}
       isLoggedIn={!!session?.user}
       isAlreadyRegistered={!!existing}
+      registrationStatus={getRegistrationWindowStatus(tournament)}
       hasAoe2CompanionLinked={Boolean(user?.aoe2companionUrl)}
       intro={content ? <TournamentSectionContent content={content} /> : null}
     />

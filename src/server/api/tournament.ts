@@ -6,6 +6,7 @@ import {
 } from "@/lib/aoe2cm";
 import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
 import { notifyMatchScheduled, notifyMatchUnscheduled } from "@/lib/discord";
+import { getRegistrationWindowStatus } from "@/lib/helpers/registration-window";
 import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
@@ -290,6 +291,23 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
         const nickname = ctx.session.user.name!;
+
+        const tournament = await tournamentRepository.getTournamentById(
+          input.tournamentId,
+        );
+
+        if (!tournament) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        // Never allow registration outside the configured window, even if the
+        // client state is stale.
+        if (getRegistrationWindowStatus(tournament) !== "OPEN") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Registration is closed for this tournament.",
+          });
+        }
 
         const existing =
           await tournamentParticipantRepository.findByUserAndTournament(

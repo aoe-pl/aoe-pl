@@ -35,6 +35,7 @@ export function TournamentCreate() {
       participantsLimit: undefined,
       registrationStartDate: undefined,
       registrationEndDate: undefined,
+      registrationClosed: false,
       status: TournamentStatus.PENDING,
       isVisible: false,
     },

@@ -1,23 +1,23 @@
-import { api } from "@/trpc/server";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TournamentStatusBadge } from "@/lib/admin-panel/tournaments/tournament-status-badge";
-import { TournamentInfo } from "@/lib/admin-panel/tournaments/tournament-info";
-import { TournamentTabs } from "./tabs";
-import { TournamentParticipants } from "@/lib/admin-panel/tournaments/tournament-participants";
-import { TournamentGroupList } from "@/lib/admin-panel/tournaments/tournament-group-list";
-import { TournamentBracketList } from "@/lib/admin-panel/tournaments/tournament-bracket-list";
-import { TournamentSections } from "@/lib/admin-panel/tournaments/tournament-sections";
 import {
   Breadcrumb,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TournamentBracketList } from "@/lib/admin-panel/tournaments/tournament-bracket-list";
+import { TournamentGroupList } from "@/lib/admin-panel/tournaments/tournament-group-list";
+import { TournamentInfo } from "@/lib/admin-panel/tournaments/tournament-info";
+import { TournamentParticipants } from "@/lib/admin-panel/tournaments/tournament-participants";
+import { TournamentSections } from "@/lib/admin-panel/tournaments/tournament-sections";
+import { TournamentStatusBadge } from "@/lib/admin-panel/tournaments/tournament-status-badge";
+import { api } from "@/trpc/server";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { TournamentTabs } from "./tabs";
 
 export default async function AdminTournamentsViewPage({
   params,

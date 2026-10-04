@@ -114,6 +114,7 @@ export const tournamentRepository = {
     participantsLimit?: number;
     registrationStartDate?: Date;
     registrationEndDate?: Date;
+    registrationClosed?: boolean;
     status: TournamentStatus;
     isVisible: boolean;
   }) {
@@ -131,6 +132,7 @@ export const tournamentRepository = {
         participantsLimit: data.participantsLimit,
         registrationStartDate: data.registrationStartDate,
         registrationEndDate: data.registrationEndDate,
+        registrationClosed: data.registrationClosed ?? false,
         status: data.status,
         isVisible: data.isVisible,
         tournamentSeries: {
@@ -164,6 +166,7 @@ export const tournamentRepository = {
       participantsLimit?: number;
       registrationStartDate?: Date;
       registrationEndDate?: Date;
+      registrationClosed: boolean;
       status: TournamentStatus;
       isVisible: boolean;
     }>,
@@ -183,6 +186,7 @@ export const tournamentRepository = {
         participantsLimit: data.participantsLimit,
         registrationStartDate: data.registrationStartDate,
         registrationEndDate: data.registrationEndDate,
+        registrationClosed: data.registrationClosed,
         status: data.status,
         isVisible: data.isVisible,
         tournamentSeries: {
