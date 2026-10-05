@@ -7,6 +7,12 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
+  images: {
+    remotePatterns: [
+      // Twitch stream preview thumbnails.
+      { protocol: "https", hostname: "static-cdn.jtvnw.net" },
+    ],
+  },
   webpack(webpackConfig) {
     webpackConfig.experiments = {
       ...webpackConfig.experiments,

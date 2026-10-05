@@ -40,6 +40,21 @@ export const usersRepository = {
     });
   },
 
+  /**
+   * Users that linked a stream, used to detect live streamers.
+   */
+  async getUsersWithStreamUrl() {
+    return db.user.findMany({
+      where: { streamUrl: { not: null } },
+      select: {
+        playerNumber: true,
+        name: true,
+        streamUrl: true,
+      },
+      orderBy: { name: "asc" },
+    });
+  },
+
   async getUserById(id: string) {
     return db.user.findUnique({
       where: { id },

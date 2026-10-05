@@ -26,6 +26,8 @@ export const env = createEnv({
     DISCORD_WEBHOOK_URL: z.string().url().optional(),
     DISCORD_INVITE_URL: z.string().url().optional(),
     SITE_URL: z.string().url().optional(),
+    TWITCH_CLIENT_ID: z.string().optional(),
+    TWITCH_CLIENT_SECRET: z.string().optional(),
   },
 
   /**
@@ -57,6 +59,8 @@ export const env = createEnv({
     DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
     DISCORD_INVITE_URL: process.env.DISCORD_INVITE_URL,
     SITE_URL: process.env.SITE_URL,
+    TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID,
+    TWITCH_CLIENT_SECRET: process.env.TWITCH_CLIENT_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

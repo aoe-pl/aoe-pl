@@ -42,6 +42,11 @@
       "error": "Failed to load players",
       "wins": "{count} wins"
     },
+    "live_streamers": {
+      "title": "Live Now",
+      "loading": "Checking for live streams...",
+      "live": "LIVE"
+    },
     "theme_customizer": {
       "select_theme_color": "Select theme color"
     }
