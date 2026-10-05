@@ -6,6 +6,7 @@ import { leaderboardRouter } from "./leaderboard";
 import { mapRouter } from "./map";
 import { newsRouter } from "./news";
 import { rolesRouter } from "./roles";
+import { streamsRouter } from "./streams";
 import { testRouter } from "./test";
 import { tournamentRouter } from "./tournament";
 import { usersRouter } from "./users";
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   leaderboard: leaderboardRouter,
   news: newsRouter,
   aoe2companion: aoe2CompanionRouter,
+  streams: streamsRouter,
 });
 
 // export type definition of API

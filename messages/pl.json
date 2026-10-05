@@ -42,6 +42,11 @@
       "error": "Nie udało się załadować graczy",
       "wins": "{count} zwycięstw"
     },
+    "live_streamers": {
+      "title": "Teraz na żywo",
+      "loading": "Sprawdzanie transmisji na żywo...",
+      "live": "NA ŻYWO"
+    },
     "theme_customizer": {
       "select_theme_color": "Wybierz kolor motywu"
     }

@@ -1,5 +1,9 @@
 import { FeaturedNews } from "@/components/home/featured-news";
 import { LatestNews } from "@/components/home/latest-news";
+import {
+  LiveStreamers,
+  LiveStreamersLoading,
+} from "@/components/home/live-streamers";
 import { TopPlayers, TopPlayersLoading } from "@/components/home/top-players";
 import { UpcomingMatches } from "@/components/home/upcoming-matches";
 import { DiscordIcon } from "@/components/icons";
@@ -66,6 +70,10 @@ export default function Home() {
               </Suspense>
             </aside>
           </div>
+
+          <Suspense fallback={<LiveStreamersLoading />}>
+            <LiveStreamers />
+          </Suspense>
         </div>
       </main>
     </div>

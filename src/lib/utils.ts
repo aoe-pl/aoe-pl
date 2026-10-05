@@ -54,6 +54,65 @@ export function getPlayerProfileIdFromCompanionUrl(url: string): number | null {
   return Number.isNaN(profileId) ? null : profileId;
 }
 
+const twitchHostname = "twitch.tv";
+const twitchLoginPattern = /^[a-z0-9_]{1,25}$/i;
+
+/** Twitch top-level paths that are not channel logins. */
+const twitchReservedPaths = new Set([
+  "activate",
+  "directory",
+  "downloads",
+  "drops",
+  "friends",
+  "inventory",
+  "jobs",
+  "login",
+  "logout",
+  "messages",
+  "p",
+  "search",
+  "settings",
+  "signup",
+  "store",
+  "subscriptions",
+  "turbo",
+  "videos",
+  "wallet",
+]);
+
+/**
+ * Extracts the channel login from a Twitch channel URL.
+ * @param url The stream URL (e.g., "https://www.twitch.tv/username").
+ * @returns The lowercase Twitch login, or null when the URL is not a channel link.
+ */
+export function getTwitchLoginFromUrl(url: string): string | null {
+  const trimmed = url?.trim();
+  if (!trimmed) return null;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    try {
+      parsed = new URL(`https://${trimmed}`);
+    } catch {
+      return null;
+    }
+  }
+
+  const host = parsed.hostname.toLowerCase().replace(/^(www|m)\./, "");
+  if (host !== twitchHostname) return null;
+
+  const [login] = parsed.pathname.split("/").filter(Boolean);
+  if (!login) return null;
+
+  const normalized = login.toLowerCase();
+  if (twitchReservedPaths.has(normalized)) return null;
+  if (!twitchLoginPattern.test(normalized)) return null;
+
+  return normalized;
+}
+
 const aoe2CompanionHostname = "aoe2companion.com";
 const aoe2CompanionProfilePath = /^\/players\/(\d{1,10})\/?$/;
 const aoe2CompanionProfileMaxDigits = 10;
