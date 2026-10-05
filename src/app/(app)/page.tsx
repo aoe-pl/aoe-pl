@@ -4,13 +4,13 @@ import { TopPlayers, TopPlayersLoading } from "@/components/home/top-players";
 import { UpcomingMatches } from "@/components/home/upcoming-matches";
 import { DiscordIcon } from "@/components/icons";
 import { Button } from "@/components/ui";
+import { env } from "@/env";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 
-const DISCORD_INVITE_URL = "https://discord.gg/9rBsfHfk";
-
 export default function Home() {
   const t = useTranslations("home.hero");
+
   return (
     <div className="text-foreground min-h-screen">
       <div className="relative mx-auto max-w-6xl px-4 py-32">
@@ -33,7 +33,7 @@ export default function Home() {
               className="text-primary-foreground bg-accent gap-2 font-semibold shadow-lg"
             >
               <a
-                href={DISCORD_INVITE_URL}
+                href={env.DISCORD_INVITE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >

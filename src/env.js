@@ -24,6 +24,7 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     DISCORD_WEBHOOK_URL: z.string().url().optional(),
+    DISCORD_INVITE_URL: z.string().url().optional(),
     SITE_URL: z.string().url().optional(),
   },
 
@@ -54,6 +55,7 @@ export const env = createEnv({
     POSTGRES_DB: process.env.POSTGRES_DB,
     NODE_ENV: process.env.NODE_ENV,
     DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
+    DISCORD_INVITE_URL: process.env.DISCORD_INVITE_URL,
     SITE_URL: process.env.SITE_URL,
   },
   /**

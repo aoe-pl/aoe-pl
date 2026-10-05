@@ -7,6 +7,7 @@ import {
 import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
 import { notifyMatchScheduled, notifyMatchUnscheduled } from "@/lib/discord";
 import { getRegistrationWindowStatus } from "@/lib/helpers/registration-window";
+import { isTournamentReadOnly } from "@/lib/helpers/tournament-lock";
 import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
 import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepository";
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
@@ -108,6 +109,49 @@ async function assertCanMarkStream(userId: string) {
   ]);
 
   if (!admin && !streamer) throw new TRPCError({ code: "FORBIDDEN" });
+}
+
+/**
+ * Throws when the tournament that owns the given match is read-only (finished,
+ * cancelled or archived). Used to block edits such as match scheduling,
+ * recording uploads and civ/map draft generation on locked tournaments.
+ */
+async function assertMatchTournamentEditable(matchId: string) {
+  const match = await db.tournamentMatch.findUnique({
+    where: { id: matchId },
+    select: {
+      group: {
+        select: {
+          tournament: { select: { status: true, archived: true } },
+        },
+      },
+      bracketNodes: {
+        select: {
+          bracket: {
+            select: {
+              tournament: { select: { status: true, archived: true } },
+            },
+          },
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!match) throw new TRPCError({ code: "NOT_FOUND" });
+
+  const tournament =
+    match.group?.tournament ??
+    match.bracketNodes[0]?.bracket.tournament ??
+    null;
+
+  if (tournament && isTournamentReadOnly(tournament)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message:
+        "This tournament is finished, cancelled or archived and can no longer be edited.",
+    });
+  }
 }
 
 export const tournamentRouter = createTRPCRouter({
@@ -915,6 +959,7 @@ export const tournamentRouter = createTRPCRouter({
           ctx.session.user.id,
           input.matchId,
         );
+        await assertMatchTournamentEditable(input.matchId);
 
         return tournamentGameRepository.saveMatchRecordings(
           input.matchId,
@@ -928,6 +973,7 @@ export const tournamentRouter = createTRPCRouter({
           ctx.session.user.id,
           input.matchId,
         );
+        await assertMatchTournamentEditable(input.matchId);
 
         return tournamentGameRepository.clearMatchRecordings(input.matchId);
       }),
@@ -949,6 +995,8 @@ export const tournamentRouter = createTRPCRouter({
           ctx.session.user.id,
           input.matchId,
         );
+
+        await assertMatchTournamentEditable(input.matchId);
 
         const presetKey = parsePresetKey(
           input.type === "civ"
@@ -1005,6 +1053,8 @@ export const tournamentRouter = createTRPCRouter({
       )
       .mutation(async ({ input, ctx }) => {
         await getManageableMatch(ctx.session.user.id, input.matchId);
+
+        await assertMatchTournamentEditable(input.matchId);
 
         await db.tournamentMatch.update({
           where: { id: input.matchId },
@@ -1067,6 +1117,8 @@ export const tournamentRouter = createTRPCRouter({
         }),
       )
       .mutation(async ({ input }) => {
+        await assertMatchTournamentEditable(input.matchId);
+
         return tournamentMatchRepository.setMatchApproval(
           input.matchId,
           input.approved,
@@ -1088,6 +1140,7 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
         await assertCanMarkStream(userId);
+        await assertMatchTournamentEditable(input.matchId);
 
         const match = await db.tournamentMatch.findUnique({
           where: { id: input.matchId },
@@ -1126,6 +1179,7 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
         await assertCanMarkStream(userId);
+        await assertMatchTournamentEditable(input.matchId);
 
         return tournamentMatchRepository.unmarkMatchAsStreamed(
           input.matchId,
@@ -1153,6 +1207,8 @@ export const tournamentRouter = createTRPCRouter({
 
         if (!admin && !isParticipant)
           throw new TRPCError({ code: "FORBIDDEN" });
+
+        await assertMatchTournamentEditable(input.id);
 
         const updated = await tournamentMatchRepository.updateTournamentMatch(
           input.id,
@@ -1186,6 +1242,8 @@ export const tournamentRouter = createTRPCRouter({
 
         if (!admin && !isParticipant)
           throw new TRPCError({ code: "FORBIDDEN" });
+
+        await assertMatchTournamentEditable(input.id);
 
         const updated = await db.tournamentMatch.update({
           where: { id: input.id },

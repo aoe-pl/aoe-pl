@@ -29,8 +29,13 @@ export function MonthView({
   const locale = getDateFnsLocale(useLocale());
   const days = buildMonthGridDays(currentMonth);
 
-  // Derive localised weekday labels from the first 7 days of the grid
-  const weekdays = days.slice(0, 7).map((d) => format(d, "EEEE", { locale }));
+  // Derive localised weekday labels from the first 7 days of the grid. Full
+  // names are only shown on wide screens; narrow screens use abbreviations to
+  // avoid the labels overlapping.
+  const weekdays = days.slice(0, 7).map((d) => ({
+    long: format(d, "EEEE", { locale }),
+    short: format(d, "EEE", { locale }),
+  }));
 
   function getGroupById(id: string): CalendarGroup | undefined {
     return groups.find((g) => g.id === id);
@@ -48,10 +53,11 @@ export function MonthView({
       <div className="border-medieval-wood-border grid grid-cols-7 border-b">
         {weekdays.map((d) => (
           <div
-            key={d}
-            className="text-medieval-gold-muted py-2 text-center text-sm font-semibold tracking-wide uppercase"
+            key={d.long}
+            className="text-medieval-gold-muted min-w-0 overflow-hidden py-2 text-center text-xs font-semibold tracking-wide uppercase xl:text-sm"
           >
-            {d}
+            <span className="hidden xl:inline">{d.long}</span>
+            <span className="xl:hidden">{d.short}</span>
           </div>
         ))}
       </div>

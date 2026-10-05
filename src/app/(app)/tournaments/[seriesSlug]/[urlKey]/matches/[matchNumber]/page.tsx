@@ -13,6 +13,8 @@ import { MatchSpoilerToggle } from "@/components/tournaments/matches/match-spoil
 import { MatchStreamPanel } from "@/components/tournaments/matches/match-stream-panel";
 import { parsePresetKey } from "@/lib/aoe2cm";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
+import { isTournamentReadOnly } from "@/lib/helpers/tournament-lock";
+import { getTournament } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
@@ -26,7 +28,7 @@ export default async function TournamentMatchPage({
 }: {
   params: Promise<{ seriesSlug: string; urlKey: string; matchNumber: string }>;
 }) {
-  const { urlKey, matchNumber } = await params;
+  const { seriesSlug, urlKey, matchNumber } = await params;
 
   const [match, locale, session, t, tGlobal] = await Promise.all([
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
@@ -37,6 +39,11 @@ export default async function TournamentMatchPage({
   ]);
 
   if (!match) notFound();
+
+  // Finished or archived tournaments are read-only: no scheduling, recording
+  // uploads or civ/map draft generation.
+  const tournament = await getTournament(seriesSlug, urlKey);
+  const isReadOnly = isTournamentReadOnly(tournament);
 
   const isAdmin = session?.user?.id
     ? await usersRepository.isUserAdmin(session.user.id)
@@ -128,10 +135,15 @@ export default async function TournamentMatchPage({
       )
     : false;
 
-  // Only admins or participants may schedule, and only while the match is upcoming.
+  // Only admins or participants may schedule, and only while the match is
+  // upcoming and the tournament is still editable.
   const isUpcoming = match.status === "PENDING" || match.status === "SCHEDULED";
 
-  const canSchedule = isUpcoming && (isAdmin || isParticipant);
+  const canSchedule = isUpcoming && !isReadOnly && (isAdmin || isParticipant);
+
+  // Whether the signed-in user may manage the match's mutable data (recordings,
+  // drafts, streams). Read-only tournaments never allow this.
+  const canManageMatch = !isReadOnly && (isAdmin || isParticipant);
 
   const player1Score = p1?.wonScore ?? 0;
   const player2Score = p2?.wonScore ?? 0;
@@ -185,6 +197,12 @@ export default async function TournamentMatchPage({
   return (
     <MatchSpoilerProvider isApproved={isApproved}>
       <div>
+        {isReadOnly && (
+          <p className="border-medieval-wood-border text-medieval-gold-muted mb-4 rounded-lg border bg-black/20 px-4 py-2 text-sm">
+            {tGlobal("tournament.read_only_notice")}
+          </p>
+        )}
+
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_15rem]">
           <div className="flex flex-col gap-6">
             <MatchScoreboard
@@ -300,7 +318,7 @@ export default async function TournamentMatchPage({
               isAdmin={isAdmin}
               hasRecordings={hasRecordings}
               isApproved={isApproved}
-              canManageRecordings={isAdmin || isParticipant}
+              canManageRecordings={canManageMatch}
               gamesWithRecordings={gamesWithRecordings}
             />
 
@@ -314,10 +332,10 @@ export default async function TournamentMatchPage({
               hasMapPreset={
                 parsePresetKey(match.group?.mapDraftPresetUrl) !== null
               }
-              canManage={isAdmin || isParticipant}
+              canManage={canManageMatch}
             />
 
-            {canMarkStream && (
+            {canMarkStream && !isReadOnly && (
               <MatchStreamPanel
                 matchId={match.id}
                 streamUrl={ownStreamUrl}
@@ -325,7 +343,7 @@ export default async function TournamentMatchPage({
               />
             )}
 
-            {isAdmin && canApprove && (
+            {isAdmin && canApprove && !isReadOnly && (
               <MatchApprovalPanel
                 matchId={match.id}
                 isApproved={isApproved}

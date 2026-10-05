@@ -678,6 +678,7 @@
     }
   },
   "tournament": {
+    "read_only_notice": "Ten turniej jest zakończony, anulowany lub zarchiwizowany, więc nie można go już edytować.",
     "calendar": {
       "today": "Dziś",
       "month": "Miesiąc",

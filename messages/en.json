@@ -678,6 +678,7 @@
     }
   },
   "tournament": {
+    "read_only_notice": "This tournament is finished, cancelled or archived, so it can no longer be edited.",
     "calendar": {
       "today": "Today",
       "month": "Month",

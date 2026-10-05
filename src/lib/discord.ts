@@ -37,6 +37,7 @@ export async function sendDiscordWebhook(
   payload: DiscordWebhookPayload,
 ): Promise<void> {
   const webhookUrl = env.DISCORD_WEBHOOK_URL;
+
   if (!webhookUrl) return;
 
   const controller = new AbortController();

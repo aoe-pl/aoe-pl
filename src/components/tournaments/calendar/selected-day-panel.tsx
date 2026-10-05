@@ -21,6 +21,7 @@ interface SelectedDayPanelProps {
   tournamentMatchRows: TournamentMatchRow[];
   userId: string | null;
   isAdmin: boolean;
+  isReadOnly?: boolean;
   onScheduleMatch: (match: TournamentMatchRow, date: Date) => void;
   onRescheduleMatch: (match: TournamentMatchRow) => void;
   onCancelMatch: (match: TournamentMatchRow) => void;
@@ -38,6 +39,7 @@ export function SelectedDayPanel({
   tournamentMatchRows,
   userId,
   isAdmin,
+  isReadOnly = false,
   onScheduleMatch: _onScheduleMatch,
   onRescheduleMatch,
   onCancelMatch,
@@ -67,8 +69,10 @@ export function SelectedDayPanel({
     );
   }
 
-  // Only allow users involved in the match or admins to reschedule/cancel from the calendar tile.
+  // Only allow users involved in the match or admins to reschedule/cancel from
+  // the calendar tile, and never for a read-only (finished/archived) tournament.
   function canActOnScheduled(matchId: string): boolean {
+    if (isReadOnly) return false;
     if (isAdmin) return true;
     if (!userId) return false;
     return matchUserIds.get(matchId)?.includes(userId) ?? false;
@@ -123,7 +127,7 @@ export function SelectedDayPanel({
         </div>
       )}
 
-      {userPendingRows.length > 0 && (
+      {!isReadOnly && userPendingRows.length > 0 && (
         <div className="mt-4 flex items-center justify-between">
           <p className="text-medieval-gold-muted text-sm">
             {t("schedule.unscheduled_count", { count: userPendingRows.length })}
@@ -139,7 +143,7 @@ export function SelectedDayPanel({
         </div>
       )}
 
-      {userDialogOpen && userId && (
+      {!isReadOnly && userDialogOpen && userId && (
         <UserScheduleDialog
           pendingRows={userPendingRows}
           userId={userId}

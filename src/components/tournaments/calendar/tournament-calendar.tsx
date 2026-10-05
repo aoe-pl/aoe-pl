@@ -21,6 +21,7 @@ interface TournamentCalendarProps {
   matchUrlBase: string;
   userId: string | null;
   isAdmin: boolean;
+  isReadOnly?: boolean;
 }
 
 export function TournamentCalendar({
@@ -28,6 +29,7 @@ export function TournamentCalendar({
   matchUrlBase,
   userId,
   isAdmin,
+  isReadOnly = false,
 }: TournamentCalendarProps) {
   const router = useRouter();
   const { calendarMatches, calendarGroups, calendarPlayers, pendingRows } =
@@ -68,10 +70,14 @@ export function TournamentCalendar({
     });
 
   function handleScheduleMatch(match: TournamentMatchRow, date: Date) {
+    if (isReadOnly) return;
+
     setSchedulingMatch({ match, defaultDate: date });
   }
 
   function handleRescheduleMatch(match: TournamentMatchRow) {
+    if (isReadOnly) return;
+
     setSchedulingMatch({
       match,
       defaultDate: match.matchDate ?? new Date(),
@@ -79,6 +85,8 @@ export function TournamentCalendar({
   }
 
   function handleCancelMatch(match: TournamentMatchRow) {
+    if (isReadOnly) return;
+
     unschedule({ id: match.id });
   }
 
@@ -138,13 +146,14 @@ export function TournamentCalendar({
           tournamentMatchRows={matches}
           userId={userId}
           isAdmin={isAdmin}
+          isReadOnly={isReadOnly}
           onScheduleMatch={handleScheduleMatch}
           onRescheduleMatch={handleRescheduleMatch}
           onCancelMatch={handleCancelMatch}
         />
       )}
 
-      {schedulingMatch && (
+      {!isReadOnly && schedulingMatch && (
         <ScheduleMatchDialog
           matchId={schedulingMatch.match.id}
           defaultDate={schedulingMatch.defaultDate}
