@@ -14,7 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type {
   Tournament,
-  TournamentGroupFormSchema,
+  TournamentGroupSubmitData,
   TournamentGroupWithParticipants,
 } from "../tournament";
 import { TournamentGroupForm } from "../tournament-group-form";
@@ -51,7 +51,7 @@ export function HeaderContainer({
       },
     });
 
-  function handleUpdate(data: TournamentGroupFormSchema) {
+  function handleUpdate(data: TournamentGroupSubmitData) {
     updateGroup({
       id: group.id,
       data,

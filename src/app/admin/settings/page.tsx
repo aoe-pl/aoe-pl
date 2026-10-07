@@ -24,18 +24,6 @@ export default function AdminSettingsPage() {
         return <MapsList />;
       case "users":
         return <UsersList />;
-      case "roles":
-      case "system":
-        return (
-          <div className="flex items-center justify-center py-16">
-            <div className="space-y-4 text-center">
-              <h3 className="text-lg font-medium">{t("coming_soon_title")}</h3>
-              <p className="text-muted-foreground">
-                {t("coming_soon_description")}
-              </p>
-            </div>
-          </div>
-        );
       default:
         return null;
     }

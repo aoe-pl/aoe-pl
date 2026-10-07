@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type {
+  TournamentGroupSubmitData,
   TournamentGroupWithParticipants,
   TournamentMatchMode,
 } from "./tournament";
@@ -142,21 +143,10 @@ export function TournamentGroupList({
     };
   };
 
-  const handleSubmit = (data: {
-    name: string;
-    displayOrder: number;
-    description?: string | undefined;
-    matchModeId?: string | undefined;
-    isTeamBased?: boolean | undefined;
-    isMixed?: boolean | undefined;
-    color?: string | undefined;
-    civDraftPresetUrl?: string | undefined;
-    mapDraftPresetUrl?: string | undefined;
-    participantIds?: string[] | undefined;
-  }) => {
+  const handleSubmit = (data: TournamentGroupSubmitData) => {
     const groupData = {
       name: data.name,
-      description: data.description,
+      translations: data.translations,
       matchModeId: data.matchModeId,
       displayOrder: data.displayOrder,
       isTeamBased: data.isTeamBased,
@@ -294,13 +284,6 @@ export function TournamentGroupList({
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Description */}
-                  {group.description && (
-                    <div className="space-y-1">
-                      <p className="text-sm">{group.description}</p>
-                    </div>
-                  )}
-
                   {/* Group Details */}
                   <div className="space-y-2 border-t pt-3">
                     <div className="grid grid-cols-2 gap-4 text-xs">

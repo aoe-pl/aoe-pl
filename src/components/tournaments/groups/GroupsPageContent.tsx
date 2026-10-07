@@ -66,6 +66,14 @@ export function GroupsPageContent({
                 matchUrlBase={matchUrlBase}
               />
             )}
+            {selectedGroupData.description && (
+              <div
+                className="border-medieval-wood-border text-primary w-full rounded-xl border p-4 text-sm whitespace-pre-line"
+                style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
+              >
+                {selectedGroupData.description}
+              </div>
+            )}
           </div>
 
           <aside

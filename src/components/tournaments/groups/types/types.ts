@@ -10,6 +10,7 @@ export interface GroupPageData {
   groupId: string;
   groupColor: string;
   groupName: string;
+  description: string | null;
   matchMode: {
     mode: TournamentMatchModeType;
     gameCount: number;

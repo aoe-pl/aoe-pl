@@ -309,7 +309,6 @@ model TournamentGroup {
   tournamentId               String
   displayOrder               Int
   name                       String
-  description                String?
   matchModeId                String?
   isTeamBased                Boolean?
   isMixed                    Boolean?
@@ -318,10 +317,21 @@ model TournamentGroup {
   mapDraftPresetUrl          String?
   matchMode                  TournamentMatchMode?         @relation(fields: [matchModeId], references: [id])
   tournament                 Tournament                   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  translations               TournamentGroupTranslation[]
   TournamentGroupParticipant TournamentGroupParticipant[] @relation("GroupParticipants")
   matches                    TournamentMatch[]            @relation("GroupMatches")
 
   @@unique([tournamentId, name])
+}
+
+model TournamentGroupTranslation {
+  id          String          @id @default(cuid())
+  groupId     String
+  locale      String
+  description String?
+  group       TournamentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, locale])
 }
 
 model TournamentBracketParticipant {

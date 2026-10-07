@@ -602,7 +602,14 @@ export const tournamentRouter = createTRPCRouter({
           tournamentId: z.string(),
           data: z.object({
             name: z.string().min(1),
-            description: z.string().optional(),
+            translations: z
+              .array(
+                z.object({
+                  locale: z.string(),
+                  description: z.string().optional(),
+                }),
+              )
+              .optional(),
             matchModeId: z.string().optional(),
             displayOrder: z.number().int().min(0).optional(),
             isTeamBased: z.boolean().optional(),
@@ -626,7 +633,14 @@ export const tournamentRouter = createTRPCRouter({
           id: z.string(),
           data: z.object({
             name: z.string().min(1).optional(),
-            description: z.string().optional(),
+            translations: z
+              .array(
+                z.object({
+                  locale: z.string(),
+                  description: z.string().optional(),
+                }),
+              )
+              .optional(),
             matchModeId: z.string().optional(),
             displayOrder: z.number().int().min(0).optional(),
             isTeamBased: z.boolean().optional(),

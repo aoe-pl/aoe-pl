@@ -11,6 +11,7 @@ import {
   type TournamentBracket,
   type TournamentGroup,
   type TournamentGroupParticipant,
+  type TournamentGroupTranslation,
   type TournamentMatch,
   type TournamentMatchMode,
   type TournamentMatchParticipant,
@@ -123,9 +124,13 @@ const tournamentFormSchema = z
     },
   );
 
+const tournamentGroupTranslationSchema = z.object({
+  description: z.string().optional(),
+});
+
 const tournamentGroupFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
+  translations: z.record(z.string(), tournamentGroupTranslationSchema),
   matchModeId: z.string().min(1, "Match mode is required"),
   displayOrder: z.number().int().min(0),
   isTeamBased: z.boolean().optional(),
@@ -257,7 +262,16 @@ const matchStatuses: { value: MatchStatus; label: string }[] = [
 type TournamentGroupFormSchema = z.infer<typeof tournamentGroupFormSchema>;
 type TournamentMatchFormSchema = z.infer<typeof tournamentMatchFormSchema>;
 
+/** Payload emitted by the group form, with translations normalised to a list. */
+type TournamentGroupSubmitData = Omit<
+  TournamentGroupFormSchema,
+  "translations"
+> & {
+  translations: { locale: string; description?: string }[];
+};
+
 type TournamentGroupWithParticipants = TournamentGroup & {
+  translations: TournamentGroupTranslation[];
   TournamentGroupParticipant: {
     tournamentParticipantId: string;
     id: string;
@@ -295,6 +309,8 @@ export {
   type TournamentGroup,
   type TournamentGroupFormSchema,
   type TournamentGroupParticipant,
+  type TournamentGroupSubmitData,
+  type TournamentGroupTranslation,
   type TournamentGroupWithParticipants,
   type TournamentMatch,
   type TournamentMatchFormSchema,

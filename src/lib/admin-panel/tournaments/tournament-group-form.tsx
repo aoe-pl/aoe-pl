@@ -15,14 +15,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { locales } from "@/lib/locales";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import type { Locale } from "next-intl";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   tournamentGroupFormSchema,
   type TournamentGroup,
   type TournamentGroupFormSchema,
+  type TournamentGroupSubmitData,
   type TournamentGroupWithParticipants,
 } from "./tournament";
 import { TournamentMatchModeSelector } from "./tournament-match-mode-selector";
@@ -30,7 +33,7 @@ import { TournamentParticipantsSelector } from "./tournament-participants-select
 
 type TournamentGroupFormProps = {
   initialData?: TournamentGroupWithParticipants;
-  onSubmit: (data: TournamentGroupFormSchema) => void;
+  onSubmit: (data: TournamentGroupSubmitData) => void;
   onCancel: () => void;
   groups?: TournamentGroup[];
   isPending?: boolean;
@@ -53,12 +56,22 @@ export function TournamentGroupForm({
   });
 
   const { data: matchModes = [] } = api.tournaments.matchMode.list.useQuery();
+  const [activeLocale, setActiveLocale] = useState<Locale>(locales.default);
 
   const form = useForm<TournamentGroupFormSchema>({
     resolver: zodResolver(tournamentGroupFormSchema),
     defaultValues: {
       name: initialData?.name ?? "",
-      description: initialData?.description ?? "",
+      translations: Object.fromEntries(
+        locales.supported.map((locale) => [
+          locale,
+          {
+            description:
+              initialData?.translations.find((tr) => tr.locale === locale)
+                ?.description ?? "",
+          },
+        ]),
+      ),
       displayOrder: initialData?.displayOrder ?? groups.length,
       isTeamBased: initialData?.isTeamBased ?? defaultIsTeamBased,
       isMixed: initialData?.isMixed ?? false,
@@ -93,6 +106,10 @@ export function TournamentGroupForm({
       isMixed: data.isMixed,
       color: data.color ?? undefined,
       participantIds: data.participantIds ?? [],
+      translations: locales.supported.map((locale) => ({
+        locale,
+        description: data.translations[locale]?.description ?? "",
+      })),
     });
   };
 
@@ -127,18 +144,48 @@ export function TournamentGroupForm({
 
             <FormField
               control={form.control}
-              name="description"
-              render={({ field }) => (
+              name="translations"
+              render={() => (
                 <FormItem>
                   <FormLabel>Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter group description"
-                      className="min-h-20"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
+                  <div className="flex gap-1">
+                    {locales.supported.map((locale) => (
+                      <Button
+                        key={locale}
+                        type="button"
+                        variant={
+                          activeLocale === locale ? "default" : "secondary"
+                        }
+                        size="sm"
+                        onClick={() => setActiveLocale(locale)}
+                      >
+                        {locale.toUpperCase()}
+                      </Button>
+                    ))}
+                  </div>
+                  {locales.supported.map((locale) => (
+                    <div
+                      key={locale}
+                      className={activeLocale === locale ? "" : "hidden"}
+                    >
+                      <FormField
+                        control={form.control}
+                        name={`translations.${locale}.description`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Enter group description"
+                                className="min-h-20"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
                 </FormItem>
               )}
             />
