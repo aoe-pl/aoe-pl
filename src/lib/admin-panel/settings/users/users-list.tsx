@@ -153,9 +153,6 @@ export function UsersList() {
                       <TableHead className="w-[200px]">
                         {t("table.name")}
                       </TableHead>
-                      <TableHead className="w-[250px]">
-                        {t("table.email")}
-                      </TableHead>
                       <TableHead className="w-[100px] text-center">
                         {t("table.roles")}
                       </TableHead>
@@ -187,9 +184,6 @@ export function UsersList() {
                               key={user.id}
                             ></PlayerLink>
                           </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {user.email ?? "No Email"}
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex flex-wrap justify-center gap-1">

@@ -6,9 +6,14 @@ import {
 import { db } from "@/server/db";
 import { MatchStatus } from "@prisma/client";
 
+export type TournamentGroupTranslationInput = {
+  locale: string;
+  description?: string;
+};
+
 export type TournamentGroupCreateData = {
   name: string;
-  description?: string;
+  translations?: TournamentGroupTranslationInput[];
   matchModeId?: string;
   displayOrder?: number;
   isTeamBased?: boolean;
@@ -27,6 +32,7 @@ export const tournamentGroupRepository = {
       where: { id },
       include: {
         matchMode: true,
+        translations: true,
         TournamentGroupParticipant: {
           include: {
             tournamentParticipant: true,
@@ -80,6 +86,7 @@ export const tournamentGroupRepository = {
       include: {
         tournament: true,
         matchMode: options?.includeMatchMode,
+        translations: true,
         TournamentGroupParticipant: options?.includeParticipants
           ? {
               include: {
@@ -122,7 +129,6 @@ export const tournamentGroupRepository = {
       const group = await tx.tournamentGroup.create({
         data: {
           name: data.name,
-          description: data.description,
           matchMode: data.matchModeId
             ? { connect: { id: data.matchModeId } }
             : undefined,
@@ -133,6 +139,14 @@ export const tournamentGroupRepository = {
           civDraftPresetUrl: data.civDraftPresetUrl,
           mapDraftPresetUrl: data.mapDraftPresetUrl,
           tournament: { connect: { id: tournamentId } },
+          translations: data.translations?.length
+            ? {
+                create: data.translations.map(({ locale, description }) => ({
+                  locale,
+                  description: description?.trim() ?? null,
+                })),
+              }
+            : undefined,
           TournamentGroupParticipant:
             participantsIds && participantsIds.length > 0
               ? {
@@ -293,7 +307,6 @@ export const tournamentGroupRepository = {
       where: { id },
       data: {
         name: data.name,
-        description: data.description,
         matchMode: data.matchModeId
           ? { connect: { id: data.matchModeId } }
           : undefined,
@@ -303,6 +316,18 @@ export const tournamentGroupRepository = {
         color: data.color,
         civDraftPresetUrl: data.civDraftPresetUrl,
         mapDraftPresetUrl: data.mapDraftPresetUrl,
+        translations: data.translations?.length
+          ? {
+              upsert: data.translations.map(({ locale, description }) => ({
+                where: { groupId_locale: { groupId: id, locale } },
+                create: {
+                  locale,
+                  description: description?.trim() ?? null,
+                },
+                update: { description: description?.trim() ?? null },
+              })),
+            }
+          : undefined,
         TournamentGroupParticipant: participantsIds
           ? {
               // Delete all participants that are not in the new list

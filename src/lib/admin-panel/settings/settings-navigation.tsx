@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Settings, Users, Map, Shield, Database } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Crown, Map, Settings, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { SettingsSection } from "./types";
 
 interface SettingsNavigationProps {
@@ -42,18 +42,6 @@ export function SettingsNavigation({
       title: t("sections.users"),
       icon: Users,
       href: "/admin/settings/users",
-    },
-    {
-      id: "roles",
-      title: t("sections.roles"),
-      icon: Shield,
-      href: "/admin/settings/roles",
-    },
-    {
-      id: "system",
-      title: t("sections.system"),
-      icon: Database,
-      href: "/admin/settings/system",
     },
   ];
 

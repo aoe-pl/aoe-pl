@@ -2,6 +2,7 @@ import { GroupsPageContent } from "@/components/tournaments/groups/GroupsPageCon
 import type { GroupPageData } from "@/components/tournaments/groups/types/types";
 import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
 import { api } from "@/trpc/server";
+import { getLocale } from "next-intl/server";
 
 export default async function TournamentGroupsPage({
   params,
@@ -9,6 +10,7 @@ export default async function TournamentGroupsPage({
   params: Promise<{ seriesSlug: string; urlKey: string }>;
 }) {
   const { seriesSlug, urlKey } = await params;
+  const locale = await getLocale();
   const { tournament, section } = await getTournamentPageData(
     seriesSlug,
     urlKey,
@@ -35,10 +37,14 @@ export default async function TournamentGroupsPage({
 
     const matchMode = g.matchMode ?? tournament.matchMode ?? null;
 
+    const description =
+      g.translations.find((tr) => tr.locale === locale)?.description ?? null;
+
     groupData.push({
       groupId: g.id,
       groupColor: g.color!,
       groupName: g.name,
+      description,
       matchMode: matchMode
         ? { mode: matchMode.mode, gameCount: matchMode.gameCount }
         : null,
