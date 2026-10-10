@@ -226,6 +226,21 @@
           "title": "Matches",
           "filter_by_player": "Filter by player",
           "all_participants": "All participants"
+        },
+        "layout_hint": "Groups sharing a name (e.g. \"Red Ants 1\", \"Red Ants 2\") form one column ordered by the trailing number, and the arrows below set the column order. Name a rotation group with both groups and an arrow, e.g. \"Red 2 <-> Black 1\".",
+        "move_earlier": "Move group earlier",
+        "move_later": "Move group later",
+        "form": {
+          "rotation_label": "Rotation group",
+          "rotation_description": "Players rotate between two groups. The name is generated automatically from the two groups selected below.",
+          "rotation_name_placeholder": "Select two groups below",
+          "rotation_name_hint": "Composed automatically from the two groups below.",
+          "rotation_first_group": "First group",
+          "rotation_second_group": "Second group",
+          "rotation_select_first": "Select first group",
+          "rotation_select_second": "Select second group",
+          "rotation_incomplete": "Select two different groups to create the rotation.",
+          "rotation_same_group": "The two groups must be different."
         }
       },
       "sections": {

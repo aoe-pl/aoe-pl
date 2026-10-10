@@ -23,10 +23,18 @@ import {
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { api } from "@/trpc/react";
-import { Calendar, Edit, Eye, Trash2, Users } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Calendar,
+  Edit,
+  Eye,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type {
   TournamentGroupSubmitData,
@@ -113,6 +121,42 @@ export function TournamentGroupList({
         setDeletingGroupId(undefined);
       },
     });
+
+  // Local copy so we can reorder optimistically before the mutation settles.
+  const [ordered, setOrdered] = useState<NonNullable<typeof groups>>([]);
+
+  useEffect(() => {
+    if (groups) setOrdered(groups);
+  }, [groups]);
+
+  const { mutate: reorder, isPending: reorderPending } =
+    api.tournaments.groups.reorder.useMutation({
+      onError: (error) => {
+        toast.error(<ErrorToast message={error.message} />);
+        void refetch();
+      },
+    });
+
+  const moveGroup = (index: number, direction: "up" | "down") => {
+    const swapWith = direction === "up" ? index - 1 : index + 1;
+    if (swapWith < 0 || swapWith >= ordered.length) return;
+
+    const next = [...ordered];
+    [next[index], next[swapWith]] = [next[swapWith]!, next[index]!];
+
+    const updated = next.map((group, order) => ({
+      ...group,
+      displayOrder: order,
+    }));
+
+    setOrdered(updated);
+    reorder({
+      updates: updated.map((group) => ({
+        id: group.id,
+        displayOrder: group.displayOrder,
+      })),
+    });
+  };
 
   const handleEdit = (group: TournamentGroupWithParticipants) => {
     setEditingGroup(group);
@@ -204,12 +248,15 @@ export function TournamentGroupList({
         <h2 className="text-lg font-semibold">Groups</h2>
         <Button onClick={handleAdd}>Add Group</Button>
       </div>
-      {!groups || groups.length === 0 ? (
+      <p className="text-muted-foreground text-xs">
+        {t("admin.tournaments.groups.layout_hint")}
+      </p>
+      {ordered.length === 0 ? (
         emptyState
       ) : (
         <div className="space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {(groups ?? []).map((group) => (
+            {ordered.map((group, index) => (
               <Card
                 key={group.id}
                 className="w-full min-w-[320px] transition-shadow hover:shadow-md sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)]"
@@ -223,7 +270,33 @@ export function TournamentGroupList({
                           {group.name}
                         </CardTitle>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveGroup(index, "up")}
+                          disabled={index === 0 || reorderPending || isLoading}
+                          className="h-8 w-8 p-0"
+                          title={t("admin.tournaments.groups.move_earlier")}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveGroup(index, "down")}
+                          disabled={
+                            index === ordered.length - 1 ||
+                            reorderPending ||
+                            isLoading
+                          }
+                          className="h-8 w-8 p-0"
+                          title={t("admin.tournaments.groups.move_later")}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
                         <Button
                           type="button"
                           variant="ghost"

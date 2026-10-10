@@ -14,11 +14,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { locales } from "@/lib/locales";
+import { parseGroupName, ROTATION_SYMBOL } from "@/lib/tournaments/group-grid";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Locale } from "next-intl";
+import { useTranslations, type Locale } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -57,6 +65,7 @@ export function TournamentGroupForm({
 
   const { data: matchModes = [] } = api.tournaments.matchMode.list.useQuery();
   const [activeLocale, setActiveLocale] = useState<Locale>(locales.default);
+  const t = useTranslations("admin.tournaments.groups.form");
 
   const form = useForm<TournamentGroupFormSchema>({
     resolver: zodResolver(tournamentGroupFormSchema),
@@ -75,6 +84,7 @@ export function TournamentGroupForm({
       displayOrder: initialData?.displayOrder ?? groups.length,
       isTeamBased: initialData?.isTeamBased ?? defaultIsTeamBased,
       isMixed: initialData?.isMixed ?? false,
+      isRotational: initialData?.isRotational ?? false,
       matchModeId: initialData?.matchModeId ?? "",
       color: initialData?.color ?? "",
       civDraftPresetUrl: initialData?.civDraftPresetUrl ?? "",
@@ -85,6 +95,61 @@ export function TournamentGroupForm({
         ) ?? [],
     },
   });
+
+  // Rotation groups are created by picking two existing groups; the name and
+  // the "isRotational" flag are derived from that selection.
+  const rotationCandidates = groups.filter(
+    (g) => !g.isRotational && g.id !== initialData?.id,
+  );
+
+  const findGroupIdForPart = (part: { base: string; index: number }) => {
+    const wanted = part.base.trim().toLowerCase();
+    const match = groups.find((g) => {
+      const parsed = parseGroupName(g.name);
+      return (
+        !parsed.rotation &&
+        parsed.base.trim().toLowerCase() === wanted &&
+        parsed.index === part.index
+      );
+    });
+    return match?.id ?? "";
+  };
+
+  const initialRotationParts =
+    initialData?.isRotational === true
+      ? parseGroupName(initialData.name).parts
+      : [];
+
+  const [isRotation, setIsRotation] = useState(
+    initialData?.isRotational ?? false,
+  );
+  const [rotationAId, setRotationAId] = useState(() =>
+    initialRotationParts[0] ? findGroupIdForPart(initialRotationParts[0]) : "",
+  );
+  const [rotationBId, setRotationBId] = useState(() =>
+    initialRotationParts[1] ? findGroupIdForPart(initialRotationParts[1]) : "",
+  );
+
+  // Compose the group name ("<A> 🔄 <B>") whenever the rotation selection
+  // changes so the form never submits an incomplete rotation name.
+  useEffect(() => {
+    if (!isRotation) return;
+    const a = groups.find((g) => g.id === rotationAId);
+    const b = groups.find((g) => g.id === rotationBId);
+    if (a && b) {
+      form.setValue("name", `${a.name} ${ROTATION_SYMBOL} ${b.name}`, {
+        shouldValidate: true,
+      });
+    }
+  }, [isRotation, rotationAId, rotationBId, groups, form]);
+
+  // A rotation is invalid when it is enabled but does not reference two
+  // distinct groups.
+  const rotationIncomplete =
+    isRotation &&
+    (rotationAId.length === 0 ||
+      rotationBId.length === 0 ||
+      rotationAId === rotationBId);
 
   // No tournament-level default anymore: default to the first available
   // match mode so every group carries an explicit one.
@@ -104,6 +169,7 @@ export function TournamentGroupForm({
       isTeamBased: data.isMixed,
       // when team based are support isMixed is always false when not team based group!
       isMixed: data.isMixed,
+      isRotational: isRotation,
       color: data.color ?? undefined,
       participantIds: data.participantIds ?? [],
       translations: locales.supported.map((locale) => ({
@@ -133,14 +199,94 @@ export function TournamentGroupForm({
                   <FormLabel>Group Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter group name"
+                      placeholder={
+                        isRotation
+                          ? t("rotation_name_placeholder")
+                          : "Enter group name"
+                      }
+                      readOnly={isRotation}
                       {...field}
                     />
                   </FormControl>
+                  {isRotation && (
+                    <FormDescription>{t("rotation_name_hint")}</FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="space-y-4 rounded-md border p-4">
+              <div className="flex flex-row items-start space-y-0 space-x-3">
+                <Checkbox
+                  checked={isRotation}
+                  onCheckedChange={(value) => setIsRotation(value === true)}
+                />
+                <div className="space-y-1 leading-none">
+                  <FormLabel>{t("rotation_label")}</FormLabel>
+                  <FormDescription>{t("rotation_description")}</FormDescription>
+                </div>
+              </div>
+
+              {isRotation && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <FormLabel>{t("rotation_first_group")}</FormLabel>
+                    <Select
+                      value={rotationAId.length > 0 ? rotationAId : undefined}
+                      onValueChange={setRotationAId}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t("rotation_select_first")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {rotationCandidates.map((group) => (
+                          <SelectItem
+                            key={group.id}
+                            value={group.id}
+                          >
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <FormLabel>{t("rotation_second_group")}</FormLabel>
+                    <Select
+                      value={rotationBId.length > 0 ? rotationBId : undefined}
+                      onValueChange={setRotationBId}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={t("rotation_select_second")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {rotationCandidates.map((group) => (
+                          <SelectItem
+                            key={group.id}
+                            value={group.id}
+                          >
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {(!rotationAId || !rotationBId) && (
+                    <p className="text-destructive text-xs sm:col-span-2">
+                      {t("rotation_incomplete")}
+                    </p>
+                  )}
+                  {rotationAId && rotationAId === rotationBId && (
+                    <p className="text-destructive text-xs sm:col-span-2">
+                      {t("rotation_same_group")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
 
             <FormField
               control={form.control}
@@ -379,7 +525,7 @@ export function TournamentGroupForm({
             </Button>
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending === true || rotationIncomplete}
             >
               {isPending ? "Saving..." : initialData ? "Update" : "Create"}
             </Button>

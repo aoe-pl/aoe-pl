@@ -100,7 +100,12 @@ export const usersRepository = {
             TournamentGroupParticipant: {
               select: {
                 tournamentGroup: {
-                  select: { id: true, name: true, color: true },
+                  select: {
+                    id: true,
+                    name: true,
+                    color: true,
+                    isRotational: true,
+                  },
                 },
               },
             },

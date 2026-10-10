@@ -614,6 +614,7 @@ export const tournamentRouter = createTRPCRouter({
             displayOrder: z.number().int().min(0).optional(),
             isTeamBased: z.boolean().optional(),
             isMixed: z.boolean().optional(),
+            isRotational: z.boolean().optional(),
             color: z.string().optional(),
             civDraftPresetUrl: z.string().optional(),
             mapDraftPresetUrl: z.string().optional(),
@@ -645,6 +646,7 @@ export const tournamentRouter = createTRPCRouter({
             displayOrder: z.number().int().min(0).optional(),
             isTeamBased: z.boolean().optional(),
             isMixed: z.boolean().optional(),
+            isRotational: z.boolean().optional(),
             color: z.string().optional(),
             civDraftPresetUrl: z.string().optional(),
             mapDraftPresetUrl: z.string().optional(),
@@ -662,6 +664,20 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         return tournamentGroupRepository.deleteTournamentGroup(input.id);
+      }),
+    reorder: adminProcedure
+      .input(
+        z.object({
+          updates: z.array(
+            z.object({
+              id: z.string(),
+              displayOrder: z.number().int().min(0),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        return tournamentGroupRepository.reorderGroups(input.updates);
       }),
   }),
 

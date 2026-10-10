@@ -10,6 +10,7 @@ export interface GroupPageData {
   groupId: string;
   groupColor: string;
   groupName: string;
+  isRotational: boolean;
   description: string | null;
   matchMode: {
     mode: TournamentMatchModeType;

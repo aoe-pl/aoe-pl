@@ -312,6 +312,7 @@ model TournamentGroup {
   matchModeId                String?
   isTeamBased                Boolean?
   isMixed                    Boolean?
+  isRotational               Boolean                      @default(false)
   color                      String?
   civDraftPresetUrl          String?
   mapDraftPresetUrl          String?

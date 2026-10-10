@@ -32,6 +32,7 @@ type TournamentParticipant = {
       id: string;
       name: string;
       color: string | null;
+      isRotational: boolean;
     };
   }[];
 };
@@ -74,7 +75,12 @@ export function ProfileTournamentHistorySection({
                     p.tournament.tournamentSeries.name,
                   );
                   const href = `/tournaments/${seriesSlug}/${p.tournament.urlKey}`;
+                  // Rotation groups link several groups; only the "real"
+                  // (non-rotational) group belongs in the history table.
                   const group =
+                    p.TournamentGroupParticipant.find(
+                      (gp) => !gp.tournamentGroup.isRotational,
+                    )?.tournamentGroup ??
                     p.TournamentGroupParticipant[0]?.tournamentGroup;
                   return (
                     <TableRow key={p.id}>

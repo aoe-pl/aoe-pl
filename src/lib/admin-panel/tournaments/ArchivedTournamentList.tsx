@@ -44,7 +44,7 @@ export async function ArchivedTournamentList() {
                         size="sm"
                         asChild
                         className="h-8 w-8 p-0"
-                        title={t("view")}
+                        title="View tournament details"
                       >
                         <Link href={`/admin/tournaments/view/${tournament.id}`}>
                           <Eye className="h-4 w-4" />
