@@ -75,7 +75,7 @@ export function GroupSelectionView({
               {group ? (
                 <Button
                   className={cn(
-                    "border-medieval-wood-border h-full min-h-12 w-full rounded-lg border-2 px-4 text-center text-sm font-bold tracking-wide whitespace-normal transition-all [text-shadow:0_1px_2px_rgba(0,0,0,0.45)] sm:min-h-14",
+                    "border-medieval-wood-border h-full min-h-12 w-full rounded-lg border-2 px-4 text-center text-xs font-bold tracking-wide whitespace-normal transition-all [text-shadow:0_1px_2px_rgba(0,0,0,0.45)] sm:min-h-14",
                     isSelected
                       ? "border-medieval-gold"
                       : "hover:border-medieval-gold/70 opacity-80 hover:-translate-y-0.5 hover:opacity-100",

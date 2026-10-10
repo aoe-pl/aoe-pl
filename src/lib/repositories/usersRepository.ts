@@ -146,9 +146,13 @@ export const usersRepository = {
           tournamentStatus: p.tournament.status,
           tournamentFormat: p.tournament.format,
           teamId: p.teamId,
-          groupIds: p.TournamentGroupParticipant.map(
-            (gp) => gp.tournamentGroup.id,
-          ),
+          // Rotational groups are derived groupings that mirror the real
+          // groups they link, so they must not influence the achieved rank -
+          // otherwise a player would inherit the (often better) placement from
+          // a rotation group instead of their actual group.
+          groupIds: p.TournamentGroupParticipant.filter(
+            (gp) => !gp.tournamentGroup.isRotational,
+          ).map((gp) => gp.tournamentGroup.id),
         })),
       ),
     ]);
