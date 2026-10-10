@@ -248,9 +248,6 @@ export function TournamentGroupList({
         <h2 className="text-lg font-semibold">Groups</h2>
         <Button onClick={handleAdd}>Add Group</Button>
       </div>
-      <p className="text-muted-foreground text-xs">
-        {t("admin.tournaments.groups.layout_hint")}
-      </p>
       {ordered.length === 0 ? (
         emptyState
       ) : (

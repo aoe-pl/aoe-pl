@@ -52,6 +52,14 @@ const push = <K, V>(m: Map<K, V[]>, k: K, v: V) => {
   else m.set(k, [v]);
 };
 
+/**
+ * Legacy rotation groups are named "<group A> 🔁 <group B>" (or with 🔄) but the
+ * old database never flagged them. Detect the rotation symbol in the name so the
+ * imported groups get `isRotational: true` in the new schema — otherwise they
+ * show up as regular groups (e.g. in player tournament history).
+ */
+const ROTATION_EMOJI = /[\u{1F501}\u{1F504}]/u; // 🔁 / 🔄
+
 /* ------------------------------------------------------------------ */
 /* civ / map resolution                                                */
 /* ------------------------------------------------------------------ */
@@ -407,14 +415,19 @@ async function main() {
   const groupTrRows: any[] = [];
   const groupParticipantRows: any[] = [];
   let groupIndex = 0;
+  let rotationalGroups = 0;
   for (const g of groups) {
     if (!tournamentById.has(Number(g.belongsToId))) continue;
     const displayOrder = g.sort_key ?? groupIndex;
+    const name = g.name ?? `Group ${g.id}`;
+    const isRotational = ROTATION_EMOJI.test(name);
+    if (isRotational) rotationalGroups++;
     groupRows.push({
       id: `g_${g.id}`,
       tournamentId: `t_${g.belongsToId}`,
       displayOrder,
-      name: g.name ?? `Group ${g.id}`,
+      name,
+      isRotational,
       matchModeId: modeIdFor(g.no_of_games),
       color: g.color ?? null,
     });
@@ -555,7 +568,7 @@ async function main() {
     `  Participant       : ${participantRows.length} (nickname suffix fixes: ${nicknameSuffixes})`,
   );
   console.log(
-    `  Group             : ${groupRows.length} (+ ${groupParticipantRows.length} members)`,
+    `  Group             : ${groupRows.length} (+ ${groupParticipantRows.length} members, rotational: ${rotationalGroups})`,
   );
   console.log(
     `  Match             : ${matchRows.length} (+ ${matchParticipantRows.length} players)`,

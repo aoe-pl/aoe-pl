@@ -227,7 +227,6 @@
           "filter_by_player": "Filter by player",
           "all_participants": "All participants"
         },
-        "layout_hint": "Groups sharing a name (e.g. \"Red Ants 1\", \"Red Ants 2\") form one column ordered by the trailing number, and the arrows below set the column order. Name a rotation group with both groups and an arrow, e.g. \"Red 2 <-> Black 1\".",
         "move_earlier": "Move group earlier",
         "move_later": "Move group later",
         "form": {

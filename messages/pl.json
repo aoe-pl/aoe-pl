@@ -227,7 +227,6 @@
           "filter_by_player": "Filtruj po graczu",
           "all_participants": "Wszyscy uczestnicy"
         },
-        "layout_hint": "Grupy o tej samej nazwie (np. \"Red Ants 1\", \"Red Ants 2\") tworzą jedną kolumnę, uporządkowaną według liczby na końcu nazwy, a strzałki poniżej ustawiają kolejność kolumn. Grupę rotacyjną nazwij, podając obie grupy i strzałkę, np. \"Red 2 <-> Black 1\".",
         "move_earlier": "Przenieś grupę wyżej",
         "move_later": "Przenieś grupę niżej",
         "form": {
