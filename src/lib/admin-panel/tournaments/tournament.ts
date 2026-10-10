@@ -135,6 +135,7 @@ const tournamentGroupFormSchema = z.object({
   displayOrder: z.number().int().min(0),
   isTeamBased: z.boolean().optional(),
   isMixed: z.boolean().optional(),
+  isRotational: z.boolean().optional(),
   color: z.string().optional(),
   civDraftPresetUrl: z
     .string()

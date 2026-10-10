@@ -226,6 +226,20 @@
           "title": "Mecze",
           "filter_by_player": "Filtruj po graczu",
           "all_participants": "Wszyscy uczestnicy"
+        },
+        "move_earlier": "Przenieś grupę wyżej",
+        "move_later": "Przenieś grupę niżej",
+        "form": {
+          "rotation_label": "Grupa rotacyjna",
+          "rotation_description": "Gracze rotują między dwiema grupami. Nazwa jest generowana automatycznie na podstawie dwóch wybranych grup poniżej.",
+          "rotation_name_placeholder": "Wybierz dwie grupy poniżej",
+          "rotation_name_hint": "Tworzona automatycznie z dwóch grup poniżej.",
+          "rotation_first_group": "Pierwsza grupa",
+          "rotation_second_group": "Druga grupa",
+          "rotation_select_first": "Wybierz pierwszą grupę",
+          "rotation_select_second": "Wybierz drugą grupę",
+          "rotation_incomplete": "Wybierz dwie różne grupy, aby utworzyć rotację.",
+          "rotation_same_group": "Grupy muszą być różne."
         }
       },
       "sections": {

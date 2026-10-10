@@ -18,6 +18,7 @@ export type TournamentGroupCreateData = {
   displayOrder?: number;
   isTeamBased?: boolean;
   isMixed?: boolean;
+  isRotational?: boolean;
   color?: string;
   civDraftPresetUrl?: string;
   mapDraftPresetUrl?: string;
@@ -135,6 +136,7 @@ export const tournamentGroupRepository = {
           displayOrder: data.displayOrder ?? 0,
           isTeamBased: data.isTeamBased,
           isMixed: data.isMixed,
+          isRotational: data.isRotational ?? false,
           color: data.color,
           civDraftPresetUrl: data.civDraftPresetUrl,
           mapDraftPresetUrl: data.mapDraftPresetUrl,
@@ -313,6 +315,7 @@ export const tournamentGroupRepository = {
         displayOrder: data.displayOrder,
         isTeamBased: data.isTeamBased,
         isMixed: data.isMixed,
+        isRotational: data.isRotational,
         color: data.color,
         civDraftPresetUrl: data.civDraftPresetUrl,
         mapDraftPresetUrl: data.mapDraftPresetUrl,
@@ -389,6 +392,14 @@ export const tournamentGroupRepository = {
 
   async deleteTournamentGroup(id: string) {
     return db.tournamentGroup.delete({ where: { id } });
+  },
+
+  async reorderGroups(updates: { id: string; displayOrder: number }[]) {
+    return db.$transaction(
+      updates.map(({ id, displayOrder }) =>
+        db.tournamentGroup.update({ where: { id }, data: { displayOrder } }),
+      ),
+    );
   },
 
   async getGroupParticipants(groupId: string) {

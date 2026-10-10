@@ -44,6 +44,7 @@ export default async function TournamentGroupsPage({
       groupId: g.id,
       groupColor: g.color!,
       groupName: g.name,
+      isRotational: g.isRotational,
       description,
       matchMode: matchMode
         ? { mode: matchMode.mode, gameCount: matchMode.gameCount }

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { TournamentSectionContent } from "../tournament-section-content";
 import { GroupLeaderboardTable } from "./GroupLeaderboardTable";
 import { GroupPlayerMatches } from "./GroupPlayerMatches";
 import { GroupProgressPanel } from "./GroupProgressPanel";
@@ -68,10 +69,12 @@ export function GroupsPageContent({
             )}
             {selectedGroupData.description && (
               <div
-                className="border-medieval-wood-border text-primary w-full rounded-xl border p-4 text-sm whitespace-pre-line"
+                className="border-medieval-wood-border text-primary w-full rounded-xl border p-4 text-sm"
                 style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
               >
-                {selectedGroupData.description}
+                <TournamentSectionContent
+                  content={selectedGroupData.description}
+                />
               </div>
             )}
           </div>

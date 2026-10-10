@@ -32,6 +32,7 @@ type TournamentParticipant = {
       id: string;
       name: string;
       color: string | null;
+      isRotational: boolean;
     };
   }[];
 };
@@ -46,8 +47,8 @@ export function ProfileTournamentHistorySection({
   const t = useTranslations("profile.tournaments");
   const tGlobal = useTranslations();
 
-  const hasGroups = participants.some(
-    (p) => p.TournamentGroupParticipant.length > 0,
+  const hasGroups = participants.some((p) =>
+    p.TournamentGroupParticipant.some((gp) => !gp.tournamentGroup.isRotational),
   );
   const hasFinished = participants.some(
     (p) => p.tournament.status === "FINISHED",
@@ -74,8 +75,12 @@ export function ProfileTournamentHistorySection({
                     p.tournament.tournamentSeries.name,
                   );
                   const href = `/tournaments/${seriesSlug}/${p.tournament.urlKey}`;
-                  const group =
-                    p.TournamentGroupParticipant[0]?.tournamentGroup;
+                  // Rotation groups link several groups; only the "real"
+                  // (non-rotational) group belongs in the history table, so
+                  // rotational-only memberships are omitted (shown as "—").
+                  const group = p.TournamentGroupParticipant.find(
+                    (gp) => !gp.tournamentGroup.isRotational,
+                  )?.tournamentGroup;
                   return (
                     <TableRow key={p.id}>
                       <TableCell>

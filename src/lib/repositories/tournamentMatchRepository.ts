@@ -934,6 +934,19 @@ export const tournamentMatchRepository = {
       where: {
         status: { in: ["PENDING", "SCHEDULED"] },
         TournamentMatchParticipant: { some: { OR: ownershipFilters } },
+        // A match belongs to a tournament either via its group (group stage) or
+        // via a bracket node (playoffs). Skip matches whose tournament already
+        // finished - they are not "upcoming" anymore.
+        OR: [
+          { group: { tournament: { status: { not: "FINISHED" } } } },
+          {
+            bracketNodes: {
+              some: {
+                bracket: { tournament: { status: { not: "FINISHED" } } },
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
