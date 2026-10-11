@@ -5,7 +5,11 @@ import {
   parsePresetKey,
 } from "@/lib/aoe2cm";
 import { fetchAoe2CompanionProfile } from "@/lib/aoe2companion";
-import { notifyMatchScheduled, notifyMatchUnscheduled } from "@/lib/discord";
+import {
+  notifyMatchScheduled,
+  notifyMatchUnscheduled,
+  notifyTournamentRegistration,
+} from "@/lib/discord";
 import { getRegistrationWindowStatus } from "@/lib/helpers/registration-window";
 import { isTournamentReadOnly } from "@/lib/helpers/tournament-lock";
 import { tournamentBracketRepository } from "@/lib/repositories/tournamentBracketRepository";
@@ -488,6 +492,8 @@ export const tournamentRouter = createTRPCRouter({
             companionValue.trim(),
           );
         }
+
+        await notifyTournamentRegistration(participant.id);
 
         return participant;
       }),

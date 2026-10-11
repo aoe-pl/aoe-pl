@@ -31,13 +31,13 @@ export interface DiscordWebhookPayload {
 }
 
 /**
- * POSTs a payload to the configured Discord webhook.
+ * POSTs a payload to the given Discord webhook URL. No-op when the URL is not
+ * configured.
  */
 export async function sendDiscordWebhook(
   payload: DiscordWebhookPayload,
+  webhookUrl: string | undefined,
 ): Promise<void> {
-  const webhookUrl = env.DISCORD_WEBHOOK_URL;
-
   if (!webhookUrl) return;
 
   const controller = new AbortController();
@@ -61,6 +61,18 @@ export async function sendDiscordWebhook(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/** Posts to the channel dedicated to match scheduling notifications. */
+async function sendMatchWebhook(payload: DiscordWebhookPayload): Promise<void> {
+  await sendDiscordWebhook(payload, env.MATCH_SCHEDULED_DISCORD_WEBHOOK_URL);
+}
+
+/** Posts to the channel dedicated to tournament registration notifications. */
+async function sendRegistrationWebhook(
+  payload: DiscordWebhookPayload,
+): Promise<void> {
+  await sendDiscordWebhook(payload, env.REGISTERED_DISCORD_WEBHOOK_URL);
 }
 
 /**
@@ -166,7 +178,7 @@ function matchFields(groupName: string | null): DiscordEmbedField[] {
  * scheduled (or rescheduled). Safe to call even when no webhook is configured.
  */
 export async function notifyMatchScheduled(matchId: string): Promise<void> {
-  if (!env.DISCORD_WEBHOOK_URL) return;
+  if (!env.MATCH_SCHEDULED_DISCORD_WEBHOOK_URL) return;
 
   try {
     const context = await loadMatchNotificationContext(matchId);
@@ -184,7 +196,7 @@ export async function notifyMatchScheduled(matchId: string): Promise<void> {
       );
     }
 
-    await sendDiscordWebhook({
+    await sendMatchWebhook({
       embeds: [
         {
           title: context.tournamentName ?? "Zaplanowano mecz",
@@ -204,14 +216,14 @@ export async function notifyMatchScheduled(matchId: string): Promise<void> {
  * cancelled. Safe to call even when no webhook is configured.
  */
 export async function notifyMatchUnscheduled(matchId: string): Promise<void> {
-  if (!env.DISCORD_WEBHOOK_URL) return;
+  if (!env.MATCH_SCHEDULED_DISCORD_WEBHOOK_URL) return;
 
   try {
     const context = await loadMatchNotificationContext(matchId);
 
     if (!context) return;
 
-    await sendDiscordWebhook({
+    await sendMatchWebhook({
       embeds: [
         {
           title: context.tournamentName ?? "Mecz anulowany",
@@ -226,5 +238,51 @@ export async function notifyMatchUnscheduled(matchId: string): Promise<void> {
     });
   } catch (error) {
     console.error("Error building Discord match notification:", error);
+  }
+}
+
+/**
+ * Sends a Discord notification announcing that a player registered for a
+ * tournament. Safe to call even when no webhook is configured.
+ */
+export async function notifyTournamentRegistration(
+  participantId: string,
+): Promise<void> {
+  if (!env.REGISTERED_DISCORD_WEBHOOK_URL) return;
+
+  try {
+    const participant = await db.tournamentParticipant.findUnique({
+      where: { id: participantId },
+      include: {
+        tournament: { include: { tournamentSeries: true } },
+      },
+    });
+
+    if (!participant) return;
+
+    const { tournament } = participant;
+
+    const siteUrl = resolveSiteUrl(env.SITE_URL);
+    const url = siteUrl
+      ? `${siteUrl}/tournaments/${slugify(
+          tournament.tournamentSeries.name,
+        )}/${tournament.urlKey}/players`
+      : undefined;
+
+    const player = url
+      ? `[**${participant.nickname}**](${url})`
+      : `**${participant.nickname}**`;
+
+    await sendRegistrationWebhook({
+      embeds: [
+        {
+          title: tournament.name ?? "Nowa rejestracja",
+          description: `Nowy uczestnik: ${player}`,
+          color: embedColor,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Error building Discord registration notification:", error);
   }
 }

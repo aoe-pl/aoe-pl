@@ -24,6 +24,8 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     DISCORD_WEBHOOK_URL: z.string().url().optional(),
+    MATCH_SCHEDULED_DISCORD_WEBHOOK_URL: z.string().url().optional(),
+    REGISTERED_DISCORD_WEBHOOK_URL: z.string().url().optional(),
     DISCORD_INVITE_URL: z.string().url().optional(),
     SITE_URL: z.string().url().optional(),
     TWITCH_CLIENT_ID: z.string().optional(),
@@ -57,6 +59,9 @@ export const env = createEnv({
     POSTGRES_DB: process.env.POSTGRES_DB,
     NODE_ENV: process.env.NODE_ENV,
     DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
+    MATCH_SCHEDULED_DISCORD_WEBHOOK_URL:
+      process.env.MATCH_SCHEDULED_DISCORD_WEBHOOK_URL,
+    REGISTERED_DISCORD_WEBHOOK_URL: process.env.REGISTERED_DISCORD_WEBHOOK_URL,
     DISCORD_INVITE_URL: process.env.DISCORD_INVITE_URL,
     SITE_URL: process.env.SITE_URL,
     TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID,
