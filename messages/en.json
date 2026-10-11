@@ -899,9 +899,7 @@
       "save_success": "Display name updated."
     },
     "streams": {
-      "linked": "Stream linked",
-      "not_linked": "No stream linked",
-      "linked_button": "Stream linked",
+      "link_label": "Stream Link",
       "not_linked_button": "Link stream",
       "dialog_title": "Stream link",
       "dialog_description": "Paste the link to your stream so viewers can find it and so you can mark matches as streamed.",
@@ -918,9 +916,7 @@
       "placeholder": "https://aoe2companion.com/players/...",
       "save_success": "AoE2Companion link saved.",
       "unlink_success": "AoE2Companion link removed.",
-      "linked": "AoE2Companion linked",
-      "not_linked": "AoE2Companion not linked",
-      "linked_button": "AoE2Companion linked",
+      "link_label": "AoE2Companion Link",
       "not_linked_button": "Link AoE2Companion",
       "dialog_title": "AoE2Companion profile",
       "dialog_description": "Paste the link to your AoE2Companion profile to show your ranked stats on this page.",

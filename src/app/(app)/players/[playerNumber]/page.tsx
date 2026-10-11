@@ -3,7 +3,6 @@ import { ProfileAoe2Matches } from "@/components/profile/profile-aoe2-matches";
 import { ProfileAoe2Stats } from "@/components/profile/profile-aoe2-stats";
 import { ProfileAoe2CompanionButton } from "@/components/profile/profile-aoe2companion-button";
 import { ProfileNameEditor } from "@/components/profile/profile-name-editor";
-import { ProfileRoleBadges } from "@/components/profile/profile-role-badges";
 import { ProfileStreamButton } from "@/components/profile/profile-stream-button";
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
 import { ProfileUpcomingMatchesSection } from "@/components/profile/profile-upcoming-matches-section";
@@ -68,10 +67,9 @@ export default async function PlayerProfilePage({
               </h1>
               {isOwnProfile && <ProfileNameEditor currentName={profile.name} />}
             </div>
-            <ProfileRoleBadges roles={profile.userRoles} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col items-end gap-2">
             <ProfileAoe2CompanionButton
               userId={profile.id}
               currentUrl={profile.aoe2companionUrl}

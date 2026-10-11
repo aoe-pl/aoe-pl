@@ -6,6 +6,26 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Ensures a user-provided external URL is absolute, prepending https:// when
+ * the value has no protocol (e.g. "aoe2companion.com/players/1"). Returns null
+ * when the value cannot be turned into a valid URL.
+ */
+export function toAbsoluteUrl(url: string | null | undefined): string | null {
+  const trimmed = url?.trim();
+  if (!trimmed) return null;
+
+  try {
+    return new URL(trimmed).toString();
+  } catch {
+    try {
+      return new URL("https://" + trimmed).toString();
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
  * Converts text into a URL friendly slug by lowercasing, removing accents, and replacing special characters with hyphens.
  */
 export function slugify(text: string): string {
