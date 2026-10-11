@@ -330,6 +330,14 @@ export const tournamentRouter = createTRPCRouter({
         );
       }),
 
+    count: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentParticipantRepository.countByTournament(
+          input.tournamentId,
+        );
+      }),
+
     register: protectedProcedure
       .input(
         z.object({

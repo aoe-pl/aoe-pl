@@ -41,6 +41,10 @@ export const tournamentParticipantRepository = {
     });
   },
 
+  async countByTournament(tournamentId: string) {
+    return db.tournamentParticipant.count({ where: { tournamentId } });
+  },
+
   async registerParticipant(
     tournamentId: string,
     userId: string,
