@@ -2,6 +2,7 @@ import { ProfileAdminNoteSection } from "@/components/profile/profile-admin-note
 import { ProfileAoe2Matches } from "@/components/profile/profile-aoe2-matches";
 import { ProfileAoe2Stats } from "@/components/profile/profile-aoe2-stats";
 import { ProfileAoe2CompanionButton } from "@/components/profile/profile-aoe2companion-button";
+import { ProfileNameEditor } from "@/components/profile/profile-name-editor";
 import { ProfileRoleBadges } from "@/components/profile/profile-role-badges";
 import { ProfileStreamButton } from "@/components/profile/profile-stream-button";
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
@@ -58,12 +59,15 @@ export default async function PlayerProfilePage({
       <div className="panel">
         <header className="flex flex-wrap items-start justify-between gap-4 pb-6">
           <div className="space-y-2">
-            <h1
-              className="text-3xl font-bold"
-              style={{ color: "var(--medieval-gold)" }}
-            >
-              {profile.name}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1
+                className="text-3xl font-bold"
+                style={{ color: "var(--medieval-gold)" }}
+              >
+                {profile.name}
+              </h1>
+              {isOwnProfile && <ProfileNameEditor currentName={profile.name} />}
+            </div>
             <ProfileRoleBadges roles={profile.userRoles} />
           </div>
 

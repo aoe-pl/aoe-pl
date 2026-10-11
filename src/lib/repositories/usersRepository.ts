@@ -1,6 +1,46 @@
 import { getAchievedRanks } from "@/lib/helpers/tournament-rank";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
 import { db } from "@/server/db";
+import { type Prisma } from "@prisma/client";
+
+/**
+ * The in-tournament display name is stored per participant
+ * (`TournamentParticipant.nickname`), so a rename must be pushed to every
+ * tournament the user takes part in
+ */
+async function propagateUserDisplayName(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  name: string,
+) {
+  const participants = await tx.tournamentParticipant.findMany({
+    where: { userId },
+    select: { id: true, tournamentId: true },
+  });
+
+  for (const participant of participants) {
+    const others = await tx.tournamentParticipant.findMany({
+      where: {
+        tournamentId: participant.tournamentId,
+        NOT: { id: participant.id },
+      },
+      select: { nickname: true },
+    });
+    const taken = new Set(others.map((p) => p.nickname));
+
+    let nickname = name;
+    let suffix = 1;
+    while (taken.has(nickname)) {
+      suffix += 1;
+      nickname = `${name} #${suffix}`;
+    }
+
+    await tx.tournamentParticipant.update({
+      where: { id: participant.id },
+      data: { nickname },
+    });
+  }
+}
 
 export const usersRepository = {
   async getUsers() {
@@ -221,6 +261,24 @@ export const usersRepository = {
     });
   },
 
+  /**
+   * Updates the user's own global display name and keeps their in-tournament
+   * display names in sync (see `propagateUserDisplayName`).
+   */
+  async updateOwnName(userId: string, name: string) {
+    return db.$transaction(async (tx) => {
+      const user = await tx.user.update({
+        where: { id: userId },
+        data: { name },
+        select: { id: true, name: true },
+      });
+
+      await propagateUserDisplayName(tx, userId, name);
+
+      return user;
+    });
+  },
+
   async updateAdminNote(userId: string, note: string | null) {
     return db.user.update({
       where: { id: userId },
@@ -253,6 +311,11 @@ export const usersRepository = {
             adminComment: data.adminComment,
           },
         });
+
+        // Keep the user's in-tournament display names in sync with the new name.
+        if (data.name !== undefined) {
+          await propagateUserDisplayName(tx, id, data.name);
+        }
 
         // Get current roles
         const currentRoles = await tx.userRole.findMany({
@@ -327,9 +390,17 @@ export const usersRepository = {
     }
 
     // Regular update without roles
-    return db.user.update({
-      where: { id },
-      data,
+    return db.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { id },
+        data,
+      });
+
+      if (data.name !== undefined) {
+        await propagateUserDisplayName(tx, id, data.name);
+      }
+
+      return updatedUser;
     });
   },
 

@@ -13,7 +13,10 @@ import { tournamentGameRepository } from "@/lib/repositories/tournamentGameRepos
 import { tournamentGroupRepository } from "@/lib/repositories/tournamentGroupRepository";
 import { tournamentMatchModeRepository } from "@/lib/repositories/tournamentMatchModeRepository";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
-import { tournamentParticipantRepository } from "@/lib/repositories/tournamentParticipantRepository";
+import {
+  NicknameTakenError,
+  tournamentParticipantRepository,
+} from "@/lib/repositories/tournamentParticipantRepository";
 import { tournamentRegistrationFieldRepository } from "@/lib/repositories/tournamentRegistrationFieldRepository";
 import { tournamentRepository } from "@/lib/repositories/tournamentRepository";
 import { tournamentSectionRepository } from "@/lib/repositories/tournamentSectionRepository";
@@ -334,7 +337,15 @@ export const tournamentRouter = createTRPCRouter({
       )
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
-        const nickname = ctx.session.user.name!;
+        const nickname = ctx.session.user.name;
+
+        if (!nickname) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Please set a display name on your profile before registering.",
+          });
+        }
 
         const tournament = await tournamentRepository.getTournamentById(
           input.tournamentId,
@@ -444,13 +455,23 @@ export const tournamentRouter = createTRPCRouter({
           });
         }
 
-        const participant =
-          await tournamentParticipantRepository.registerParticipant(
+        const participant = await tournamentParticipantRepository
+          .registerParticipant(
             input.tournamentId,
             userId,
             nickname,
             input.formData ?? {},
-          );
+          )
+          .catch((error) => {
+            if (error instanceof NicknameTakenError) {
+              throw new TRPCError({
+                code: "CONFLICT",
+                message:
+                  "That name is already taken in this tournament. Please change your display name and try again.",
+              });
+            }
+            throw error;
+          });
 
         // A predefined AoE2Companion field links the provided URL to the user's
         // profile so their ranking stats become available across the site.
@@ -482,7 +503,6 @@ export const tournamentRouter = createTRPCRouter({
         z.object({
           tournamentId: z.string(),
           userId: z.string(),
-          nickname: z.string().min(1).optional(),
         }),
       )
       .mutation(async ({ input }) => {
@@ -507,17 +527,19 @@ export const tournamentRouter = createTRPCRouter({
           });
         }
 
-        const trimmedNickname = input.nickname?.trim();
-        const nickname =
-          trimmedNickname && trimmedNickname.length > 0
-            ? trimmedNickname
-            : (user.name ?? "Player");
+        const nickname = user.name ?? "Player";
 
-        return tournamentParticipantRepository.registerParticipant(
-          input.tournamentId,
-          input.userId,
-          nickname,
-        );
+        return tournamentParticipantRepository
+          .registerParticipant(input.tournamentId, input.userId, nickname)
+          .catch((error) => {
+            if (error instanceof NicknameTakenError) {
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: `A participant named "${nickname}" is already registered in this tournament.`,
+              });
+            }
+            throw error;
+          });
       }),
 
     updateRegistrationData: adminProcedure
