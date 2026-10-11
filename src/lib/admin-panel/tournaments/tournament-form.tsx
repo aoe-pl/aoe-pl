@@ -28,10 +28,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { formatDateOnly, toLocalCalendarDate, toUtcMidnight } from "@/lib/date";
 import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
 import { storagePaths } from "@/lib/storage/paths";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { UseFormReturn } from "react-hook-form";
@@ -274,7 +274,7 @@ export function TournamentForm({
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          formatDateOnly(field.value, "PPP")
                         ) : (
                           <span>{t("start_date_placeholder")}</span>
                         )}
@@ -288,8 +288,14 @@ export function TournamentForm({
                   >
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
+                      selected={
+                        field.value
+                          ? toLocalCalendarDate(field.value)
+                          : undefined
+                      }
+                      onSelect={(date) =>
+                        field.onChange(date ? toUtcMidnight(date) : undefined)
+                      }
                       disabled={(date) =>
                         date < new Date(new Date().setHours(0, 0, 0, 0))
                       }
@@ -322,7 +328,7 @@ export function TournamentForm({
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          formatDateOnly(field.value, "PPP")
                         ) : (
                           <span>{t("end_date_placeholder")}</span>
                         )}
@@ -336,8 +342,14 @@ export function TournamentForm({
                   >
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
+                      selected={
+                        field.value
+                          ? toLocalCalendarDate(field.value)
+                          : undefined
+                      }
+                      onSelect={(date) =>
+                        field.onChange(date ? toUtcMidnight(date) : undefined)
+                      }
                       disabled={(date) =>
                         date < new Date(new Date().setHours(0, 0, 0, 0))
                       }
@@ -396,7 +408,7 @@ export function TournamentForm({
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          formatDateOnly(field.value, "PPP")
                         ) : (
                           <span>
                             {t("registration_start_date_placeholder")}
@@ -412,8 +424,14 @@ export function TournamentForm({
                   >
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
+                      selected={
+                        field.value
+                          ? toLocalCalendarDate(field.value)
+                          : undefined
+                      }
+                      onSelect={(date) =>
+                        field.onChange(date ? toUtcMidnight(date) : undefined)
+                      }
                       disabled={(date) =>
                         date < new Date(new Date().setHours(0, 0, 0, 0))
                       }
@@ -446,7 +464,7 @@ export function TournamentForm({
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          formatDateOnly(field.value, "PPP")
                         ) : (
                           <span>{t("registration_end_date_placeholder")}</span>
                         )}
@@ -460,8 +478,14 @@ export function TournamentForm({
                   >
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
+                      selected={
+                        field.value
+                          ? toLocalCalendarDate(field.value)
+                          : undefined
+                      }
+                      onSelect={(date) =>
+                        field.onChange(date ? toUtcMidnight(date) : undefined)
+                      }
                       disabled={(date) =>
                         date < new Date(new Date().setHours(0, 0, 0, 0))
                       }

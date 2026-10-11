@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatDateOnlyLocale } from "@/lib/date";
 import { formatRegistrationModeLabel } from "@/lib/helpers/registration-mode";
 import { getRegistrationWindowStatus } from "@/lib/helpers/registration-window";
 import type { TournamentSeries } from "@prisma/client";
@@ -42,14 +43,14 @@ export async function TournamentInfo({
             <span className="text-muted-foreground font-semibold">
               {t("admin.tournaments.view.info.start_date")}
             </span>
-            <span>{new Date(tournament.startDate).toLocaleDateString()}</span>
+            <span>{formatDateOnlyLocale(tournament.startDate)}</span>
           </div>
           {tournament.endDate && (
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground font-semibold">
                 {t("admin.tournaments.view.info.end_date")}
               </span>
-              <span>{new Date(tournament.endDate).toLocaleDateString()}</span>
+              <span>{formatDateOnlyLocale(tournament.endDate)}</span>
             </div>
           )}
           {tournament.registrationStartDate && (
@@ -58,9 +59,7 @@ export async function TournamentInfo({
                 {t("admin.tournaments.view.info.registration_start")}
               </span>
               <span>
-                {new Date(
-                  tournament.registrationStartDate,
-                ).toLocaleDateString()}
+                {formatDateOnlyLocale(tournament.registrationStartDate)}
               </span>
             </div>
           )}
@@ -70,7 +69,7 @@ export async function TournamentInfo({
                 {t("admin.tournaments.view.info.registration_end")}
               </span>
               <span>
-                {new Date(tournament.registrationEndDate).toLocaleDateString()}
+                {formatDateOnlyLocale(tournament.registrationEndDate)}
               </span>
             </div>
           )}
