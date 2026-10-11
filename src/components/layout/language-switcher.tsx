@@ -24,8 +24,7 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <button className="text-accent flex items-center gap-1 text-sm font-bold">
           <span className="text-base">{current.flag}</span>
-          <span>{current.code.toUpperCase()}</span>
-          <ChevronDown className="h-4" />
+          <ChevronDown className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
 
@@ -37,7 +36,7 @@ export function LanguageSwitcher() {
           >
             <a
               href={`/api/locale?${locales.key}=${l.code}&returnTo=${encodeURIComponent(pathname)}`}
-              className={`text-accent flex items-center`}
+              className="text-accent-foreground flex items-center gap-2"
             >
               <span className="">{l.flag}</span>
               {l.label}

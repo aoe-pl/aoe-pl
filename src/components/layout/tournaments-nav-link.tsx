@@ -69,7 +69,7 @@ export function TournamentsNavLink({
       </Link>
 
       {open && (
-        <div className="menu-medieval absolute top-full left-0 z-50 mt-1 w-64 overflow-hidden rounded-md border shadow-lg">
+        <div className="menu-medieval absolute top-full left-0 z-50 mt-1 w-max max-w-[calc(100vw-2rem)] min-w-64 overflow-hidden rounded-md border shadow-lg">
           <div className="max-h-[70vh] overflow-y-auto py-1">
             {groups.map((group) => (
               <div
@@ -83,7 +83,7 @@ export function TournamentsNavLink({
                   <Link
                     key={tournament.href}
                     href={tournament.href}
-                    className="text-foreground/90 hover:bg-accent/10 hover:text-accent block truncate rounded-sm px-3 py-1.5 text-sm"
+                    className="text-foreground/90 hover:bg-accent/10 hover:text-accent block rounded-sm px-3 py-1.5 text-sm whitespace-nowrap"
                   >
                     {tournament.name}
                   </Link>

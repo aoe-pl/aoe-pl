@@ -890,10 +890,17 @@
     "roles": {
       "expired": "wygasła"
     },
+    "name": {
+      "edit": "Zmień nazwę wyświetlaną",
+      "dialog_title": "Nazwa wyświetlana",
+      "dialog_description": "Ta nazwa jest widoczna na Twoim profilu oraz we wszystkich turniejach. Domyślnie jest to nazwa z Discorda.",
+      "placeholder": "Twoja nazwa wyświetlana",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "save_success": "Nazwa wyświetlana została zaktualizowana."
+    },
     "streams": {
-      "linked": "Stream powiązany",
-      "not_linked": "Brak powiązanego streama",
-      "linked_button": "Stream powiązany",
+      "link_label": "Link do streama",
       "not_linked_button": "Powiąż stream",
       "dialog_title": "Link do streama",
       "dialog_description": "Wklej link do swojego streama, aby widzowie mogli go znaleźć i abyś mógł oznaczać mecze jako streamowane.",
@@ -910,9 +917,7 @@
       "placeholder": "https://aoe2companion.com/players/...",
       "save_success": "Link AoE2Companion został zapisany.",
       "unlink_success": "Link AoE2Companion został usunięty.",
-      "linked": "Profil AoE2Companion powiązany",
-      "not_linked": "Profil AoE2Companion niepowiązany",
-      "linked_button": "AoE2Companion powiązany",
+      "link_label": "Link AoE2Companion",
       "not_linked_button": "Powiąż AoE2Companion",
       "dialog_title": "Profil AoE2Companion",
       "dialog_description": "Wklej link do swojego profilu AoE2Companion, aby wyświetlić statystyki rankingowe na tej stronie.",

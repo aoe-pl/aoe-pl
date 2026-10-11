@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDateOnlyLocale } from "@/lib/date";
 import type { TournamentWithRelations } from "@/server/api/tournament";
 import { api } from "@/trpc/server";
 import {
@@ -125,7 +126,7 @@ export async function TournamentList() {
                         {t("start")}:
                       </span>
                       <span className="font-medium">
-                        {new Date(tournament.startDate).toLocaleDateString()}
+                        {formatDateOnlyLocale(tournament.startDate)}
                       </span>
                     </div>
                   </div>
@@ -140,7 +141,7 @@ export async function TournamentList() {
                             {t("end")}:
                           </span>
                           <span className="font-medium">
-                            {new Date(tournament.endDate).toLocaleDateString()}
+                            {formatDateOnlyLocale(tournament.endDate)}
                           </span>
                         </div>
                       )}
@@ -151,9 +152,9 @@ export async function TournamentList() {
                             {t("registration_start")}:
                           </span>
                           <span className="font-medium">
-                            {new Date(
+                            {formatDateOnlyLocale(
                               tournament.registrationStartDate,
-                            ).toLocaleDateString()}
+                            )}
                           </span>
                         </div>
                       )}
@@ -164,9 +165,9 @@ export async function TournamentList() {
                             {t("registration_end")}:
                           </span>
                           <span className="font-medium">
-                            {new Date(
+                            {formatDateOnlyLocale(
                               tournament.registrationEndDate,
-                            ).toLocaleDateString()}
+                            )}
                           </span>
                         </div>
                       )}

@@ -131,6 +131,20 @@ export const usersRouter = createTRPCRouter({
       );
     }),
 
+  updateOwnName: protectedProcedure
+    .input(
+      z.object({
+        name: z
+          .string()
+          .trim()
+          .min(1, "Name is required")
+          .max(32, "Name is too long"),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return usersRepository.updateOwnName(ctx.session.user.id, input.name);
+    }),
+
   updateAdminNote: adminProcedure
     .input(z.object({ userId: z.string(), note: z.string() }))
     .mutation(async ({ input }) => {
