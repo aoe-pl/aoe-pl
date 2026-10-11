@@ -889,6 +889,15 @@
     "roles": {
       "expired": "expired"
     },
+    "name": {
+      "edit": "Edit display name",
+      "dialog_title": "Display name",
+      "dialog_description": "This name is shown on your profile and across all tournaments. It defaults to your Discord name.",
+      "placeholder": "Your display name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "save_success": "Display name updated."
+    },
     "streams": {
       "linked": "Stream linked",
       "not_linked": "No stream linked",

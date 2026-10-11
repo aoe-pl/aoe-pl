@@ -19,7 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ErrorToast } from "@/components/ui/error-toast-content";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -44,7 +43,6 @@ export function AddParticipantDialog({
   const [open, setOpen] = useState(false);
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [nickname, setNickname] = useState("");
 
   const { data: users, isLoading } = api.users.list.useQuery(undefined, {
     enabled: open,
@@ -56,7 +54,6 @@ export function AddParticipantDialog({
         toast.success("Participant added.");
         setOpen(false);
         setSelectedUserId(null);
-        setNickname("");
         router.refresh();
       },
       onError: (error) => {
@@ -71,7 +68,6 @@ export function AddParticipantDialog({
     addParticipant({
       tournamentId,
       userId: selectedUserId,
-      nickname: nickname.trim() || undefined,
     });
   };
 
@@ -167,18 +163,6 @@ export function AddParticipantDialog({
                 </Command>
               </PopoverContent>
             </Popover>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="participant-nickname">
-              Nickname (optional, defaults to user's name)
-            </Label>
-            <Input
-              id="participant-nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder={selectedUser?.name ?? "Nickname"}
-            />
           </div>
         </div>
 

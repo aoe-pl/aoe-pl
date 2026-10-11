@@ -890,6 +890,15 @@
     "roles": {
       "expired": "wygasła"
     },
+    "name": {
+      "edit": "Zmień nazwę wyświetlaną",
+      "dialog_title": "Nazwa wyświetlana",
+      "dialog_description": "Ta nazwa jest widoczna na Twoim profilu oraz we wszystkich turniejach. Domyślnie jest to nazwa z Discorda.",
+      "placeholder": "Twoja nazwa wyświetlana",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "save_success": "Nazwa wyświetlana została zaktualizowana."
+    },
     "streams": {
       "linked": "Stream powiązany",
       "not_linked": "Brak powiązanego streama",
