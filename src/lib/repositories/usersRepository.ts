@@ -465,4 +465,12 @@ export const usersRepository = {
     });
     return user?.streamUrl ?? null;
   },
+
+  async getAoe2CompanionUrl(userId: string) {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { aoe2companionUrl: true },
+    });
+    return user?.aoe2companionUrl ?? null;
+  },
 };

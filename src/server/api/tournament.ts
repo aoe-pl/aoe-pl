@@ -382,6 +382,12 @@ export const tournamentRouter = createTRPCRouter({
           input.tournamentId,
         );
 
+        // The client hides the AoE2Companion field for users who already linked
+        // a profile on their account, so it must not be required for them here.
+        const hasAoe2CompanionLinked = Boolean(
+          await usersRepository.getAoe2CompanionUrl(userId),
+        );
+
         const validFieldIds = new Set(fields.map((f) => f.id));
 
         for (const [key, val] of Object.entries(input.formData ?? {})) {
@@ -446,6 +452,13 @@ export const tournamentRouter = createTRPCRouter({
         const missingRequired = fields
           .filter((f) => f.required)
           .filter((f) => {
+            if (
+              f.slug === aoe2companionRegistrationFieldSlug &&
+              hasAoe2CompanionLinked
+            ) {
+              return false;
+            }
+
             const val = input.formData?.[f.id];
             return val == null || val === "";
           });
