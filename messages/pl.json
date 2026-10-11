@@ -632,6 +632,7 @@
       "register": "Zarejestruj się",
       "registering": "Rejestrowanie...",
       "register_success": "Pomyślnie zarejestrowano na turniej.",
+      "registered_players": "{count, plural, one {Obecnie zarejestrowany jest # gracz!} few {Obecnie zarejestrowanych jest # graczy!} many {Obecnie zarejestrowanych jest # graczy!} other {Obecnie zarejestrowanych jest # graczy!}}",
       "must_be_logged_in": "Musisz być zalogowany, aby zarejestrować się na turniej.",
       "field_required_error": "To pole jest wymagane.",
       "field_number_error": "To pole musi być prawidłową liczbą.",

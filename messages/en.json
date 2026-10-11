@@ -632,6 +632,7 @@
       "register": "Register",
       "registering": "Registering...",
       "register_success": "You have successfully registered for the tournament.",
+      "registered_players": "{count, plural, one {# player registered} other {# players registered}}",
       "must_be_logged_in": "You must be logged in to register for the tournament.",
       "field_required_error": "This field is required.",
       "field_number_error": "This field must be a valid number.",

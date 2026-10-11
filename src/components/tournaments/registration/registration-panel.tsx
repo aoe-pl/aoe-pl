@@ -14,6 +14,7 @@ import {
   LogIn,
   ScrollText,
   ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -60,9 +61,22 @@ export function RegistrationPanel({
       { enabled: isLoggedIn && !isAlreadyRegistered && registrationOpen },
     );
 
+  const utils = api.useUtils();
+
+  const { data: participantCount } =
+    api.tournaments.participants.count.useQuery({ tournamentId });
+
+  const registeredPlayers =
+    participantCount != null
+      ? t("registered_players", { count: participantCount })
+      : null;
+
   const { mutate: register, isPending } =
     api.tournaments.participants.register.useMutation({
-      onSuccess: () => setRegistered(true),
+      onSuccess: () => {
+        setRegistered(true);
+        void utils.tournaments.participants.count.invalidate({ tournamentId });
+      },
       onError: (error) => toast.error(error.message),
     });
 
@@ -303,6 +317,15 @@ export function RegistrationPanel({
       )}
 
       {body}
+
+      {registeredPlayers && (
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <Users className="text-medieval-gold-muted size-4" />
+          <p className="text-medieval-gold-muted text-sm">
+            {registeredPlayers}
+          </p>
+        </div>
+      )}
     </section>
   );
 }
