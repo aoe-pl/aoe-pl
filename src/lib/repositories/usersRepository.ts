@@ -458,6 +458,14 @@ export const usersRepository = {
     return streamerRole !== null;
   },
 
+  async isUserPatron(userId: string) {
+    const patronRole = await db.userRole.findFirst({
+      where: { userId, role: { type: "PATRON" } },
+      select: { userId: true },
+    });
+    return patronRole !== null;
+  },
+
   async getUserStreamUrl(userId: string) {
     const user = await db.user.findUnique({
       where: { id: userId },

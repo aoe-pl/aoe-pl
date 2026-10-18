@@ -19,3 +19,14 @@ export const getIsAdmin = cache(async () => {
 
   return usersRepository.isUserAdmin(session.user.id);
 });
+
+/**
+ * Per-request cached isPatron check.
+ */
+export const getIsPatron = cache(async () => {
+  const session = await getSession();
+
+  if (!session?.user?.id) return false;
+
+  return usersRepository.isUserPatron(session.user.id);
+});
