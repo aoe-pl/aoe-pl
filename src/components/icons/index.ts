@@ -3,6 +3,7 @@ export { CogIcon } from "./cog";
 export { DiscordIcon } from "./discord";
 export { HomeIcon } from "./home";
 export { NewsIcon } from "./news";
+export { PatronIcon } from "./patron";
 export { TrophyIcon } from "./trophy";
 export { TwitchIcon } from "./twitch";
 export { UsersIcon } from "./users";

@@ -466,6 +466,18 @@ export const usersRepository = {
     return patronRole !== null;
   },
 
+  /**
+   * Player numbers of every user holding the PATRON role, so player names can
+   * be decorated with the patron emblem without one query per name.
+   */
+  async getPatronPlayerNumbers() {
+    const patrons = await db.user.findMany({
+      where: { userRoles: { some: { role: { type: "PATRON" } } } },
+      select: { playerNumber: true },
+    });
+    return patrons.map((patron) => patron.playerNumber);
+  },
+
   async getUserStreamUrl(userId: string) {
     const user = await db.user.findUnique({
       where: { id: userId },

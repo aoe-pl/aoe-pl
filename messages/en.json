@@ -905,6 +905,9 @@
     }
   },
   "profile": {
+    "patron": {
+      "tooltip": "Community Patron! Want to become one? Click here!"
+    },
     "roles": {
       "expired": "expired"
     },

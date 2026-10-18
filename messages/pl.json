@@ -906,6 +906,9 @@
     }
   },
   "profile": {
+    "patron": {
+      "tooltip": "Patron Społeczności! Chcesz nim zostać? Kliknij tutaj!"
+    },
     "roles": {
       "expired": "wygasła"
     },
