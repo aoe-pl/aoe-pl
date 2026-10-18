@@ -1,11 +1,12 @@
 "use client";
 
+import { SignInButton } from "@/components/auth/sign-in-button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import {
   TournamentsMobileMenu,
   TournamentsNavLink,
 } from "@/components/layout/tournaments-nav-link";
-import { Button } from "@/components/ui";
 import type { TournamentNavGroup } from "@/lib/helpers/tournament-nav";
 import { Menu, X } from "lucide-react";
 import type { Session } from "next-auth";
@@ -158,14 +159,15 @@ function DesktopNavigation({
         </span>
       )}
 
-      <Button
-        asChild
-        className="text-primary-foreground bg-accent ml-4 font-semibold shadow-lg"
-      >
-        <Link href={session ? "/api/auth/signout" : "/api/auth/signin"}>
-          {session ? t("logout") : t("login")}
-        </Link>
-      </Button>
+      {session ? (
+        <SignOutButton className="text-primary-foreground bg-accent ml-4 font-semibold shadow-lg">
+          {t("logout")}
+        </SignOutButton>
+      ) : (
+        <SignInButton className="text-primary-foreground bg-accent ml-4 font-semibold shadow-lg">
+          {t("login")}
+        </SignInButton>
+      )}
     </div>
   );
 }
@@ -263,17 +265,17 @@ function MobileMenu({
           <LanguageSwitcher />
         </div>
 
-        <Button
-          asChild
-          className="text-primary-foreground bg-primary mx-4 font-semibold"
-        >
-          <Link
-            href={session ? "/api/auth/signout" : "/api/auth/signin"}
-            onClick={onClose}
-          >
-            {session ? t("logout") : t("login")}
-          </Link>
-        </Button>
+        <div className="px-4">
+          {session ? (
+            <SignOutButton className="text-primary-foreground bg-primary w-full font-semibold">
+              {t("logout")}
+            </SignOutButton>
+          ) : (
+            <SignInButton className="text-primary-foreground bg-primary w-full font-semibold">
+              {t("login")}
+            </SignInButton>
+          )}
+        </div>
       </div>
     </div>
   );
