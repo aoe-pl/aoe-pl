@@ -34,6 +34,10 @@ export const usersRouter = createTRPCRouter({
       return usersRepository.getPublicProfile(input.playerNumber);
     }),
 
+  getPatronPlayerNumbers: publicProcedure.query(async () => {
+    return usersRepository.getPatronPlayerNumbers();
+  }),
+
   getWithDetails: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { SignInButton } from "@/components/auth/sign-in-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,6 @@ import {
   X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -200,14 +200,13 @@ export function RegistrationPanel({
         icon={<LogIn className="size-6" />}
         title={t("must_be_logged_in")}
         action={
-          <Button
-            asChild
+          <SignInButton
             variant="gold"
             size="sm"
             className="font-semibold"
           >
-            <Link href="/api/auth/signin">{tNav("login")}</Link>
-          </Button>
+            {tNav("login")}
+          </SignInButton>
         }
       />
     );

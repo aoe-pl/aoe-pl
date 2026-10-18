@@ -1,3 +1,4 @@
+import { PatronBadge } from "@/components/profile/patron-badge";
 import { ProfileAdminNoteSection } from "@/components/profile/profile-admin-note-section";
 import { ProfileAoe2Matches } from "@/components/profile/profile-aoe2-matches";
 import { ProfileAoe2Stats } from "@/components/profile/profile-aoe2-stats";
@@ -30,6 +31,10 @@ export default async function PlayerProfilePage({
   const session = await getSession();
 
   const isOwnProfile = session?.user?.id === profile.id;
+
+  const patronRole = profile.userRoles.find(
+    (userRole) => userRole.role.type === "PATRON",
+  );
 
   const participantIds = profile.TournamentParticipant.map((p) => p.id);
   const teamIds = profile.TournamentParticipant.map((p) => p.teamId).filter(
@@ -65,6 +70,7 @@ export default async function PlayerProfilePage({
               >
                 {profile.name}
               </h1>
+              {patronRole && <PatronBadge className="h-6 w-6" />}
               {isOwnProfile && <ProfileNameEditor currentName={profile.name} />}
             </div>
           </div>

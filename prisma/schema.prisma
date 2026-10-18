@@ -496,6 +496,7 @@ enum RoleType {
   ADMIN
   MODERATOR
   STREAMER
+  PATRON
 }
 
 enum TournamentMatchModeType {

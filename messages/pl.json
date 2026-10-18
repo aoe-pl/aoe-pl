@@ -10,6 +10,24 @@
     "logout": "Wyloguj",
     "login": "Zaloguj się"
   },
+  "auth": {
+    "signin": {
+      "title": "Zaloguj się",
+      "description": "Zaloguj się przez Discord, aby zapisywać się na turnieje i śledzić swoje postępy.",
+      "discord_button": "Zaloguj się przez Discord",
+      "redirecting": "Przekierowywanie...",
+      "trigger": "Zaloguj się",
+      "footer_note": "Logowanie odbywa się wyłącznie przez Discord.",
+      "error": "Nie udało się zalogować. Spróbuj ponownie.",
+      "back_home": "Powrót na stronę główną"
+    },
+    "signout": {
+      "title": "Wylogować się?",
+      "description": "Czy na pewno chcesz się wylogować?",
+      "confirm": "Wyloguj się",
+      "cancel": "Anuluj"
+    }
+  },
   "image_upload": {
     "upload": "Wgraj obraz",
     "replace": "Zmień obraz",
@@ -888,6 +906,9 @@
     }
   },
   "profile": {
+    "patron": {
+      "tooltip": "Patron Społeczności! Chcesz nim zostać? Kliknij tutaj!"
+    },
     "roles": {
       "expired": "wygasła"
     },

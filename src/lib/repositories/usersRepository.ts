@@ -458,6 +458,26 @@ export const usersRepository = {
     return streamerRole !== null;
   },
 
+  async isUserPatron(userId: string) {
+    const patronRole = await db.userRole.findFirst({
+      where: { userId, role: { type: "PATRON" } },
+      select: { userId: true },
+    });
+    return patronRole !== null;
+  },
+
+  /**
+   * Player numbers of every user holding the PATRON role, so player names can
+   * be decorated with the patron emblem without one query per name.
+   */
+  async getPatronPlayerNumbers() {
+    const patrons = await db.user.findMany({
+      where: { userRoles: { some: { role: { type: "PATRON" } } } },
+      select: { playerNumber: true },
+    });
+    return patrons.map((patron) => patron.playerNumber);
+  },
+
   async getUserStreamUrl(userId: string) {
     const user = await db.user.findUnique({
       where: { id: userId },

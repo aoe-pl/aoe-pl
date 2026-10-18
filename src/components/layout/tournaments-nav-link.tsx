@@ -83,7 +83,7 @@ export function TournamentsNavLink({
                   <Link
                     key={tournament.href}
                     href={tournament.href}
-                    className="text-foreground/90 hover:bg-accent/10 hover:text-accent block rounded-sm px-3 py-1.5 text-sm whitespace-nowrap"
+                    className="text-foreground/90 hover:bg-accent/10 hover:text-medieval-gold block rounded-sm px-3 py-1.5 text-sm whitespace-nowrap"
                   >
                     {tournament.name}
                   </Link>

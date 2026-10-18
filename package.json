@@ -24,8 +24,7 @@
     "db:down": "docker compose stop",
     "db:restart": "docker compose restart",
     "db:logs": "docker compose logs -f",
-    "migration:dry": "tsx migration/migrate.ts",
-    "migration:commit": "tsx migration/migrate.ts --commit",
+    "users:merge": "tsx migration/merge-users.ts",
     "fix:all": "npm run format:write && npm run lint:fix && npm run typecheck",
     "test": "vitest run",
     "test:watch": "vitest"
