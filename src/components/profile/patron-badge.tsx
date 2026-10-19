@@ -31,7 +31,7 @@ export function PatronBadge({ className }: { className?: string }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t("tooltip")}
-          className="inline-flex align-[-0.2em] text-white transition-opacity hover:opacity-80 focus-visible:opacity-80"
+          className="inline-flex align-[-0.2em] text-purple-300 transition-opacity hover:opacity-80 focus-visible:opacity-80"
         >
           <PatronIcon className={cn("h-[1.1em] w-[1.1em]", className)} />
         </a>
