@@ -4,11 +4,24 @@
     "home": "Home",
     "news": "News",
     "tournaments": "Tournaments",
+    "hall_of_fame": "Hall of Fame",
     "profile": "Profile",
     "admin": "Admin",
     "logged_in_as": "Logged in as",
     "logout": "Log out",
     "login": "Log in"
+  },
+  "hall_of_fame": {
+    "title": "Hall of Fame",
+    "subtitle": "Legends of the Arena",
+    "description": "Tournament champions",
+    "bracket": "Final",
+    "no_results": "No results yet",
+    "no_results_description": "Once a tournament is completed, its group winners will be immortalised here.",
+    "back_to_tournaments": "Back to tournaments",
+    "banner_title": "Hall of Fame",
+    "banner_description": "Meet the legends who conquered our tournaments.",
+    "banner_cta": "Enter the hall"
   },
   "auth": {
     "signin": {
@@ -183,6 +196,8 @@
         "registration_closed_description": "Prevent new players from registering, regardless of the dates above.",
         "visible_to_public": "Visible to public",
         "visible_to_public_description": "The tournament will be visible on the website",
+        "include_in_hall_of_fame": "Include in Hall of Fame",
+        "include_in_hall_of_fame_description": "Group winners will appear in the Hall of Fame once the tournament is finished.",
         "team_based": "Team-based",
         "team_based_description": "The tournament allows team participation",
         "create_tournament": "Create tournament",

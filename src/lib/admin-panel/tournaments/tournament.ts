@@ -98,6 +98,7 @@ const tournamentFormSchema = z
     registrationClosed: z.boolean(),
     status: z.nativeEnum(TournamentStatus),
     isVisible: z.boolean(),
+    includeInHallOfFame: z.boolean(),
   })
   .refine(
     (data) => {

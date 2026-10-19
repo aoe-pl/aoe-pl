@@ -4,11 +4,24 @@
     "home": "Główna",
     "news": "Wiadomości",
     "tournaments": "Turnieje",
+    "hall_of_fame": "Hall of Fame",
     "profile": "Profil",
     "admin": "Admin",
     "logged_in_as": "Zalogowano jako",
     "logout": "Wyloguj",
     "login": "Zaloguj się"
+  },
+  "hall_of_fame": {
+    "title": "Hall of Fame",
+    "subtitle": "Sala chwały",
+    "description": "Zwycięzcy naszych turniejów",
+    "bracket": "Finał",
+    "no_results": "Brak wyników",
+    "no_results_description": "Gdy turniej się zakończy, zwycięzcy jego grup trafią do tej kroniki.",
+    "back_to_tournaments": "Wróć do turniejów",
+    "banner_title": "Hall of Fame",
+    "banner_description": "Poznaj legendy, które zdominowały nasze turnieje.",
+    "banner_cta": "Wejdź do sali"
   },
   "auth": {
     "signin": {
@@ -183,6 +196,8 @@
         "registration_closed_description": "Zablokuj możliwość zapisu nowych graczy, niezależnie od powyższych dat.",
         "visible_to_public": "Widoczny publicznie",
         "visible_to_public_description": "Turniej będzie widoczny na stronie",
+        "include_in_hall_of_fame": "Uwzględnij w Hall of Fame",
+        "include_in_hall_of_fame_description": "Zwycięzcy grup pojawią się w Hall of Fame po zakończeniu turnieju.",
         "team_based": "Drużynowy",
         "team_based_description": "Turniej pozwala na udział drużyn",
         "create_tournament": "Utwórz turniej",

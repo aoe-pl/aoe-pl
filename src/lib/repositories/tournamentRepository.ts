@@ -117,6 +117,7 @@ export const tournamentRepository = {
     registrationClosed?: boolean;
     status: TournamentStatus;
     isVisible: boolean;
+    includeInHallOfFame: boolean;
   }) {
     return db.tournament.create({
       data: {
@@ -135,6 +136,7 @@ export const tournamentRepository = {
         registrationClosed: data.registrationClosed ?? false,
         status: data.status,
         isVisible: data.isVisible,
+        includeInHallOfFame: data.includeInHallOfFame,
         tournamentSeries: {
           connect: {
             id: data.tournamentSeriesId,
@@ -169,6 +171,7 @@ export const tournamentRepository = {
       registrationClosed: boolean;
       status: TournamentStatus;
       isVisible: boolean;
+      includeInHallOfFame: boolean;
     }>,
   ) {
     return db.tournament.update({
@@ -189,6 +192,7 @@ export const tournamentRepository = {
         registrationClosed: data.registrationClosed,
         status: data.status,
         isVisible: data.isVisible,
+        includeInHallOfFame: data.includeInHallOfFame,
         tournamentSeries: {
           connect: {
             id: data.tournamentSeriesId,

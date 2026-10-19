@@ -70,6 +70,7 @@ export function Navigation({
             isAdmin={isAdmin}
             session={session}
             tournamentGroups={tournamentGroups}
+            hallOfFameLabel={t("hall_of_fame")}
             t={t}
           />
 
@@ -85,6 +86,7 @@ export function Navigation({
           isAdmin={isAdmin}
           session={session}
           tournamentGroups={tournamentGroups}
+          hallOfFameLabel={t("hall_of_fame")}
           t={t}
           onClose={() => setMobileMenuOpen(false)}
         />
@@ -98,12 +100,14 @@ function DesktopNavigation({
   isAdmin,
   session,
   tournamentGroups,
+  hallOfFameLabel,
   t,
 }: {
   navItems: NavLinkProps[];
   isAdmin: boolean;
   session: Session | null;
   tournamentGroups: TournamentNavGroup[];
+  hallOfFameLabel: string;
   t: (key: string) => string;
 }) {
   const navLinkClass =
@@ -117,6 +121,7 @@ function DesktopNavigation({
             key={item.label}
             groups={tournamentGroups}
             label={item.label}
+            hallOfFameLabel={hallOfFameLabel}
             className={navLinkClass}
           />
         ) : (
@@ -195,6 +200,7 @@ function MobileMenu({
   isAdmin,
   session,
   tournamentGroups,
+  hallOfFameLabel,
   t,
   onClose,
 }: {
@@ -203,6 +209,7 @@ function MobileMenu({
   isAdmin: boolean;
   session: Session | null;
   tournamentGroups: TournamentNavGroup[];
+  hallOfFameLabel: string;
   t: (key: string) => string;
   onClose: () => void;
 }) {
@@ -217,6 +224,7 @@ function MobileMenu({
               key={item.label}
               groups={tournamentGroups}
               label={item.label}
+              hallOfFameLabel={hallOfFameLabel}
               linkClassName="text-foreground/80 hover:text-accent hover:bg-accent/10 rounded-md px-4 py-2 text-base font-semibold transition-colors"
               onNavigate={onClose}
             />
