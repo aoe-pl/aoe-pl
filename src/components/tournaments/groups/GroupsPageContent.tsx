@@ -12,13 +12,20 @@ import type { GroupPageData } from "./types/types";
 export function GroupsPageContent({
   groupsData,
   matchUrlBase,
+  initialGroupId,
 }: {
   groupsData: GroupPageData[];
   matchUrlBase: string;
+  initialGroupId?: string | null;
 }) {
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(
-    () => groupsData[0]?.groupId ?? null,
-  );
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(() => {
+    const initialGroup = initialGroupId
+      ? groupsData.find((g) => g.groupId === initialGroupId)
+      : undefined;
+
+    return initialGroup?.groupId ?? groupsData[0]?.groupId ?? null;
+  });
+
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const t = useTranslations("tournament.groups");
 

@@ -1,6 +1,7 @@
 import { GroupsPageContent } from "@/components/tournaments/groups/GroupsPageContent";
 import type { GroupPageData } from "@/components/tournaments/groups/types/types";
 import { getTournamentPageData } from "@/lib/helpers/tournament-page-data";
+import { getSession } from "@/lib/session";
 import { api } from "@/trpc/server";
 import { getLocale } from "next-intl/server";
 
@@ -11,6 +12,8 @@ export default async function TournamentGroupsPage({
 }) {
   const { seriesSlug, urlKey } = await params;
   const locale = await getLocale();
+  const session = await getSession();
+  const userId = session?.user?.id ?? null;
   const { tournament, section } = await getTournamentPageData(
     seriesSlug,
     urlKey,
@@ -26,10 +29,24 @@ export default async function TournamentGroupsPage({
 
   const groupData: GroupPageData[] = [];
 
+  // The group the logged-in user belongs to, used to pre-select it. Rotational
+  // groups are derived groupings that mirror the real groups they link, so the
+  // (non-rotational) group itself is preferred when the user is in both.
+  let ownGroupId: string | null = null;
+  let ownRotationGroupId: string | null = null;
+
   for (const g of groups) {
     const participants = await api.tournaments.groups.getParticipants({
       groupId: g.id,
     });
+
+    if (userId && participants.some((p) => p.userId === userId)) {
+      if (g.isRotational) {
+        ownRotationGroupId ??= g.id;
+      } else {
+        ownGroupId ??= g.id;
+      }
+    }
 
     const matchesForGroup = await api.tournaments.matches.list({
       groupId: g.id,
@@ -65,6 +82,7 @@ export default async function TournamentGroupsPage({
       <GroupsPageContent
         groupsData={groupData}
         matchUrlBase={matchUrlBase}
+        initialGroupId={ownGroupId ?? ownRotationGroupId}
       />
     </div>
   );
