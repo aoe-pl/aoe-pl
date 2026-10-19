@@ -20,9 +20,8 @@ function GroupRow({
 }) {
   return (
     <div
-      className="grid grid-cols-[minmax(0,1fr)_2.5rem_minmax(0,1fr)] items-center gap-2 rounded-xl border border-l-4 border-white/10 bg-black/20 px-4 py-2.5"
+      className="grid grid-cols-[minmax(0,1fr)_2.5rem_minmax(0,1fr)] items-center gap-2 rounded-xl border-b-3 border-black/30 bg-black/20 px-4 py-3"
       style={{
-        borderLeftColor: group.color ?? "var(--medieval-gold)",
         backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${
           group.color ?? "var(--medieval-gold)"
         } 22%, transparent) 0%, transparent 30%, transparent 70%, color-mix(in srgb, ${
@@ -32,11 +31,11 @@ function GroupRow({
     >
       <div className="flex min-w-0 items-center justify-end gap-2">
         {group.isBracket && (
-          <span className="border-medieval-gold/30 bg-medieval-gold/10 text-medieval-gold shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+          <span className="border-medieval-gold/30 bg-medieval-gold/10 text-medieval-gold shrink-0 rounded-full border px-2 py-0.5 text-lg font-bold tracking-wider uppercase">
             {labels.bracket}
           </span>
         )}
-        <p className="text-medieval-gold min-w-0 truncate text-right text-sm font-semibold">
+        <p className="text-medieval-gold min-w-0 truncate text-right text-lg font-semibold">
           {group.name}
         </p>
       </div>
