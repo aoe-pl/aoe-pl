@@ -776,8 +776,17 @@
     },
     "players": {
       "nickname": "Nickname",
+      "rating": "Rating",
       "in_groups": "Groups",
-      "no_players": "No registered players."
+      "no_players": "No registered players.",
+      "sort": {
+        "label": "Sort players",
+        "name_asc": "Nickname (A-Z)",
+        "name_desc": "Nickname (Z-A)",
+        "rating_desc": "Rating (highest first)",
+        "rating_asc": "Rating (lowest first)",
+        "group": "Group"
+      }
     },
     "groups": {
       "no_groups": "No groups to display.",

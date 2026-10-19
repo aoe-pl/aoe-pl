@@ -44,6 +44,8 @@ model User {
   color                 String?
   adminComment          String?
   aoe2companionUrl      String?
+  rating                Int?
+  ratingUpdatedAt       DateTime?
   streamUrl             String?
   accounts              Account[]
   sessions              Session[]

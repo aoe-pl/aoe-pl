@@ -9,8 +9,15 @@ const aoe2CompanionApi = "https://data.aoe2companion.com/api/profiles";
 /** Endpoint exposing recent match history for one or more profiles. */
 const aoe2CompanionMatchesApi = "https://data.aoe2companion.com/api/matches";
 
-/** How long (in seconds) the AoE2Companion response is cached by Next.js. */
+/** How long (in seconds) the AoE2Companion match response is cached by Next.js. */
 const cacheForSeconds = 60 * 60;
+
+/**
+ * Profiles are cached for the same 30 minutes as the player rating TTL, so
+ * concurrent rating refreshes reuse the same response instead of hitting the
+ * API once per request.
+ */
+const profileCacheForSeconds = 30 * 60;
 
 /**
  * Builds the public AoE2Companion profile page URL for a given profile id.
@@ -95,7 +102,7 @@ export async function fetchAoe2CompanionProfile(
 ): Promise<Aoe2CompanionProfile | null> {
   try {
     const response = await fetch(`${aoe2CompanionApi}/${profileId}`, {
-      next: { revalidate: cacheForSeconds },
+      next: { revalidate: profileCacheForSeconds },
       headers: { "User-Agent": "AoE2PL/1.0" },
     });
 

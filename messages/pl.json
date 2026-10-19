@@ -799,8 +799,17 @@
     },
     "players": {
       "nickname": "Nick",
+      "rating": "Rating",
       "in_groups": "W grupach",
-      "no_players": "Brak zarejestrowanych graczy."
+      "no_players": "Brak zarejestrowanych graczy.",
+      "sort": {
+        "label": "Sortuj graczy",
+        "name_asc": "Nick (A-Z)",
+        "name_desc": "Nick (Z-A)",
+        "rating_desc": "Rating (od najwyższego)",
+        "rating_asc": "Rating (od najniższego)",
+        "group": "Grupa"
+      }
     },
     "matches": {
       "drafts": {
