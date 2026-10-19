@@ -264,6 +264,33 @@ export const tournamentMatchRepository = {
     });
   },
 
+  /**
+   * Groups plus their matches.
+   */
+  async getMatchesByGroupIds(groupIds: string[]) {
+    if (groupIds.length === 0) return [];
+
+    return db.tournamentMatch.findMany({
+      where: { groupId: { in: groupIds } },
+      include: {
+        TournamentMatchParticipant: {
+          select: {
+            participantId: true,
+            teamId: true,
+            isWinner: true,
+            wonScore: true,
+            lostScore: true,
+            participant: {
+              select: { nickname: true, user: { select: { name: true } } },
+            },
+            team: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  },
+
   async getMatchesByGroupId(groupId: string) {
     return db.tournamentMatch.findMany({
       where: { groupId },

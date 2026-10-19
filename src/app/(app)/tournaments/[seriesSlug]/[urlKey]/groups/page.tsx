@@ -21,13 +21,22 @@ export default async function TournamentGroupsPage({
     { includeMatchMode: true },
   );
 
-  const groups = await api.tournaments.groups.listByTournament({
+  // All groups including their participants in a single query.
+  const groups = await api.tournaments.groups.listWithParticipants({
     tournamentId: section.tournamentId,
-    includeParticipants: true,
-    includeMatchMode: true,
   });
 
-  const groupData: GroupPageData[] = [];
+  const allMatches = await api.tournaments.matches.listByGroupIds({
+    groupIds: groups.map((g) => g.id),
+  });
+
+  const matchesByGroup = new Map<string, GroupPageData["matches"]>();
+  for (const match of allMatches) {
+    if (!match.groupId) continue;
+    const groupMatches = matchesByGroup.get(match.groupId);
+    if (groupMatches) groupMatches.push(match);
+    else matchesByGroup.set(match.groupId, [match]);
+  }
 
   // The group the logged-in user belongs to, used to pre-select it. Rotational
   // groups are derived groupings that mirror the real groups they link, so the
@@ -35,10 +44,10 @@ export default async function TournamentGroupsPage({
   let ownGroupId: string | null = null;
   let ownRotationGroupId: string | null = null;
 
-  for (const g of groups) {
-    const participants = await api.tournaments.groups.getParticipants({
-      groupId: g.id,
-    });
+  const groupData: GroupPageData[] = groups.map((g) => {
+    const participants = g.TournamentGroupParticipant.map(
+      (gp) => gp.tournamentParticipant,
+    );
 
     if (userId && participants.some((p) => p.userId === userId)) {
       if (g.isRotational) {
@@ -48,16 +57,12 @@ export default async function TournamentGroupsPage({
       }
     }
 
-    const matchesForGroup = await api.tournaments.matches.list({
-      groupId: g.id,
-    });
-
     const matchMode = g.matchMode ?? tournament.matchMode ?? null;
 
     const description =
       g.translations.find((tr) => tr.locale === locale)?.description ?? null;
 
-    groupData.push({
+    return {
       groupId: g.id,
       groupColor: g.color!,
       groupName: g.name,
@@ -66,14 +71,14 @@ export default async function TournamentGroupsPage({
       matchMode: matchMode
         ? { mode: matchMode.mode, gameCount: matchMode.gameCount }
         : null,
-      matches: matchesForGroup,
+      matches: matchesByGroup.get(g.id) ?? [],
       players: participants.map((p) => ({
         id: p.id,
         name: p.nickname,
         playerNumber: p.user!.playerNumber,
       })),
-    });
-  }
+    };
+  });
 
   const matchUrlBase = `/tournaments/${seriesSlug}/${urlKey}/matches`;
 
