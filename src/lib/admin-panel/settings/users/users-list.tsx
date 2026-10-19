@@ -22,6 +22,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { ErrorToast } from "@/components/ui/error-toast-content";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
@@ -33,23 +34,62 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/trpc/react";
 import type { User } from "@prisma/client";
-import { Edit, Eye, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Eye,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { UserDetailView } from "./user-detail-view";
 import { UserForm, type UserFormSchema } from "./user-form";
 
+const PAGE_SIZE = 15;
 export function UsersList() {
   const t = useTranslations("admin.settings.users");
+  const locale = useLocale();
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | undefined>();
   const [viewingUser, setViewingUser] = useState<string | undefined>();
   const [deletingUser, setDeletingUser] = useState<User | undefined>();
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
 
   const utils = api.useUtils();
   const { data: users, refetch, isLoading } = api.users.list.useQuery();
+
+  const filteredUsers = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return [...(users ?? [])]
+      .sort((a, b) =>
+        (a.name ?? "").localeCompare(b.name ?? "", locale, {
+          sensitivity: "base",
+        }),
+      )
+      .filter((user) => {
+        if (!normalizedQuery) return true;
+
+        return (
+          (user.name ?? "").toLowerCase().includes(normalizedQuery) ||
+          user.userRoles.some((userRole) =>
+            userRole.role.name.toLowerCase().includes(normalizedQuery),
+          )
+        );
+      });
+  }, [users, query, locale]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const visibleUsers = filteredUsers.slice(
+    currentPage * PAGE_SIZE,
+    (currentPage + 1) * PAGE_SIZE,
+  );
 
   const { data: userDetails } = api.users.getWithDetails.useQuery(
     { id: viewingUser! },
@@ -86,6 +126,11 @@ export function UsersList() {
         toast.error(<ErrorToast message={error.message} />);
       },
     });
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    setPage(0);
+  };
 
   const handleEdit = (user: User) => {
     setEditingUser(user);
@@ -145,126 +190,185 @@ export function UsersList() {
               <p className="text-muted-foreground mb-4">{t("no_users")}</p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <ScrollArea className="w-full">
-                <Table className="min-w-[800px]">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[200px]">
-                        {t("table.name")}
-                      </TableHead>
-                      <TableHead className="w-[100px] text-center">
-                        {t("table.roles")}
-                      </TableHead>
-                      <TableHead className="w-[100px] text-center">
-                        {t("table.tournaments")}
-                      </TableHead>
-                      <TableHead className="w-[100px] text-center">
-                        {t("table.streams")}
-                      </TableHead>
-                      <TableHead className="w-[150px] text-right">
-                        {t("table.actions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            {user.color && (
-                              <div
-                                className="h-3 w-3 rounded-full border"
-                                style={{ backgroundColor: user.color }}
-                              />
-                            )}
-                            <PlayerLink
-                              playerNumber={user.playerNumber}
-                              name={user.name!}
-                              key={user.id}
-                            ></PlayerLink>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex flex-wrap justify-center gap-1">
-                            {user.userRoles.length > 0 ? (
-                              <>
-                                {user.userRoles.map((userRole) => (
-                                  <Badge
-                                    key={userRole.role.id}
-                                    variant={
-                                      userRole.role.type === "ADMIN"
-                                        ? "default"
-                                        : "secondary"
-                                    }
-                                    className="text-xs"
+            <div className="space-y-4">
+              <div className="relative w-full max-w-sm">
+                <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  placeholder={t("search_placeholder")}
+                  value={query}
+                  onChange={(e) => handleQueryChange(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+
+              {filteredUsers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <p className="text-muted-foreground">
+                    {t("no_matching_users")}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-md border">
+                    <ScrollArea className="w-full">
+                      <Table className="min-w-[800px]">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[200px]">
+                              {t("table.name")}
+                            </TableHead>
+                            <TableHead className="w-[100px] text-center">
+                              {t("table.roles")}
+                            </TableHead>
+                            <TableHead className="w-[100px] text-center">
+                              {t("table.tournaments")}
+                            </TableHead>
+                            <TableHead className="w-[100px] text-center">
+                              {t("table.streams")}
+                            </TableHead>
+                            <TableHead className="w-[150px] text-right">
+                              {t("table.actions")}
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {visibleUsers.map((user) => (
+                            <TableRow key={user.id}>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  {user.color && (
+                                    <div
+                                      className="h-3 w-3 rounded-full border"
+                                      style={{ backgroundColor: user.color }}
+                                    />
+                                  )}
+                                  <PlayerLink
+                                    playerNumber={user.playerNumber}
+                                    name={user.name!}
+                                    key={user.id}
+                                  ></PlayerLink>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <div className="flex flex-wrap justify-center gap-1">
+                                  {user.userRoles.length > 0 ? (
+                                    <>
+                                      {user.userRoles
+                                        .slice(0, 3)
+                                        .map((userRole) => (
+                                          <Badge
+                                            key={userRole.role.id}
+                                            variant={
+                                              userRole.role.type === "ADMIN"
+                                                ? "default"
+                                                : "secondary"
+                                            }
+                                            className="text-xs"
+                                          >
+                                            {userRole.role.name}
+                                          </Badge>
+                                        ))}
+                                      {user._count.userRoles > 3 && (
+                                        <Badge
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          +{user._count.userRoles - 3}
+                                        </Badge>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span className="text-muted-foreground text-xs">
+                                      -
+                                    </span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {user._count.TournamentParticipant}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {user._count.userStreams}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleView(user.id)}
                                   >
-                                    {userRole.role.name}
-                                  </Badge>
-                                ))}
-                                {user._count.userRoles > 3 && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs"
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEdit(user)}
                                   >
-                                    +{user._count.userRoles - 3}
-                                  </Badge>
-                                )}
-                              </>
-                            ) : (
-                              <span className="text-muted-foreground text-xs">
-                                -
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {user._count.TournamentParticipant}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {user._count.userStreams}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleView(user.id)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(user)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(user)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDelete(user)}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setPage(Math.max(0, currentPage - 1))}
+                        disabled={currentPage === 0}
+                        aria-label={t("pagination.previous")}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+
+                      <span className="text-muted-foreground text-sm">
+                        {t("pagination.page", {
+                          current: currentPage + 1,
+                          total: totalPages,
+                        })}
+                      </span>
+
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() =>
+                          setPage(Math.min(totalPages - 1, currentPage + 1))
+                        }
+                        disabled={currentPage === totalPages - 1}
+                        aria-label={t("pagination.next")}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </CardContent>

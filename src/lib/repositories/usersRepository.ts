@@ -68,7 +68,6 @@ export const usersRepository = {
               },
             },
           },
-          take: 3, // Only show first 3 roles in list
         },
         _count: {
           select: {

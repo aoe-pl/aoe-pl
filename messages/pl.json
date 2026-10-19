@@ -561,6 +561,13 @@
         "user_details": "Szczegóły użytkownika",
         "user_details_description": "Pełne informacje o użytkowniku",
         "no_users": "Brak użytkowników",
+        "search_placeholder": "Szukaj po nazwie lub roli...",
+        "no_matching_users": "Brak użytkowników pasujących do wyszukiwania",
+        "pagination": {
+          "previous": "Poprzednia strona",
+          "next": "Następna strona",
+          "page": "Strona {current} z {total}"
+        },
         "table": {
           "name": "Nazwa",
           "email": "Email",
