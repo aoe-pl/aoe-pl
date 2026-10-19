@@ -34,6 +34,7 @@ export function TournamentEdit({ tournament }: { tournament: Tournament }) {
       registrationClosed: tournament.registrationClosed,
       status: tournament.status,
       isVisible: tournament.isVisible,
+      includeInHallOfFame: tournament.includeInHallOfFame,
     },
   });
 

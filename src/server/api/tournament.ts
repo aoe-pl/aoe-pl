@@ -645,6 +645,16 @@ export const tournamentRouter = createTRPCRouter({
           },
         );
       }),
+    /**
+     * All groups of a tournament including their participants, in a single query.
+     */
+    listWithParticipants: publicProcedure
+      .input(z.object({ tournamentId: z.string() }))
+      .query(async ({ input }) => {
+        return tournamentGroupRepository.getGroupsWithParticipantsByTournamentId(
+          input.tournamentId,
+        );
+      }),
     create: adminProcedure
       .input(
         z.object({
@@ -837,6 +847,15 @@ export const tournamentRouter = createTRPCRouter({
       )
       .query(async ({ input }) => {
         return tournamentMatchRepository.getMatchesByGroupId(input.groupId);
+      }),
+    listByGroupIds: publicProcedure
+      .input(
+        z.object({
+          groupIds: z.array(z.string()),
+        }),
+      )
+      .query(async ({ input }) => {
+        return tournamentMatchRepository.getMatchesByGroupIds(input.groupIds);
       }),
     get: publicProcedure
       .input(

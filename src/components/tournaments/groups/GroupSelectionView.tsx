@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui";
 import { buildGroupGrid } from "@/lib/tournaments/group-grid";
 import { cn } from "@/lib/utils";
@@ -53,7 +52,7 @@ export function GroupSelectionView({
           const [rotationLeft, rotationRight] = cell.rotationColors ?? [];
           const rotationBackground =
             rotationLeft && rotationRight
-              ? `linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28) 100%), linear-gradient(90deg, ${rotationLeft} 0%, ${rotationRight} 100%)`
+              ? `linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28) 100%), linear-gradient(rgba(70, 48, 33, 0.35), rgba(70, 48, 33, 0.35)), linear-gradient(90deg, ${rotationLeft} 0%, ${rotationLeft} 20%, ${rotationRight} 80%, ${rotationRight} 100%)`
               : null;
 
           return (
@@ -75,7 +74,7 @@ export function GroupSelectionView({
               {group ? (
                 <Button
                   className={cn(
-                    "border-medieval-wood-border h-full min-h-12 w-full rounded-lg border-2 px-4 text-center text-xs font-bold tracking-wide whitespace-normal transition-all [text-shadow:0_1px_2px_rgba(0,0,0,0.45)] sm:min-h-14",
+                    "border-medieval-wood-border text-outlined h-full min-h-12 w-full rounded-lg border-2 px-4 text-center text-xs font-bold tracking-wide whitespace-normal transition-all sm:min-h-14",
                     isSelected
                       ? "border-medieval-gold"
                       : "hover:border-medieval-gold/70 opacity-80 hover:-translate-y-0.5 hover:opacity-100",
@@ -88,7 +87,7 @@ export function GroupSelectionView({
                         : "linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.22)), var(--medieval-wood)"),
                     color: "var(--medieval-parchment-foreground)",
                     boxShadow: isSelected
-                      ? "0 0 16px rgba(230, 192, 82, 0.6)"
+                      ? "0 0 6px rgba(230, 192, 82, 0.6)"
                       : "0 2px 6px rgba(0, 0, 0, 0.35)",
                   }}
                   onClick={() => onSelectGroup(group.groupId)}

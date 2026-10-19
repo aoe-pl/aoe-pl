@@ -2,19 +2,21 @@
 
 import type { TournamentNavGroup } from "@/lib/helpers/tournament-nav";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 
 interface TournamentsNavLinkProps {
   groups: TournamentNavGroup[];
   label: string;
+  hallOfFameLabel: string;
   className: string;
 }
 
 export function TournamentsNavLink({
   groups,
   label,
+  hallOfFameLabel,
   className,
 }: TournamentsNavLinkProps) {
   const [open, setOpen] = useState(false);
@@ -37,7 +39,7 @@ export function TournamentsNavLink({
     closeTimeout.current = setTimeout(() => setOpen(false), 150);
   };
 
-  if (groups.length === 0) {
+  if (groups.length === 0 && !hallOfFameLabel) {
     return (
       <Link
         href="/tournaments"
@@ -90,6 +92,16 @@ export function TournamentsNavLink({
                 ))}
               </div>
             ))}
+
+            <div className="border-primary/20 mt-1 border-t pt-1">
+              <Link
+                href="/tournaments/hall-of-fame"
+                className="text-medieval-gold hover:bg-accent/10 flex items-center gap-2 rounded-sm px-3 py-2 text-sm font-semibold whitespace-nowrap"
+              >
+                <Trophy className="h-4 w-4 shrink-0" />
+                {hallOfFameLabel}
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -100,6 +112,7 @@ export function TournamentsNavLink({
 interface TournamentsMobileMenuProps {
   groups: TournamentNavGroup[];
   label: string;
+  hallOfFameLabel: string;
   linkClassName: string;
   onNavigate: () => void;
 }
@@ -107,12 +120,13 @@ interface TournamentsMobileMenuProps {
 export function TournamentsMobileMenu({
   groups,
   label,
+  hallOfFameLabel,
   linkClassName,
   onNavigate,
 }: TournamentsMobileMenuProps) {
   const [open, setOpen] = useState(false);
 
-  if (groups.length === 0) {
+  if (groups.length === 0 && !hallOfFameLabel) {
     return (
       <Link
         href="/tournaments"
@@ -166,6 +180,15 @@ export function TournamentsMobileMenu({
               ))}
             </div>
           ))}
+
+          <Link
+            href="/tournaments/hall-of-fame"
+            className="text-medieval-gold hover:bg-accent/10 mt-1 flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold"
+            onClick={onNavigate}
+          >
+            <Trophy className="h-4 w-4 shrink-0" />
+            {hallOfFameLabel}
+          </Link>
         </div>
       )}
     </div>

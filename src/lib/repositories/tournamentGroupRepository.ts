@@ -4,7 +4,30 @@ import {
   getMatchesToDelete,
 } from "@/lib/tournaments/match-generation/group-matches";
 import { db } from "@/server/db";
+import type { Prisma } from "@prisma/client";
 import { MatchStatus } from "@prisma/client";
+
+/**
+ * Groups plus their participants.
+ */
+const groupsWithParticipantsInclude = {
+  matchMode: true,
+  translations: true,
+  TournamentGroupParticipant: {
+    include: {
+      tournamentParticipant: {
+        include: {
+          user: true,
+          team: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.TournamentGroupInclude;
+
+export type TournamentGroupWithParticipants = Prisma.TournamentGroupGetPayload<{
+  include: typeof groupsWithParticipantsInclude;
+}>;
 
 export type TournamentGroupTranslationInput = {
   locale: string;
@@ -102,6 +125,19 @@ export const tournamentGroupRepository = {
           : undefined,
         matches: options?.includeMatches,
       },
+      orderBy: { displayOrder: "asc" },
+    });
+  },
+
+  /**
+   * All groups of a tournament with their participants.
+   */
+  async getGroupsWithParticipantsByTournamentId(
+    tournamentId: string,
+  ): Promise<TournamentGroupWithParticipants[]> {
+    return db.tournamentGroup.findMany({
+      where: { tournamentId },
+      include: groupsWithParticipantsInclude,
       orderBy: { displayOrder: "asc" },
     });
   },

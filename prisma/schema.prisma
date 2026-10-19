@@ -44,6 +44,8 @@ model User {
   color                 String?
   adminComment          String?
   aoe2companionUrl      String?
+  rating                Int?
+  ratingUpdatedAt       DateTime?
   streamUrl             String?
   accounts              Account[]
   sessions              Session[]
@@ -152,6 +154,13 @@ model LeaderboardPlayerFilter {
   createdAt DateTime @default(now())
 }
 
+model LeaderboardPlayerInclude {
+  id        String   @id @default(cuid())
+  profileId Int      @unique
+  name      String?
+  createdAt DateTime @default(now())
+}
+
 model NewsPost {
   id           String                @id @default(cuid())
   featured     Boolean               @default(false)
@@ -213,6 +222,7 @@ model Tournament {
   status                TournamentStatus
   isVisible             Boolean
   archived              Boolean                 @default(false)
+  includeInHallOfFame   Boolean                 @default(true)
   name                  String
   matchMode             TournamentMatchMode?     @relation(fields: [matchModeId], references: [id])
   tournamentSeries      TournamentSeries        @relation(fields: [tournamentSeriesId], references: [id])

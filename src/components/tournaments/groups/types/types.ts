@@ -3,7 +3,7 @@ import type { TournamentMatchModeType } from "@prisma/client";
 import type { inferProcedureOutput } from "@trpc/server";
 
 type TournamentMatchData = inferProcedureOutput<
-  AppRouter["tournaments"]["matches"]["list"]
+  AppRouter["tournaments"]["matches"]["listByGroupIds"]
 >;
 
 export interface GroupPageData {

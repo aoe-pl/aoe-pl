@@ -55,6 +55,8 @@ export const usersRepository = {
         color: true,
         adminComment: true,
         aoe2companionUrl: true,
+        rating: true,
+        ratingUpdatedAt: true,
         streamUrl: true,
         userRoles: {
           select: {
@@ -66,7 +68,6 @@ export const usersRepository = {
               },
             },
           },
-          take: 3, // Only show first 3 roles in list
         },
         _count: {
           select: {
@@ -248,7 +249,13 @@ export const usersRepository = {
   async updateOwnAoe2CompanionUrl(userId: string, url: string | null) {
     return db.user.update({
       where: { id: userId },
-      data: { aoe2companionUrl: url },
+      // The cached rating belongs to the previous profile, so drop it and let
+      // the next refresh fetch the new one.
+      data: {
+        aoe2companionUrl: url,
+        rating: null,
+        ratingUpdatedAt: null,
+      },
       select: { id: true, aoe2companionUrl: true },
     });
   },

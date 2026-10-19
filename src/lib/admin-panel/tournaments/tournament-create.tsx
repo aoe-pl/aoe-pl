@@ -38,6 +38,7 @@ export function TournamentCreate() {
       registrationClosed: false,
       status: TournamentStatus.PENDING,
       isVisible: false,
+      includeInHallOfFame: true,
     },
   });
 

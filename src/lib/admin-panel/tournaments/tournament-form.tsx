@@ -548,6 +548,29 @@ export function TournamentForm({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="includeInHallOfFame"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    {t("include_in_hall_of_fame")}
+                    <FormDescription>
+                      {t("include_in_hall_of_fame_description")}
+                    </FormDescription>
+                  </div>
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+
           <Button
             type="submit"
             disabled={isPending}
