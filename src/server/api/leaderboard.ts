@@ -38,15 +38,22 @@ interface LeaderboardResponse {
 async function fetchTopPolishPlayers(
   count: number,
 ): Promise<LeaderboardPlayer[]> {
-  const polishPlayers: LeaderboardPlayer[] = [];
+  const playersByProfileId = new Map<number, LeaderboardPlayer>();
   const maxPages = 100;
 
   let page = 1;
 
-  while (polishPlayers.length < count && page <= maxPages) {
+  while (playersByProfileId.size < count && page <= maxPages) {
     try {
+      const params = new URLSearchParams({
+        search: "",
+        language: "en",
+        country: "pl",
+        page: String(page),
+      });
+
       const response = await fetch(
-        `https://data.aoe2companion.com/api/leaderboards/rm_1v1?search=&language=en&page=${page}`,
+        `https://data.aoe2companion.com/api/leaderboards/rm_1v1?${params.toString()}`,
         {
           next: { revalidate: 3600 }, // Cache for 1h
           headers: {
@@ -66,7 +73,11 @@ async function fetchTopPolishPlayers(
       const data = (await response.json()) as LeaderboardResponse;
       const polishFromPage = data.players.filter((p) => p.country === "pl");
 
-      polishPlayers.push(...polishFromPage);
+      for (const player of polishFromPage) {
+        if (!playersByProfileId.has(player.profileId)) {
+          playersByProfileId.set(player.profileId, player);
+        }
+      }
 
       page++;
 
@@ -79,7 +90,7 @@ async function fetchTopPolishPlayers(
     }
   }
 
-  return polishPlayers.slice(0, count);
+  return [...playersByProfileId.values()].slice(0, count);
 }
 
 /**
@@ -177,12 +188,11 @@ export const leaderboardRouter = createTRPCRouter({
         ),
       ]);
 
-      const merged = mergePlayers(
-        players,
-        includedPlayers.filter(
-          (player): player is LeaderboardPlayer => player !== null,
-        ),
+      const validIncludedPlayers = includedPlayers.filter(
+        (player): player is LeaderboardPlayer => player !== null,
       );
+
+      const merged = mergePlayers(players, validIncludedPlayers);
 
       const filtered = merged
         .filter((p) => !isPlayerFiltered(p, filters))
