@@ -12,7 +12,7 @@ import { useState } from "react";
 
 export default function AdminSettingsPage() {
   const t = useTranslations("admin.settings");
-  const [activeSection, setActiveSection] = useState("civilizations");
+  const [activeSection, setActiveSection] = useState("users");
 
   const renderContent = () => {
     switch (activeSection) {
