@@ -1,3 +1,7 @@
+import {
+  fetchAoe2CompanionProfile,
+  getAoe2Companion1v1,
+} from "@/lib/aoe2companion";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import {
   adminProcedure,
@@ -5,6 +9,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { db } from "@/server/db";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 /** Maximum number of players the top-players list supports. */
@@ -78,6 +83,54 @@ async function fetchTopPolishPlayers(
 }
 
 /**
+ * Builds a leaderboard entry for a manually included AoE2Companion profile.
+ * Returns null when the profile or its 1v1 Random Map standing is unavailable.
+ */
+async function fetchIncludedPlayer(
+  profileId: number,
+): Promise<LeaderboardPlayer | null> {
+  const profile = await fetchAoe2CompanionProfile(profileId);
+
+  if (!profile) return null;
+
+  const leaderboard = getAoe2Companion1v1(profile);
+
+  if (!leaderboard) return null;
+
+  return {
+    leaderboardId: leaderboard.leaderboardId,
+    profileId: profile.profileId,
+    name: profile.name,
+    rank: leaderboard.rank ?? 0,
+    rating: leaderboard.rating,
+    country: profile.country ?? "",
+    wins: leaderboard.wins,
+    losses: leaderboard.losses,
+    games: leaderboard.games,
+    streak: leaderboard.streak,
+  };
+}
+
+/**
+ * Merges the Polish leaderboard players with manually included players,
+ * deduplicating by profile id and sorting by rating (highest first).
+ */
+function mergePlayers(
+  polishPlayers: LeaderboardPlayer[],
+  includedPlayers: LeaderboardPlayer[],
+): LeaderboardPlayer[] {
+  const byProfileId = new Map<number, LeaderboardPlayer>();
+
+  for (const player of [...polishPlayers, ...includedPlayers]) {
+    if (!byProfileId.has(player.profileId)) {
+      byProfileId.set(player.profileId, player);
+    }
+  }
+
+  return [...byProfileId.values()].sort((a, b) => b.rating - a.rating);
+}
+
+/**
  * Builds a map of AoE2Companion profileId -> internal playerNumber for users
  * who linked their AoE2Companion profile. This lets us link leaderboard entries
  * to their in-app profile page when the account exists.
@@ -106,13 +159,32 @@ export const leaderboardRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const filters = await db.leaderboardPlayerFilter.findMany({
-        select: { profileId: true, name: true },
-      });
+      const [filters, includedProfiles] = await Promise.all([
+        db.leaderboardPlayerFilter.findMany({
+          select: { profileId: true, name: true },
+        }),
+        db.leaderboardPlayerInclude.findMany({
+          select: { profileId: true },
+        }),
+      ]);
 
-      const players = await fetchTopPolishPlayers(input.count + filters.length);
+      const [players, includedPlayers] = await Promise.all([
+        fetchTopPolishPlayers(input.count + filters.length),
+        Promise.all(
+          includedProfiles.map((included) =>
+            fetchIncludedPlayer(included.profileId),
+          ),
+        ),
+      ]);
 
-      const filtered = players
+      const merged = mergePlayers(
+        players,
+        includedPlayers.filter(
+          (player): player is LeaderboardPlayer => player !== null,
+        ),
+      );
+
+      const filtered = merged
         .filter((p) => !isPlayerFiltered(p, filters))
         .slice(0, input.count);
 
@@ -154,6 +226,44 @@ export const leaderboardRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       return db.leaderboardPlayerFilter.delete({ where: { id: input.id } });
+    }),
+
+  getIncludedPlayers: adminProcedure.query(async () => {
+    return db.leaderboardPlayerInclude.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+  }),
+
+  addIncludedPlayer: adminProcedure
+    .input(z.object({ profileId: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      const profile = await fetchAoe2CompanionProfile(input.profileId);
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Player not found on AoE2Companion.",
+        });
+      }
+
+      if (!getAoe2Companion1v1(profile)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Player has no 1v1 Random Map rating.",
+        });
+      }
+
+      return db.leaderboardPlayerInclude.upsert({
+        where: { profileId: input.profileId },
+        create: { profileId: input.profileId, name: profile.name },
+        update: { name: profile.name },
+      });
+    }),
+
+  removeIncludedPlayer: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return db.leaderboardPlayerInclude.delete({ where: { id: input.id } });
     }),
 });
 

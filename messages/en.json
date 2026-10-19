@@ -58,7 +58,20 @@
       "title": "Top Polish Players",
       "loading": "Loading players...",
       "error": "Failed to load players",
-      "wins": "{count} wins"
+      "wins": "{count} wins",
+      "settings": {
+        "title": "Top Players Settings",
+        "included_title": "Included players",
+        "included_description": "Profiles considered for the top list regardless of country.",
+        "included_placeholder": "AoE2Companion profile ID",
+        "included_empty": "No players included.",
+        "excluded_title": "Excluded players",
+        "excluded_description": "Players removed from the top list by name or profile ID.",
+        "excluded_placeholder": "Name or profile ID",
+        "excluded_empty": "No filters set.",
+        "profile_id": "profileId: {id}",
+        "invalid_profile_id": "Enter a valid AoE2Companion profile ID."
+      }
     },
     "live_streamers": {
       "title": "Live Now",
