@@ -14,8 +14,7 @@ import { db } from "@/server/db";
 const PLAYER_RATING_MAX_AGE_MS = 30 * 60 * 1000;
 
 /**
- * Maximum number of profiles refreshed per call. Covers a typical tournament
- * roster in one page load; any leftovers are picked up by the next call.
+ * Maximum number of profiles refreshed per call.
  */
 const DEFAULT_REFRESH_LIMIT = 100;
 
