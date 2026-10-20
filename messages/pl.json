@@ -16,7 +16,6 @@
     "subtitle": "Sala chwały",
     "description": "Zwycięzcy naszych turniejów",
     "bracket": "Finał",
-    "group_number": "Grupa {number}",
     "no_results": "Brak wyników",
     "no_results_description": "Gdy turniej się zakończy, zwycięzcy jego grup trafią do tej kroniki.",
     "back_to_tournaments": "Wróć do turniejów",

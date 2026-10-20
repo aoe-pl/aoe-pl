@@ -16,7 +16,6 @@
     "subtitle": "Legends of the Arena",
     "description": "Tournament champions",
     "bracket": "Final",
-    "group_number": "Group {number}",
     "no_results": "No results yet",
     "no_results_description": "Once a tournament is completed, its group winners will be immortalised here.",
     "back_to_tournaments": "Back to tournaments",

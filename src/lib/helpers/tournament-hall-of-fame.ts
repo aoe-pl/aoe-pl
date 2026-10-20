@@ -103,7 +103,7 @@ export interface HallOfFameGroupResult {
   name: string;
   color: string | null;
   isBracket: boolean;
-  winners: HallOfFameWinner[];
+  winner: HallOfFameWinner;
 }
 
 export interface HallOfFameTournament {
@@ -120,11 +120,11 @@ export interface HallOfFameData {
 }
 
 /**
- * Returns every finished tournament with the winner(s) of each of its groups.
- * Participants tied on the highest score are all listed as winners. Rotational
- * groups are skipped. Groups without approved match
- * results are omitted. Bracket tournaments list their bracket finals instead of
- * groups. Tournaments without any group or bracket results are omitted.
+ * Returns every finished tournament with the winner of each of its groups.
+ * Rotational groups are derived groupings and are skipped. Groups without
+ * approved match results are omitted. Bracket tournaments list their bracket
+ * finals instead of groups. Tournaments without any group or bracket results
+ * are omitted.
  */
 export async function getHallOfFame(): Promise<HallOfFameData> {
   const tournaments = await db.tournament.findMany({
@@ -140,9 +140,9 @@ export async function getHallOfFame(): Promise<HallOfFameData> {
 
   for (const tournament of tournaments) {
     const groups = tournament.groups.flatMap((group) => {
-      const winners = getGroupWinners(group);
+      const winner = getGroupWinner(group);
 
-      if (winners.length === 0) return [];
+      if (!winner) return [];
 
       return [
         {
@@ -150,7 +150,7 @@ export async function getHallOfFame(): Promise<HallOfFameData> {
           name: group.name,
           color: group.color,
           isBracket: false,
-          winners,
+          winner,
         },
       ];
     });
@@ -160,7 +160,7 @@ export async function getHallOfFame(): Promise<HallOfFameData> {
       name: bracket.name,
       color: null,
       isBracket: true,
-      winners: bracket.winners,
+      winner: bracket.winner,
     }));
 
     const entries = [...groups, ...bracketWinners];
@@ -182,8 +182,8 @@ export async function getHallOfFame(): Promise<HallOfFameData> {
   };
 }
 
-function getGroupWinners(group: GroupResult): HallOfFameWinner[] {
-  if (group.matches.length === 0) return [];
+function getGroupWinner(group: GroupResult): HallOfFameWinner | null {
+  if (group.matches.length === 0) return null;
 
   const points = new Map<string, number>();
 
@@ -204,13 +204,7 @@ function getGroupWinners(group: GroupResult): HallOfFameWinner[] {
     points: points.get(member.tournamentParticipant.id) ?? 0,
   })).sort((a, b) => b.points - a.points || a.displayOrder - b.displayOrder);
 
-  const topPoints = standings[0]?.points;
-
-  if (topPoints === undefined) return [];
-
-  return standings
-    .filter((standing) => standing.points === topPoints)
-    .map((standing) => toWinner(standing.member));
+  return standings[0] ? toWinner(standings[0].member) : null;
 }
 
 function toWinner(member: GroupMember): HallOfFameWinner {
@@ -241,26 +235,20 @@ function getBracketWinners(tournament: TournamentResult) {
       return [];
     }
 
-    const winners = finalNode.match.TournamentMatchParticipant.flatMap(
-      ({ isWinner, participant }) => {
-        if (!isWinner || !participant) return [];
+    const winner = finalNode.match.TournamentMatchParticipant.find(
+      (participant) => participant.isWinner,
+    )?.participant;
 
-        return [
-          {
-            name: participant.user?.name ?? participant.nickname,
-            playerNumber: participant.user?.playerNumber ?? null,
-          },
-        ];
-      },
-    );
-
-    if (winners.length === 0) return [];
+    if (!winner) return [];
 
     return [
       {
         id: bracket.id,
         name: bracket.name,
-        winners,
+        winner: {
+          name: winner.user?.name ?? winner.nickname,
+          playerNumber: winner.user?.playerNumber ?? null,
+        },
       },
     ];
   });
