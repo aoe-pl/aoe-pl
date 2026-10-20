@@ -77,6 +77,9 @@ export function TournamentMatchForm({
   header,
 }: TournamentMatchFormProps) {
   const [scores, setScores] = useState<ParticipantScore[]>([]);
+  // When true, the winner is chosen explicitly by the admin and score changes
+  // no longer overwrite it automatically.
+  const [isWinnerManual, setIsWinnerManual] = useState(false);
 
   const { data: groupParticipants = [], isLoading: participantsLoading } =
     api.tournaments.groups.getParticipants.useQuery(
@@ -126,6 +129,7 @@ export function TournamentMatchForm({
         isTeam: !!p.teamId,
       }));
       setScores(initialScores);
+      setIsWinnerManual(false);
     }
   }, [initialData]);
 
@@ -144,15 +148,17 @@ export function TournamentMatchForm({
       };
     });
     setScores(newScores);
+    setIsWinnerManual(false);
   };
 
   // Bracket matches manage the winner manually (single-player slots, bye
   // advancement) - the score-derived winner logic below is group-only.
   const isBracketMatch = !!initialData && !initialData.groupId;
 
-  // Automatically determine winner when scores change
+  // Automatically determine winner when scores change, unless the admin has
+  // explicitly picked a winner for this match.
   useEffect(() => {
-    if (isBracketMatch) return;
+    if (isBracketMatch || isWinnerManual) return;
     if (scores.length < 2) {
       setScores((s) => s.map((i) => ({ ...i, isWinner: false })));
       return;
@@ -171,7 +177,24 @@ export function TournamentMatchForm({
         isWinner: s.wonScore === maxWonScore && maxWonScore > 0,
       })),
     );
-  }, [isBracketMatch, scores.map((s) => s.wonScore).join(",")]);
+  }, [isBracketMatch, isWinnerManual, scores.map((s) => s.wonScore).join(",")]);
+
+  const handleToggleWinner = (participantId: string) => {
+    setIsWinnerManual(true);
+    setScores((currentScores) =>
+      currentScores.map((s) => ({
+        ...s,
+        // Exactly one winner per match: toggling the current winner off clears
+        // the winner entirely; selecting another player moves the flag.
+        isWinner: s.id === participantId ? !s.isWinner : false,
+      })),
+    );
+  };
+
+  // Restore the automatic score-based winner selection.
+  const handleUseScoreWinner = () => {
+    setIsWinnerManual(false);
+  };
 
   const handleSubmit = (data: TournamentMatchData) => {
     if (!initialData) {
@@ -229,11 +252,28 @@ export function TournamentMatchForm({
 
     return (
       <div className="space-y-4">
-        <div>
-          <FormLabel>Match Results</FormLabel>
-          <FormDescription>
-            Mark the winner - advancement to the next round is automatic.
-          </FormDescription>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <FormLabel>Match Results</FormLabel>
+            <FormDescription>
+              {isBracketMatch
+                ? "Mark the winner - advancement to the next round is automatic."
+                : isWinnerManual
+                  ? "Winner is set manually and won't change when scores change."
+                  : "Scores determine the winner automatically. Pick one manually if needed."}
+            </FormDescription>
+          </div>
+          {!isBracketMatch && isWinnerManual && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7"
+              onClick={handleUseScoreWinner}
+            >
+              Use score winner
+            </Button>
+          )}
         </div>
         <div className="space-y-3">
           {scores.map((pScore) => (
@@ -243,27 +283,16 @@ export function TournamentMatchForm({
             >
               <div className="flex items-center gap-3">
                 <span className="font-medium">{pScore.name}</span>
-                {isBracketMatch && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={pScore.isWinner ? "default" : "outline"}
-                    className="h-7"
-                    onClick={() => {
-                      // Exactly one winner per match: toggling on clears the
-                      // others, toggling off unmarks everyone.
-                      setScores((currentScores) =>
-                        currentScores.map((s) => ({
-                          ...s,
-                          isWinner: s.id === pScore.id ? !s.isWinner : false,
-                        })),
-                      );
-                    }}
-                    title="Mark as winner - advances to the next round"
-                  >
-                    {pScore.isWinner ? "Winner" : "Set as winner"}
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={pScore.isWinner ? "default" : "outline"}
+                  className="h-7"
+                  onClick={() => handleToggleWinner(pScore.id)}
+                  title="Mark as winner"
+                >
+                  {pScore.isWinner ? "Winner" : "Set as winner"}
+                </Button>
               </div>
               <div className="flex items-center gap-2">
                 <FormLabel>Won:</FormLabel>

@@ -5,52 +5,176 @@ import type {
   HallOfFameGroupResult,
   HallOfFameTournament,
 } from "@/lib/helpers/tournament-hall-of-fame";
-import { ChevronDown, Trophy } from "lucide-react";
+import { ChevronDown, Crown, Trophy } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-function GroupRow({
-  group,
-  labels,
+const GROUP_SUFFIX_PATTERN = /(?:\s+(?:\d+|[A-Z]+))+$/u;
+const TEXT_SHADOW = "0 1px 1px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.55)";
+
+interface HallOfFameLabels {
+  bracket: string;
+  groupNumber: (number: string) => string;
+}
+
+interface HallOfFameSection {
+  key: string;
+  title: string;
+  entries: HallOfFameGroupResult[];
+}
+
+function getSectionTitle(name: string) {
+  return name.replace(GROUP_SUFFIX_PATTERN, "").trim() || name.trim();
+}
+
+function groupEntriesByPrefix(entries: HallOfFameGroupResult[]) {
+  const sections = new Map<string, HallOfFameSection>();
+
+  for (const entry of entries) {
+    const title = getSectionTitle(entry.name);
+    const key = title.toLocaleLowerCase();
+    const section = sections.get(key);
+
+    if (section) {
+      section.entries.push(entry);
+    } else {
+      sections.set(key, { key, title, entries: [entry] });
+    }
+  }
+
+  return Array.from(sections.values());
+}
+
+function getEntryLabel(
+  entry: HallOfFameGroupResult,
+  section: HallOfFameSection,
+  labels: HallOfFameLabels,
+) {
+  const suffix = entry.name.slice(section.title.length).trim();
+
+  if (/^\d+$/u.test(suffix)) {
+    return labels.groupNumber(suffix);
+  }
+
+  if (suffix) return suffix;
+
+  return entry.isBracket ? labels.bracket : null;
+}
+
+function getSectionAccent(section: HallOfFameSection) {
+  const color = section.entries[0]?.color ?? "var(--medieval-gold)";
+
+  return `color-mix(in srgb, ${color} 82%, white)`;
+}
+
+function WinnerNames({
+  winners,
 }: {
-  group: HallOfFameGroupResult;
-  labels: {
-    bracket: string;
-  };
+  winners: HallOfFameGroupResult["winners"];
 }) {
   return (
-    <div
-      className="grid grid-cols-[minmax(0,1fr)_2.5rem_minmax(0,1fr)] items-center gap-2 rounded-xl border-b-3 border-black/30 bg-black/20 px-4 py-3"
-      style={{
-        backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${
-          group.color ?? "var(--medieval-gold)"
-        } 22%, transparent) 0%, transparent 30%, transparent 70%, color-mix(in srgb, ${
-          group.color ?? "var(--medieval-gold)"
-        } 22%, transparent) 100%)`,
-      }}
-    >
-      <div className="flex min-w-0 items-center justify-end gap-2">
-        {group.isBracket && (
-          <span className="border-medieval-gold/30 bg-medieval-gold/10 text-medieval-gold shrink-0 rounded-full border px-2 py-0.5 text-lg font-bold tracking-wider uppercase">
-            {labels.bracket}
-          </span>
-        )}
-        <p className="text-medieval-gold min-w-0 truncate text-right text-lg font-semibold">
-          {group.name}
-        </p>
-      </div>
-
-      <Trophy className="text-medieval-gold mx-auto h-4 w-4" />
-
-      <div className="min-w-0 text-left">
-        <span className="text-medieval-gold block truncate font-semibold">
+    <div className="flex min-w-0 flex-col items-center gap-0.5 text-center">
+      {winners.map((winner, index) => (
+        <span
+          key={`${winner.playerNumber ?? "guest"}-${winner.name}-${index}`}
+          className="text-medieval-gold block truncate text-lg font-bold sm:text-xl"
+        >
           <PlayerLink
-            playerNumber={group.winner.playerNumber ?? undefined}
-            name={group.winner.name}
+            playerNumber={winner.playerNumber ?? undefined}
+            name={winner.name}
           />
         </span>
-      </div>
+      ))}
     </div>
+  );
+}
+
+function ChampionCard({ section }: { section: HallOfFameSection }) {
+  const accent = getSectionAccent(section);
+
+  return (
+    <section
+      className="relative overflow-hidden rounded-2xl border px-5 py-4"
+      style={{
+        borderColor: `color-mix(in srgb, ${accent} 50%, transparent)`,
+        backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 28%, transparent) 0%, color-mix(in srgb, ${accent} 12%, transparent) 100%)`,
+        boxShadow: `0 0 32px color-mix(in srgb, ${accent} 14%, transparent)`,
+        textShadow: TEXT_SHADOW,
+      }}
+    >
+      <div className="flex flex-col items-center gap-2 text-center">
+        <span className="text-medieval-gold text-xl font-bold sm:text-2xl">
+          {section.title}
+        </span>
+
+        <span className="bg-medieval-gold/20 h-px w-full" />
+
+        <Trophy className="text-medieval-gold h-5 w-5 shrink-0" />
+
+        <div className="flex flex-col items-center gap-0.5">
+          {section.entries.flatMap((entry) =>
+            entry.winners.map((winner, index) => (
+              <span
+                key={`${entry.id}-${winner.playerNumber ?? "guest"}-${winner.name}-${index}`}
+                className="text-medieval-gold text-xl font-bold sm:text-2xl"
+              >
+                <PlayerLink
+                  playerNumber={winner.playerNumber ?? undefined}
+                  name={winner.name}
+                />
+              </span>
+            )),
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DivisionCard({
+  section,
+  labels,
+}: {
+  section: HallOfFameSection;
+  labels: HallOfFameLabels;
+}) {
+  const accent = getSectionAccent(section);
+
+  return (
+    <section
+      className="rounded-xl border p-4"
+      style={{
+        borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`,
+        backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 28%, transparent) 0%, color-mix(in srgb, ${accent} 8%, transparent) 75%, transparent 100%)`,
+        textShadow: TEXT_SHADOW,
+      }}
+    >
+      <header className="border-medieval-gold/20 mb-3 flex min-w-0 items-center justify-center gap-2 border-b pb-2">
+        <h3 className="text-medieval-gold truncate text-xl font-bold">
+          {section.title}
+        </h3>
+      </header>
+
+      <div className="space-y-3">
+        {section.entries.map((entry) => {
+          const label = getEntryLabel(entry, section, labels);
+
+          return (
+            <div
+              key={entry.id}
+              className="flex min-w-0 flex-col items-center gap-0.5 text-center"
+            >
+              {label && (
+                <span className="text-medieval-gold-muted text-sm font-bold tracking-wide">
+                  {label}
+                </span>
+              )}
+              <WinnerNames winners={entry.winners} />
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -61,10 +185,12 @@ function TournamentTree({
 }: {
   tournament: HallOfFameTournament;
   defaultOpen: boolean;
-  labels: {
-    bracket: string;
-  };
+  labels: HallOfFameLabels;
 }) {
+  const [championSection, ...divisionSections] = groupEntriesByPrefix(
+    tournament.groups,
+  );
+
   return (
     <details
       open={defaultOpen}
@@ -87,18 +213,26 @@ function TournamentTree({
         </span>
       </summary>
 
-      <div className="mx-auto max-w-3xl pt-5">
-        <div className="space-y-2">
-          {tournament.groups.map((group) => (
-            <GroupRow
-              key={group.id}
-              group={group}
-              labels={{
-                bracket: labels.bracket,
-              }}
-            />
-          ))}
-        </div>
+      <div className="mx-auto max-w-4xl space-y-4 pt-5">
+        {championSection && <ChampionCard section={championSection} />}
+
+        {divisionSections.length > 0 && (
+          <div
+            className={
+              divisionSections.length > 1
+                ? "grid gap-4 sm:grid-cols-2"
+                : "grid gap-4"
+            }
+          >
+            {divisionSections.map((section) => (
+              <DivisionCard
+                key={section.key}
+                section={section}
+                labels={labels}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </details>
   );
@@ -106,6 +240,10 @@ function TournamentTree({
 
 export async function HallOfFameContent({ data }: { data: HallOfFameData }) {
   const t = await getTranslations("hall_of_fame");
+  const labels: HallOfFameLabels = {
+    bracket: t("bracket"),
+    groupNumber: (number) => t("group_number", { number }),
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 pt-28 pb-16">
@@ -126,9 +264,7 @@ export async function HallOfFameContent({ data }: { data: HallOfFameData }) {
               key={tournament.tournamentId}
               tournament={tournament}
               defaultOpen={index === 0}
-              labels={{
-                bracket: t("bracket"),
-              }}
+              labels={labels}
             />
           ))}
         </div>
