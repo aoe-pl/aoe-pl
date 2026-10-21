@@ -52,7 +52,7 @@ export function GroupSelectionView({
           const [rotationLeft, rotationRight] = cell.rotationColors ?? [];
           const rotationBackground =
             rotationLeft && rotationRight
-              ? `linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28) 100%), linear-gradient(rgba(70, 48, 33, 0.35), rgba(70, 48, 33, 0.35)), linear-gradient(90deg, ${rotationLeft} 0%, ${rotationLeft} 20%, ${rotationRight} 80%, ${rotationRight} 100%)`
+              ? `linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28) 100%), linear-gradient(rgba(70, 48, 33, 0.175), rgba(70, 48, 33, 0.175)), linear-gradient(90deg, ${rotationLeft} 0%, ${rotationLeft} 20%, ${rotationRight} 80%, ${rotationRight} 100%)`
               : null;
 
           return (
@@ -83,12 +83,12 @@ export function GroupSelectionView({
                     background:
                       rotationBackground ??
                       (group.groupColor
-                        ? `linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28) 100%), linear-gradient(rgba(70, 48, 33, 0.35), rgba(70, 48, 33, 0.35)), ${group.groupColor}`
+                        ? `linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28) 100%), linear-gradient(rgba(70, 48, 33, 0.175), rgba(70, 48, 33, 0.175)), ${group.groupColor}`
                         : "linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.22)), var(--medieval-wood)"),
-                    color: "var(--medieval-parchment-foreground)",
+                    color: "#ffffff",
                     boxShadow: isSelected
                       ? "0 0 6px rgba(230, 192, 82, 0.6)"
-                      : "0 2px 6px rgba(0, 0, 0, 0.35)",
+                      : "0 8px 6px rgba(0, 0, 0, 0.6)",
                   }}
                   onClick={() => onSelectGroup(group.groupId)}
                 >

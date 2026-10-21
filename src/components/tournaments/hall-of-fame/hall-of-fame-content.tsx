@@ -5,7 +5,7 @@ import type {
   HallOfFameGroupResult,
   HallOfFameTournament,
 } from "@/lib/helpers/tournament-hall-of-fame";
-import { ChevronDown, Crown, Trophy } from "lucide-react";
+import { ChevronDown, Trophy } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
