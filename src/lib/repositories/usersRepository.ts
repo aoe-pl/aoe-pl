@@ -163,7 +163,7 @@ export const usersRepository = {
               },
             },
           },
-          orderBy: { registrationDate: "desc" },
+          orderBy: { tournament: { startDate: "desc" } },
         },
       },
     });

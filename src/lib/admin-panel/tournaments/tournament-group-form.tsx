@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
@@ -432,14 +433,15 @@ export function TournamentGroupForm({
                 <FormItem>
                   <FormLabel>Group Color</FormLabel>
                   <FormControl>
-                    <Input
-                      type="color"
-                      placeholder="#000000"
+                    <ColorPicker
                       {...field}
+                      value={field.value ?? ""}
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormDescription>
-                    Choose a color to visually distinguish this group
+                    Pick a preset or enter a hex/RGB value to visually
+                    distinguish this group.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

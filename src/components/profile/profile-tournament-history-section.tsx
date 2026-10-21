@@ -1,7 +1,6 @@
 "use client";
 
 import { GroupLabel } from "@/components/tournaments/group-label";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -10,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatTournamentStatusLabel } from "@/lib/helpers/tournament-status";
 import { slugify } from "@/lib/utils";
 import type { TournamentStatus } from "@prisma/client";
 import { useTranslations } from "next-intl";
@@ -45,7 +43,6 @@ export function ProfileTournamentHistorySection({
   participants,
 }: ProfileTournamentHistorySectionProps) {
   const t = useTranslations("profile.tournaments");
-  const tGlobal = useTranslations();
 
   const hasGroups = participants.some((p) =>
     p.TournamentGroupParticipant.some((gp) => !gp.tournamentGroup.isRotational),
@@ -66,7 +63,6 @@ export function ProfileTournamentHistorySection({
                   <TableHead>{t("tournament")}</TableHead>
                   {hasGroups && <TableHead>{t("group")}</TableHead>}
                   {hasFinished && <TableHead>{t("rank")}</TableHead>}
-                  <TableHead>{t("status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -108,21 +104,6 @@ export function ProfileTournamentHistorySection({
                           {p.rank != null ? `#${p.rank}` : "—"}
                         </TableCell>
                       )}
-                      <TableCell>
-                        <Badge
-                          variant={
-                            p.tournament.status === "ACTIVE"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className="text-xs"
-                        >
-                          {formatTournamentStatusLabel(
-                            p.tournament.status,
-                            tGlobal,
-                          )}
-                        </Badge>
-                      </TableCell>
                     </TableRow>
                   );
                 })}
