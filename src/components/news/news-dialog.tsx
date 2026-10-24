@@ -171,7 +171,11 @@ export function NewsDialog({ id, trigger }: NewsDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+      <DialogContent
+        className="max-h-[90vh] max-w-3xl overflow-y-auto"
+        // Prevent losing unsaved form input when clicking the overlay
+        onInteractOutside={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{id ? t("edit_title") : t("add_title")}</DialogTitle>
         </DialogHeader>
