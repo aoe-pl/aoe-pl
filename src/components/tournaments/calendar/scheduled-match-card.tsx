@@ -106,7 +106,7 @@ export function ScheduledMatchCard({
               {t("schedule.reschedule")}
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="text-red-400"
+              className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
               onSelect={(e) => e.preventDefault()}
             >
               <AlertDialog>
