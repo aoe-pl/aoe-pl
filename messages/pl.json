@@ -878,7 +878,7 @@
       },
       "status": {
         "label": "Status",
-        "pending": "Oczekujący",
+        "pending": "Do zaplanowania",
         "scheduled": "Zaplanowany",
         "completed": "Zagrany",
         "admin_approved": "Zatwierdzony przez admina"
@@ -1052,7 +1052,7 @@
       "none": "Brak zaplanowanych nadchodzących meczów.",
       "vs": "vs",
       "tbd": "TBD",
-      "pending": "Oczekujący",
+      "pending": "Do zaplanowania",
       "scheduled": "Zaplanowany"
     },
     "admin_note": {
