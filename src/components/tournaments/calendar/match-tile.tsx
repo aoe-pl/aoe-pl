@@ -1,8 +1,10 @@
+import { ADMIN_MARKER_META } from "@/components/tournaments/matches/admin-stream-marker";
 import { isBrightColor } from "@/lib/utils";
 import { format } from "date-fns";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { CalendarMatchStatus } from "./types";
 import type { CalendarGroup, CalendarMatch, CalendarPlayer } from "./types";
 
 interface MatchTileProps {
@@ -11,6 +13,7 @@ interface MatchTileProps {
   player1: CalendarPlayer;
   player2: CalendarPlayer;
   href: string;
+  showAdminMarker?: boolean;
 }
 
 export function MatchTile({
@@ -19,15 +22,29 @@ export function MatchTile({
   player1,
   player2,
   href,
+  showAdminMarker = false,
 }: MatchTileProps) {
   const t = useTranslations("tournament.calendar");
-  const { isStreamed = false, isVerified = false } = match;
+  const tMatches = useTranslations("tournament.matches");
+  const {
+    isStreamed = false,
+    isVerified = false,
+    adminStreamStatus = null,
+  } = match;
   const textColor = isBrightColor(group.color) ? "#000000" : "#ffffff";
 
   const sharedStyle = {
     backgroundColor: group.color + "51",
     borderColor: group.color + "66",
   };
+
+  const adminMarker = adminStreamStatus
+    ? ADMIN_MARKER_META[adminStreamStatus]
+    : null;
+  const AdminMarkerIcon = adminMarker?.icon;
+
+  const isCompleted =
+    match.status === CalendarMatchStatus.Completed && !isVerified;
 
   const content = (
     <>
@@ -40,13 +57,43 @@ export function MatchTile({
         />
       )}
 
-      {/* Verified checkmark */}
-      {isVerified && (
-        <Check
-          className="absolute -bottom-1 left-0 h-4 w-4 text-green-500"
-          strokeWidth={5}
-          aria-label="Verified"
-        />
+      {/* Admin coverage marker */}
+      {showAdminMarker && adminMarker && AdminMarkerIcon && (
+        <span
+          className="absolute -top-2 -left-1.5 rounded-full bg-black/50 p-0.5"
+          title={tMatches(adminMarker.labelKey)}
+          aria-label={tMatches(adminMarker.labelKey)}
+        >
+          <AdminMarkerIcon
+            className={`h-4 w-4 ${adminMarker.className}`}
+            aria-hidden
+          />
+        </span>
+      )}
+
+      {/* Approved / completed checkmark */}
+      {(isVerified || isCompleted) && (
+        <span
+          className="absolute -bottom-1.5 left-0"
+          title={
+            isVerified
+              ? tMatches("status.admin_approved")
+              : tMatches("status.completed")
+          }
+          aria-label={
+            isVerified
+              ? tMatches("status.admin_approved")
+              : tMatches("status.completed")
+          }
+        >
+          <Check
+            className={`h-6 w-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ${
+              isVerified ? "text-green-500" : "text-orange-500"
+            }`}
+            strokeWidth={4}
+            aria-hidden
+          />
+        </span>
       )}
 
       {/* Group label + time */}

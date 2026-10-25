@@ -11,7 +11,15 @@ import {
 } from "@/components/ui/dialog";
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/trpc/react";
+import type { StreamType } from "@prisma/client";
 import { CircleSlash, RadioTower } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -22,21 +30,27 @@ interface MatchStreamPanelProps {
   matchId: string;
   streamUrl: string | null;
   isMarkedByMe: boolean;
+  myStreamType: StreamType | null;
 }
 
 /**
- * Control that lets a streamer mark a match as going to be
- * streamed, or remove their own stream entry again
+ * Control that lets any signed-in user mark a match as going to be streamed,
+ * optionally specifying whether they will stream POV or commentate. Multiple
+ * users can mark the same match.
  */
 export function MatchStreamPanel({
   matchId,
   streamUrl,
   isMarkedByMe,
+  myStreamType,
 }: MatchStreamPanelProps) {
   const t = useTranslations("tournament.matches.stream");
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [value, setValue] = useState(streamUrl ?? "");
+  const [streamType, setStreamType] = useState<StreamType | null>(
+    myStreamType ?? null,
+  );
 
   const { mutate: mark, isPending: isMarking } =
     api.tournaments.matches.markStream.useMutation({
@@ -65,20 +79,19 @@ export function MatchStreamPanel({
       onError: (err) => toast.error(<ErrorToast message={err.message} />),
     });
 
-  function handleMarkClick() {
-    // Ask for the link when the profile has none stored yet.
-    if (!streamUrl) {
-      setValue("");
-      setDialogOpen(true);
-      return;
-    }
-    mark({ matchId });
+  function openDialog() {
+    setValue(streamUrl ?? "");
+    setStreamType(myStreamType ?? null);
+    setDialogOpen(true);
   }
 
   function handleSubmitDialog() {
     const trimmed = value.trim();
-    if (!trimmed) return;
-    mark({ matchId, streamUrl: trimmed });
+    mark({
+      matchId,
+      streamUrl: trimmed || undefined,
+      streamType,
+    });
   }
 
   const isPending = isMarking || isUnmarking;
@@ -89,14 +102,27 @@ export function MatchStreamPanel({
 
       <Button
         size="lg"
-        variant={isMarkedByMe ? "wine" : "gold"}
+        variant="gold"
         className="w-full"
         disabled={isPending}
-        onClick={() => (isMarkedByMe ? unmark({ matchId }) : handleMarkClick())}
+        onClick={openDialog}
       >
-        {isMarkedByMe ? <CircleSlash /> : <RadioTower />}
-        {isMarkedByMe ? t("unmark_button") : t("mark_button")}
+        <RadioTower />
+        {isMarkedByMe ? t("update_button") : t("mark_button")}
       </Button>
+
+      {isMarkedByMe && (
+        <Button
+          size="lg"
+          variant="wine"
+          className="w-full"
+          disabled={isPending}
+          onClick={() => unmark({ matchId })}
+        >
+          <CircleSlash />
+          {t("unmark_button")}
+        </Button>
+      )}
 
       <Dialog
         open={dialogOpen}
@@ -107,12 +133,37 @@ export function MatchStreamPanel({
             <DialogTitle>{t("dialog_title")}</DialogTitle>
             <DialogDescription>{t("dialog_description")}</DialogDescription>
           </DialogHeader>
-          <Input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={t("placeholder")}
-            autoFocus
-          />
+
+          <div className="space-y-4">
+            <Input
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder={t("placeholder")}
+              autoFocus
+            />
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">{t("type_label")}</div>
+              <Select
+                value={streamType ?? "NONE"}
+                onValueChange={(next) =>
+                  setStreamType(next === "NONE" ? null : (next as StreamType))
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">{t("type.none")}</SelectItem>
+                  <SelectItem value="POV">{t("type.pov")}</SelectItem>
+                  <SelectItem value="COMMENTARY">
+                    {t("type.commentary")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button
               variant="ghost"

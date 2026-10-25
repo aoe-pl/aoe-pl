@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import type { AdminStreamStatus } from "@prisma/client";
 import {
   CalendarMatchStatus,
   type CalendarGroup,
@@ -13,6 +14,7 @@ export interface TournamentMatchRow {
   matchNumber: number;
   matchDate: Date | null;
   status: "PENDING" | "SCHEDULED" | "COMPLETED" | "ADMIN_APPROVED";
+  adminStreamStatus: AdminStreamStatus | null;
   group: MatchRowGroup | null;
   TournamentMatchParticipant: MatchRowParticipant[];
   TournamentMatchStream: MatchRowStream[];
@@ -108,6 +110,7 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
         player1Id: p1.id,
         player2Id: p2.id,
         status,
+        adminStreamStatus: row.adminStreamStatus,
         isStreamed: hasAny,
         isVerified: row.status === "ADMIN_APPROVED",
       });

@@ -440,6 +440,7 @@ model TournamentMatch {
   TournamentMatchMode        TournamentMatchMode?         @relation(fields: [tournamentMatchModeId], references: [id])
   TournamentMatchParticipant TournamentMatchParticipant[] @relation("MatchParticipants")
   TournamentMatchStream      TournamentMatchStream[]
+  adminStreamStatus          AdminStreamStatus?
 }
 
 model TournamentMatchStream {
@@ -450,6 +451,7 @@ model TournamentMatchStream {
   scheduledStartTime  DateTime?
   streamUrl           String?
   scheduledStreamLive Boolean
+  streamType          StreamType?
   streamer            User            @relation(fields: [streamerId], references: [id])
   tournamentMatch     TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
 
@@ -539,6 +541,19 @@ enum StreamStatus {
   LIVE
   COMPLETED
   CANCELLED
+}
+
+enum StreamType {
+  POV
+  COMMENTARY
+}
+
+enum AdminStreamStatus {
+  WILL_BE_COMMENTATED
+  WILL_BE_WATCHED
+  WATCHED
+  COMMENTATED
+  WILL_BE_STREAMED_LIVE
 }
 
 enum ParticipantStatus {

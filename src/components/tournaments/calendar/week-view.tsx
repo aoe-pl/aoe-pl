@@ -14,6 +14,7 @@ interface WeekViewProps {
   matchUrlBase: string;
   selectedDay?: Date | null;
   onDaySelect?: (day: Date) => void;
+  showAdminMarker?: boolean;
 }
 
 export function WeekView({
@@ -24,6 +25,7 @@ export function WeekView({
   matchUrlBase,
   selectedDay,
   onDaySelect,
+  showAdminMarker = false,
 }: WeekViewProps) {
   const locale = getDateFnsLocale(useLocale());
   const days = buildWeekDays(currentWeekStart);
@@ -103,6 +105,7 @@ export function WeekView({
                         player1={p1}
                         player2={p2}
                         href={`${matchUrlBase}/${m.matchNumber}`}
+                        showAdminMarker={showAdminMarker}
                       />
                     );
                   })}

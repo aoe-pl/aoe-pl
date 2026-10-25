@@ -1,4 +1,5 @@
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
+import { MatchAdminStreamPanel } from "@/components/tournaments/matches/match-admin-stream-panel";
 import { MatchApprovalPanel } from "@/components/tournaments/matches/match-approval-panel";
 import { MatchDraftsPanel } from "@/components/tournaments/matches/match-drafts-panel";
 import {
@@ -49,12 +50,7 @@ export default async function TournamentMatchPage({
     ? await usersRepository.isUserAdmin(session.user.id)
     : false;
 
-  // Admins and users with the "Streamer" role may mark the match as streamed.
-  const isStreamer = session?.user?.id
-    ? await usersRepository.isUserStreamer(session.user.id)
-    : false;
-
-  const canMarkStream = isAdmin || isStreamer;
+  const canMarkStream = Boolean(session?.user?.id);
 
   const streams = match.TournamentMatchStream;
 
@@ -62,9 +58,11 @@ export default async function TournamentMatchPage({
     ? await usersRepository.getUserStreamUrl(session.user.id)
     : null;
 
-  const isMarkedByMe = session?.user?.id
-    ? streams.some((stream) => stream.streamerId === session.user.id)
-    : false;
+  const myStream = session?.user?.id
+    ? streams.find((stream) => stream.streamerId === session.user.id)
+    : undefined;
+
+  const isMarkedByMe = myStream !== undefined;
 
   const dateFnsLocale = getDateFnsLocale(locale);
 
@@ -277,6 +275,13 @@ export default async function TournamentMatchPage({
                           ) : (
                             <span>{streamerName}</span>
                           )}
+                          {stream.streamType && (
+                            <span className="text-medieval-gold-muted text-xs">
+                              {stream.streamType === "POV"
+                                ? t("stream.type.pov")
+                                : t("stream.type.commentary")}
+                            </span>
+                          )}
                         </div>
                       );
                     })}
@@ -338,8 +343,16 @@ export default async function TournamentMatchPage({
             {canMarkStream && !isReadOnly && (
               <MatchStreamPanel
                 matchId={match.id}
-                streamUrl={ownStreamUrl}
+                streamUrl={myStream?.streamUrl ?? ownStreamUrl}
                 isMarkedByMe={isMarkedByMe}
+                myStreamType={myStream?.streamType ?? null}
+              />
+            )}
+
+            {isAdmin && !isReadOnly && (
+              <MatchAdminStreamPanel
+                matchId={match.id}
+                status={match.adminStreamStatus}
               />
             )}
 
