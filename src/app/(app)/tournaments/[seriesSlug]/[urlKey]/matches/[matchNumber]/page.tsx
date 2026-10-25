@@ -12,6 +12,7 @@ import { MatchScoreboard } from "@/components/tournaments/matches/match-scoreboa
 import { MatchSpoilerProvider } from "@/components/tournaments/matches/match-spoiler-context";
 import { MatchSpoilerToggle } from "@/components/tournaments/matches/match-spoiler-toggle";
 import { MatchStreamPanel } from "@/components/tournaments/matches/match-stream-panel";
+import { STREAM_TYPE_META } from "@/components/tournaments/matches/stream-type-meta";
 import { parsePresetKey } from "@/lib/aoe2cm";
 import { formatMatchModeName } from "@/lib/helpers/match-mode";
 import { isTournamentReadOnly } from "@/lib/helpers/tournament-lock";
@@ -253,16 +254,33 @@ export default async function TournamentMatchPage({
                         stream.streamer.name ?? t("stream.unknown_streamer");
                       const streamUrl =
                         stream.streamUrl ?? stream.streamer.streamUrl;
+                      const streamMeta = stream.streamType
+                        ? STREAM_TYPE_META[stream.streamType]
+                        : null;
+                      const StreamIcon = streamMeta?.icon;
 
                       return (
                         <div
                           key={stream.id}
                           className="flex items-center gap-2 font-medium"
                         >
-                          <span
-                            className="inline-block size-2.5 shrink-0 rounded-full bg-red-500"
-                            aria-hidden
-                          />
+                          {StreamIcon && streamMeta ? (
+                            <span
+                              title={t(streamMeta.labelKey)}
+                              aria-label={t(streamMeta.labelKey)}
+                              className="flex shrink-0 items-center justify-center"
+                            >
+                              <StreamIcon
+                                className={`size-4 ${streamMeta.className}`}
+                                aria-hidden
+                              />
+                            </span>
+                          ) : (
+                            <span
+                              className="inline-block size-2.5 shrink-0 rounded-full bg-red-500"
+                              aria-hidden
+                            />
+                          )}
                           {streamUrl ? (
                             <a
                               href={streamUrl}
@@ -274,13 +292,6 @@ export default async function TournamentMatchPage({
                             </a>
                           ) : (
                             <span>{streamerName}</span>
-                          )}
-                          {stream.streamType && (
-                            <span className="text-medieval-gold-muted text-xs">
-                              {stream.streamType === "POV"
-                                ? t("stream.type.pov")
-                                : t("stream.type.commentary")}
-                            </span>
                           )}
                         </div>
                       );

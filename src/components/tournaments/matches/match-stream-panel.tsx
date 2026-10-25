@@ -86,6 +86,8 @@ export function MatchStreamPanel({
   }
 
   function handleSubmitDialog() {
+    if (!streamType) return;
+
     const trimmed = value.trim();
     mark({
       matchId,
@@ -145,16 +147,13 @@ export function MatchStreamPanel({
             <div className="space-y-2">
               <div className="text-sm font-medium">{t("type_label")}</div>
               <Select
-                value={streamType ?? "NONE"}
-                onValueChange={(next) =>
-                  setStreamType(next === "NONE" ? null : (next as StreamType))
-                }
+                value={streamType ?? ""}
+                onValueChange={(next) => setStreamType(next as StreamType)}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder={t("type.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NONE">{t("type.none")}</SelectItem>
                   <SelectItem value="POV">{t("type.pov")}</SelectItem>
                   <SelectItem value="COMMENTARY">
                     {t("type.commentary")}
@@ -174,7 +173,7 @@ export function MatchStreamPanel({
             </Button>
             <Button
               onClick={handleSubmitDialog}
-              disabled={!value.trim() || isMarking}
+              disabled={!value.trim() || !streamType || isMarking}
             >
               {t("confirm")}
             </Button>

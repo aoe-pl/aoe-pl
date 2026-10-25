@@ -1,6 +1,7 @@
 "use client";
 
 import { ADMIN_MARKER_META } from "@/components/tournaments/matches/admin-stream-marker";
+import { STREAM_TYPE_META } from "@/components/tournaments/matches/stream-type-meta";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { isBrightColor } from "@/lib/utils";
-import type { AdminStreamStatus } from "@prisma/client";
+import type { AdminStreamStatus, StreamType } from "@prisma/client";
 import { format } from "date-fns";
 import { CalendarClock, CircleCheck, CircleDashed, Tv } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -41,6 +42,7 @@ export interface MatchListRow {
   TournamentMatchStream: {
     id: string;
     status: "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED";
+    streamType: StreamType | null;
     streamer: { id: string; name: string | null; playerNumber: number };
   }[];
 }
@@ -250,9 +252,17 @@ export function MatchList({
               : null;
             const AdminMarkerIcon = adminMarker?.icon;
 
-            const isStreamed = match.TournamentMatchStream.some(
+            const activeStreams = match.TournamentMatchStream.filter(
               (stream) => stream.status !== "CANCELLED",
             );
+            const isStreamed = activeStreams.length > 0;
+            const streamTypes = [
+              ...new Set(
+                activeStreams
+                  .map((stream) => stream.streamType)
+                  .filter((type): type is StreamType => type !== null),
+              ),
+            ];
 
             const approved = match.status === "ADMIN_APPROVED";
             const completed = match.status === "COMPLETED";
@@ -377,8 +387,31 @@ export function MatchList({
                   )}
                 </span>
 
-                <span className="flex items-center justify-center">
-                  {isStreamed && (
+                <span className="flex items-center justify-center gap-1">
+                  {streamTypes.map((type) => {
+                    const streamMeta = STREAM_TYPE_META[type];
+                    const StreamIcon = streamMeta.icon;
+
+                    return (
+                      <Tooltip key={type}>
+                        <TooltipTrigger asChild>
+                          <span className="flex cursor-default items-center">
+                            <StreamIcon
+                              className={`size-4 ${streamMeta.className}`}
+                              aria-hidden
+                            />
+                            <span className="sr-only">
+                              {t(streamMeta.labelKey)}
+                            </span>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {t(streamMeta.labelKey)}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                  {isStreamed && streamTypes.length === 0 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="flex cursor-default items-center">

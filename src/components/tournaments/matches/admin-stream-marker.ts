@@ -22,12 +22,12 @@ export const ADMIN_MARKER_META: Record<
   WATCHED: {
     icon: Eye,
     labelKey: "admin_stream.watched",
-    className: "text-medieval-gold",
+    className: "text-green-400",
   },
   COMMENTATED: {
     icon: Mic,
     labelKey: "admin_stream.commentated",
-    className: "text-medieval-gold",
+    className: "text-green-400",
   },
   WILL_BE_STREAMED_LIVE: {
     icon: RadioTower,

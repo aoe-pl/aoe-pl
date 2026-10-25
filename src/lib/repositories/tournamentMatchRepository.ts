@@ -502,7 +502,7 @@ export const tournamentMatchRepository = {
     streamerId: string,
     streamUrl: string | null,
     scheduledStartTime: Date | null = null,
-    streamType: StreamType | null = null,
+    streamType: StreamType,
   ) {
     return db.tournamentMatchStream.upsert({
       where: {

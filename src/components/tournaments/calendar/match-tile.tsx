@@ -1,4 +1,5 @@
 import { ADMIN_MARKER_META } from "@/components/tournaments/matches/admin-stream-marker";
+import { STREAM_TYPE_META } from "@/components/tournaments/matches/stream-type-meta";
 import { isBrightColor } from "@/lib/utils";
 import { format } from "date-fns";
 import { Check } from "lucide-react";
@@ -30,6 +31,7 @@ export function MatchTile({
   const tMatches = useTranslations("tournament.matches");
   const {
     isStreamed = false,
+    streamTypes = [],
     isVerified = false,
     adminStreamStatus = null,
   } = match;
@@ -139,14 +141,34 @@ export function MatchTile({
           </span>
 
           {/* Stream mark: always right */}
-          <span className="flex h-5 w-5 items-center justify-center">
-            {isStreamed && (
-              <span
-                className="h-3 w-3 rounded-full bg-red-500 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
-                title={t("streamed")}
-                aria-label={t("streamed")}
-              />
-            )}
+          <span className="flex h-5 min-w-5 items-center justify-center gap-1">
+            {streamTypes.length > 0
+              ? streamTypes.map((type) => {
+                  const streamMeta = STREAM_TYPE_META[type];
+                  const StreamIcon = streamMeta.icon;
+                  const label = tMatches(streamMeta.labelKey);
+
+                  return (
+                    <span
+                      key={type}
+                      title={label}
+                      aria-label={label}
+                      className="flex size-5 items-center justify-center rounded-full bg-black/50"
+                    >
+                      <StreamIcon
+                        className={`h-4 w-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ${streamMeta.className}`}
+                        aria-hidden
+                      />
+                    </span>
+                  );
+                })
+              : isStreamed && (
+                  <span
+                    className="h-3 w-3 rounded-full bg-red-500 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
+                    title={t("streamed")}
+                    aria-label={t("streamed")}
+                  />
+                )}
           </span>
         </div>
       )}

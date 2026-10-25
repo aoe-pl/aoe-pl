@@ -903,9 +903,9 @@
         "dialog_title": "Stream this match",
         "dialog_description": "Add the link to your stream. It will be saved to your profile and reused for future matches.",
         "placeholder": "https://twitch.tv/...",
-        "type_label": "Stream type (optional)",
+        "type_label": "Stream type",
         "type": {
-          "none": "Not specified",
+          "placeholder": "Select stream type",
           "pov": "POV",
           "commentary": "Commentary"
         },

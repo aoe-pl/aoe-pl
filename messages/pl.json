@@ -904,9 +904,9 @@
         "dialog_description": "Dodaj link do swojego streama. Zostanie zapisany w Twoim profilu i użyty w przyszłych meczach.",
         "placeholder": "https://twitch.tv/...",
         "link_saved_hint": "Link zostanie zapisany w Twoim profilu.",
-        "type_label": "Typ streama (opcjonalnie)",
+        "type_label": "Typ streama",
         "type": {
-          "none": "Nie określono",
+          "placeholder": "Wybierz typ streama",
           "pov": "POV",
           "commentary": "Komentarz"
         },

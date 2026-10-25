@@ -451,7 +451,7 @@ model TournamentMatchStream {
   scheduledStartTime  DateTime?
   streamUrl           String?
   scheduledStreamLive Boolean
-  streamType          StreamType?
+  streamType          StreamType
   streamer            User            @relation(fields: [streamerId], references: [id])
   tournamentMatch     TournamentMatch @relation(fields: [tournamentMatchId], references: [id], onDelete: Cascade)
 

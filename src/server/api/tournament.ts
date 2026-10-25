@@ -1222,7 +1222,7 @@ export const tournamentRouter = createTRPCRouter({
         z.object({
           matchId: z.string(),
           streamUrl: z.string().url().optional().or(z.literal("")),
-          streamType: z.nativeEnum(StreamType).nullable().optional(),
+          streamType: z.nativeEnum(StreamType),
         }),
       )
       .mutation(async ({ input, ctx }) => {
@@ -1257,7 +1257,7 @@ export const tournamentRouter = createTRPCRouter({
           userId,
           streamUrl,
           match.matchDate,
-          input.streamType ?? null,
+          input.streamType,
         );
       }),
 
