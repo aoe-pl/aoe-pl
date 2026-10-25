@@ -36,7 +36,7 @@ export function CalendarToolbar({
   return (
     <div className="flex flex-wrap items-center justify-between">
       {/* Navigation */}
-      <div className="flex items-center gap-2">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
         <Button
           variant="wood"
           size="lg"
@@ -58,7 +58,7 @@ export function CalendarToolbar({
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <span className="text-primary ml-2 text-base font-semibold">
+        <span className="text-primary w-full min-w-0 truncate text-base font-semibold sm:ml-2 sm:w-auto">
           {headerLabel}
         </span>
       </div>

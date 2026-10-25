@@ -14,6 +14,7 @@ interface MatchTileProps {
   player2: CalendarPlayer;
   href: string;
   showAdminMarker?: boolean;
+  reserveActionSpace?: boolean;
 }
 
 export function MatchTile({
@@ -23,6 +24,7 @@ export function MatchTile({
   player2,
   href,
   showAdminMarker = false,
+  reserveActionSpace = false,
 }: MatchTileProps) {
   const t = useTranslations("tournament.calendar");
   const tMatches = useTranslations("tournament.matches");
@@ -45,97 +47,109 @@ export function MatchTile({
 
   const isCompleted =
     match.status === CalendarMatchStatus.Completed && !isVerified;
+  const showAdminMarkerIcon =
+    showAdminMarker && !!adminMarker && !!AdminMarkerIcon;
 
-  const content = (
-    <>
-      {/* Stream indicator */}
-      {isStreamed && (
-        <span
-          className="absolute -top-1 -right-1.5 h-4 w-4 rounded-full bg-red-500"
-          title={t("streamed")}
-          aria-label={t("streamed")}
-        />
-      )}
-
-      {/* Admin coverage marker */}
-      {showAdminMarker && adminMarker && AdminMarkerIcon && (
-        <span
-          className="absolute -top-2 -left-1.5 rounded-full bg-black/50 p-0.5"
-          title={tMatches(adminMarker.labelKey)}
-          aria-label={tMatches(adminMarker.labelKey)}
-        >
-          <AdminMarkerIcon
-            className={`h-4 w-4 ${adminMarker.className}`}
-            aria-hidden
-          />
-        </span>
-      )}
-
-      {/* Approved / completed checkmark */}
-      {(isVerified || isCompleted) && (
-        <span
-          className="absolute -bottom-1.5 left-0"
-          title={
-            isVerified
-              ? tMatches("status.admin_approved")
-              : tMatches("status.completed")
-          }
-          aria-label={
-            isVerified
-              ? tMatches("status.admin_approved")
-              : tMatches("status.completed")
-          }
-        >
-          <Check
-            className={`h-6 w-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ${
-              isVerified ? "text-green-500" : "text-orange-500"
-            }`}
-            strokeWidth={4}
-            aria-hidden
-          />
-        </span>
-      )}
-
-      {/* Group label + time */}
-      <div className="flex items-center justify-between gap-2">
-        <span
-          className="rounded-sm px-1 py-1 text-[10px] font-semibold"
-          style={{ backgroundColor: group.color, color: textColor }}
-        >
-          {group.name}
-        </span>
-        <span className="text-primary shrink-0 text-[12px] font-medium">
-          {format(match.date, "HH:mm")}
-        </span>
-      </div>
-
-      {/* Player names */}
-      <div className="mt-1 flex min-w-0 flex-col items-center text-sm font-medium">
-        <span className="text-primary w-full truncate text-center">
-          {player1.nickname}
-        </span>
-        <span className="text-medieval-gold-muted text-[10px] leading-none">
-          vs
-        </span>
-        <span className="text-primary w-full truncate text-center">
-          {player2.nickname}
-        </span>
-      </div>
-    </>
-  );
-
-  const props = {
-    className: "relative w-full rounded-md border px-2.5 py-1.5",
-    style: sharedStyle,
-    title: `${player1.nickname} vs ${player2.nickname} — ${group.name}`,
-  };
+  const hasFooter =
+    isStreamed || showAdminMarkerIcon || isVerified || isCompleted;
 
   return (
     <Link
       href={href}
-      {...props}
+      className="relative flex w-full flex-col overflow-hidden rounded-md border"
+      style={sharedStyle}
+      title={`${player1.nickname} vs ${player2.nickname} — ${group.name}`}
     >
-      {content}
+      <div className="px-2.5 py-1.5">
+        {/* Group label + time */}
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="rounded-sm px-1 py-1 text-[10px] font-semibold"
+            style={{ backgroundColor: group.color, color: textColor }}
+          >
+            {group.name}
+          </span>
+          <span className="text-primary shrink-0 text-[12px] font-medium">
+            {format(match.date, "HH:mm")}
+          </span>
+        </div>
+
+        {/* Player names */}
+        <div className="mt-1 flex min-w-0 flex-col items-center text-sm font-medium">
+          <span className="text-primary w-full truncate text-center">
+            {player1.nickname}
+          </span>
+          <span className="text-medieval-gold-muted text-[10px] leading-none">
+            vs
+          </span>
+          <span className="text-primary w-full truncate text-center">
+            {player2.nickname}
+          </span>
+        </div>
+      </div>
+
+      {/* Status markers, separated from the match details */}
+      {hasFooter && (
+        <div
+          className={`relative flex items-center justify-between gap-2 border-t px-2.5 py-1 ${
+            reserveActionSpace ? "pr-9" : ""
+          }`}
+          style={{ borderColor: group.color + "66" }}
+        >
+          {/* Approval / completed checkmark: always left */}
+          <span className="flex h-5 w-5 items-center justify-center">
+            {(isVerified || isCompleted) && (
+              <span
+                title={
+                  isVerified
+                    ? tMatches("status.admin_approved")
+                    : tMatches("status.completed")
+                }
+                aria-label={
+                  isVerified
+                    ? tMatches("status.admin_approved")
+                    : tMatches("status.completed")
+                }
+              >
+                <Check
+                  className={`h-4 w-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ${
+                    isVerified ? "text-green-500" : "text-orange-500"
+                  }`}
+                  strokeWidth={4}
+                  aria-hidden
+                />
+              </span>
+            )}
+          </span>
+
+          {/* Admin coverage marker: always centered */}
+          <span className="absolute top-1/2 left-1/2 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+            {showAdminMarkerIcon && adminMarker && AdminMarkerIcon && (
+              <span
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-black/50"
+                title={tMatches(adminMarker.labelKey)}
+                aria-label={tMatches(adminMarker.labelKey)}
+              >
+                <AdminMarkerIcon
+                  className={`h-4 w-4 ${adminMarker.className}`}
+                  aria-hidden
+                />
+              </span>
+            )}
+          </span>
+
+          {/* Stream mark: always right */}
+          <span className="flex h-5 w-5 items-center justify-center">
+            {isStreamed && (
+              <span
+                className="h-3 w-3 rounded-full bg-red-500 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
+                title={t("streamed")}
+                aria-label={t("streamed")}
+              />
+            )}
+          </span>
+        </div>
+      )}
     </Link>
   );
 }

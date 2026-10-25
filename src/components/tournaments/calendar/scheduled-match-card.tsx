@@ -58,6 +58,7 @@ export function ScheduledMatchCard({
         player2={player2}
         href={`${matchUrlBase}/${match.matchNumber}`}
         showAdminMarker={showAdminMarker}
+        reserveActionSpace={canAct}
       />
       {canAct && (
         <DropdownMenu>
@@ -105,7 +106,7 @@ export function ScheduledMatchCard({
               {t("schedule.reschedule")}
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="text-destructive"
+              className="text-red-400"
               onSelect={(e) => e.preventDefault()}
             >
               <AlertDialog>

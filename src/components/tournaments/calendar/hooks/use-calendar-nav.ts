@@ -34,7 +34,7 @@ export function useCalendarNav(): CalendarNavResult {
   const today = new Date();
   const locale = getDateFnsLocale(useLocale());
 
-  const [view, setView] = useState<CalendarView>("month");
+  const [view, setView] = useState<CalendarView>("week");
   const [currentMonth, setCurrentMonth] = useState(today);
   const [currentWeekStart, setCurrentWeekStart] = useState(
     startOfWeek(today, { weekStartsOn: 1 }),
@@ -73,6 +73,13 @@ export function useCalendarNav(): CalendarNavResult {
       setCurrentWeekStart(startOfWeek(day, { weekStartsOn: 1 }));
     }
   }
+
+  // The week view is not available on small screens, so fall back to month.
+  useEffect(() => {
+    if (!window.matchMedia("(min-width: 640px)").matches) {
+      setView("month");
+    }
+  }, []);
 
   // Keep currentMonth in sync when navigating weeks across a month boundary.
   useEffect(() => {
