@@ -18,7 +18,7 @@ import {
 import { isBrightColor } from "@/lib/utils";
 import type { AdminStreamStatus } from "@prisma/client";
 import { format } from "date-fns";
-import { CircleCheck, Tv } from "lucide-react";
+import { CalendarClock, CircleCheck, CircleDashed, Tv } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -256,6 +256,8 @@ export function MatchList({
 
             const approved = match.status === "ADMIN_APPROVED";
             const completed = match.status === "COMPLETED";
+            const scheduled = match.status === "SCHEDULED";
+            const pending = match.status === "PENDING";
 
             return (
               <Link
@@ -290,6 +292,36 @@ export function MatchList({
                 </span>
 
                 <span className="flex items-center justify-center">
+                  {pending && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex cursor-default items-center">
+                          <CircleDashed
+                            className="text-muted-foreground size-4"
+                            aria-hidden
+                          />
+                          <span className="sr-only">{t("status.pending")}</span>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{t("status.pending")}</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {scheduled && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex cursor-default items-center">
+                          <CalendarClock
+                            className="size-4 text-blue-500"
+                            aria-hidden
+                          />
+                          <span className="sr-only">
+                            {t("status.scheduled")}
+                          </span>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{t("status.scheduled")}</TooltipContent>
+                    </Tooltip>
+                  )}
                   {approved && (
                     <Tooltip>
                       <TooltipTrigger asChild>
