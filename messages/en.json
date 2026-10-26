@@ -851,12 +851,25 @@
         "clear_confirm_title": "Clear draft?",
         "clear_confirm_description": "This removes the draft link from the match."
       },
-      "no_matches": "No upcoming matches",
+      "no_matches": "No matches",
       "date": "Date",
       "date_tbd": "Date TBD",
       "group": "Group",
       "player": "Player",
       "search_players_or_group": "Search player or group",
+      "filters": {
+        "all_statuses": "All statuses",
+        "all_markers": "All markers",
+        "no_marker": "No marker"
+      },
+      "columns": {
+        "players": "Players",
+        "group": "Group",
+        "status": "Status",
+        "marker": "Marker",
+        "stream": "Stream",
+        "date": "Date"
+      },
       "spoiler": {
         "reveal": "Reveal scores",
         "hide": "Hide scores",
@@ -867,7 +880,7 @@
         "label": "Status",
         "pending": "Pending",
         "scheduled": "Scheduled",
-        "completed": "Completed",
+        "completed": "Played",
         "admin_approved": "Admin approved"
       },
       "approval": {
@@ -881,16 +894,34 @@
       "stream": {
         "title": "Stream",
         "label": "Streamed by",
+        "will_be_streamed": "Will be streamed",
         "mark_button": "I will stream",
+        "update_button": "Update stream",
         "unmark_button": "Remove stream",
         "marked_toast": "Match marked as going to be streamed",
         "unmarked_toast": "Stream removed",
         "dialog_title": "Stream this match",
         "dialog_description": "Add the link to your stream. It will be saved to your profile and reused for future matches.",
         "placeholder": "https://twitch.tv/...",
+        "type_label": "Stream type",
+        "type": {
+          "placeholder": "Select stream type",
+          "pov": "POV",
+          "commentary": "Commentary"
+        },
         "confirm": "Save & mark",
         "cancel": "Cancel",
         "unknown_streamer": "Unknown streamer"
+      },
+      "admin_stream": {
+        "title": "Admin marker",
+        "none": "Not set",
+        "will_be_commentated": "Will be commentated",
+        "will_be_watched": "Will be watched",
+        "watched": "Watched",
+        "commentated": "Commentated",
+        "will_be_streamed_live": "Will be streamed live",
+        "updated_toast": "Coverage status updated"
       },
       "recordings": {
         "upload_button": "Upload recs",

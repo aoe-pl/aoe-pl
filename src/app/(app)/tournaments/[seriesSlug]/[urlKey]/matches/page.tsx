@@ -8,6 +8,7 @@ import {
   getTournamentPageData,
 } from "@/lib/helpers/tournament-page-data";
 import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRepository";
+import { getIsAdmin } from "@/lib/session";
 import { getLocale } from "next-intl/server";
 
 export default async function TournamentMatchesPage({
@@ -18,9 +19,10 @@ export default async function TournamentMatchesPage({
   const { seriesSlug, urlKey } = await params;
   const locale = await getLocale();
 
-  const [tournament, { section }] = await Promise.all([
+  const [tournament, { section }, isAdmin] = await Promise.all([
     getTournament(seriesSlug, urlKey),
     getTournamentPageData(seriesSlug, urlKey, "matches"),
+    getIsAdmin(),
   ]);
 
   const content =
@@ -39,6 +41,7 @@ export default async function TournamentMatchesPage({
         <MatchList
           matches={matches}
           matchUrlBase={matchUrlBase}
+          showAdminMarker={isAdmin}
         />
       </div>
     </div>

@@ -851,12 +851,25 @@
         "clear_confirm_title": "Wyczyścić draft?",
         "clear_confirm_description": "Spowoduje to usunięcie linku do draftu z meczu."
       },
-      "no_matches": "Brak zaplanowanych meczów.",
+      "no_matches": "Brak meczów.",
       "date": "Data",
       "date_tbd": "Data do ustalenia",
       "group": "Grupa",
       "player": "Gracz",
       "search_players_or_group": "Szukaj gracza lub grupy",
+      "filters": {
+        "all_statuses": "Wszystkie statusy",
+        "all_markers": "Wszystkie znaczniki",
+        "no_marker": "Brak znacznika"
+      },
+      "columns": {
+        "players": "Gracze",
+        "group": "Grupa",
+        "status": "Status",
+        "marker": "Znacznik",
+        "stream": "Stream",
+        "date": "Data"
+      },
       "spoiler": {
         "reveal": "Pokaż wyniki",
         "hide": "Ukryj wyniki",
@@ -865,7 +878,7 @@
       },
       "status": {
         "label": "Status",
-        "pending": "Oczekujący",
+        "pending": "Do zaplanowania",
         "scheduled": "Zaplanowany",
         "completed": "Zagrany",
         "admin_approved": "Zatwierdzony przez admina"
@@ -881,7 +894,9 @@
       "stream": {
         "title": "Stream",
         "label": "Streamuje",
+        "will_be_streamed": "Będzie streamowany",
         "mark_button": "Będę streamować",
+        "update_button": "Zaktualizuj stream",
         "unmark_button": "Usuń stream",
         "marked_toast": "Mecz oznaczony jako planowany do streamowania",
         "unmarked_toast": "Stream usunięty",
@@ -889,9 +904,25 @@
         "dialog_description": "Dodaj link do swojego streama. Zostanie zapisany w Twoim profilu i użyty w przyszłych meczach.",
         "placeholder": "https://twitch.tv/...",
         "link_saved_hint": "Link zostanie zapisany w Twoim profilu.",
+        "type_label": "Typ streama",
+        "type": {
+          "placeholder": "Wybierz typ streama",
+          "pov": "POV",
+          "commentary": "Komentarz"
+        },
         "confirm": "Zapisz i oznacz",
         "cancel": "Anuluj",
         "unknown_streamer": "Nieznany streamer"
+      },
+      "admin_stream": {
+        "title": "Znacznik admina",
+        "none": "Nie ustawiono",
+        "will_be_commentated": "Będzie komentowany",
+        "will_be_watched": "Będzie oglądany",
+        "watched": "Obejrzany",
+        "commentated": "Skomentowany",
+        "will_be_streamed_live": "Będzie streamowany na żywo",
+        "updated_toast": "Zaktualizowano status transmisji"
       },
       "recordings": {
         "upload_button": "Wrzuć nagrania",
@@ -1021,7 +1052,7 @@
       "none": "Brak zaplanowanych nadchodzących meczów.",
       "vs": "vs",
       "tbd": "TBD",
-      "pending": "Oczekujący",
+      "pending": "Do zaplanowania",
       "scheduled": "Zaplanowany"
     },
     "admin_note": {

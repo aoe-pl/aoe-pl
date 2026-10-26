@@ -31,6 +31,7 @@ interface ScheduledMatchCardProps {
   player2: CalendarPlayer;
   matchUrlBase: string;
   canAct: boolean;
+  showAdminMarker?: boolean;
   onReschedule: (row: TournamentMatchRow) => void;
   onCancel: (row: TournamentMatchRow) => void;
 }
@@ -42,6 +43,7 @@ export function ScheduledMatchCard({
   player2,
   matchUrlBase,
   canAct,
+  showAdminMarker = false,
   onReschedule,
   onCancel,
 }: ScheduledMatchCardProps) {
@@ -55,6 +57,8 @@ export function ScheduledMatchCard({
         player1={player1}
         player2={player2}
         href={`${matchUrlBase}/${match.matchNumber}`}
+        showAdminMarker={showAdminMarker}
+        reserveActionSpace={canAct}
       />
       {canAct && (
         <DropdownMenu>
@@ -75,6 +79,7 @@ export function ScheduledMatchCard({
                   matchNumber: match.matchNumber,
                   matchDate: match.date,
                   status: "SCHEDULED",
+                  adminStreamStatus: null,
                   group: { id: group.id, name: group.name, color: group.color },
                   TournamentMatchParticipant: [
                     {
@@ -101,7 +106,7 @@ export function ScheduledMatchCard({
               {t("schedule.reschedule")}
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="text-destructive"
+              className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
               onSelect={(e) => e.preventDefault()}
             >
               <AlertDialog>
@@ -129,6 +134,7 @@ export function ScheduledMatchCard({
                           matchNumber: match.matchNumber,
                           matchDate: match.date,
                           status: "SCHEDULED",
+                          adminStreamStatus: null,
                           group: null,
                           TournamentMatchParticipant: [],
                           TournamentMatchStream: [],

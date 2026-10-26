@@ -119,6 +119,7 @@ export function SelectedDayPanel({
                 player2={p2}
                 matchUrlBase={matchUrlBase}
                 canAct={canActOnScheduled(m.id)}
+                showAdminMarker={isAdmin}
                 onReschedule={onRescheduleMatch}
                 onCancel={onCancelMatch}
               />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import type { AdminStreamStatus, StreamType } from "@prisma/client";
 import {
   CalendarMatchStatus,
   type CalendarGroup,
@@ -13,6 +14,7 @@ export interface TournamentMatchRow {
   matchNumber: number;
   matchDate: Date | null;
   status: "PENDING" | "SCHEDULED" | "COMPLETED" | "ADMIN_APPROVED";
+  adminStreamStatus: AdminStreamStatus | null;
   group: MatchRowGroup | null;
   TournamentMatchParticipant: MatchRowParticipant[];
   TournamentMatchStream: MatchRowStream[];
@@ -29,6 +31,7 @@ interface MatchRowParticipant {
 }
 interface MatchRowStream {
   status: "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED";
+  streamType: StreamType | null;
 }
 
 interface CalendarData {
@@ -93,7 +96,15 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
         playerMap.set(p2.id, { id: p2.id, nickname: p2.nickname });
 
       const streams = row.TournamentMatchStream;
-      const hasAny = streams.some((s) => s.status !== "CANCELLED");
+      const activeStreams = streams.filter((s) => s.status !== "CANCELLED");
+      const hasAny = activeStreams.length > 0;
+      const streamTypes = [
+        ...new Set(
+          activeStreams
+            .map((stream) => stream.streamType)
+            .filter((type): type is StreamType => type !== null),
+        ),
+      ];
 
       const status =
         row.status === "COMPLETED" || row.status === "ADMIN_APPROVED"
@@ -108,7 +119,9 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
         player1Id: p1.id,
         player2Id: p2.id,
         status,
+        adminStreamStatus: row.adminStreamStatus,
         isStreamed: hasAny,
+        streamTypes,
         isVerified: row.status === "ADMIN_APPROVED",
       });
     }

@@ -1,7 +1,12 @@
 import { syncBracketAdvancement } from "@/lib/repositories/tournamentBracketRepository";
 import { createAoe2RecsService } from "@/lib/storage";
 import { db } from "@/server/db";
-import type { MatchStatus, Prisma } from "@prisma/client";
+import type {
+  AdminStreamStatus,
+  MatchStatus,
+  Prisma,
+  StreamType,
+} from "@prisma/client";
 
 const upcomingMatchesInclude = {
   TournamentMatchParticipant: {
@@ -497,6 +502,7 @@ export const tournamentMatchRepository = {
     streamerId: string,
     streamUrl: string | null,
     scheduledStartTime: Date | null = null,
+    streamType: StreamType,
   ) {
     return db.tournamentMatchStream.upsert({
       where: {
@@ -512,11 +518,13 @@ export const tournamentMatchRepository = {
         streamUrl,
         scheduledStartTime,
         scheduledStreamLive: true,
+        streamType,
       },
       update: {
         status: "SCHEDULED",
         streamUrl,
         scheduledStartTime,
+        streamType,
       },
       include: matchStreamsInclude,
     });
@@ -526,6 +534,17 @@ export const tournamentMatchRepository = {
   async unmarkMatchAsStreamed(matchId: string, streamerId: string) {
     return db.tournamentMatchStream.deleteMany({
       where: { tournamentMatchId: matchId, streamerId },
+    });
+  },
+
+  /** Sets (or clears) the admin-only coverage status of a match. */
+  async setAdminStreamStatus(
+    matchId: string,
+    status: AdminStreamStatus | null,
+  ) {
+    return db.tournamentMatch.update({
+      where: { id: matchId },
+      data: { adminStreamStatus: status },
     });
   },
 
@@ -897,9 +916,10 @@ export const tournamentMatchRepository = {
   async getMatchesByTournamentId(tournamentId: string) {
     return db.tournamentMatch.findMany({
       where: {
-        group: {
-          tournamentId,
-        },
+        OR: [
+          { group: { tournamentId } },
+          { bracketNodes: { some: { bracket: { tournamentId } } } },
+        ],
       },
       include: {
         group: true,

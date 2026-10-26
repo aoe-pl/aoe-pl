@@ -1,3 +1,5 @@
+import type { AdminStreamStatus, StreamType } from "@prisma/client";
+
 export enum CalendarMatchStatus {
   Scheduled = "scheduled",
   Ongoing = "ongoing",
@@ -23,6 +25,8 @@ export interface CalendarMatch {
   player1Id: string;
   player2Id: string;
   status: CalendarMatchStatus;
+  adminStreamStatus?: AdminStreamStatus | null;
   isStreamed?: boolean;
+  streamTypes?: StreamType[];
   isVerified?: boolean;
 }

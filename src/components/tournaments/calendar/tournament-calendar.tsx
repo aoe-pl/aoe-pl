@@ -131,6 +131,7 @@ export function TournamentCalendar({
           matchUrlBase={matchUrlBase}
           selectedDay={selectedDay}
           onDaySelect={handleDaySelect}
+          showAdminMarker={isAdmin}
         />
       </div>
 

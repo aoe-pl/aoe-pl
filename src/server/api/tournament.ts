@@ -44,9 +44,11 @@ import type {
   TournamentSeries,
 } from "@prisma/client";
 import {
+  AdminStreamStatus,
   BracketType,
   MatchStatus,
   RegistrationFieldType,
+  StreamType,
   TournamentMatchModeType,
 } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -103,19 +105,6 @@ async function getManageableMatch(userId: string, matchId: string) {
  */
 async function assertCanManageMatchRecordings(userId: string, matchId: string) {
   await getManageableMatch(userId, matchId);
-}
-
-/**
- * Ensures the current user may mark matches as going to be streamed, i.e. is an
- * admin or has the "Streamer" role.
- */
-async function assertCanMarkStream(userId: string) {
-  const [admin, streamer] = await Promise.all([
-    usersRepository.isUserAdmin(userId),
-    usersRepository.isUserStreamer(userId),
-  ]);
-
-  if (!admin && !streamer) throw new TRPCError({ code: "FORBIDDEN" });
 }
 
 /**
@@ -1225,19 +1214,19 @@ export const tournamentRouter = createTRPCRouter({
 
     /**
      * Marks a match as going to be streamed by the current user. Available to
-     * admins and users with the "Streamer" role. When the user has no stream
-     * link stored yet, one can be provided and is saved on their profile.
+     * every signed-in user. When the user has no stream link stored yet, one
+     * can be provided and is saved on their profile.
      */
     markStream: protectedProcedure
       .input(
         z.object({
           matchId: z.string(),
           streamUrl: z.string().url().optional().or(z.literal("")),
+          streamType: z.nativeEnum(StreamType),
         }),
       )
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
-        await assertCanMarkStream(userId);
         await assertMatchTournamentEditable(input.matchId);
 
         const match = await db.tournamentMatch.findUnique({
@@ -1268,6 +1257,7 @@ export const tournamentRouter = createTRPCRouter({
           userId,
           streamUrl,
           match.matchDate,
+          input.streamType,
         );
       }),
 
@@ -1276,12 +1266,28 @@ export const tournamentRouter = createTRPCRouter({
       .input(z.object({ matchId: z.string() }))
       .mutation(async ({ input, ctx }) => {
         const userId = ctx.session.user.id;
-        await assertCanMarkStream(userId);
         await assertMatchTournamentEditable(input.matchId);
 
         return tournamentMatchRepository.unmarkMatchAsStreamed(
           input.matchId,
           userId,
+        );
+      }),
+
+    /** Admin-only coverage status shown only to admins. */
+    setAdminStreamStatus: adminProcedure
+      .input(
+        z.object({
+          matchId: z.string(),
+          status: z.nativeEnum(AdminStreamStatus).nullable(),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        await assertMatchTournamentEditable(input.matchId);
+
+        return tournamentMatchRepository.setAdminStreamStatus(
+          input.matchId,
+          input.status,
         );
       }),
 
