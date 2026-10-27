@@ -800,6 +800,7 @@
     "players": {
       "nickname": "Nickname",
       "rating": "Rating",
+      "max_rating": "Highest rating",
       "in_groups": "Groups",
       "no_players": "No registered players.",
       "sort": {
@@ -1024,6 +1025,7 @@
       "stats": {
         "title": "Ranked stats 1v1",
         "rating": "Rating",
+        "max_rating": "Highest rating",
         "rank": "Rank",
         "games": "Games",
         "win_rate": "Win rate"

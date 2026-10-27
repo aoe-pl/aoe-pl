@@ -56,6 +56,7 @@ export const usersRepository = {
         adminComment: true,
         aoe2companionUrl: true,
         rating: true,
+        maxRating: true,
         ratingUpdatedAt: true,
         streamUrl: true,
         userRoles: {

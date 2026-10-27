@@ -62,9 +62,12 @@ export default async function PlayerProfilePage({
 
   // Keep the cached rating used by the tournament player list fresh.
   if (companionProfile) {
+    const oneVsOne = getAoe2Companion1v1(companionProfile);
+
     await savePlayerRating(
       profile.id,
-      getAoe2Companion1v1(companionProfile)?.rating ?? null,
+      oneVsOne?.rating ?? null,
+      oneVsOne?.maxRating ?? null,
     );
   }
 

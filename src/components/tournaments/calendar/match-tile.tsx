@@ -60,7 +60,7 @@ export function MatchTile({
       href={href}
       className="relative flex w-full flex-col overflow-hidden rounded-md border"
       style={sharedStyle}
-      title={`${player1.nickname} vs ${player2.nickname} — ${group.name}`}
+      title={`${player1.nickname} vs ${player2.nickname} - ${group.name}`}
     >
       <div className="px-2.5 py-1.5">
         {/* Group label + time */}

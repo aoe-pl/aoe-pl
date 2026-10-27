@@ -95,7 +95,7 @@ export default async function TournamentMatchPage({
     ? format(new Date(match.matchDate), "PPP p", { locale: dateFnsLocale })
     : t("date_tbd");
 
-  const groupName = match.group?.name ?? "—";
+  const groupName = match.group?.name ?? "-";
 
   const matchMode =
     match.TournamentMatchMode ??
