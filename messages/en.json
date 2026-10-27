@@ -101,7 +101,8 @@
       "dashboard": "Dashboard",
       "tournaments": "Tournaments",
       "archived_tournaments": "Archived tournaments",
-      "settings": "Settings"
+      "settings": "Settings",
+      "recording_parser": "Recording parser"
     },
     "tournaments": {
       "title": "Tournaments",
@@ -640,6 +641,34 @@
           "update_success": "User updated successfully",
           "delete_success": "User deleted successfully"
         }
+      }
+    },
+    "debug": {
+      "recordings": {
+        "page_title": "Recording parser",
+        "page_description": "Upload a .aoe2record file to inspect the data produced by RecordingParser.",
+        "select_file": "Select recording",
+        "file_hint": "Only .aoe2record files are supported.",
+        "invalid_file": "The selected file is not a .aoe2record file.",
+        "parse_error": "Failed to parse the recording.",
+        "parsing": "Parsing...",
+        "clear": "Clear",
+        "parsed_data": "Parsed data",
+        "raw_json": "Raw JSON",
+        "file_name": "File",
+        "map": "Map",
+        "date": "Date",
+        "duration": "Duration",
+        "winner": "Winner",
+        "winner_none": "Undetermined",
+        "winner_player": "Player {number}",
+        "world_time": "World time",
+        "player1": "Player 1",
+        "player2": "Player 2",
+        "name": "Name",
+        "profile_id": "Profile ID",
+        "civ": "Civilization",
+        "civ_id": "Civilization ID"
       }
     }
   },

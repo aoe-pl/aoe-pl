@@ -7,7 +7,7 @@ import {
   TrophyIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { Archive } from "lucide-react";
+import { Archive, Bug } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,6 +46,13 @@ export function Sidebar() {
           active={pathname.startsWith("/admin/settings")}
         >
           {t("settings")}
+        </NavItem>
+        <NavItem
+          href="/admin/debug/recordings"
+          icon={<Bug className="h-5 w-5" />}
+          active={pathname.startsWith("/admin/debug/recordings")}
+        >
+          {t("recording_parser")}
         </NavItem>
         <NavItem
           href="/"
