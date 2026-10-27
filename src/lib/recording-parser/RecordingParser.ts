@@ -25,7 +25,8 @@ export class RecordingParser {
       winner = team0.winner ? 1 : 2;
     }
 
-    const mapId = summary.header.game_settings.resolved_map_id;
+    const gameSettings = summary.header.game_settings;
+    const mapId = gameSettings.resolved_map_id;
     const timestamp = summary.header.timestamp;
 
     return {
@@ -44,7 +45,7 @@ export class RecordingParser {
       },
 
       fileName: file.name,
-      map: MAP_NAMES[mapId]!,
+      map: resolveMapName(mapId, gameSettings.rms_strings),
       mapId,
       length: formatDurationMs(summary.duration),
       date: new Date(timestamp * 1000).toISOString().slice(0, 10),
@@ -55,6 +56,43 @@ export class RecordingParser {
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
+
+/**
+ * Resolves a map name from its ID, falling back to the RMS strings for maps
+ * that are not present in the static map table (e.g. custom map packs).
+ */
+function resolveMapName(mapId: number, rmsStrings: string[]): string {
+  const knownMapName = MAP_NAMES[mapId];
+
+  if (knownMapName) {
+    return knownMapName;
+  }
+
+  return getRmsMapName(rmsStrings) ?? `Unknown map (${mapId})`;
+}
+
+/**
+ * Extracts a map name from an RMS string such as
+ * "SUBSCRIBEDMODS:RANDOM_MAPS:ANT - Arabia.rms:363867_Ant League - Mappack:false".
+ */
+function getRmsMapName(rmsStrings: string[]): string | null {
+  for (const rmsString of rmsStrings) {
+    const fileName = rmsString.split(":")[2]?.trim();
+
+    if (!fileName || fileName.toUpperCase() === "NONE") {
+      continue;
+    }
+
+    const baseName = fileName.split(/[\\/]/).pop()!;
+    const mapName = baseName.replace(/\.rms2?$/i, "").trim();
+
+    if (mapName) {
+      return mapName;
+    }
+  }
+
+  return null;
+}
 
 // Formats a duration in milliseconds to a string in the format "H:MM:SS".
 function formatDurationMs(milliseconds: number): string {

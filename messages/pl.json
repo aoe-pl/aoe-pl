@@ -101,7 +101,8 @@
       "dashboard": "Dashboard",
       "tournaments": "Turnieje",
       "archived_tournaments": "Archiwum turniejów",
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "recording_parser": "Parser nagrań"
     },
     "tournaments": {
       "title": "Turnieje",
@@ -640,6 +641,34 @@
           "update_success": "Użytkownik został zaktualizowany pomyślnie",
           "delete_success": "Użytkownik został usunięty pomyślnie"
         }
+      }
+    },
+    "debug": {
+      "recordings": {
+        "page_title": "Parser nagrań",
+        "page_description": "Wgraj plik .aoe2record, aby sprawdzić dane zwrócone przez RecordingParser.",
+        "select_file": "Wybierz nagranie",
+        "file_hint": "Obsługiwane są wyłącznie pliki .aoe2record.",
+        "invalid_file": "Wybrany plik nie jest plikiem .aoe2record.",
+        "parse_error": "Nie udało się przetworzyć nagrania.",
+        "parsing": "Przetwarzanie...",
+        "clear": "Wyczyść",
+        "parsed_data": "Przetworzone dane",
+        "raw_json": "Surowy JSON",
+        "file_name": "Plik",
+        "map": "Mapa",
+        "date": "Data",
+        "duration": "Czas trwania",
+        "winner": "Zwycięzca",
+        "winner_none": "Nieokreślony",
+        "winner_player": "Gracz {number}",
+        "world_time": "Czas świata",
+        "player1": "Gracz 1",
+        "player2": "Gracz 2",
+        "name": "Nazwa",
+        "profile_id": "ID profilu",
+        "civ": "Cywilizacja",
+        "civ_id": "ID cywilizacji"
       }
     }
   },
