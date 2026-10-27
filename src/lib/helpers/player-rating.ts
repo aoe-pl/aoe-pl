@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  fetchAoe2CompanionProfile,
-  getAoe2Companion1v1,
-} from "@/lib/aoe2companion";
+import { fetchAoe2CompanionStandings } from "@/lib/aoe2companion";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { db } from "@/server/db";
 
@@ -14,18 +11,10 @@ import { db } from "@/server/db";
 const PLAYER_RATING_MAX_AGE_MS = 30 * 60 * 1000;
 
 /**
- * Maximum number of profiles refreshed per call.
+ * Maximum number of profiles refreshed per call. Profiles are fetched in
+ * batches of 100, so this is a handful of requests even for a big tournament.
  */
-const DEFAULT_REFRESH_LIMIT = 100;
-
-/** Keep concurrent requests to AoE2Companion low to avoid rate limiting. */
-const REFRESH_CONCURRENCY = 3;
-
-/**
- * Users currently being refreshed in this process, so concurrent page views
- * don't fetch the same profile twice.
- */
-const inFlightUserIds = new Set<string>();
+const DEFAULT_REFRESH_LIMIT = 500;
 
 /**
  * Stores a freshly fetched rating for a user. `null` is a valid value: the
@@ -56,8 +45,8 @@ interface RefreshStalePlayerRatingsOptions {
 
 /**
  * Refreshes cached ratings that are missing or older than
- * `PLAYER_RATING_MAX_AGE_MS`. Users are processed with bounded concurrency so
- * a large tournament cannot flood the AoE2Companion API.
+ * `PLAYER_RATING_MAX_AGE_MS`. Profiles are fetched in batches, so refreshing a
+ * whole tournament costs a few requests instead of one per player.
  */
 export async function refreshStalePlayerRatings({
   userIds,
@@ -67,7 +56,7 @@ export async function refreshStalePlayerRatings({
 
   const staleBefore = new Date(Date.now() - PLAYER_RATING_MAX_AGE_MS);
 
-  const candidates = await db.user.findMany({
+  const users = await db.user.findMany({
     where: {
       aoe2companionUrl: { not: null },
       ...(userIds ? { id: { in: userIds } } : {}),
@@ -75,50 +64,48 @@ export async function refreshStalePlayerRatings({
     },
     select: { id: true, aoe2companionUrl: true },
     orderBy: { ratingUpdatedAt: { sort: "asc", nulls: "first" } },
-    take: limit + inFlightUserIds.size,
+    take: limit,
   });
 
-  const users = candidates
-    .filter((user) => !inFlightUserIds.has(user.id))
-    .slice(0, limit);
+  if (users.length === 0) return;
 
-  await runWithConcurrency(users, REFRESH_CONCURRENCY, async (user) => {
-    if (inFlightUserIds.has(user.id)) return;
+  const profileIdByUserId = new Map<string, number>();
 
-    inFlightUserIds.add(user.id);
-    try {
-      const profileId = getPlayerProfileIdFromCompanionUrl(
-        user.aoe2companionUrl ?? "",
-      );
+  for (const user of users) {
+    const profileId = getPlayerProfileIdFromCompanionUrl(
+      user.aoe2companionUrl ?? "",
+    );
 
-      if (profileId === null) {
-        // An invalid link will not become valid on its own; mark it as checked
-        // so it is not retried on every page view.
-        await savePlayerRating(user.id, null);
-        return;
-      }
+    if (profileId === null) {
+      // An invalid link will not become valid on its own; mark it as checked
+      // so it is not retried on every page view.
+      await savePlayerRating(user.id, null);
+      continue;
+    }
 
-      // The profile request is shared through Next.js' data cache for 30
-      // minutes, so concurrent page loads don't hit AoE2Companion repeatedly.
-      const profile = await fetchAoe2CompanionProfile(profileId);
+    profileIdByUserId.set(user.id, profileId);
+  }
 
-      // A failed request is most likely transient (network or rate limiting),
-      // so leave the timestamp untouched and retry on a later run.
-      if (!profile) return;
+  const { standings, failedProfileIds } = await fetchAoe2CompanionStandings([
+    ...profileIdByUserId.values(),
+  ]);
 
-      const oneVsOne = getAoe2Companion1v1(profile);
+  await Promise.all(
+    [...profileIdByUserId].map(async ([userId, profileId]) => {
+      // A failed batch is most likely transient (network or rate limiting), so
+      // leave the timestamp untouched and retry on a later run.
+      if (failedProfileIds.has(profileId)) return;
+
+      // Missing from a successful response means no 1v1 Random Map standing.
+      const standing = standings.get(profileId);
 
       await savePlayerRating(
-        user.id,
-        oneVsOne?.rating ?? null,
-        oneVsOne?.maxRating ?? null,
+        userId,
+        standing?.rating ?? null,
+        standing?.maxRating ?? null,
       );
-    } catch (error) {
-      console.error(`Failed to refresh rating for user ${user.id}:`, error);
-    } finally {
-      inFlightUserIds.delete(user.id);
-    }
-  });
+    }),
+  );
 }
 
 /** Refreshes the stale ratings of every player registered in a tournament. */
@@ -136,28 +123,4 @@ export async function refreshStalePlayerRatingsForTournament(
     .filter((id): id is string => Boolean(id));
 
   await refreshStalePlayerRatings({ userIds, limit });
-}
-
-async function runWithConcurrency<T>(
-  items: T[],
-  concurrency: number,
-  task: (item: T) => Promise<void>,
-) {
-  let nextIndex = 0;
-
-  const workers = Array.from(
-    { length: Math.min(concurrency, items.length) },
-    async () => {
-      while (nextIndex < items.length) {
-        const item = items[nextIndex];
-        nextIndex += 1;
-
-        if (item !== undefined) {
-          await task(item);
-        }
-      }
-    },
-  );
-
-  await Promise.all(workers);
 }
