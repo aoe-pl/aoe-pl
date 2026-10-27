@@ -1,6 +1,6 @@
-import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
 import { MatchAdminStreamPanel } from "@/components/tournaments/matches/match-admin-stream-panel";
 import { MatchApprovalPanel } from "@/components/tournaments/matches/match-approval-panel";
+import { MatchDateLabel } from "@/components/tournaments/matches/match-date-label";
 import { MatchDraftsPanel } from "@/components/tournaments/matches/match-drafts-panel";
 import {
   MatchGamesTable,
@@ -21,8 +21,7 @@ import { tournamentMatchRepository } from "@/lib/repositories/tournamentMatchRep
 import { usersRepository } from "@/lib/repositories/usersRepository";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { auth } from "@/server/auth";
-import { format } from "date-fns";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 export default async function TournamentMatchPage({
@@ -32,9 +31,8 @@ export default async function TournamentMatchPage({
 }) {
   const { seriesSlug, urlKey, matchNumber } = await params;
 
-  const [match, locale, session, t, tGlobal] = await Promise.all([
+  const [match, session, t, tGlobal] = await Promise.all([
     tournamentMatchRepository.getTournamentMatchByNumber(Number(matchNumber)),
-    getLocale(),
     auth(),
     getTranslations("tournament.matches"),
     getTranslations(),
@@ -65,8 +63,6 @@ export default async function TournamentMatchPage({
 
   const isMarkedByMe = myStream !== undefined;
 
-  const dateFnsLocale = getDateFnsLocale(locale);
-
   const participants = match.TournamentMatchParticipant;
 
   const getSlotName = (slot: (typeof participants)[number]): string => {
@@ -90,10 +86,6 @@ export default async function TournamentMatchPage({
 
   const p1ProfileId = getPlayerProfileIdFromCompanionUrl(p1CompanionUrl ?? "");
   const p2ProfileId = getPlayerProfileIdFromCompanionUrl(p2CompanionUrl ?? "");
-
-  const dateLabel = match.matchDate
-    ? format(new Date(match.matchDate), "PPP p", { locale: dateFnsLocale })
-    : t("date_tbd");
 
   const groupName = match.group?.name ?? "-";
 
@@ -229,7 +221,9 @@ export default async function TournamentMatchPage({
               </div>
               <div>
                 <div className="text-medieval-gold-muted">{t("date")}</div>
-                <div className="font-medium">{dateLabel}</div>
+                <div className="font-medium">
+                  <MatchDateLabel date={match.matchDate} />
+                </div>
               </div>
               <div>
                 <div className="text-medieval-gold-muted">{t("group")}</div>
