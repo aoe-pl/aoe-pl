@@ -143,6 +143,7 @@ export function TournamentPlayerList({
           <TableRow>
             <TableHead className="w-[100px]">{t("nickname")}</TableHead>
             <TableHead className="w-[100px]">{t("rating")}</TableHead>
+            <TableHead className="w-[100px]">{t("max_rating")}</TableHead>
             <TableHead>{t("in_groups")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -157,6 +158,9 @@ export function TournamentPlayerList({
               </TableCell>
               <TableCell className="font-medium">
                 {player.user?.rating ?? "-"}
+              </TableCell>
+              <TableCell className="font-medium">
+                {player.user?.maxRating ?? "-"}
               </TableCell>
               <TableCell className="flex gap-1">
                 {player.TournamentGroupParticipant.map((gp) => (

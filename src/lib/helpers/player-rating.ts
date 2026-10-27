@@ -29,12 +29,21 @@ const inFlightUserIds = new Set<string>();
 
 /**
  * Stores a freshly fetched rating for a user. `null` is a valid value: the
- * player may simply have no 1v1 Random Map standing.
+ * player may simply have no 1v1 Random Map standing. `maxRating` is left
+ * untouched when omitted so invalid links don't erase the stored peak.
  */
-export function savePlayerRating(userId: string, rating: number | null) {
+export function savePlayerRating(
+  userId: string,
+  rating: number | null,
+  maxRating?: number | null,
+) {
   return db.user.update({
     where: { id: userId },
-    data: { rating, ratingUpdatedAt: new Date() },
+    data: {
+      rating,
+      ratingUpdatedAt: new Date(),
+      ...(maxRating !== undefined ? { maxRating } : {}),
+    },
   });
 }
 
@@ -97,9 +106,12 @@ export async function refreshStalePlayerRatings({
       // so leave the timestamp untouched and retry on a later run.
       if (!profile) return;
 
+      const oneVsOne = getAoe2Companion1v1(profile);
+
       await savePlayerRating(
         user.id,
-        getAoe2Companion1v1(profile)?.rating ?? null,
+        oneVsOne?.rating ?? null,
+        oneVsOne?.maxRating ?? null,
       );
     } catch (error) {
       console.error(`Failed to refresh rating for user ${user.id}:`, error);

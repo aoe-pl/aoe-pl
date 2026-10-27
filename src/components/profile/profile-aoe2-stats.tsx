@@ -25,11 +25,15 @@ export function ProfileAoe2Stats({ profile }: ProfileAoe2StatsProps) {
     <div className="space-y-4">
       <div className="panel-header flex items-center gap-2">{t("title")}</div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <StatCard
           label={t("rating")}
           value={oneVsOne?.rating ?? "-"}
           highlight
+        />
+        <StatCard
+          label={t("max_rating")}
+          value={oneVsOne?.maxRating ?? "-"}
         />
         <StatCard
           label={t("rank")}

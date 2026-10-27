@@ -823,6 +823,7 @@
     "players": {
       "nickname": "Nick",
       "rating": "Rating",
+      "max_rating": "Max rating",
       "in_groups": "W grupach",
       "no_players": "Brak zarejestrowanych graczy.",
       "sort": {
@@ -1024,7 +1025,8 @@
       "unlink": "Usuń powiązanie",
       "stats": {
         "title": "Statystyki rankingowe 1v1",
-        "rating": "Ranking",
+        "rating": "Rating",
+        "max_rating": "Max rating",
         "rank": "Pozycja",
         "games": "Gry",
         "win_rate": "Win rate"

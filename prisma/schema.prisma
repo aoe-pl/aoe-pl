@@ -45,6 +45,7 @@ model User {
   adminComment          String?
   aoe2companionUrl      String?
   rating                Int?
+  maxRating             Int?
   ratingUpdatedAt       DateTime?
   streamUrl             String?
   accounts              Account[]
