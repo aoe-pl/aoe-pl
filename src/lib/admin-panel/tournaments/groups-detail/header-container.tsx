@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type {
   Tournament,
+  TournamentGroup,
   TournamentGroupSubmitData,
   TournamentGroupWithParticipants,
 } from "../tournament";
@@ -22,6 +23,7 @@ import { GroupHeader } from "./group-header";
 
 type HeaderContainerProps = {
   group: TournamentGroupWithParticipants & { tournament: Tournament };
+  groups: TournamentGroup[];
   matchesCount: number;
   matchMode: { id: string; mode: string; gameCount: number };
   tournamentId: string;
@@ -29,6 +31,7 @@ type HeaderContainerProps = {
 
 export function HeaderContainer({
   group,
+  groups,
   tournamentId,
   matchesCount,
   matchMode,
@@ -82,11 +85,13 @@ export function HeaderContainer({
             </DrawerDescription>
           </DrawerHeader>
           <TournamentGroupForm
+            key={group.id}
             initialData={group}
             onSubmit={handleUpdate}
             onCancel={() => {
               setIsDrawerOpen(false);
             }}
+            groups={groups}
             isPending={updatePending}
             tournamentId={tournamentId}
             defaultIsTeamBased={group.isTeamBased ?? false}

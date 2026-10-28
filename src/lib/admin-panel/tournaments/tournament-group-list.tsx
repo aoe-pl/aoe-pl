@@ -404,6 +404,7 @@ export function TournamentGroupList({
             </DrawerDescription>
           </DrawerHeader>
           <TournamentGroupForm
+            key={editingGroup?.id ?? "new"}
             initialData={editingGroup}
             onSubmit={handleSubmit}
             onCancel={() => {
