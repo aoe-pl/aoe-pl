@@ -76,7 +76,7 @@ const MARKER_FILTERS: { value: MarkerFilter; labelKey: string }[] = [
 
 /** Shared desktop column layout for the header and every row. */
 const ROW_GRID =
-  "sm:grid sm:grid-cols-[minmax(0,1fr)_7rem_4rem_4rem_4rem_9.5rem] sm:items-center sm:gap-3";
+  "sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(7rem,14rem)_4rem_4rem_4rem_9.5rem] sm:items-center sm:gap-3";
 
 function getSlotName(
   p: MatchListRow["TournamentMatchParticipant"][number],
@@ -287,6 +287,7 @@ export function MatchList({
                   {match.group && (
                     <Badge
                       className="max-w-full truncate text-sm font-bold"
+                      title={match.group.name}
                       style={
                         match.group.color
                           ? {

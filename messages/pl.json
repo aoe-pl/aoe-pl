@@ -786,6 +786,7 @@
       "today": "Dziś",
       "month": "Miesiąc",
       "week": "Tydzień",
+      "rotations": "Rotacje",
       "streamed": "Streamowany",
       "matches_count": "{visible}/{total} meczów",
       "matches": "{count, plural, one {# mecz} few {# mecze} other {# meczów}}",

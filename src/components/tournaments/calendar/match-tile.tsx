@@ -69,7 +69,7 @@ export function MatchTile({
             className="rounded-sm px-1 py-1 text-[10px] font-semibold"
             style={{ backgroundColor: group.color, color: textColor }}
           >
-            {group.name}
+            {group.isRotational ? t("rotations") : group.name}
           </span>
           <span className="text-primary shrink-0 text-[12px] font-medium">
             {format(match.date, "HH:mm")}
