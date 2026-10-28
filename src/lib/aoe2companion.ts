@@ -9,20 +9,12 @@ const aoe2CompanionApi = "https://data.aoe2companion.com/api/profiles";
 /** Endpoint exposing recent match history for one or more profiles. */
 const aoe2CompanionMatchesApi = "https://data.aoe2companion.com/api/matches";
 
-/** Leaderboard endpoint, queryable with `profile_ids`. */
-const aoe2CompanionLeaderboardApi =
-  "https://data.aoe2companion.com/api/leaderboards/rm_1v1";
-
 /** How long (in seconds) the AoE2Companion match response is cached by Next.js. */
 const cacheForSeconds = 60 * 60;
 
-/** Maximum number of ids accepted in one leaderboard request. */
-const leaderboardBatchSize = 100;
-
 /**
- * Profiles are cached for the same 30 minutes as the player rating TTL, so
- * concurrent rating refreshes reuse the same response instead of hitting the
- * API once per request.
+ * Profile responses are cached for 30 minutes so concurrent page views reuse
+ * the same response instead of hitting the API once per request.
  */
 const profileCacheForSeconds = 30 * 60;
 
@@ -142,75 +134,6 @@ export async function fetchAoe2CompanionProfile(
     console.error(`Error fetching AoE2Companion profile ${profileId}:`, error);
     return null;
   }
-}
-
-export interface Aoe2CompanionStanding {
-  rating: number;
-  maxRating: number;
-}
-
-export interface Aoe2CompanionStandingsResult {
-  standings: Map<number, Aoe2CompanionStanding>;
-  /** Ids whose batch request failed; callers should retry them later. */
-  failedProfileIds: Set<number>;
-}
-
-/**
- * Fetches 1v1 Random Map standings for many profiles. The profile endpoint
- * rate limits quickly and its batch variant omits leaderboards, so use the
- * leaderboard endpoint with `profile_ids` and one request per 100 players.
- */
-export async function fetchAoe2CompanionStandings(
-  profileIds: number[],
-): Promise<Aoe2CompanionStandingsResult> {
-  const uniqueIds = [...new Set(profileIds)];
-  const standings = new Map<number, Aoe2CompanionStanding>();
-  const failedProfileIds = new Set<number>();
-
-  for (let index = 0; index < uniqueIds.length; index += leaderboardBatchSize) {
-    const batch = uniqueIds.slice(index, index + leaderboardBatchSize);
-    const params = new URLSearchParams({
-      profile_ids: batch.join(","),
-      per_page: String(batch.length),
-    });
-
-    try {
-      const response = await fetch(
-        `${aoe2CompanionLeaderboardApi}?${params.toString()}`,
-        {
-          next: { revalidate: profileCacheForSeconds },
-          headers: { "User-Agent": "AoE2PL/1.0" },
-        },
-      );
-
-      if (!response.ok) {
-        console.error(
-          `Failed to fetch AoE2Companion standings (${batch.length} ids): ${response.status} ${response.statusText}`,
-        );
-        for (const profileId of batch) failedProfileIds.add(profileId);
-        continue;
-      }
-
-      const data = (await response.json()) as {
-        players?: { profileId: number; rating: number; maxRating: number }[];
-      };
-
-      for (const player of data.players ?? []) {
-        standings.set(player.profileId, {
-          rating: player.rating,
-          maxRating: player.maxRating,
-        });
-      }
-    } catch (error) {
-      console.error(
-        `Error fetching AoE2Companion standings (${batch.length} ids):`,
-        error,
-      );
-      for (const profileId of batch) failedProfileIds.add(profileId);
-    }
-  }
-
-  return { standings, failedProfileIds };
 }
 
 /** Returns the 1v1 Random Map standing, if the player has one. */

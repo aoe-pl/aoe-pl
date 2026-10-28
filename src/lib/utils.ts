@@ -60,14 +60,23 @@ export function isBrightColor(hexColor: string): boolean {
 }
 
 /**
- * Extracts the player profile ID from an aoe2companion URL.
- * @param url The aoe2companion URL (e.g., "https://www.aoe2companion.com/players/233750").
+ * Extracts the player profile ID from an AoE2Companion URL.
+ *
+ * Supports the canonical profile URL plus legacy formats that still exist on
+ * stored user records, e.g.:
+ * - https://www.aoe2companion.com/players/233750
+ * - https://www.aoe2companion.com/profile/12191475
+ * - https://app.aoe2companion.com/matches/users/9635844/main-profile
+ *
  * @returns The player profile ID as a number, or null if the URL is invalid.
  */
 export function getPlayerProfileIdFromCompanionUrl(url: string): number | null {
   if (!url) return null;
 
-  const match = /\/players\/(\d+)(?:\/|\?|$)/.exec(url);
+  const match =
+    /\/players\/(\d+)(?:\/|\?|$)/.exec(url) ??
+    /\/profile\/(\d+)(?:\/|\?|$)/.exec(url) ??
+    /\/matches\/users\/(\d+)\/main-profile(?:\/|\?|$)/.exec(url);
   if (!match) return null;
 
   const profileId = Number(match[1]);

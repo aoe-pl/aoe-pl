@@ -8,8 +8,6 @@ import { ProfileStreamButton } from "@/components/profile/profile-stream-button"
 import { ProfileTournamentHistorySection } from "@/components/profile/profile-tournament-history-section";
 import { ProfileUpcomingMatchesSection } from "@/components/profile/profile-upcoming-matches-section";
 import { getIsAdmin, getSession } from "@/lib/session";
-import { getAoe2Companion1v1 } from "@/lib/aoe2companion";
-import { savePlayerRating } from "@/lib/helpers/player-rating";
 import { getPlayerProfileIdFromCompanionUrl } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
@@ -59,17 +57,6 @@ export default async function PlayerProfilePage({
         })
       : Promise.resolve([]),
   ]);
-
-  // Keep the cached rating used by the tournament player list fresh.
-  if (companionProfile) {
-    const oneVsOne = getAoe2Companion1v1(companionProfile);
-
-    await savePlayerRating(
-      profile.id,
-      oneVsOne?.rating ?? null,
-      oneVsOne?.maxRating ?? null,
-    );
-  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-24">
