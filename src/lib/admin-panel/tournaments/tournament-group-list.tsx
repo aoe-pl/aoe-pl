@@ -195,6 +195,7 @@ export function TournamentGroupList({
       displayOrder: data.displayOrder,
       isTeamBased: data.isTeamBased,
       isMixed: data.isMixed,
+      isRotational: data.isRotational,
       color: data.color,
       civDraftPresetUrl: data.civDraftPresetUrl,
       mapDraftPresetUrl: data.mapDraftPresetUrl,
@@ -403,6 +404,7 @@ export function TournamentGroupList({
             </DrawerDescription>
           </DrawerHeader>
           <TournamentGroupForm
+            key={editingGroup?.id ?? "new"}
             initialData={editingGroup}
             onSubmit={handleSubmit}
             onCancel={() => {

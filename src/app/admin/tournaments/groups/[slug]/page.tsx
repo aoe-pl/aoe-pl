@@ -29,6 +29,12 @@ export default async function TournamentGroupPage({
     return null;
   }
 
+  // Rotation groups reference two other groups, so the edit form needs the
+  // tournament's full group list to populate the rotation selectors.
+  const groups = await api.tournaments.groups.listByTournament({
+    tournamentId: group.tournamentId,
+  });
+
   const matchMode = group.matchMode ??
     group.tournament.matchMode ?? {
       id: "",
@@ -64,6 +70,7 @@ export default async function TournamentGroupPage({
       </div>
       <HeaderContainer
         group={group}
+        groups={groups}
         matchesCount={group.matches.length}
         matchMode={matchMode}
         tournamentId={group.tournamentId}
