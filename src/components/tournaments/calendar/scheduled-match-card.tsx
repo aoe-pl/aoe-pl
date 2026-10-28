@@ -80,7 +80,12 @@ export function ScheduledMatchCard({
                   matchDate: match.date,
                   status: "SCHEDULED",
                   adminStreamStatus: null,
-                  group: { id: group.id, name: group.name, color: group.color },
+                  group: {
+                    id: group.id,
+                    name: group.name,
+                    color: group.color,
+                    isRotational: group.isRotational,
+                  },
                   TournamentMatchParticipant: [
                     {
                       participant: {

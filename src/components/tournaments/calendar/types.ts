@@ -10,6 +10,7 @@ export interface CalendarGroup {
   id: string;
   name: string;
   color: string;
+  isRotational: boolean;
 }
 
 export interface CalendarPlayer {

@@ -786,6 +786,7 @@
       "today": "Today",
       "month": "Month",
       "week": "Week",
+      "rotations": "Rotations",
       "streamed": "Streamed",
       "matches_count": "{visible}/{total} matches",
       "matches": "{count, plural, one {# match} other {# matches}}",

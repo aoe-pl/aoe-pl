@@ -24,6 +24,7 @@ interface MatchRowGroup {
   id: string;
   name: string;
   color: string | null;
+  isRotational: boolean;
 }
 interface MatchRowParticipant {
   participant: { id: string; nickname: string; userId: string | null } | null;
@@ -64,6 +65,7 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
           id: row.group.id,
           name: row.group.name,
           color: row.group.color ?? "#ffffff55",
+          isRotational: row.group.isRotational,
         });
       }
 
