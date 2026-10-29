@@ -84,7 +84,7 @@ function getRmsMapName(rmsStrings: string[]): string | null {
     }
 
     const baseName = fileName.split(/[\\/]/).pop()!;
-    const mapName = baseName.replace(/\.rms2?$/i, "").trim();
+    const mapName = baseName.replace(/(?:\.rms2?)+$/i, "").trim();
 
     if (mapName) {
       return mapName;
