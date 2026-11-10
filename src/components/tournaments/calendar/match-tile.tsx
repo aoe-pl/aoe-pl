@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useIsMounted } from "./hooks/use-is-mounted";
 import { CalendarMatchStatus } from "./types";
 import type { CalendarGroup, CalendarMatch, CalendarPlayer } from "./types";
 
@@ -29,6 +30,10 @@ export function MatchTile({
 }: MatchTileProps) {
   const t = useTranslations("tournament.calendar");
   const tMatches = useTranslations("tournament.matches");
+
+  // The server renders in its own timezone; wait for the client so the time
+  // matches the viewer's timezone instead of flashing between values.
+  const mounted = useIsMounted();
   const {
     isStreamed = false,
     streamTypes = [],
@@ -71,8 +76,8 @@ export function MatchTile({
           >
             {group.isRotational ? t("rotations") : group.name}
           </span>
-          <span className="text-primary shrink-0 text-[12px] font-medium">
-            {format(match.date, "HH:mm")}
+          <span className="text-primary shrink-0 text-[12px] font-medium tabular-nums">
+            {mounted ? format(match.date, "HH:mm") : "--:--"}
           </span>
         </div>
 
