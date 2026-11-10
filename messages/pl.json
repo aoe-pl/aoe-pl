@@ -970,21 +970,23 @@
         "cleared_toast": "Nagrania wyczyszczone",
         "clear_error": "Nie udało się wyczyścić nagrań",
         "title": "Wrzuć nagrania gier",
-        "subtitle": "Wgraj pliki .aoe2record dla {player1} vs {player2}.",
-        "hint": "Jeden plik na grę; dodaj więcej, jeśli gra była wznawiana.",
-        "upload_disabled_tooltip": "Wgrywanie jest wyłączone, ponieważ żaden gracz nie ma ustawionego prawidłowego linku AoE2Companion w swoim profilu.",
+        "subtitle": "Wrzuć wszystkie rozegrane gry z meczu {player1} vs {player2}.",
+        "upload_disabled_tooltip": "Wrzucanie nagran jest wyłączone, ponieważ żaden gracz nie ma ustawionego prawidłowego linku AoE2Companion w swoim profilu.",
         "admin": {
           "title": "Nadpisanie administratora",
           "toggle": "Włącz nadpisanie administratora",
-          "assign_players": "Który nagrany gracz to {player}?",
+          "assign_players": "Który gracz to {player}?",
           "winner": "Zwycięzca"
         },
-        "step_confirm": "Potwierdź",
+        "mapping": {
+          "title": "Wybierz przypisanie graczy",
+          "prompt": "Który gracz to {player}?",
+          "hint": "Drugi gracz zostanie uznany za {player}."
+        },
         "drop_zone_label": "Upuść nagrania tutaj lub kliknij, aby wybrać",
         "drop_zone": "Przeciągnij i upuść plik(i) <code>.aoe2record</code> tutaj lub <link>kliknij, aby wybrać</link>",
         "clear_files": "Wyczyść pliki",
-        "back_button": "Wstecz",
-        "next_button": "Dalej",
+        "restored_badge": "Wznawiana",
         "submit_button": "Potwierdź i wyślij",
         "submitting_button": "Wysyłanie...",
         "winner": "Zwycięzca",
@@ -1002,13 +1004,17 @@
         "save_error": "Nie udało się zapisać nagrań",
         "parse_error_invalid_type": "Nieprawidłowy typ pliku: {files}. Akceptowane są tylko pliki .aoe2record.",
         "parse_error_failed": "Nie udało się przetworzyć nagrania",
+        "too_many_games": "Wykryto zbyt wiele gier: {count} (maksymalnie {total}).",
+        "ignored_games": "{count, plural, one {Zignorowano # grę, ponieważ seria była już rozstrzygnięta} few {Zignorowano # gry, ponieważ seria była już rozstrzygnięta} many {Zignorowano # gier, ponieważ seria była już rozstrzygnięta} other {Zignorowano # gry, ponieważ seria była już rozstrzygnięta}}.",
         "validation_error": "Pliki nagrań są nieprawidłowe. Upewnij się, że wszystkie nagrania pochodzą z tej samej gry, z tymi samymi graczami, cywilizacjami i mapą.",
         "validation_error_profile_mismatch": "Niezgodność identyfikatora profilu.",
+        "validation_error_player_mismatch": "To nagranie zostało rozegrane przez {recordedPlayer1} i {recordedPlayer2}, ale ten mecz to {player1} vs {player2}. Jeśli to zamierzone (np. gracz użył innego konta), wybierz poniżej, który nagrany gracz odpowiada każdemu z graczy meczu.",
+        "validation_error_different_players": "Wszystkie nagrania muszą dotyczyć tych samych graczy. Gra {gameNumber} jest rozegrana przez {otherPlayer1} i {otherPlayer2}, a inne nagranie przez {player1} i {player2}.",
         "confirm": {
           "review": "Sprawdź czy wszystko się zgadza przed wysłaniem.",
           "game_label": "Gra {number}",
           "count_mismatch_complete": "{uploaded, plural, one {Wgrano # nagranie} few {Wgrano # nagrania} many {Wgrano # nagrań} other {Wgrano # nagrania}}, ale wynik ({p1}:{p2}) sugeruje, że rozegrano {expected, plural, one {# grę} few {# gry} many {# gier} other {# gry}}. Sprawdź, czy pliki są prawidłowe.",
-          "count_mismatch_incomplete": "Na podstawie wgranych nagrań żaden z graczy nie zapewnił sobie jeszcze zwycięstwa w serii ({p1}:{p2}). Upewnij się, że wszystkie gry zostały uwzględnione.",
+          "count_mismatch_incomplete": "Na podstawie wgranych nagrań żaden z graczy nie zapewnił sobie jeszcze zwycięstwa w serii ({p1}:{p2}). Upewnij się, że wszystkie gry zostały wrzucone.",
           "count_mismatch_play_all": "Tryb Play All wymaga wszystkich gier. {uploaded, plural, one {Wgrano tylko # z {total} gier} few {Wgrano tylko # z {total} gier} many {Wgrano tylko # z {total} gier} other {Wgrano tylko # z {total} gier}}."
         }
       }

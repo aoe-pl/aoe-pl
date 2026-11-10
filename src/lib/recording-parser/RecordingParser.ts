@@ -29,7 +29,7 @@ export class RecordingParser {
     const mapId = gameSettings.resolved_map_id;
     const timestamp = summary.header.timestamp;
 
-    return {
+    const parsed: ParsedRecording = {
       player1Data: {
         profileId: p1.profile_id,
         name: p1.name,
@@ -49,10 +49,80 @@ export class RecordingParser {
       mapId,
       length: formatDurationMs(summary.duration),
       date: new Date(timestamp * 1000).toISOString().slice(0, 10),
+      timestamp,
       winner,
       worldTime: summary.header.replay.world_time ?? 0,
     };
+
+    logParsedRecording(file.name, parsed, summary);
+
+    return parsed;
   }
+}
+
+/**
+ * Logs everything the parser returned together with the complete raw summary.
+ * Disabled in production builds to avoid noisy console output.
+ */
+function logParsedRecording(
+  fileName: string,
+  parsed: ParsedRecording,
+  summary: unknown,
+): void {
+  if (process.env.NODE_ENV === "production") return;
+
+  const plainSummary = serializeWasmValue(summary);
+
+  console.groupCollapsed(`[RecordingParser] ${fileName}`);
+  console.log("Parsed recording:", parsed);
+  console.log("Raw summary (all fields):");
+  console.log(JSON.stringify(plainSummary, null, 2));
+  console.log("Raw summary object:", plainSummary);
+  console.groupEnd();
+}
+
+/**
+ * Converts wasm-bindgen objects into plain objects for logging. The library
+ * exposes every field as a prototype getter, which `JSON.stringify` ignores
+ * and which makes the object unreadable in the console.
+ */
+function serializeWasmValue(
+  value: unknown,
+  seen = new WeakSet<object>(),
+): unknown {
+  if (value === null || typeof value !== "object") return value;
+
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeWasmValue(item, seen));
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    if (value instanceof DataView)
+      return Array.from(new Uint8Array(value.buffer));
+
+    return Array.from(value as unknown as ArrayLike<number>);
+  }
+
+  if (seen.has(value)) return "[Circular]";
+  seen.add(value);
+
+  const plain: Record<string, unknown> = {};
+  let proto: object | null = Object.getPrototypeOf(value) as object | null;
+
+  while (proto && proto !== Object.prototype) {
+    for (const key of Object.getOwnPropertyNames(proto)) {
+      if (key === "constructor" || key === "free") continue;
+
+      const descriptor = Object.getOwnPropertyDescriptor(proto, key);
+      if (!descriptor?.get) continue;
+
+      plain[key] = serializeWasmValue(descriptor.get.call(value), seen);
+    }
+
+    proto = Object.getPrototypeOf(proto) as object | null;
+  }
+
+  return plain;
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────

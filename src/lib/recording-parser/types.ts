@@ -19,6 +19,7 @@ export interface ParsedRecording {
   mapId: number;
   length: string;
   date: string;
+  timestamp: number;
   winner: 1 | 2 | null; // null if no winner or both teams marked as winners
   worldTime: number;
 }

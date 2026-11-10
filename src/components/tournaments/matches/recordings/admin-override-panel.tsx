@@ -6,25 +6,17 @@ import { useTranslations } from "next-intl";
 interface AdminOverridePanelProps {
   player1Name: string;
   player2Name: string;
-  recordedPlayer1Name: string | null;
-  recordedPlayer2Name: string | null;
-  swap: boolean;
-  onSetSwap: (swap: boolean) => void;
   winner: 1 | 2 | null;
   onSetWinner: (winner: 1 | 2) => void;
 }
 
 /**
- * Admin-only fallback for games where validation had errors, so the orientation and the winner can be set
- * by hand.
+ * Admin-only fallback for games where validation had errors, so the winner can
+ * be set by hand. Player mapping is chosen globally for the whole upload.
  */
 export function AdminOverridePanel({
   player1Name,
   player2Name,
-  recordedPlayer1Name,
-  recordedPlayer2Name,
-  swap,
-  onSetSwap,
   winner,
   onSetWinner,
 }: AdminOverridePanelProps) {
@@ -36,30 +28,6 @@ export function AdminOverridePanel({
       style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
     >
       <p className="text-medieval-gold font-semibold">{t("admin.title")}</p>
-
-      <div className="space-y-1">
-        <p className="text-medieval-gold-muted text-xs">
-          {t("admin.assign_players", { player: player1Name })}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            variant={swap ? "outline" : "gold"}
-            disabled={recordedPlayer1Name === null}
-            onClick={() => onSetSwap(false)}
-          >
-            {recordedPlayer1Name ?? "?"}
-          </Button>
-          <Button
-            size="sm"
-            variant={swap ? "gold" : "outline"}
-            disabled={recordedPlayer2Name === null}
-            onClick={() => onSetSwap(true)}
-          >
-            {recordedPlayer2Name ?? "?"}
-          </Button>
-        </div>
-      </div>
 
       <div className="space-y-1">
         <p className="text-medieval-gold-muted text-xs">{t("admin.winner")}</p>
