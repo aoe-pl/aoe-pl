@@ -11,12 +11,15 @@ export interface CalendarGroup {
   name: string;
   color: string;
   isRotational: boolean;
+  displayOrder: number;
 }
 
 export interface CalendarPlayer {
   id: string;
   nickname: string;
 }
+
+export type CalendarAdminMarkerFilter = AdminStreamStatus | "NONE";
 
 export interface CalendarMatch {
   id: string;

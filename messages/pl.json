@@ -819,12 +819,15 @@
         "clear_date_confirm_button": "Wyczyść datę"
       },
       "filters": {
+        "filter_button": "Filtry",
         "groups": "Grupy",
         "players": "Gracze",
+        "match_status": "Status meczu",
+        "admin_marker": "Znacznik admina",
+        "no_marker": "Brak znacznika",
         "search_players": "Szukaj graczy",
         "no_players_found": "Nie znaleziono graczy.",
-        "clear_all": "Wyczyść wszystko",
-        "remove_filter": "Usuń filtr {name}"
+        "clear_all": "Wyczyść wszystko"
       }
     },
     "groups": {

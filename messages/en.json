@@ -819,12 +819,15 @@
         "clear_date_confirm_button": "Clear date"
       },
       "filters": {
+        "filter_button": "Filters",
         "groups": "Groups",
         "players": "Players",
+        "match_status": "Match status",
+        "admin_marker": "Admin marker",
+        "no_marker": "No marker",
         "search_players": "Search players",
         "no_players_found": "No players found.",
-        "clear_all": "Clear all",
-        "remove_filter": "Remove {name} filter"
+        "clear_all": "Clear all"
       }
     },
     "players": {

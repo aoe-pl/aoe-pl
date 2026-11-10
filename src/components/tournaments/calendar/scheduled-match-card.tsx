@@ -85,6 +85,7 @@ export function ScheduledMatchCard({
                     name: group.name,
                     color: group.color,
                     isRotational: group.isRotational,
+                    displayOrder: group.displayOrder,
                   },
                   TournamentMatchParticipant: [
                     {

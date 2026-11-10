@@ -25,6 +25,7 @@ interface MatchRowGroup {
   name: string;
   color: string | null;
   isRotational: boolean;
+  displayOrder: number;
 }
 interface MatchRowParticipant {
   participant: { id: string; nickname: string; userId: string | null } | null;
@@ -66,6 +67,7 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
           name: row.group.name,
           color: row.group.color ?? "#ffffff55",
           isRotational: row.group.isRotational,
+          displayOrder: row.group.displayOrder,
         });
       }
 
@@ -130,8 +132,15 @@ export function useCalendarData(rows: TournamentMatchRow[]): CalendarData {
 
     return {
       calendarMatches: mapped,
-      calendarGroups: Array.from(groupMap.values()),
-      calendarPlayers: Array.from(playerMap.values()),
+      calendarGroups: Array.from(groupMap.values()).sort(
+        (a, b) =>
+          Number(a.isRotational) - Number(b.isRotational) ||
+          a.displayOrder - b.displayOrder ||
+          a.name.localeCompare(b.name),
+      ),
+      calendarPlayers: Array.from(playerMap.values()).sort((a, b) =>
+        a.nickname.localeCompare(b.nickname),
+      ),
       pendingRows,
     };
   }, [rows]);
