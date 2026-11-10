@@ -18,9 +18,9 @@ import { ChevronDown, ListFilter, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import type { AdminStreamStatus } from "@prisma/client";
 import {
   CalendarMatchStatus,
-  type CalendarAdminMarkerFilter,
   type CalendarGroup,
   type CalendarPlayer,
 } from "./types";
@@ -31,12 +31,12 @@ interface CalendarFiltersProps {
   selectedGroups: Set<string>;
   selectedPlayers: Set<string>;
   selectedStatuses: Set<CalendarMatchStatus>;
-  selectedAdminMarkers: Set<CalendarAdminMarkerFilter>;
+  selectedAdminMarkers: Set<AdminStreamStatus>;
   showAdminMarkers?: boolean;
   onGroupToggle: (id: string) => void;
   onPlayerToggle: (id: string) => void;
   onStatusToggle: (status: CalendarMatchStatus) => void;
-  onAdminMarkerToggle: (marker: CalendarAdminMarkerFilter) => void;
+  onAdminMarkerToggle: (marker: AdminStreamStatus) => void;
   onClearAll: () => void;
 }
 
@@ -173,8 +173,6 @@ export function CalendarFilters({
     selectedAdminMarkers.size;
   const hasFilter = activeCount > 0;
 
-  const hasNoMarkerFilter = selectedAdminMarkers.has("NONE");
-
   const filteredPlayers = useMemo(() => {
     const query = playerSearch.trim().toLowerCase();
     if (!query) return players;
@@ -234,31 +232,21 @@ export function CalendarFilters({
     </CheckboxOption>
   ));
 
-  const adminMarkerOptions = (
-    <>
-      <CheckboxOption
-        checked={hasNoMarkerFilter}
-        onToggle={() => onAdminMarkerToggle("NONE")}
-      >
-        <span>{t("no_marker")}</span>
-      </CheckboxOption>
-      {ADMIN_MARKER_VALUES.map((value) => {
-        const marker = ADMIN_MARKER_META[value];
-        const MarkerIcon = marker.icon;
+  const adminMarkerOptions = ADMIN_MARKER_VALUES.map((value) => {
+    const marker = ADMIN_MARKER_META[value];
+    const MarkerIcon = marker.icon;
 
-        return (
-          <CheckboxOption
-            key={value}
-            checked={selectedAdminMarkers.has(value)}
-            onToggle={() => onAdminMarkerToggle(value)}
-          >
-            <MarkerIcon className={cn("h-4 w-4 shrink-0", marker.className)} />
-            <span>{tMatches(marker.labelKey)}</span>
-          </CheckboxOption>
-        );
-      })}
-    </>
-  );
+    return (
+      <CheckboxOption
+        key={value}
+        checked={selectedAdminMarkers.has(value)}
+        onToggle={() => onAdminMarkerToggle(value)}
+      >
+        <MarkerIcon className={cn("h-4 w-4 shrink-0", marker.className)} />
+        <span>{tMatches(marker.labelKey)}</span>
+      </CheckboxOption>
+    );
+  });
 
   const clearAllItem = hasFilter ? (
     <>

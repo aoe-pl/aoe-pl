@@ -824,7 +824,6 @@
         "players": "Gracze",
         "match_status": "Status meczu",
         "admin_marker": "Znacznik admina",
-        "no_marker": "Brak znacznika",
         "search_players": "Szukaj graczy",
         "no_players_found": "Nie znaleziono graczy.",
         "clear_all": "Wyczyść wszystko"

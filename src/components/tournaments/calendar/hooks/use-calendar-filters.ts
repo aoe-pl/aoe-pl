@@ -1,9 +1,9 @@
 "use client";
 
+import type { AdminStreamStatus } from "@prisma/client";
 import { useEffect, useMemo, useState } from "react";
 import {
   type CalendarMatchStatus,
-  type CalendarAdminMarkerFilter,
   type CalendarMatch,
   type CalendarPlayer,
 } from "../types";
@@ -12,14 +12,14 @@ interface CalendarFiltersResult {
   selectedGroups: Set<string>;
   selectedPlayers: Set<string>;
   selectedStatuses: Set<CalendarMatchStatus>;
-  selectedAdminMarkers: Set<CalendarAdminMarkerFilter>;
+  selectedAdminMarkers: Set<AdminStreamStatus>;
   filteredMatches: CalendarMatch[];
   eligiblePlayers: CalendarPlayer[];
   isFiltered: boolean;
   toggleGroup: (id: string) => void;
   togglePlayer: (id: string) => void;
   toggleStatus: (status: CalendarMatchStatus) => void;
-  toggleAdminMarker: (marker: CalendarAdminMarkerFilter) => void;
+  toggleAdminMarker: (marker: AdminStreamStatus) => void;
   clearFilters: () => void;
 }
 
@@ -42,7 +42,7 @@ export function useCalendarFilters(
     Set<CalendarMatchStatus>
   >(new Set());
   const [selectedAdminMarkers, setSelectedAdminMarkers] = useState<
-    Set<CalendarAdminMarkerFilter>
+    Set<AdminStreamStatus>
   >(new Set());
 
   const filteredMatches = useMemo(() => {
@@ -58,8 +58,11 @@ export function useCalendarFilters(
       if (selectedStatuses.size > 0 && !selectedStatuses.has(m.status))
         return false;
       if (selectedAdminMarkers.size > 0) {
-        const marker = m.adminStreamStatus ?? "NONE";
-        if (!selectedAdminMarkers.has(marker)) return false;
+        if (
+          m.adminStreamStatus == null ||
+          !selectedAdminMarkers.has(m.adminStreamStatus)
+        )
+          return false;
       }
       return true;
     });
@@ -106,7 +109,7 @@ export function useCalendarFilters(
     setSelectedStatuses((prev) => toggleInSet(prev, status));
   }
 
-  function toggleAdminMarker(marker: CalendarAdminMarkerFilter) {
+  function toggleAdminMarker(marker: AdminStreamStatus) {
     setSelectedAdminMarkers((prev) => toggleInSet(prev, marker));
   }
 

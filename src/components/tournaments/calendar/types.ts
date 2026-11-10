@@ -19,8 +19,6 @@ export interface CalendarPlayer {
   nickname: string;
 }
 
-export type CalendarAdminMarkerFilter = AdminStreamStatus | "NONE";
-
 export interface CalendarMatch {
   id: string;
   matchNumber: number;
