@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { isSameDay } from "date-fns";
 import { CalendarPlus } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type { TournamentMatchRow } from "./hooks/use-calendar-data";
 import { ScheduledMatchCard } from "./scheduled-match-card";
@@ -45,7 +45,13 @@ export function SelectedDayPanel({
   onCancelMatch,
 }: SelectedDayPanelProps) {
   const t = useTranslations("tournament.calendar");
-  const fmt = useFormatter();
+  const locale = useLocale();
+
+  const dayLabel = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(selectedDay);
 
   const dayMatches = matches
     .filter((m) => isSameDay(m.date, selectedDay))
@@ -82,11 +88,7 @@ export function SelectedDayPanel({
     <div className="panel-inset p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-primary font-semibold">
-          {fmt.dateTime(selectedDay, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
+          {dayLabel}
           {dayMatches.length > 0 && (
             <span className="text-medieval-gold-muted ml-2 text-sm font-normal">
               {t("matches", { count: dayMatches.length })}

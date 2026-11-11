@@ -819,12 +819,14 @@
         "clear_date_confirm_button": "Clear date"
       },
       "filters": {
+        "filter_button": "Filters",
         "groups": "Groups",
         "players": "Players",
+        "match_status": "Match status",
+        "admin_marker": "Admin marker",
         "search_players": "Search players",
         "no_players_found": "No players found.",
-        "clear_all": "Clear all",
-        "remove_filter": "Remove {name} filter"
+        "clear_all": "Clear all"
       }
     },
     "players": {
@@ -967,21 +969,23 @@
         "cleared_toast": "Recordings cleared",
         "clear_error": "Failed to clear recordings",
         "title": "Upload game recordings",
-        "subtitle": "Upload .aoe2record files for {player1} vs {player2}.",
-        "hint": "One file per game; add multiple if a game was restored.",
+        "subtitle": "Upload every played game for {player1} vs {player2} match.",
         "upload_disabled_tooltip": "Upload is disabled because neither player has a valid aoe2companion link set on their profile page.",
         "admin": {
           "title": "Admin override",
           "toggle": "Enable admin override",
-          "assign_players": "Which recorded player is {player}?",
+          "assign_players": "Which player is {player}?",
           "winner": "Winner"
         },
-        "step_confirm": "Confirm",
+        "mapping": {
+          "title": "Select player mapping",
+          "prompt": "Which player is {player}?",
+          "hint": "The other player will be counted as {player}."
+        },
         "drop_zone_label": "Drop recordings here or click to select",
         "drop_zone": "Drag & drop <code>.aoe2record</code> file(s) here, or <link>click to select</link>",
         "clear_files": "Clear files",
-        "back_button": "Back",
-        "next_button": "Next",
+        "restored_badge": "Restored",
         "submit_button": "Confirm & Submit",
         "submitting_button": "Submitting...",
         "winner": "Winner",
@@ -999,8 +1003,12 @@
         "save_error": "Failed to save recordings",
         "parse_error_invalid_type": "Invalid file type: {files}. Only .aoe2record files are accepted.",
         "parse_error_failed": "Failed to parse recording",
+        "too_many_games": "Too many games detected: {count} (maximum {total}).",
+        "ignored_games": "{count, plural, one {# game was ignored because the series was already decided} other {# games were ignored because the series was already decided}}.",
         "validation_error": "Recording files are invalid. Please ensure that all recordings are from the same game, with the same players, civs, and map.",
         "validation_error_profile_mismatch": "Profile ID mismatch.",
+        "validation_error_player_mismatch": "This recording was played by {recordedPlayer1} and {recordedPlayer2}, but this match is {player1} vs {player2}. If this was intended (for example, a player used a different account), select which recorded player corresponds to each match player below.",
+        "validation_error_different_players": "All recordings must feature the same players. Game {gameNumber} is between {otherPlayer1} and {otherPlayer2}, but another game is between {player1} and {player2}.",
         "confirm": {
           "review": "Review the uploaded recordings before submitting.",
           "game_label": "Game {number}",

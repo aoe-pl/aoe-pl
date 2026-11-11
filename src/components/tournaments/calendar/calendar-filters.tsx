@@ -1,33 +1,145 @@
 "use client";
 
+import { ADMIN_MARKER_META } from "@/components/tournaments/matches/admin-stream-marker";
 import { Button } from "@/components/ui";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { isBrightColor } from "@/lib/utils";
-import { Check, ChevronDown, X } from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { ChevronDown, ListFilter, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import type { CalendarGroup, CalendarPlayer } from "./types";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import type { AdminStreamStatus } from "@prisma/client";
+import {
+  CalendarMatchStatus,
+  type CalendarGroup,
+  type CalendarPlayer,
+} from "./types";
 
 interface CalendarFiltersProps {
   groups: CalendarGroup[];
   players: CalendarPlayer[];
   selectedGroups: Set<string>;
   selectedPlayers: Set<string>;
+  selectedStatuses: Set<CalendarMatchStatus>;
+  selectedAdminMarkers: Set<AdminStreamStatus>;
+  showAdminMarkers?: boolean;
   onGroupToggle: (id: string) => void;
   onPlayerToggle: (id: string) => void;
+  onStatusToggle: (status: CalendarMatchStatus) => void;
+  onAdminMarkerToggle: (marker: AdminStreamStatus) => void;
   onClearAll: () => void;
+}
+
+const STATUS_OPTIONS = [
+  { value: CalendarMatchStatus.Scheduled, labelKey: "status.scheduled" },
+  { value: CalendarMatchStatus.Completed, labelKey: "status.completed" },
+] as const;
+
+const ADMIN_MARKER_VALUES = Object.keys(
+  ADMIN_MARKER_META,
+) as (keyof typeof ADMIN_MARKER_META)[];
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, [query]);
+
+  return matches;
+}
+
+function CheckboxOption({
+  checked,
+  onToggle,
+  children,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <DropdownMenuItem
+      role="menuitemcheckbox"
+      aria-checked={checked}
+      onSelect={(event) => {
+        event.preventDefault();
+        onToggle();
+      }}
+      className={cn(
+        "cursor-pointer rounded-none px-3",
+        checked && "bg-medieval-gold/20 text-medieval-gold",
+      )}
+    >
+      {children}
+    </DropdownMenuItem>
+  );
+}
+
+function FilterSubTrigger({ label, count }: { label: string; count: number }) {
+  return (
+    <DropdownMenuSubTrigger className="cursor-pointer rounded-none px-3">
+      <span>{label}</span>
+      {count > 0 && (
+        <span className="text-medieval-gold-muted ml-auto text-xs tabular-nums">
+          {count}
+        </span>
+      )}
+    </DropdownMenuSubTrigger>
+  );
+}
+
+function MobileSection({
+  title,
+  count,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  count: number;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="border-medieval-wood-border/60 border-b last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="hover:bg-medieval-gold/10 flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors"
+      >
+        <span>{title}</span>
+        {count > 0 && (
+          <span className="text-medieval-gold-muted text-xs tabular-nums">
+            {count}
+          </span>
+        )}
+        <ChevronDown
+          className={cn(
+            "ml-auto h-4 w-4 opacity-60 transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      {open && <div>{children}</div>}
+    </div>
+  );
 }
 
 export function CalendarFilters({
@@ -35,170 +147,276 @@ export function CalendarFilters({
   players,
   selectedGroups,
   selectedPlayers,
+  selectedStatuses,
+  selectedAdminMarkers,
+  showAdminMarkers = false,
   onGroupToggle,
   onPlayerToggle,
+  onStatusToggle,
+  onAdminMarkerToggle,
   onClearAll,
 }: CalendarFiltersProps) {
   const t = useTranslations("tournament.calendar.filters");
-  const [groupsOpen, setGroupsOpen] = useState(false);
-  const [playersOpen, setPlayersOpen] = useState(false);
+  const tMatches = useTranslations("tournament.matches");
 
-  const hasFilter = selectedGroups.size > 0 || selectedPlayers.size > 0;
+  const [open, setOpen] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [mobileSection, setMobileSection] = useState<
+    "groups" | "players" | "status" | "admin" | null
+  >(null);
+  const isMobile = useMediaQuery("(max-width: 639px)");
 
-  const activeGroups = groups.filter((g) => selectedGroups.has(g.id));
-  const activePlayers = players.filter((p) => selectedPlayers.has(p.id));
+  const activeCount =
+    selectedGroups.size +
+    selectedPlayers.size +
+    selectedStatuses.size +
+    selectedAdminMarkers.size;
+  const hasFilter = activeCount > 0;
+
+  const filteredPlayers = useMemo(() => {
+    const query = playerSearch.trim().toLowerCase();
+    if (!query) return players;
+    return players.filter((p) => p.nickname.toLowerCase().includes(query));
+  }, [players, playerSearch]);
+
+  const groupOptions = groups.map((group) => (
+    <CheckboxOption
+      key={group.id}
+      checked={selectedGroups.has(group.id)}
+      onToggle={() => onGroupToggle(group.id)}
+    >
+      <span
+        className="h-2.5 w-2.5 shrink-0 rounded-full"
+        style={{ backgroundColor: group.color }}
+      />
+      <span className="truncate">{group.name}</span>
+    </CheckboxOption>
+  ));
+
+  const playerOptions =
+    filteredPlayers.length === 0 ? (
+      <p className="text-muted-foreground px-3 py-3 text-sm">
+        {t("no_players_found")}
+      </p>
+    ) : (
+      filteredPlayers.map((player) => (
+        <CheckboxOption
+          key={player.id}
+          checked={selectedPlayers.has(player.id)}
+          onToggle={() => onPlayerToggle(player.id)}
+        >
+          <span className="truncate">{player.nickname}</span>
+        </CheckboxOption>
+      ))
+    );
+
+  const playerSearchInput = (
+    <Input
+      placeholder={t("search_players")}
+      value={playerSearch}
+      onChange={(event) => setPlayerSearch(event.target.value)}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") event.stopPropagation();
+      }}
+      className="h-8"
+    />
+  );
+
+  const statusOptions = STATUS_OPTIONS.map((status) => (
+    <CheckboxOption
+      key={status.value}
+      checked={selectedStatuses.has(status.value)}
+      onToggle={() => onStatusToggle(status.value)}
+    >
+      <span>{tMatches(status.labelKey)}</span>
+    </CheckboxOption>
+  ));
+
+  const adminMarkerOptions = ADMIN_MARKER_VALUES.map((value) => {
+    const marker = ADMIN_MARKER_META[value];
+    const MarkerIcon = marker.icon;
+
+    return (
+      <CheckboxOption
+        key={value}
+        checked={selectedAdminMarkers.has(value)}
+        onToggle={() => onAdminMarkerToggle(value)}
+      >
+        <MarkerIcon className={cn("h-4 w-4 shrink-0", marker.className)} />
+        <span>{tMatches(marker.labelKey)}</span>
+      </CheckboxOption>
+    );
+  });
+
+  const clearAllItem = hasFilter ? (
+    <>
+      <DropdownMenuSeparator className="mx-0" />
+      <DropdownMenuItem
+        className="rounded-none px-3 text-xs"
+        onSelect={(event) => {
+          event.preventDefault();
+          onClearAll();
+        }}
+      >
+        <X className="h-3.5 w-3.5" />
+        {t("clear_all")}
+      </DropdownMenuItem>
+    </>
+  ) : null;
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Groups popover menu*/}
-        <Popover
-          open={groupsOpen}
-          onOpenChange={setGroupsOpen}
-        >
-          <PopoverTrigger asChild>
-            <Button variant="wood">
-              {t("groups")}
-              {selectedGroups.size > 0 && (
-                <span className="bg-accent-foreground text-medieval-wood rounded-full px-1 py-px text-[10px] leading-none font-bold">
-                  {selectedGroups.size}
-                </span>
-              )}
-              <ChevronDown className="h-4 w-4 opacity-60" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-56 p-0"
-            align="start"
+      <DropdownMenu
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) setMobileSection(null);
+        }}
+      >
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="wood"
+            className="focus-visible:border-medieval-wood-border w-fit focus-visible:ring-0"
           >
-            <Command>
-              <CommandList>
-                <CommandGroup>
-                  {groups.map((g) => {
-                    const active = selectedGroups.has(g.id);
-                    return (
-                      <CommandItem
-                        key={g.id}
-                        value={g.name}
-                        onSelect={() => onGroupToggle(g.id)}
-                        className="flex cursor-pointer items-center gap-2"
-                      >
-                        {/* Color dot */}
-                        <span
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: g.color }}
-                        />
-                        <span className="flex-1 text-sm">{g.name}</span>
-                        {active && (
-                          <Check className="text-primary h-3.5 w-3.5 shrink-0" />
-                        )}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-
-        {/* Players popover menu */}
-        <Popover
-          open={playersOpen}
-          onOpenChange={setPlayersOpen}
-        >
-          <PopoverTrigger asChild>
-            <Button variant="wood">
-              {t("players")}
-              {selectedPlayers.size > 0 && (
-                <span className="bg-medieval-gold text-medieval-wood rounded-full px-1 py-px text-[10px] leading-none font-bold">
-                  {selectedPlayers.size}
-                </span>
-              )}
-              <ChevronDown className="h-4 w-4 opacity-60" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-64 p-0"
-            align="start"
-          >
-            <Command>
-              <CommandInput placeholder={t("search_players")} />
-              <CommandList>
-                <CommandEmpty>{t("no_players_found")}</CommandEmpty>
-                <CommandGroup>
-                  {players.map((p) => {
-                    const active = selectedPlayers.has(p.id);
-                    return (
-                      <CommandItem
-                        key={p.id}
-                        value={p.nickname}
-                        onSelect={() => onPlayerToggle(p.id)}
-                        className="flex cursor-pointer items-center justify-between gap-2"
-                      >
-                        <span className="text-sm">{p.nickname}</span>
-                        {active && (
-                          <Check className="text-primary h-3.5 w-3.5 shrink-0" />
-                        )}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-
-        {/* Clear all */}
-        {hasFilter && (
-          <button
-            onClick={onClearAll}
-            className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
-          >
-            <X className="h-4 w-4" />
-            {t("clear_all")}
-          </button>
-        )}
-      </div>
-
-      {/* Active filter chips */}
-      {hasFilter && (
-        <div className="flex flex-wrap gap-1.5">
-          {activeGroups.map((g) => {
-            const textColor = isBrightColor(g.color) ? "#000" : "#fff";
-
-            return (
-              <span
-                key={g.id}
-                className="flex items-center rounded-full px-2 py-2 text-xs"
-                style={{ backgroundColor: g.color, color: textColor }}
-              >
-                {g.name}
-                <button
-                  onClick={() => onGroupToggle(g.id)}
-                  className="opacity-70 hover:opacity-100"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+            <ListFilter className="h-4 w-4 opacity-70" />
+            {t("filter_button")}
+            {hasFilter && (
+              <span className="bg-medieval-gold text-medieval-wood rounded-full px-1.5 py-px text-[10px] leading-none font-bold">
+                {activeCount}
               </span>
-            );
-          })}
+            )}
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 opacity-60 transition-transform",
+                open && "rotate-180",
+              )}
+            />
+          </Button>
+        </DropdownMenuTrigger>
 
-          {activePlayers.map((p) => (
-            <span
-              key={p.id}
-              className="text-primary bg-medieval-gold/20 flex items-center rounded-full px-2 py-2 text-xs"
-            >
-              {p.nickname}
-              <button
-                onClick={() => onPlayerToggle(p.id)}
-                className="opacity-70 hover:opacity-100"
+        <DropdownMenuContent
+          align="start"
+          collisionPadding={8}
+          className={cn(
+            "max-w-[calc(100vw-2rem)] border-black/60 p-0",
+            isMobile ? "w-[calc(100vw-2rem)]" : "w-64",
+          )}
+        >
+          {isMobile ? (
+            <div className="py-1">
+              <MobileSection
+                title={t("groups")}
+                count={selectedGroups.size}
+                open={mobileSection === "groups"}
+                onToggle={() =>
+                  setMobileSection((current) =>
+                    current === "groups" ? null : "groups",
+                  )
+                }
               >
-                <X className="h-4 w-4" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
+                <div className="max-h-56 overflow-y-auto">{groupOptions}</div>
+              </MobileSection>
+
+              <MobileSection
+                title={t("players")}
+                count={selectedPlayers.size}
+                open={mobileSection === "players"}
+                onToggle={() =>
+                  setMobileSection((current) =>
+                    current === "players" ? null : "players",
+                  )
+                }
+              >
+                <div className="border-medieval-wood-border border-b p-2">
+                  {playerSearchInput}
+                </div>
+                <div className="max-h-56 overflow-y-auto">{playerOptions}</div>
+              </MobileSection>
+
+              <MobileSection
+                title={t("match_status")}
+                count={selectedStatuses.size}
+                open={mobileSection === "status"}
+                onToggle={() =>
+                  setMobileSection((current) =>
+                    current === "status" ? null : "status",
+                  )
+                }
+              >
+                {statusOptions}
+              </MobileSection>
+
+              {showAdminMarkers && (
+                <MobileSection
+                  title={t("admin_marker")}
+                  count={selectedAdminMarkers.size}
+                  open={mobileSection === "admin"}
+                  onToggle={() =>
+                    setMobileSection((current) =>
+                      current === "admin" ? null : "admin",
+                    )
+                  }
+                >
+                  {adminMarkerOptions}
+                </MobileSection>
+              )}
+
+              {clearAllItem}
+            </div>
+          ) : (
+            <>
+              <DropdownMenuSub>
+                <FilterSubTrigger
+                  label={t("groups")}
+                  count={selectedGroups.size}
+                />
+                <DropdownMenuSubContent className="max-h-[min(70vh,20rem)] w-56 overflow-y-auto border-black/60 p-0">
+                  {groupOptions}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <FilterSubTrigger
+                  label={t("players")}
+                  count={selectedPlayers.size}
+                />
+                <DropdownMenuSubContent className="w-64 border-black/60 p-0">
+                  <div className="border-medieval-wood-border border-b p-2">
+                    {playerSearchInput}
+                  </div>
+                  <div className="max-h-56 overflow-y-auto">
+                    {playerOptions}
+                  </div>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <FilterSubTrigger
+                  label={t("match_status")}
+                  count={selectedStatuses.size}
+                />
+                <DropdownMenuSubContent className="w-48 border-black/60 p-0">
+                  {statusOptions}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              {showAdminMarkers && (
+                <DropdownMenuSub>
+                  <FilterSubTrigger
+                    label={t("admin_marker")}
+                    count={selectedAdminMarkers.size}
+                  />
+                  <DropdownMenuSubContent className="w-60 border-black/60 p-0">
+                    {adminMarkerOptions}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              )}
+
+              {clearAllItem}
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

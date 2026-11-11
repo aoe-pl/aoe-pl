@@ -11,6 +11,7 @@ export interface CalendarGroup {
   name: string;
   color: string;
   isRotational: boolean;
+  displayOrder: number;
 }
 
 export interface CalendarPlayer {

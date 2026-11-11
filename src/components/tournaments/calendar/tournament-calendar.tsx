@@ -38,11 +38,15 @@ export function TournamentCalendar({
   const {
     selectedGroups,
     selectedPlayers,
+    selectedStatuses,
+    selectedAdminMarkers,
     filteredMatches,
     eligiblePlayers,
     isFiltered,
     toggleGroup,
     togglePlayer,
+    toggleStatus,
+    toggleAdminMarker,
     clearFilters,
   } = useCalendarFilters(calendarMatches, calendarPlayers);
 
@@ -97,8 +101,13 @@ export function TournamentCalendar({
         players={eligiblePlayers}
         selectedGroups={selectedGroups}
         selectedPlayers={selectedPlayers}
+        selectedStatuses={selectedStatuses}
+        selectedAdminMarkers={selectedAdminMarkers}
+        showAdminMarkers={isAdmin}
         onGroupToggle={toggleGroup}
         onPlayerToggle={togglePlayer}
+        onStatusToggle={toggleStatus}
+        onAdminMarkerToggle={toggleAdminMarker}
         onClearAll={clearFilters}
       />
 
