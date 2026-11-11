@@ -1,5 +1,4 @@
 import { GroupLabel } from "@/components/tournaments/group-label";
-import { Badge } from "@/components/ui/badge";
 import { slugify } from "@/lib/utils";
 import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -96,7 +95,7 @@ export function ProfileUpcomingMatchesSection({
             return (
               <li
                 key={match.id}
-                className="panel-inset grid grid-cols-1 items-center gap-x-4 gap-y-1 px-3 py-2 text-sm sm:grid-cols-[minmax(0,3.2fr)_minmax(0,1fr)_8.5rem_6rem]"
+                className="panel-inset grid grid-cols-1 items-center gap-x-4 gap-y-1 px-3 py-2 text-sm sm:grid-cols-[minmax(0,3.2fr)_minmax(0,1fr)_8.5rem]"
               >
                 <div className="flex min-w-0 items-center gap-2">
                   {tournament && href ? (
@@ -131,15 +130,6 @@ export function ProfileUpcomingMatchesSection({
                       })
                     : null}
                 </span>
-
-                <Badge
-                  variant={
-                    match.status === "SCHEDULED" ? "default" : "secondary"
-                  }
-                  className="justify-self-end text-xs"
-                >
-                  {match.status === "SCHEDULED" ? t("scheduled") : t("pending")}
-                </Badge>
               </li>
             );
           })}

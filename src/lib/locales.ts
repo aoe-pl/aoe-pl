@@ -5,8 +5,8 @@
 // otherwise some locale-sensitive features (like calendar labels) may fall back to the default locale.
 
 const list = [
-  { code: "pl" as const, flag: "🇵🇱", label: "Polski" },
-  { code: "en" as const, flag: "🇬🇧", label: "English" },
+  { code: "pl" as const, label: "Polski" },
+  { code: "en" as const, label: "English" },
 ] as const;
 
 export type Locale = (typeof list)[number]["code"];
@@ -14,7 +14,6 @@ export type Locale = (typeof list)[number]["code"];
 interface LocaleConfig {
   readonly list: readonly {
     readonly code: Locale;
-    readonly flag: string;
     readonly label: string;
   }[];
   readonly supported: readonly Locale[];

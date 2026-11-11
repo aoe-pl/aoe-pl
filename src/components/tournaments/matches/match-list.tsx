@@ -1,6 +1,7 @@
 "use client";
 
 import { ADMIN_MARKER_META } from "@/components/tournaments/matches/admin-stream-marker";
+import { MatchStatusIcon } from "@/components/tournaments/matches/match-status-icon";
 import { STREAM_TYPE_META } from "@/components/tournaments/matches/stream-type-meta";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import {
 import { isBrightColor } from "@/lib/utils";
 import type { AdminStreamStatus, StreamType } from "@prisma/client";
 import { format } from "date-fns";
-import { CalendarClock, CircleCheck, CircleDashed, Tv } from "lucide-react";
+import { Tv } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -264,11 +265,6 @@ export function MatchList({
               ),
             ];
 
-            const approved = match.status === "ADMIN_APPROVED";
-            const completed = match.status === "COMPLETED";
-            const scheduled = match.status === "SCHEDULED";
-            const pending = match.status === "PENDING";
-
             return (
               <Link
                 key={match.id}
@@ -303,70 +299,7 @@ export function MatchList({
                 </span>
 
                 <span className="flex items-center justify-center">
-                  {pending && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex cursor-default items-center">
-                          <CircleDashed
-                            className="text-muted-foreground size-4"
-                            aria-hidden
-                          />
-                          <span className="sr-only">{t("status.pending")}</span>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>{t("status.pending")}</TooltipContent>
-                    </Tooltip>
-                  )}
-                  {scheduled && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex cursor-default items-center">
-                          <CalendarClock
-                            className="size-4 text-blue-500"
-                            aria-hidden
-                          />
-                          <span className="sr-only">
-                            {t("status.scheduled")}
-                          </span>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>{t("status.scheduled")}</TooltipContent>
-                    </Tooltip>
-                  )}
-                  {approved && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex cursor-default items-center">
-                          <CircleCheck
-                            className="size-4 text-green-500"
-                            aria-hidden
-                          />
-                          <span className="sr-only">
-                            {t("status.admin_approved")}
-                          </span>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {t("status.admin_approved")}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  {completed && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex cursor-default items-center">
-                          <CircleCheck
-                            className="size-4 text-orange-500"
-                            aria-hidden
-                          />
-                          <span className="sr-only">
-                            {t("status.completed")}
-                          </span>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>{t("status.completed")}</TooltipContent>
-                    </Tooltip>
-                  )}
+                  <MatchStatusIcon status={match.status} />
                 </span>
 
                 <span className="flex items-center justify-center">
