@@ -1006,10 +1006,10 @@
         "parse_error_failed": "Nie udało się przetworzyć nagrania",
         "too_many_games": "Wykryto zbyt wiele gier: {count} (maksymalnie {total}).",
         "ignored_games": "{count, plural, one {Zignorowano # grę, ponieważ seria była już rozstrzygnięta} few {Zignorowano # gry, ponieważ seria była już rozstrzygnięta} many {Zignorowano # gier, ponieważ seria była już rozstrzygnięta} other {Zignorowano # gry, ponieważ seria była już rozstrzygnięta}}.",
-        "validation_error": "Pliki nagrań są nieprawidłowe. Upewnij się, że wszystkie nagrania pochodzą z tej samej gry, z tymi samymi graczami, cywilizacjami i mapą.",
+        "validation_error": "Pliki są nieprawidłowe. Upewnij się, że wszystkie nagrania pochodzą z tej samej gry, z tymi samymi graczami, cywilizacjami i mapą.",
         "validation_error_profile_mismatch": "Niezgodność identyfikatora profilu.",
-        "validation_error_player_mismatch": "To nagranie zostało rozegrane przez {recordedPlayer1} i {recordedPlayer2}, ale ten mecz to {player1} vs {player2}. Jeśli to zamierzone (np. gracz użył innego konta), wybierz poniżej, który nagrany gracz odpowiada każdemu z graczy meczu.",
-        "validation_error_different_players": "Wszystkie nagrania muszą dotyczyć tych samych graczy. Gra {gameNumber} jest rozegrana przez {otherPlayer1} i {otherPlayer2}, a inne nagranie przez {player1} i {player2}.",
+        "validation_error_player_mismatch": "Ta gra została rozegrana przez {recordedPlayer1} i {recordedPlayer2}, ale mecz jest dla {player1} vs {player2}. Jeśli to zamierzone (np. gracz użył innego konta), wybierz który gracz jest kim.",
+        "validation_error_different_players": "Wszystkie nagrania muszą dotyczyć tych samych graczy. Gra {gameNumber} jest rozegrana przez {otherPlayer1} i {otherPlayer2}, a inna przez {player1} i {player2}.",
         "confirm": {
           "review": "Sprawdź czy wszystko się zgadza przed wysłaniem.",
           "game_label": "Gra {number}",
