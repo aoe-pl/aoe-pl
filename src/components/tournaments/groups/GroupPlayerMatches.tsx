@@ -2,6 +2,7 @@
 
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
 import { MatchStatusIcon } from "@/components/tournaments/matches/match-status-icon";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -81,6 +82,13 @@ export function GroupPlayerMatches({
                   )}`
                 : null;
 
+            const scoreClassName =
+              score && playerSlot
+                ? playerSlot.isWinner
+                  ? "text-green-500"
+                  : "text-red-400"
+                : "text-primary";
+
             const dateLabel = match.matchDate
               ? format(new Date(match.matchDate), "dd MMM yyyy, HH:mm", {
                   locale: dateLocale,
@@ -108,7 +116,12 @@ export function GroupPlayerMatches({
                   {dateLabel}
                 </span>
 
-                <span className="text-primary w-12 shrink-0 text-right font-bold tabular-nums">
+                <span
+                  className={cn(
+                    "w-12 shrink-0 text-right font-bold tabular-nums",
+                    scoreClassName,
+                  )}
+                >
                   {score}
                 </span>
               </Link>
