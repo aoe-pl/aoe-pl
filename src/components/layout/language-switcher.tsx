@@ -79,10 +79,11 @@ export function LanguageSwitcher() {
           <DropdownMenuItem
             key={l.code}
             asChild
+            className="text-foreground/90 hover:bg-accent/10 hover:text-medieval-gold focus:bg-accent/10 focus:text-medieval-gold cursor-pointer rounded-sm px-3 py-1.5"
           >
             <a
               href={`/api/locale?${locales.key}=${l.code}&returnTo=${encodeURIComponent(pathname)}`}
-              className="text-accent-foreground flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               <LocaleFlag locale={l.code} />
               {l.label}
