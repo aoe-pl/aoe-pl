@@ -1,7 +1,7 @@
 "use client";
 
 import { getDateFnsLocale } from "@/components/tournaments/calendar/locale-utils";
-import { cn } from "@/lib/utils";
+import { MatchStatusIcon } from "@/components/tournaments/matches/match-status-icon";
 import { format } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -9,13 +9,6 @@ import type { GroupPageData } from "./types/types";
 
 type GroupMatch = GroupPageData["matches"][number];
 type MatchSlot = GroupMatch["TournamentMatchParticipant"][number];
-
-const STATUS_BADGE_CLASSES = {
-  PENDING: "bg-black/25 text-medieval-gold-muted",
-  SCHEDULED: "bg-orange-500/20 text-orange-300",
-  COMPLETED: "bg-emerald-500/10 text-emerald-400/80",
-  ADMIN_APPROVED: "bg-emerald-500/20 text-emerald-300",
-} as const satisfies Record<GroupMatch["status"], string>;
 
 /** Resolves a match slot (participant or team) to a displayable name. */
 function getSlotName(slot: MatchSlot): string {
@@ -44,13 +37,6 @@ export function GroupPlayerMatches({
   const t = useTranslations("tournament.groups");
   const tMatches = useTranslations("tournament.matches");
   const dateLocale = getDateFnsLocale(useLocale());
-
-  const statusLabels = {
-    PENDING: tMatches("status.pending"),
-    SCHEDULED: tMatches("status.scheduled"),
-    COMPLETED: tMatches("status.completed"),
-    ADMIN_APPROVED: tMatches("status.admin_approved"),
-  } satisfies Record<GroupMatch["status"], string>;
 
   const playerMatches = matches
     .filter((match) =>
@@ -114,13 +100,8 @@ export function GroupPlayerMatches({
                   {opponentName}
                 </span>
 
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2 py-0.5 text-xs font-bold",
-                    STATUS_BADGE_CLASSES[match.status],
-                  )}
-                >
-                  {statusLabels[match.status]}
+                <span className="flex shrink-0 items-center justify-center">
+                  <MatchStatusIcon status={match.status} />
                 </span>
 
                 <span className="text-medieval-gold-muted hidden w-32 shrink-0 text-right text-xs tabular-nums sm:block">
