@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { locales } from "@/lib/locales";
+import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
@@ -67,7 +68,9 @@ export function LanguageSwitcher() {
             locale={current.code}
             className="h-3.5"
           />
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown
+            className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
+          />
         </button>
       </DropdownMenuTrigger>
 
