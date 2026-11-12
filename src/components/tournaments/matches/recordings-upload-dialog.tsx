@@ -35,7 +35,6 @@ import {
   getGameSwap,
   getGameWinner,
   isRestoredGame,
-  winsNeeded,
 } from "./recordings/recordings-helpers";
 import { PlayerMappingPanel } from "./recordings/player-mapping-panel";
 import { RecordingsList } from "./recordings/recordings-list";
@@ -285,7 +284,7 @@ export function RecordingsUploadDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[90vh] w-full flex-col gap-6 overflow-y-auto">
+      <DialogContent className="flex max-h-[90vh] w-full flex-col gap-4 overflow-y-auto sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle className="text-medieval-gold text-center">
             {t("title")}
@@ -299,6 +298,7 @@ export function RecordingsUploadDialog({
         <DropZone
           onFiles={handleFiles}
           disabled={parsing || isSubmitting}
+          compact={games.length > 0}
         />
 
         {parseError && (
@@ -351,7 +351,7 @@ export function RecordingsUploadDialog({
         )}
 
         {games.length > 0 && (
-          <div className="space-y-3">
+          <div className="flex flex-wrap justify-center gap-3">
             {games.map((game, gameIndex) => {
               const winner = getGameWinner(game);
               const mappingResolved = getGameAlignment(game) !== "unknown";
@@ -359,7 +359,7 @@ export function RecordingsUploadDialog({
               return (
                 <div
                   key={game.key}
-                  className="border-medieval-wood-border space-y-3 rounded-xl border p-3"
+                  className="border-medieval-wood-border w-full space-y-3 rounded-xl border p-3 sm:w-[calc((100%-0.75rem)/2)] lg:w-[calc((100%-1.5rem)/3)]"
                   style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
                 >
                   <div className="flex items-center justify-between gap-2">

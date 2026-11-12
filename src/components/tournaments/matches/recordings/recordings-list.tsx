@@ -20,7 +20,7 @@ export function RecordingsList({ recordings }: RecordingsListProps) {
       {recordings.map((recording, index) => (
         <li
           key={`${recording.fileName}-${index}`}
-          className="border-medieval-wood-border space-y-1 rounded-xl border p-3 text-sm"
+          className="border-medieval-wood-border space-y-1 rounded-xl border p-3 text-center text-sm"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.18)" }}
         >
           <p
@@ -30,46 +30,66 @@ export function RecordingsList({ recordings }: RecordingsListProps) {
             {recording.fileName}
           </p>
 
-          <RecordingField
-            label={t("player1")}
-            value={`${recording.player1Data.name} - ${recording.player1Data.civ}`}
-          />
-          <RecordingField
-            label={t("player2")}
-            value={`${recording.player2Data.name} - ${recording.player2Data.civ}`}
-          />
-          <RecordingField
-            label={t("map")}
-            value={recording.map}
-          />
-          <RecordingField
-            label={t("length")}
-            value={recording.length}
-          />
-          <RecordingField
-            label={t("date")}
-            value={recording.date}
-          />
-          <RecordingField
-            label={t("winner")}
-            value={
-              recording.winner === null ? (
-                <span className="text-medieval-gold-muted">
-                  {t("winner_unknown")}
-                </span>
-              ) : (
-                <span className="text-medieval-parchment-foreground inline-flex items-center gap-1 font-semibold">
-                  <Crown className="text-medieval-gold size-3.5" />
-                  {recording.winner === 1
-                    ? recording.player1Data.name
-                    : recording.player2Data.name}
-                </span>
-              )
-            }
-          />
+          <div className="mx-auto w-fit max-w-full space-y-1 text-left">
+            <RecordingField
+              label={t("player1")}
+              value={
+                <PlayerValue
+                  value={`${recording.player1Data.name} - ${recording.player1Data.civ}`}
+                  isWinner={recording.winner === 1}
+                  winnerLabel={t("winner")}
+                />
+              }
+            />
+            <RecordingField
+              label={t("player2")}
+              value={
+                <PlayerValue
+                  value={`${recording.player2Data.name} - ${recording.player2Data.civ}`}
+                  isWinner={recording.winner === 2}
+                  winnerLabel={t("winner")}
+                />
+              }
+            />
+            <RecordingField
+              label={t("map")}
+              value={recording.map}
+            />
+            <RecordingField
+              label={t("length")}
+              value={recording.length}
+            />
+            <RecordingField
+              label={t("date")}
+              value={recording.date}
+            />
+          </div>
         </li>
       ))}
     </ul>
+  );
+}
+
+function PlayerValue({
+  value,
+  isWinner,
+  winnerLabel,
+}: {
+  value: string;
+  isWinner: boolean;
+  winnerLabel: string;
+}) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <span className="min-w-0 break-words">{value}</span>
+      {isWinner && (
+        <Crown
+          role="img"
+          aria-label={winnerLabel}
+          className="text-medieval-gold size-3.5 shrink-0"
+        />
+      )}
+    </span>
   );
 }
 

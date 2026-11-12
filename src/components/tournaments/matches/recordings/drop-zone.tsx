@@ -14,12 +14,17 @@ import {
 interface DropZoneProps {
   onFiles: (files: File[]) => void | Promise<void>;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 /**
  * Drop zone for files. Supports drag-and-drop and click-to-select.
  */
-export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
+export function DropZone({
+  onFiles,
+  disabled = false,
+  compact = false,
+}: DropZoneProps) {
   const t = useTranslations("tournament.matches.recordings");
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,7 +73,8 @@ export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors select-none",
+        "flex items-center justify-center rounded-lg border-2 border-dashed transition-colors select-none",
+        compact ? "gap-2 p-3" : "flex-col gap-2 p-8",
         disabled
           ? "border-border cursor-not-allowed opacity-50"
           : dragging
@@ -76,8 +82,15 @@ export function DropZone({ onFiles, disabled = false }: DropZoneProps) {
             : "border-border hover:border-primary/50 hover:bg-accent/30 cursor-pointer",
       )}
     >
-      <UploadCloudIcon className="text-muted-foreground size-8" />
-      <p className="text-muted-foreground text-sm">
+      <UploadCloudIcon
+        className={cn(
+          "text-muted-foreground shrink-0",
+          compact ? "size-5" : "size-8",
+        )}
+      />
+      <p
+        className={cn("text-muted-foreground", compact ? "text-xs" : "text-sm")}
+      >
         {t.rich("drop_zone_label", {
           code: (chunks) => <code>{chunks}</code>,
           link: (chunks) => (
