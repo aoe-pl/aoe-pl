@@ -7,19 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { buildGroupStandings } from "@/lib/tournaments/group-standings";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import type { GroupPageData } from "./types/types";
-
-interface LeaderboardPlayerStats {
-  playerId: string;
-  playerName: string;
-  playerNumber: number;
-  matchesPlayed: number;
-  matchesWon: number;
-  matchesLost: number;
-  totalScore: number;
-}
 
 export function GroupLeaderboardTable({
   groupData,
@@ -32,44 +23,7 @@ export function GroupLeaderboardTable({
 }) {
   const t = useTranslations("tournament.groups");
 
-  const playerMap = new Map<string, LeaderboardPlayerStats>();
-
-  for (const player of groupData.players) {
-    playerMap.set(player.id, {
-      playerId: player.id,
-      playerName: player.name,
-      playerNumber: player.playerNumber,
-      matchesPlayed: 0,
-      matchesWon: 0,
-      matchesLost: 0,
-      totalScore: 0,
-    });
-  }
-
-  const approvedMatches = groupData.matches.filter(
-    (m) => m.status === "ADMIN_APPROVED",
-  );
-
-  for (const match of approvedMatches) {
-    for (const participant of match.TournamentMatchParticipant) {
-      const player = playerMap.get(participant.participantId!);
-
-      if (!player) continue;
-
-      player.matchesPlayed++;
-
-      if (participant.isWinner) {
-        player.matchesWon++;
-      } else {
-        player.matchesLost++;
-      }
-      player.totalScore += participant.wonScore;
-    }
-  }
-
-  const players = Array.from(playerMap.values()).sort(
-    (a, b) => b.totalScore - a.totalScore,
-  );
+  const players = buildGroupStandings(groupData.players, groupData.matches);
 
   return (
     <div className="w-full">
