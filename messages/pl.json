@@ -1005,7 +1005,6 @@
         "parse_error_invalid_type": "Nieprawidłowy typ pliku: {files}. Akceptowane są tylko pliki .aoe2record.",
         "parse_error_failed": "Nie udało się przetworzyć nagrania",
         "too_many_games": "Wykryto zbyt wiele gier: {count} (maksymalnie {total}).",
-        "ignored_games": "{count, plural, one {Zignorowano # grę, ponieważ seria była już rozstrzygnięta} few {Zignorowano # gry, ponieważ seria była już rozstrzygnięta} many {Zignorowano # gier, ponieważ seria była już rozstrzygnięta} other {Zignorowano # gry, ponieważ seria była już rozstrzygnięta}}.",
         "validation_error": "Pliki są nieprawidłowe. Upewnij się, że wszystkie nagrania pochodzą z tej samej gry, z tymi samymi graczami, cywilizacjami i mapą.",
         "validation_error_profile_mismatch": "Niezgodność identyfikatora profilu.",
         "validation_error_player_mismatch": "Ta gra została rozegrana przez {recordedPlayer1} i {recordedPlayer2}, ale mecz jest dla {player1} vs {player2}. Jeśli to zamierzone (np. gracz użył innego konta), wybierz który gracz jest kim.",

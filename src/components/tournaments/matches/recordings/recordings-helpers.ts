@@ -184,34 +184,6 @@ export function getGameWinner(game: ParsedGame): 1 | 2 | null {
   return getGameSwap(game) ? (winner === 1 ? 2 : 1) : winner;
 }
 
-/**
- * Games that count towards the series result. In a best-of series, games after
- * the clinching win are ignored. Play-all counts every game.
- */
-export function getSeriesGames(
-  games: ParsedGame[],
-  gameCount: number,
-  mode: MatchMode,
-): ParsedGame[] {
-  if (mode === "PLAY_ALL") return games;
-
-  const counted: ParsedGame[] = [];
-  let p1Wins = 0;
-  let p2Wins = 0;
-
-  for (const game of games) {
-    counted.push(game);
-
-    const winner = getGameWinner(game);
-    if (winner === 1) p1Wins++;
-    else if (winner === 2) p2Wins++;
-
-    if (isSeriesDecided([p1Wins, p2Wins], gameCount, mode)) break;
-  }
-
-  return counted;
-}
-
 /** Returns [player1Wins, player2Wins] across all parsed games. */
 export function computeScores(games: ParsedGame[]): [number, number] {
   let p1 = 0;

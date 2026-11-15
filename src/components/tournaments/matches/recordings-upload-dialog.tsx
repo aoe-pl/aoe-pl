@@ -99,7 +99,6 @@ export function RecordingsUploadDialog({
     parseError,
     adminOverride,
     tooManyGames,
-    ignoredGamesCount,
     seriesComplete,
     mappedPlayer1,
     playerMappingError,
@@ -314,15 +313,6 @@ export function RecordingsUploadDialog({
                 count: uploadedCount,
                 total: gameCount,
               })}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {ignoredGamesCount > 0 && (
-          <Alert className="border-amber-500/50 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200 [&>svg]:text-amber-500">
-            <TriangleAlertIcon className="size-4" />
-            <AlertDescription>
-              {t("ignored_games", { count: ignoredGamesCount })}
             </AlertDescription>
           </Alert>
         )}
