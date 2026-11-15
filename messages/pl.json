@@ -1000,7 +1000,7 @@
         "saved_toast": "{count, plural, one {Nagranie zapisane} few {Zapisano # gry} many {Zapisano # gier} other {Zapisano # gry}}",
         "uploading_toast": "Wgrywanie nagrań…",
         "uploaded_toast": "Nagrania wgrane",
-        "upload_failed_toast": "Nagrania zapisane, ale wgrywanie nie powiodło się",
+        "upload_failed_toast": "Nie udało się wgrać nagrań. Nie zostały zapisane.",
         "save_error": "Nie udało się zapisać nagrań",
         "parse_error_invalid_type": "Nieprawidłowy typ pliku: {files}. Akceptowane są tylko pliki .aoe2record.",
         "parse_error_failed": "Nie udało się przetworzyć nagrania",

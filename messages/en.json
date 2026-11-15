@@ -999,7 +999,7 @@
         "saved_toast": "{count, plural, one {Recording saved} other {# games saved}}",
         "uploading_toast": "Uploading recordings…",
         "uploaded_toast": "Recordings uploaded",
-        "upload_failed_toast": "Recordings saved, but the upload failed",
+        "upload_failed_toast": "Upload failed. Recordings were not saved.",
         "save_error": "Failed to save recordings",
         "parse_error_invalid_type": "Invalid file type: {files}. Only .aoe2record files are accepted.",
         "parse_error_failed": "Failed to parse recording",
