@@ -20,7 +20,12 @@ import {
 import { storagePaths } from "@/lib/storage/paths";
 import { uploadFile } from "@/lib/storage/upload-client";
 import { api } from "@/trpc/react";
-import { TriangleAlertIcon, UploadCloudIcon, XIcon } from "lucide-react";
+import {
+  Loader2,
+  TriangleAlertIcon,
+  UploadCloudIcon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -493,9 +498,17 @@ export function RecordingsUploadDialog({
             variant="gold"
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting}
+            aria-busy={isSubmitting}
             className="w-full min-w-48 sm:w-auto"
           >
-            {isSubmitting ? t("submitting_button") : t("submit_button")}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" />
+                {t("submitting_button")}
+              </>
+            ) : (
+              t("submit_button")
+            )}
           </Button>
         </div>
       </DialogContent>
