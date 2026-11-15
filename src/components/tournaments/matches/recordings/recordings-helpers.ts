@@ -397,22 +397,17 @@ function getFileExtension(fileName: string): string {
 
 /**
  * Build a proper file name for a recording.
+ * "<player1>_<player2>_game_<n>".
  */
 export function buildRecordingFileName(
   file: File,
-  recording: ParsedRecording | undefined,
+  player1Name: string,
+  player2Name: string,
   gameNumber: number,
   usedNames: Set<string>,
-  swap = false,
 ): string {
   const extension = getFileExtension(file.name);
-  // The map is intentionally omitted so downloads are named consistently as
-  // "<player1>_<player2>_game_<n>"
-  const label = recording
-    ? swap
-      ? `${recording.player2Data.name}_${recording.player1Data.name}`
-      : `${recording.player1Data.name}_${recording.player2Data.name}`
-    : file.name.replace(/\.[^.]+$/, "");
+  const label = `${player1Name}_${player2Name}`;
 
   const base = sanitizeFileName(`${label}_game_${gameNumber}`);
   const name = sanitizeFileName(`${base}.${extension}`);

@@ -17,10 +17,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { buildObjectKey, storagePaths } from "@/lib/storage/paths";
+import { storagePaths } from "@/lib/storage/paths";
 import { uploadFile } from "@/lib/storage/upload-client";
 import { api } from "@/trpc/react";
-import { TriangleAlertIcon, UploadCloudIcon, XIcon } from "lucide-react";
+import {
+  Loader2,
+  TriangleAlertIcon,
+  UploadCloudIcon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,7 +37,6 @@ import {
   buildRecordingFileName,
   computeScores,
   getGameAlignment,
-  getGameSwap,
   getGameWinner,
   isRestoredGame,
 } from "./recordings/recordings-helpers";
@@ -150,29 +154,56 @@ export function RecordingsUploadDialog({
       const usedNames = new Set<string>();
 
       // Collect every raw file across all games, naming each one after the
-      // players and game number parsed from it.
+      // match participants and game number.
       const uploads = games.flatMap((game, gameIndex) =>
-        game.files.map((file, fileIndex) => ({
+        game.files.map((file) => ({
           file,
           gameIndex,
           fileName: buildRecordingFileName(
             file,
-            game.recordings[fileIndex],
+            player1Name,
+            player2Name,
             gameIndex + 1,
             usedNames,
-            getGameSwap(game),
           ),
         })),
       );
 
-      // The storage key is deterministic (path + sanitized file name), so we
-      // can predict it and group the keys per game without waiting for Minio.
+      // Upload every file before touching the database. The games reference
+      // the storage keys, so saving first would leave dangling references
+      // whenever an upload is interrupted (closed tab, network error, etc.).
+      const uploadToastId = toast.loading(t("uploading_toast"));
+
+      const uploaded = await Promise.all(
+        uploads.map(async (upload) => ({
+          ...upload,
+          key: (
+            await uploadFile({
+              file: upload.file,
+              path,
+              fileName: upload.fileName,
+            })
+          ).key,
+        })),
+      ).catch(() => {
+        toast.error(t("upload_failed_toast"), { id: uploadToastId });
+        return null;
+      });
+
+      // Keep the dialog open so the user can retry without re-uploading the
+      // files they already dropped.
+      if (!uploaded) return;
+
+      toast.success(t("uploaded_toast"), { id: uploadToastId });
+
+      // Group the keys actually written by storage per game. Using the
+      // response keys instead of pre-computed ones keeps the database in sync
+      // with what was really stored.
       const keysByGame = new Map<number, string[]>();
-      for (const upload of uploads) {
-        const key = buildObjectKey(path, upload.fileName);
+      for (const upload of uploaded) {
         keysByGame.set(upload.gameIndex, [
           ...(keysByGame.get(upload.gameIndex) ?? []),
-          key,
+          upload.key,
         ]);
       }
 
@@ -198,32 +229,13 @@ export function RecordingsUploadDialog({
         ];
       });
 
-      // Persist the games first so the score table updates right away; the
-      // (slower) Minio uploads happen in the background afterwards.
+      // Only persist the games once every recording is safely in storage.
       await saveRecordings({ matchId, games: gamePayloads });
 
       toast.success(t("saved_toast", { count: gamePayloads.length }));
 
       router.refresh();
       setOpen(false);
-
-      // Fire-and-forget: the games already reference the predicted keys.
-      void toast.promise(
-        Promise.all(
-          uploads.map((upload) =>
-            uploadFile({
-              file: upload.file,
-              path,
-              fileName: upload.fileName,
-            }),
-          ),
-        ),
-        {
-          loading: t("uploading_toast"),
-          success: t("uploaded_toast"),
-          error: t("upload_failed_toast"),
-        },
-      );
     } catch (error) {
       toast.error(
         <ErrorToast
@@ -486,9 +498,17 @@ export function RecordingsUploadDialog({
             variant="gold"
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting}
+            aria-busy={isSubmitting}
             className="w-full min-w-48 sm:w-auto"
           >
-            {isSubmitting ? t("submitting_button") : t("submit_button")}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" />
+                {t("submitting_button")}
+              </>
+            ) : (
+              t("submit_button")
+            )}
           </Button>
         </div>
       </DialogContent>
