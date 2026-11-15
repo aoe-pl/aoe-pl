@@ -11,9 +11,11 @@ import Link from "next/link";
 export function PlayerLink({
   playerNumber,
   name,
+  showPatronBadge = true,
 }: {
   playerNumber: number | undefined;
   name: string;
+  showPatronBadge?: boolean;
 }) {
   // A single shared query backs every player link on the page, so the patron
   // lookup does not turn into one request per rendered name.
@@ -37,7 +39,7 @@ export function PlayerLink({
           {name}
         </Link>
       )}
-      {isPatron && <PatronBadge className="ml-1" />}
+      {showPatronBadge && isPatron && <PatronBadge className="ml-1" />}
     </>
   );
 }

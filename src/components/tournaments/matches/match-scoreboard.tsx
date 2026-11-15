@@ -49,6 +49,7 @@ export function MatchScoreboard({
           <PlayerLink
             name={player1Name}
             playerNumber={player1Number}
+            showPatronBadge={false}
           />
         </span>
 
@@ -74,6 +75,7 @@ export function MatchScoreboard({
           <PlayerLink
             name={player2Name}
             playerNumber={player2Number}
+            showPatronBadge={false}
           />
         </span>
       </div>

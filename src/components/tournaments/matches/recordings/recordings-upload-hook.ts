@@ -7,7 +7,6 @@ import {
   gameKey,
   getGameAlignment,
   getGameWinner,
-  getSeriesGames,
   getSwapForMappedPlayer,
   groupRecordingFiles,
   isSeriesDecided,
@@ -62,7 +61,7 @@ export function useRecordingsUpload({
 
   // Games are derived from the parsed files, so adding or removing a file
   // automatically re-groups and re-validates everything.
-  const allGames = useMemo<ParsedGame[]>(
+  const games = useMemo<ParsedGame[]>(
     () =>
       groupRecordingFiles(entries).map((group) => {
         const recordings = group.map((entry) => entry.recording);
@@ -111,13 +110,6 @@ export function useRecordingsUpload({
       t,
     ],
   );
-
-  // In best-of series, games played after the clinching win do not count.
-  const games = useMemo(
-    () => getSeriesGames(allGames, gameCount, mode),
-    [allGames, gameCount, mode],
-  );
-  const ignoredGamesCount = allGames.length - games.length;
 
   const handleFiles = useCallback(
     async (newFiles: File[]) => {
@@ -280,7 +272,6 @@ export function useRecordingsUpload({
     parseError,
     adminOverride,
     tooManyGames,
-    ignoredGamesCount,
     seriesComplete,
     mappedPlayer1,
     playerMappingError,

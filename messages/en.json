@@ -1004,7 +1004,6 @@
         "parse_error_invalid_type": "Invalid file type: {files}. Only .aoe2record files are accepted.",
         "parse_error_failed": "Failed to parse recording",
         "too_many_games": "Too many games detected: {count} (maximum {total}).",
-        "ignored_games": "{count, plural, one {# game was ignored because the series was already decided} other {# games were ignored because the series was already decided}}.",
         "validation_error": "Recording files are invalid. Please ensure that all recordings are from the same game, with the same players, civs, and map.",
         "validation_error_profile_mismatch": "Profile ID mismatch.",
         "validation_error_player_mismatch": "This recording was played by {recordedPlayer1} and {recordedPlayer2}, but this match is {player1} vs {player2}. If this was intended (for example, a player used a different account), select which recorded player corresponds to each match player below.",
