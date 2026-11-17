@@ -1,32 +1,25 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { MatchStatusIcon } from "@/components/tournaments/matches/match-status-icon";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { MatchStatus } from "@prisma/client";
-import { format } from "date-fns";
+import { TableCell, TableRow } from "@/components/ui/table";
 import {
-  Calendar,
-  Download,
-  Edit,
-  Hand,
-  MapPin,
-  Sword,
-  Swords,
-  Trash2,
-  Users,
-} from "lucide-react";
-import { matchStatusesLabels } from "../tournament";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Calendar, Download, Edit, ExternalLink, Trash2 } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
+import { useState } from "react";
 import type { ExtendedTournamentMatch } from "./match";
-import { SpoilerText } from "./spoiler-protection";
 
 interface MatchCardProps {
   match: ExtendedTournamentMatch;
   gamesCount?: number;
   onEdit?: (match: ExtendedTournamentMatch) => void;
   onDelete?: (match: ExtendedTournamentMatch) => void;
-  onManageGames?: (match: ExtendedTournamentMatch) => void;
   onDownloadReplays?: (match: ExtendedTournamentMatch) => void;
+  matchHref?: string;
   isTeamBased?: boolean;
   isMixed?: boolean;
 }
@@ -36,30 +29,27 @@ export function MatchCard({
   gamesCount = 0,
   onEdit,
   onDelete,
-  onManageGames,
   onDownloadReplays,
+  matchHref,
   isTeamBased = false,
   isMixed = false,
 }: MatchCardProps) {
+  const t = useTranslations("admin.tournaments.groups.matches");
+  const fmt = useFormatter();
+  const [scoresRevealed, setScoresRevealed] = useState(false);
+
   const participants = match.TournamentMatchParticipant;
   const [participant1, participant2] = participants;
 
-  const getStatusVariant = (status: MatchStatus) => {
-    switch (status) {
-      case "COMPLETED":
-        return "default";
-      case "PENDING":
-        return "secondary";
-      case "SCHEDULED":
-        return "outline";
-      case "ADMIN_APPROVED":
-        return "default";
-      default:
-        return "outline";
-    }
-  };
+  const mixedTeams = isTeamBased && isMixed && participants.length > 2;
 
-  const mixedTeams = isTeamBased && isMixed;
+  const hasScores = participants.some(
+    (participant) =>
+      (participant?.wonScore !== null && participant?.wonScore !== undefined) ||
+      (participant?.lostScore !== null && participant?.lostScore !== undefined),
+  );
+
+  const isSpoiler = match.status !== "ADMIN_APPROVED" && hasScores;
 
   const getParticipantName = (participant: typeof participant1) => {
     if (participant?.participant) {
@@ -68,351 +58,170 @@ export function MatchCard({
     if (participant?.team) {
       return participant.team.name;
     }
-    return "TBD";
+    return t("tbd");
   };
 
-  const shouldHideSpoilers = () => {
-    return match.status !== "ADMIN_APPROVED";
-  };
+  const renderScore = (participant: typeof participant1) => {
+    const scoreText = (participant?.wonScore ?? 0).toString();
 
-  const hasScores = () => {
-    return participants.some(
-      (participant) =>
-        (participant?.wonScore !== null &&
-          participant?.wonScore !== undefined) ||
-        (participant?.lostScore !== null &&
-          participant?.lostScore !== undefined),
-    );
-  };
-
-  const getParticipantScore = (participant: typeof participant1) => {
-    const wonScore = participant?.wonScore ?? 0;
-    const scoreText = wonScore.toString();
-    const isSpoiler = shouldHideSpoilers() && hasScores();
-
-    return (
-      <SpoilerText
-        text={scoreText}
-        isSpoiler={isSpoiler}
-        fallbackText="••"
-        className="text-primary text-lg font-bold"
-      />
-    );
-  };
-
-  const isWinner = (participant: typeof participant1) => {
-    const winner = participant?.isWinner ?? false;
-    const isSpoiler = shouldHideSpoilers() && hasScores();
-
-    if (!winner || !isSpoiler) {
-      return winner;
+    if (!isSpoiler) {
+      return (
+        <span className="text-medieval-gold text-lg font-bold tabular-nums">
+          {scoreText}
+        </span>
+      );
     }
 
-    return false;
-  };
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return "Not set";
-    return format(new Date(date), "MMM dd, yyyy 'at' HH:mm");
-  };
-
-  const getGamesCount = () => {
-    const isSpoiler = shouldHideSpoilers() && gamesCount > 0;
-
     return (
-      <SpoilerText
-        text={gamesCount.toString()}
-        isSpoiler={isSpoiler}
-        fallbackText="••"
-        className="font-medium"
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={() => setScoresRevealed((revealed) => !revealed)}
+            aria-label={
+              scoresRevealed ? t("card.hide_score") : t("card.reveal_score")
+            }
+            className="text-medieval-gold focus-visible:ring-ring cursor-pointer rounded-sm px-0.5 text-lg font-bold tabular-nums focus-visible:ring-2 focus-visible:outline-none"
+          >
+            {scoresRevealed ? scoreText : "?"}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          {scoresRevealed ? t("card.click_hide") : t("card.click_reveal")}
+        </TooltipContent>
+      </Tooltip>
     );
   };
 
-  // Render team-based match (winners vs losers)
-  const renderMixedTeamBasedParticipants = () => {
-    const winners = participants.filter((p) => p.isWinner);
-    const losers = participants.filter((p) => !p.isWinner);
-    const allParticipants = participants.filter((p) => p.participantId);
-
-    // If no scores yet, show all participants in a simple list
-    if (!hasScores() || shouldHideSpoilers()) {
+  const renderParticipants = () => {
+    if (mixedTeams) {
       return (
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium">
-            Participants ({allParticipants.length})
-          </h4>
-          <div className="space-y-2">
-            {allParticipants.map((participant) => (
-              <div
-                key={participant.id}
-                className="flex items-center justify-between rounded-lg border p-2"
-              >
-                <span className="text-sm font-medium">
-                  {getParticipantName(participant)}
-                </span>
-                <span className="text-primary text-sm font-bold">
-                  {getParticipantScore(participant)}
-                </span>
-              </div>
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {participants.map((participant) => (
+            <span
+              key={participant.id}
+              className="inline-flex items-center gap-1.5"
+            >
+              <span className="text-primary text-sm font-medium">
+                {getParticipantName(participant)}
+              </span>
+              {renderScore(participant)}
+            </span>
+          ))}
         </div>
       );
     }
 
     return (
-      <div className="space-y-4">
-        {/* Winners */}
-        {winners.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h4 className="text-primary text-sm font-medium">Winners</h4>
-              <Badge
-                variant="default"
-                className="bg-primary/10 text-primary text-xs"
-              >
-                {winners.length}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              {winners.map((participant) => (
-                <div
-                  key={participant.id}
-                  className="border-primary/20 bg-primary/5 flex items-center justify-between rounded-lg border p-2"
-                >
-                  <span className="text-sm font-medium">
-                    {getParticipantName(participant)}
-                  </span>
-                  <span className="text-primary text-sm font-bold">
-                    {getParticipantScore(participant)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Losers */}
-        {losers.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h4 className="text-muted-foreground text-sm font-medium">
-                Others
-              </h4>
-              <Badge
-                variant="secondary"
-                className="text-xs"
-              >
-                {losers.length}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              {losers.map((participant) => (
-                <div
-                  key={participant.id}
-                  className="flex items-center justify-between rounded-lg border p-2"
-                >
-                  <span className="text-sm font-medium">
-                    {getParticipantName(participant)}
-                  </span>
-                  <span className="text-sm font-bold">
-                    {getParticipantScore(participant)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Render 1v1 match (traditional layout)
-  const render1v1Participants = () => {
-    return (
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col items-center gap-2">
-          <div className="text-center">
-            <span className="text-sm font-medium">
-              {getParticipantName(participant1)}
-            </span>
-            <div className="text-primary text-lg font-bold">
-              {getParticipantScore(participant1)}
-            </div>
-          </div>
-          {isWinner(participant1) && (
-            <Badge
-              variant="default"
-              className="text-xs"
-            >
-              Winner
-            </Badge>
-          )}
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <div className="text-center">
-            <span className="text-sm font-medium">
-              {getParticipantName(participant2)}
-            </span>
-            <div className="text-primary text-lg font-bold">
-              {getParticipantScore(participant2)}
-            </div>
-          </div>
-          {isWinner(participant2) && (
-            <Badge
-              variant="default"
-              className="text-xs"
-            >
-              Winner
-            </Badge>
-          )}
-        </div>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-primary max-w-[40%] truncate text-sm font-medium">
+          {getParticipantName(participant1)}
+        </span>
+        {renderScore(participant1)}
+        <span className="text-medieval-gold-muted text-lg font-bold">:</span>
+        {renderScore(participant2)}
+        <span className="text-primary max-w-[40%] truncate text-sm font-medium">
+          {getParticipantName(participant2)}
+        </span>
       </div>
     );
   };
 
   return (
-    <Card className="border-medieval-wood bg-medieval-wood-light w-full transition-shadow [--border:var(--medieval-wood)] hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-base">
-                {isTeamBased && isMixed && participants.length > 2
-                  ? `Mixed Team Match (${participants.length})`
-                  : "Match"}
-              </CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              {onDownloadReplays && gamesCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDownloadReplays(match)}
-                  className="h-8 w-8 p-0"
-                  title="Download replays"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              )}
-              {onManageGames && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onManageGames(match)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Swords className="h-4 w-4" />
-                </Button>
-              )}
-              {onEdit && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(match)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(match)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant={getStatusVariant(match.status)}>
-              {matchStatusesLabels[match.status]}
-            </Badge>
-            {isTeamBased && isMixed && participants.length > 2 && (
-              <Badge
-                variant="outline"
-                className="text-xs"
-              >
-                Mixed Team
-              </Badge>
-            )}
-            {match.isManualMatch && (
-              <Badge
-                variant="secondary"
-                className="text-xs"
-              >
-                <Hand className="mr-1 h-3 w-3" />
-                Manual
-              </Badge>
-            )}
-          </div>
-          {/* Match Date */}
-          <div className="text-muted-foreground mt-4 flex items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate(match.matchDate)}</span>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {mixedTeams
-          ? renderMixedTeamBasedParticipants()
-          : render1v1Participants()}
-
-        {/* Match Details */}
-        <div className="space-y-2 border-t pt-3">
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div className="flex items-center gap-1">
-              <Sword className="text-muted-foreground h-3 w-3" />
-              <span className="text-muted-foreground">Civ Draft:</span>
-              <span className="font-medium">
-                {match.civDraftKey || "Not set"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MapPin className="text-muted-foreground h-3 w-3" />
-              <span className="text-muted-foreground">Map Draft:</span>
-              <span className="font-medium">
-                {match.mapDraftKey || "Not set"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 text-xs">
-            <Users className="text-muted-foreground h-3 w-3" />
-            <span className="text-muted-foreground">Games:</span>
-            {getGamesCount()}
-          </div>
-        </div>
-
-        {/* Comments */}
+    <TableRow className="border-medieval-wood-border border-b odd:bg-black/10 hover:bg-black/15">
+      <TableCell className="px-3 py-3">
+        {renderParticipants()}
         {(match.comment ?? match.adminComment) && (
-          <div className="space-y-1 border-t pt-3">
+          <div className="text-medieval-gold-muted mt-1 space-y-0.5 text-xs">
             {match.comment && (
-              <div className="text-xs">
-                <span className="text-muted-foreground">Comment:</span>
+              <div>
+                <span>{t("comment")}</span>
                 <span className="ml-1">{match.comment}</span>
               </div>
             )}
             {match.adminComment && (
-              <div className="text-xs">
-                <span className="text-muted-foreground italic">Admin:</span>
+              <div>
+                <span className="italic">{t("admin")}</span>
                 <span className="ml-1 italic">{match.adminComment}</span>
               </div>
             )}
           </div>
         )}
+      </TableCell>
 
-        {/* Match Info */}
-        <div className="text-muted-foreground space-y-1 border-t pt-3 text-xs">
-          <div>
-            Created: {format(new Date(match.createdAt), "MMM dd, yyyy HH:mm")}
-          </div>
+      <TableCell className="w-12 px-3 py-3 text-center">
+        <div className="flex items-center justify-center">
+          <MatchStatusIcon status={match.status} />
         </div>
-      </CardContent>
-    </Card>
+      </TableCell>
+
+      <TableCell className="text-medieval-gold-muted w-44 px-3 py-3 text-right text-xs tabular-nums">
+        {match.matchDate && (
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5" />
+            {fmt.dateTime(new Date(match.matchDate), {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </span>
+        )}
+      </TableCell>
+
+      <TableCell className="w-36 px-3 py-3">
+        <div className="flex items-center justify-end gap-1">
+          {onDownloadReplays && gamesCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDownloadReplays(match)}
+              className="h-8 w-8 p-0"
+              title={t("card.download_replays")}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
+
+          {matchHref && (
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title={t("card.open_match_page")}
+            >
+              <a
+                href={matchHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
+          )}
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(match)}
+              className="h-8 w-8 p-0"
+              title={t("card.edit_match")}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(match)}
+              className="h-8 w-8 p-0"
+              title={t("card.delete_match")}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }

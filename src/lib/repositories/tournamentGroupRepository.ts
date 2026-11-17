@@ -1,8 +1,3 @@
-import {
-  generateNewMatches,
-  getMatchesToCreate,
-  getMatchesToDelete,
-} from "@/lib/tournaments/match-generation/group-matches";
 import { db } from "@/server/db";
 import type { Prisma } from "@prisma/client";
 import { MatchStatus } from "@prisma/client";
@@ -59,7 +54,11 @@ export const tournamentGroupRepository = {
         translations: true,
         TournamentGroupParticipant: {
           include: {
-            tournamentParticipant: true,
+            tournamentParticipant: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
         matches: {
@@ -90,6 +89,7 @@ export const tournamentGroupRepository = {
         tournament: {
           include: {
             matchMode: true,
+            tournamentSeries: true,
           },
         },
       },
@@ -150,109 +150,43 @@ export const tournamentGroupRepository = {
       tournamentParticipantId: id,
     }));
 
-    // Get all participants to generate matches
-    const participants = data.participantIds
-      ? await db.tournamentParticipant.findMany({
-          where: {
-            id: {
-              in: data.participantIds,
-            },
-          },
-        })
-      : [];
-
-    return db.$transaction(async (tx) => {
-      // Create the group
-      const group = await tx.tournamentGroup.create({
-        data: {
-          name: data.name,
-          matchMode: data.matchModeId
-            ? { connect: { id: data.matchModeId } }
-            : undefined,
-          displayOrder: data.displayOrder ?? 0,
-          isTeamBased: data.isTeamBased,
-          isMixed: data.isMixed,
-          isRotational: data.isRotational ?? false,
-          color: data.color,
-          civDraftPresetUrl: data.civDraftPresetUrl,
-          mapDraftPresetUrl: data.mapDraftPresetUrl,
-          tournament: { connect: { id: tournamentId } },
-          translations: data.translations?.length
+    // Matches are intentionally not generated here: admins add them explicitly
+    // (including in bulk) so that deleting a match is permanent and editing the
+    // roster never recreates matches.
+    return db.tournamentGroup.create({
+      data: {
+        name: data.name,
+        matchMode: data.matchModeId
+          ? { connect: { id: data.matchModeId } }
+          : undefined,
+        displayOrder: data.displayOrder ?? 0,
+        isTeamBased: data.isTeamBased,
+        isMixed: data.isMixed,
+        isRotational: data.isRotational ?? false,
+        color: data.color,
+        civDraftPresetUrl: data.civDraftPresetUrl,
+        mapDraftPresetUrl: data.mapDraftPresetUrl,
+        tournament: { connect: { id: tournamentId } },
+        translations: data.translations?.length
+          ? {
+              create: data.translations.map(({ locale, description }) => ({
+                locale,
+                description: description?.trim() ?? null,
+              })),
+            }
+          : undefined,
+        TournamentGroupParticipant:
+          participantsIds && participantsIds.length > 0
             ? {
-                create: data.translations.map(({ locale, description }) => ({
-                  locale,
-                  description: description?.trim() ?? null,
+                create: participantsIds.map((p) => ({
+                  tournamentParticipant: {
+                    connect: { id: p.tournamentParticipantId },
+                  },
+                  displayOrder: 0,
                 })),
               }
             : undefined,
-          TournamentGroupParticipant:
-            participantsIds && participantsIds.length > 0
-              ? {
-                  create: participantsIds.map((p) => ({
-                    tournamentParticipant: {
-                      connect: { id: p.tournamentParticipantId },
-                    },
-                    displayOrder: 0,
-                  })),
-                }
-              : undefined,
-        },
-      });
-
-      const tournament = await tx.tournament.findUnique({
-        where: { id: tournamentId },
-      });
-
-      // Team-based groups can't auto-generate round-robin matches (teams
-      // are unknown until created), so matches are added manually.
-      if (data.isTeamBased || tournament?.isTeamBased) {
-        return group;
-      }
-
-      const newMatches = generateNewMatches(participants, []);
-
-      if (newMatches.length === 0) {
-        return group;
-      }
-
-      // Create matches
-      await tx.tournamentMatch.createMany({
-        data: newMatches.map((match) => ({
-          groupId: group.id,
-          status: match.status,
-          civDraftKey: match.civDraftKey,
-          mapDraftKey: match.mapDraftKey,
-        })),
-      });
-
-      // Get created matches to add participants
-      const matches = await tx.tournamentMatch.findMany({
-        where: { groupId: group.id },
-      });
-
-      // Add participants to matches
-      for (let i = 0; i < matches.length; i++) {
-        const match = matches[i];
-        const matchData = newMatches[i];
-        if (!match || !matchData) continue;
-
-        await tx.tournamentMatchParticipant.createMany({
-          data: [
-            {
-              matchId: match.id,
-              participantId: matchData.participant1Id,
-              isWinner: false,
-            },
-            {
-              matchId: match.id,
-              participantId: matchData.participant2Id,
-              isWinner: false,
-            },
-          ],
-        });
-      }
-
-      return group;
+      },
     });
   },
 
@@ -261,21 +195,10 @@ export const tournamentGroupRepository = {
       tournamentParticipantId: id,
     }));
 
-    // Get current group with matches and participants
     const currentGroup = await db.tournamentGroup.findUnique({
       where: { id },
       include: {
-        matches: {
-          include: {
-            TournamentMatchParticipant: true,
-          },
-        },
-        TournamentGroupParticipant: {
-          include: {
-            tournamentParticipant: true,
-          },
-        },
-        tournament: true,
+        TournamentGroupParticipant: true,
       },
     });
 
@@ -283,146 +206,86 @@ export const tournamentGroupRepository = {
       throw new Error("Tournament group not found");
     }
 
-    // Get current participant IDs
-    const currentParticipantIds = currentGroup.TournamentGroupParticipant.map(
-      (p) => p.tournamentParticipantId,
-    );
+    // Roster changes never create matches, so manually deleted matches stay
+    // deleted. Removed players are cleaned up from the group's matches.
+    return db.$transaction(async (tx) => {
+      if (data.participantIds) {
+        const newParticipantIds = data.participantIds;
+        const removedParticipantIds =
+          currentGroup.TournamentGroupParticipant.map(
+            (p) => p.tournamentParticipantId,
+          ).filter(
+            (participantId) => !newParticipantIds.includes(participantId),
+          );
 
-    // Get new participant IDs
-    const newParticipantIds = data.participantIds ?? currentParticipantIds;
+        if (removedParticipantIds.length > 0) {
+          await tx.tournamentMatch.deleteMany({
+            where: {
+              groupId: id,
+              TournamentMatchParticipant: {
+                some: { participantId: { in: removedParticipantIds } },
+              },
+            },
+          });
+        }
+      }
 
-    // Check if participants are exactly the same (no need to update matches)
-    const participantsChanged =
-      currentParticipantIds.length !== newParticipantIds.length ||
-      !currentParticipantIds.every((id) => newParticipantIds.includes(id));
-
-    const currentMatches = currentGroup.matches.map((match) => ({
-      id: match.id,
-      participant1Id: match.TournamentMatchParticipant[0]?.participantId ?? "",
-      participant2Id: match.TournamentMatchParticipant[1]?.participantId ?? "",
-    }));
-
-    // Groups always use round-robin matches - no stage type checks anymore.
-
-    // Only calculate match changes if participants actually changed
-    let matchesToDelete: typeof currentMatches = [];
-    let matchesToCreate: Array<{
-      participant1Id: string;
-      participant2Id: string;
-      status: MatchStatus;
-      civDraftKey: string;
-      mapDraftKey: string;
-    }> = [];
-
-    if (participantsChanged) {
-      // Get matches to delete (where either participant was removed)
-      matchesToDelete = getMatchesToDelete(currentMatches, newParticipantIds);
-
-      // Get all participants for new matches
-      const allParticipants = await db.tournamentParticipant.findMany({
-        where: {
-          id: {
-            in: newParticipantIds,
-          },
+      return tx.tournamentGroup.update({
+        where: { id },
+        data: {
+          name: data.name,
+          matchMode: data.matchModeId
+            ? { connect: { id: data.matchModeId } }
+            : undefined,
+          displayOrder: data.displayOrder,
+          isTeamBased: data.isTeamBased,
+          isMixed: data.isMixed,
+          isRotational: data.isRotational,
+          color: data.color,
+          civDraftPresetUrl: data.civDraftPresetUrl,
+          mapDraftPresetUrl: data.mapDraftPresetUrl,
+          translations: data.translations?.length
+            ? {
+                upsert: data.translations.map(({ locale, description }) => ({
+                  where: { groupId_locale: { groupId: id, locale } },
+                  create: {
+                    locale,
+                    description: description?.trim() ?? null,
+                  },
+                  update: { description: description?.trim() ?? null },
+                })),
+              }
+            : undefined,
+          TournamentGroupParticipant: participantsIds
+            ? {
+                // Delete all participants that are not in the new list
+                deleteMany: {
+                  NOT: {
+                    tournamentParticipantId: {
+                      in: participantsIds.map((p) => p.tournamentParticipantId),
+                    },
+                  },
+                },
+                // Upsert the participants that are in the new list
+                upsert: participantsIds.map((p) => ({
+                  where: {
+                    tournamentGroupId_tournamentParticipantId: {
+                      tournamentGroupId: id,
+                      tournamentParticipantId: p.tournamentParticipantId,
+                    },
+                  },
+                  create: {
+                    tournamentParticipant: {
+                      connect: { id: p.tournamentParticipantId },
+                    },
+                    displayOrder: 0,
+                  },
+                  update: {},
+                })),
+              }
+            : undefined,
         },
       });
-
-      // Get matches to create
-      matchesToCreate = getMatchesToCreate(currentMatches, allParticipants);
-    }
-
-    const tournament = currentGroup.tournament;
-    const isTeamBased = data.isTeamBased ?? tournament?.isTeamBased;
-
-    // if we change from individual -> tournament based, we need to remove all matches
-    if (isTeamBased) {
-      await db.tournamentMatch.deleteMany({
-        where: { groupId: id },
-      });
-    }
-
-    return db.tournamentGroup.update({
-      where: { id },
-      data: {
-        name: data.name,
-        matchMode: data.matchModeId
-          ? { connect: { id: data.matchModeId } }
-          : undefined,
-        displayOrder: data.displayOrder,
-        isTeamBased: data.isTeamBased,
-        isMixed: data.isMixed,
-        isRotational: data.isRotational,
-        color: data.color,
-        civDraftPresetUrl: data.civDraftPresetUrl,
-        mapDraftPresetUrl: data.mapDraftPresetUrl,
-        translations: data.translations?.length
-          ? {
-              upsert: data.translations.map(({ locale, description }) => ({
-                where: { groupId_locale: { groupId: id, locale } },
-                create: {
-                  locale,
-                  description: description?.trim() ?? null,
-                },
-                update: { description: description?.trim() ?? null },
-              })),
-            }
-          : undefined,
-        TournamentGroupParticipant: participantsIds
-          ? {
-              // Delete all participants that are not in the new list
-              deleteMany: {
-                NOT: {
-                  tournamentParticipantId: {
-                    in: participantsIds.map((p) => p.tournamentParticipantId),
-                  },
-                },
-              },
-              // Upsert the participants that are in the new list
-              upsert: participantsIds.map((p) => ({
-                where: {
-                  tournamentGroupId_tournamentParticipantId: {
-                    tournamentGroupId: id,
-                    tournamentParticipantId: p.tournamentParticipantId,
-                  },
-                },
-                create: {
-                  tournamentParticipant: {
-                    connect: { id: p.tournamentParticipantId },
-                  },
-                  displayOrder: 0,
-                },
-                update: {},
-              })),
-            }
-          : undefined,
-        // we are not support team based registration yet
-        // and for individual registration -> team based we can't generate matches
-        // because we don't know the teams yet, admin need to create them manually
-        // Only update matches if participants changed and not team based
-        matches:
-          isTeamBased || !participantsChanged
-            ? undefined
-            : {
-                // Delete matches where participants were removed
-                deleteMany: {
-                  id: {
-                    in: matchesToDelete.map((match) => match.id),
-                  },
-                },
-                // Create new matches for new participant combinations
-                create: matchesToCreate.map((match) => ({
-                  status: match.status,
-                  civDraftKey: match.civDraftKey,
-                  mapDraftKey: match.mapDraftKey,
-                  TournamentMatchParticipant: {
-                    create: [
-                      { participantId: match.participant1Id, isWinner: false },
-                      { participantId: match.participant2Id, isWinner: false },
-                    ],
-                  },
-                })),
-              },
-      },
     });
   },
 

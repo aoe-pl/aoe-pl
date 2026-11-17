@@ -1,4 +1,10 @@
 import { syncBracketAdvancement } from "@/lib/repositories/tournamentBracketRepository";
+import {
+  collectExistingPairKeys,
+  filterCreatablePairs,
+  generateAllPairs,
+  type ParticipantPair,
+} from "@/lib/tournaments/group-match-pairs";
 import { createAoe2RecsService } from "@/lib/storage";
 import { db } from "@/server/db";
 import type {
@@ -91,6 +97,67 @@ export type GameData = {
     isWinner: boolean;
   }[];
 };
+
+/**
+ * Loads the group roster and the pairs that already have a match in a form
+ * suitable for filtering new pairs.
+ */
+async function getGroupMatchPairContext(groupId: string) {
+  const group = await db.tournamentGroup.findUnique({
+    where: { id: groupId },
+    select: {
+      TournamentGroupParticipant: {
+        select: { tournamentParticipantId: true },
+      },
+      matches: {
+        select: {
+          TournamentMatchParticipant: {
+            select: { participantId: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!group) {
+    throw new Error("Tournament group not found");
+  }
+
+  return {
+    memberIds: group.TournamentGroupParticipant.map(
+      (p) => p.tournamentParticipantId,
+    ),
+    existingPairKeys: collectExistingPairKeys(
+      group.matches.map((match) => ({
+        participantIds: match.TournamentMatchParticipant.map(
+          (participant) => participant.participantId,
+        ),
+      })),
+    ),
+  };
+}
+
+function createPendingMatches(groupId: string, pairs: ParticipantPair[]) {
+  return db.$transaction(
+    pairs.map((pair) =>
+      db.tournamentMatch.create({
+        data: {
+          groupId,
+          status: "PENDING",
+          isManualMatch: true,
+          civDraftKey: "",
+          mapDraftKey: "",
+          TournamentMatchParticipant: {
+            create: [
+              { participantId: pair.participant1Id, isWinner: false },
+              { participantId: pair.participant2Id, isWinner: false },
+            ],
+          },
+        },
+      }),
+    ),
+  );
+}
 
 export const tournamentMatchRepository = {
   async getUpcomingMatches(): Promise<UpcomingMatch[]> {
@@ -391,6 +458,29 @@ export const tournamentMatchRepository = {
         },
       },
     });
+  },
+
+  /**
+   * Creates every missing match for a full round-robin schedule: all unique
+   * pairs of current group members, excluding pairs that already have a match.
+   */
+  async createRoundRobinMatchesForGroup(groupId: string) {
+    const { memberIds, existingPairKeys } =
+      await getGroupMatchPairContext(groupId);
+
+    const pairsToCreate = filterCreatablePairs(
+      generateAllPairs(memberIds),
+      memberIds,
+      existingPairKeys,
+    );
+
+    if (pairsToCreate.length === 0) {
+      return { created: 0 };
+    }
+
+    await createPendingMatches(groupId, pairsToCreate);
+
+    return { created: pairsToCreate.length };
   },
 
   async updateTournamentMatch(id: string, data: TournamentMatchUpdateData) {

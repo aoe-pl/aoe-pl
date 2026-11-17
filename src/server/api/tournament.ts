@@ -908,6 +908,13 @@ export const tournamentRouter = createTRPCRouter({
       .mutation(async ({ input }) => {
         return tournamentMatchRepository.createTournamentMatch(input.data);
       }),
+    createRoundRobin: adminProcedure
+      .input(z.object({ groupId: z.string() }))
+      .mutation(async ({ input }) => {
+        return tournamentMatchRepository.createRoundRobinMatchesForGroup(
+          input.groupId,
+        );
+      }),
     update: adminProcedure
       .input(
         z.object({

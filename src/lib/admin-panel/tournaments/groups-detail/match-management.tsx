@@ -9,8 +9,14 @@ import {
 } from "@/components/ui/drawer";
 import { TournamentMatchForm } from "../tournament-match-form";
 import { MatchCard } from "./match-card";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
@@ -18,6 +24,7 @@ import { ErrorToast } from "@/components/ui/error-toast-content";
 import type { ExtendedTournamentMatch } from "./match";
 import type { TournamentMatchFormSchema } from "../tournament";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,12 +35,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { GameManagement } from "./game-management";
 
 interface MatchManagementProps {
   groupId: string;
   matches: ExtendedTournamentMatch[];
-  matchMode: { id: string; mode: string; gameCount: number };
+  matchUrlBase?: string;
   isTeamBased?: boolean;
   isMixed?: boolean;
 }
@@ -41,41 +47,25 @@ interface MatchManagementProps {
 export function MatchManagement({
   groupId,
   matches,
-  matchMode,
+  matchUrlBase,
   isTeamBased = false,
   isMixed = false,
 }: MatchManagementProps) {
   const router = useRouter();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const t = useTranslations("admin.tournaments.groups.matches");
   const [editingMatch, setEditingMatch] = useState<ExtendedTournamentMatch>();
   const [deletingMatch, setDeletingMatch] = useState<ExtendedTournamentMatch>();
-
-  const [managingGamesMatch, setManagingGamesMatch] =
-    useState<ExtendedTournamentMatch | null>(null);
 
   const refreshPage = () => {
     router.refresh();
   };
 
-  const { mutate: createMatch, isPending: creationPending } =
-    api.tournaments.matches.create.useMutation({
-      onSuccess: () => {
-        refreshPage();
-        setIsDrawerOpen(false);
-        toast.success("Match created successfully");
-      },
-      onError: (error) => {
-        toast.error(<ErrorToast message={error.message} />);
-      },
-    });
-
   const { mutate: updateMatch, isPending: updatePending } =
     api.tournaments.matches.update.useMutation({
       onSuccess: () => {
         refreshPage();
-        setIsDrawerOpen(false);
         setEditingMatch(undefined);
-        toast.success("Match updated successfully");
+        toast.success(t("update_success"));
       },
       onError: (error) => {
         toast.error(<ErrorToast message={error.message} />);
@@ -87,7 +77,7 @@ export function MatchManagement({
       onSuccess: () => {
         refreshPage();
         setDeletingMatch(undefined);
-        toast.success("Match deleted successfully");
+        toast.success(t("delete_success"));
       },
       onError: (error) => {
         toast.error(<ErrorToast message={error.message} />);
@@ -96,20 +86,15 @@ export function MatchManagement({
 
   const handleEditMatch = (match: ExtendedTournamentMatch) => {
     setEditingMatch(match);
-    setIsDrawerOpen(true);
   };
 
   const handleDeleteMatch = (match: ExtendedTournamentMatch) => {
     setDeletingMatch(match);
   };
 
-  const handleManageGames = (match: ExtendedTournamentMatch) => {
-    setManagingGamesMatch(match);
-  };
-
   const handleDownloadReplays = async (match: ExtendedTournamentMatch) => {
     try {
-      toast.info("Preparing replay files...");
+      toast.info(t("replays.preparing"));
 
       const response = await fetch(
         `/api/tournaments/matches/${match.id}/replays`,
@@ -117,7 +102,7 @@ export function MatchManagement({
 
       if (!response.ok) {
         if (response.status === 404) {
-          toast.info("No replays available for this match");
+          toast.info(t("replays.none"));
           return;
         }
         throw new Error("Failed to fetch replays");
@@ -138,7 +123,7 @@ export function MatchManagement({
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
 
-        toast.success("Downloaded replay files as ZIP");
+        toast.success(t("replays.zip_success"));
       } else {
         // Fallback to individual downloads if ZIP creation failed
         const data = (await response.json()) as {
@@ -150,7 +135,7 @@ export function MatchManagement({
         };
 
         if (data.replays.length === 0) {
-          toast.info("No replays available for this match");
+          toast.info(t("replays.none"));
           return;
         }
 
@@ -167,51 +152,33 @@ export function MatchManagement({
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
-        toast.success(`Downloaded ${data.replays.length} replay files`);
+        toast.success(t("replays.downloaded", { count: data.replays.length }));
       }
     } catch (error) {
       console.error("Error downloading replays:", error);
-      toast.error("Failed to download replays");
+      toast.error(t("replays.failed"));
     }
   };
 
   const handleSubmit = (data: TournamentMatchFormSchema) => {
-    if (editingMatch) {
-      updateMatch({
-        id: editingMatch.id,
-        data: {
-          matchDate: data.matchDate,
-          civDraftKey: data.civDraftKey,
-          mapDraftKey: data.mapDraftKey,
-          status: data.status,
-          comment: data.comment,
-          adminComment: data.adminComment,
-          participantScores: data.participantScores,
-          teamScores: data.teamScores,
-        },
-      });
-    } else {
-      createMatch({
-        data: {
-          groupId,
-          matchDate: data.matchDate,
-          civDraftKey: data.civDraftKey,
-          mapDraftKey: data.mapDraftKey,
-          status: data.status,
-          comment: data.comment,
-          adminComment: data.adminComment,
-          participantIds: data.participantIds,
-          teamIds: data.teamIds,
-          isManualMatch: true,
-          participantScores: data.participantScores,
-          teamScores: data.teamScores,
-        },
-      });
-    }
+    if (!editingMatch) return;
+
+    updateMatch({
+      id: editingMatch.id,
+      data: {
+        matchDate: data.matchDate,
+        civDraftKey: data.civDraftKey,
+        mapDraftKey: data.mapDraftKey,
+        status: data.status,
+        comment: data.comment,
+        adminComment: data.adminComment,
+        participantScores: data.participantScores,
+        teamScores: data.teamScores,
+      },
+    });
   };
 
   const handleCancel = () => {
-    setIsDrawerOpen(false);
     setEditingMatch(undefined);
   };
 
@@ -223,39 +190,59 @@ export function MatchManagement({
 
   return (
     <>
-      <div className="py-4">
-        <Button
-          onClick={() => {
-            setEditingMatch(undefined);
-            setIsDrawerOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Match
-        </Button>
-      </div>
-
-      <div
-        className="grid gap-4"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
-      >
-        {matches.map((match) => (
-          <MatchCard
-            key={match.id}
-            match={match}
-            onEdit={handleEditMatch}
-            onDelete={handleDeleteMatch}
-            onManageGames={handleManageGames}
-            onDownloadReplays={handleDownloadReplays}
-            gamesCount={match.GameCount}
-            isTeamBased={isTeamBased}
-            isMixed={isMixed}
-          />
-        ))}
+      <div className="border-medieval-wood-border w-full overflow-x-auto rounded-xl border">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-medieval-wood-border border-b bg-black/20 hover:bg-black/20">
+              <TableHead className="text-medieval-gold-muted px-3 text-left text-xs font-bold tracking-wide uppercase">
+                {t("table.match")}
+              </TableHead>
+              <TableHead className="text-medieval-gold-muted w-12 px-3 text-center text-xs font-bold tracking-wide uppercase">
+                {t("table.status")}
+              </TableHead>
+              <TableHead className="text-medieval-gold-muted w-44 px-3 text-right text-xs font-bold tracking-wide uppercase">
+                {t("table.date")}
+              </TableHead>
+              <TableHead className="text-medieval-gold-muted w-36 px-3 text-right text-xs font-bold tracking-wide uppercase">
+                {t("table.actions")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {matches.length === 0 ? (
+              <TableRow className="border-medieval-wood-border border-b">
+                <TableCell
+                  colSpan={4}
+                  className="text-medieval-gold-muted py-6 text-center text-sm"
+                >
+                  {t("no_matches")}
+                </TableCell>
+              </TableRow>
+            ) : (
+              matches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  onEdit={handleEditMatch}
+                  onDelete={handleDeleteMatch}
+                  onDownloadReplays={handleDownloadReplays}
+                  matchHref={
+                    matchUrlBase
+                      ? `${matchUrlBase}/${match.matchNumber}`
+                      : undefined
+                  }
+                  gamesCount={match.GameCount}
+                  isTeamBased={isTeamBased}
+                  isMixed={isMixed}
+                />
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <Drawer
-        open={isDrawerOpen || !!editingMatch}
+        open={!!editingMatch}
         onOpenChange={(open) => {
           if (!open) {
             handleCancel();
@@ -264,12 +251,8 @@ export function MatchManagement({
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>
-              {editingMatch ? "Edit Match" : "Add New Match"}
-            </DrawerTitle>
-            <DrawerDescription>
-              Configure the match settings and details
-            </DrawerDescription>
+            <DrawerTitle>{t("edit_dialog_title")}</DrawerTitle>
+            <DrawerDescription>{t("dialog_description")}</DrawerDescription>
           </DrawerHeader>
 
           <TournamentMatchForm
@@ -277,21 +260,10 @@ export function MatchManagement({
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             groupId={groupId}
-            isPending={creationPending || updatePending}
+            isPending={updatePending}
           />
         </DrawerContent>
       </Drawer>
-
-      {managingGamesMatch && (
-        <GameManagement
-          match={{ ...managingGamesMatch }}
-          isOpen={!!managingGamesMatch}
-          onClose={() => {
-            setManagingGamesMatch(null);
-          }}
-          matchMode={matchMode}
-        />
-      )}
 
       <AlertDialog
         open={!!deletingMatch}
@@ -303,20 +275,21 @@ export function MatchManagement({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Match</AlertDialogTitle>
+            <AlertDialogTitle>{t("delete_dialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this match? This action cannot be
-              undone. All game data and scores will be permanently removed.
+              {t("delete_dialog.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("delete_dialog.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               disabled={deletionPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deletionPending ? "Deleting..." : "Delete"}
+              {deletionPending
+                ? t("delete_dialog.deleting")
+                : t("delete_dialog.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,8 +1,9 @@
 import { api } from "@/trpc/server";
+import { slugify } from "@/lib/utils";
 import { TournamentMatchModeType } from "@/lib/admin-panel/tournaments/tournament";
+import { getTranslations } from "next-intl/server";
 
 import { HeaderContainer } from "@/lib/admin-panel/tournaments/groups-detail/header-container";
-import { GroupParticipantsTable } from "@/lib/admin-panel/tournaments/groups-detail/group-participants";
 import { MatchesContainer } from "@/lib/admin-panel/tournaments/groups-detail/matches";
 import { APItoTournamentMatch } from "@/lib/admin-panel/tournaments/groups-detail/match";
 import {
@@ -20,6 +21,7 @@ export default async function TournamentGroupPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug: groupId } = await params;
+  const t = await getTranslations("admin.sidebar");
 
   const group = await api.tournaments.groups.get({
     id: groupId,
@@ -42,6 +44,16 @@ export default async function TournamentGroupPage({
       gameCount: 1,
     };
   const matches = group.matches.map(APItoTournamentMatch);
+  const participants = group.TournamentGroupParticipant.map(
+    ({ tournamentParticipant }) => ({
+      id: tournamentParticipant.id,
+      nickname: tournamentParticipant.nickname,
+      playerNumber: tournamentParticipant.user?.playerNumber,
+    }),
+  );
+  const matchUrlBase = `/tournaments/${slugify(
+    group.tournament.tournamentSeries.name,
+  )}/${group.tournament.urlKey}/matches`;
 
   return (
     <div className="container mx-auto space-y-6 py-6">
@@ -50,7 +62,7 @@ export default async function TournamentGroupPage({
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/admin/tournaments">
-                Tournaments
+                {t("tournaments")}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -71,19 +83,17 @@ export default async function TournamentGroupPage({
       <HeaderContainer
         group={group}
         groups={groups}
+        participants={participants}
         matchesCount={group.matches.length}
         matchMode={matchMode}
         tournamentId={group.tournamentId}
       />
       <div className="grid gap-6">
-        <GroupParticipantsTable
-          participants={group.TournamentGroupParticipant}
-          groupId={groupId}
-        />
         <MatchesContainer
           matches={matches}
+          participants={participants}
           groupId={groupId}
-          matchMode={matchMode}
+          matchUrlBase={matchUrlBase}
           isTeamBased={group.isTeamBased ?? false}
           isMixed={group.isMixed ?? false}
         />
