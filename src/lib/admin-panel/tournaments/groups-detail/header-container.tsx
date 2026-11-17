@@ -10,6 +10,7 @@ import {
 import { ErrorToast } from "@/components/ui/error-toast-content";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import type {
@@ -17,6 +18,7 @@ import type {
   TournamentGroup,
   TournamentGroupSubmitData,
   TournamentGroupWithParticipants,
+  TournamentMatchModeType,
 } from "../tournament";
 import { TournamentGroupForm } from "../tournament-group-form";
 import { GroupHeader } from "./group-header";
@@ -24,27 +26,34 @@ import { GroupHeader } from "./group-header";
 type HeaderContainerProps = {
   group: TournamentGroupWithParticipants & { tournament: Tournament };
   groups: TournamentGroup[];
+  participants: {
+    id: string;
+    nickname: string;
+    playerNumber: number | undefined;
+  }[];
   matchesCount: number;
-  matchMode: { id: string; mode: string; gameCount: number };
+  matchMode: { id: string; mode: TournamentMatchModeType; gameCount: number };
   tournamentId: string;
 };
 
 export function HeaderContainer({
   group,
   groups,
+  participants,
   tournamentId,
   matchesCount,
   matchMode,
 }: HeaderContainerProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const router = useRouter();
+  const t = useTranslations("admin.tournaments.groups.detail");
 
   const { mutate: updateGroup, isPending: updatePending } =
     api.tournaments.groups.update.useMutation({
       onSuccess: () => {
         setIsDrawerOpen(false);
         router.refresh();
-        toast.success("Group updated successfully");
+        toast.success(t("update_success"));
       },
       onError: (error) => {
         toast.error(<ErrorToast message={error.message} />, {
@@ -67,7 +76,7 @@ export function HeaderContainer({
         name={group.name}
         isTeamBased={group.isTeamBased ?? false}
         isMixed={group.isMixed ?? false}
-        participantsCount={group.TournamentGroupParticipant.length}
+        participants={participants}
         matchesCount={matchesCount}
         matchMode={matchMode}
         onEdit={() => setIsDrawerOpen(true)}
@@ -79,9 +88,9 @@ export function HeaderContainer({
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Edit Group</DrawerTitle>
+            <DrawerTitle>{t("edit_dialog_title")}</DrawerTitle>
             <DrawerDescription>
-              Update the group details below.
+              {t("edit_dialog_description")}
             </DrawerDescription>
           </DrawerHeader>
           <TournamentGroupForm

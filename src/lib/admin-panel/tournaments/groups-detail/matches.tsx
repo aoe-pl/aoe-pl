@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -8,11 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { MatchStatus } from "@prisma/client";
+import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { matchStatuses } from "../tournament";
 import type { ExtendedTournamentMatch } from "./match";
+import { AddMatchButton } from "./add-match-button";
 import { MatchManagement } from "./match-management";
+import { RoundRobinMatchCreator } from "./round-robin-match-creator";
 
 interface Participant {
   id: string;
@@ -21,19 +25,24 @@ interface Participant {
 
 export function MatchesContainer({
   matches,
+  participants = [],
   groupId,
-  matchMode,
+  matchUrlBase,
   isTeamBased = false,
   isMixed = false,
 }: {
   matches: ExtendedTournamentMatch[];
+  participants?: { id: string }[];
   groupId: string;
-  matchMode: { id: string; mode: string; gameCount: number };
+  matchUrlBase?: string;
   isTeamBased?: boolean;
   isMixed?: boolean;
 }) {
-  const t = useTranslations();
+  const t = useTranslations("admin.tournaments.groups.matches");
+  const tStatus = useTranslations("tournament.matches.status");
   const [selectedParticipant, setSelectedParticipant] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Extract all unique participants from matches
   const allParticipants = useMemo(() => {
@@ -62,61 +71,147 @@ export function MatchesContainer({
     );
   }, [matches, isTeamBased]);
 
-  // Filter matches based on selected participant
-  const filteredMatches = useMemo(() => {
-    if (selectedParticipant === "all") {
-      return matches;
-    }
-
-    return matches.filter((match) =>
-      match.TournamentMatchParticipant.some((matchParticipant) => {
-        if (isTeamBased && matchParticipant.team) {
-          return matchParticipant.team.id === selectedParticipant;
-        } else if (matchParticipant.participant) {
-          return matchParticipant.participant.id === selectedParticipant;
-        }
-        return false;
-      }),
-    );
-  }, [matches, selectedParticipant, isTeamBased]);
-
-  const matchesByStatus = filteredMatches.reduce(
-    (acc, match) => {
-      let arr = acc[match.status];
-      if (!arr) {
-        arr = [];
-        acc[match.status] = arr;
-      }
-      arr.push(match);
-      return acc;
-    },
-    {} as Record<MatchStatus, ExtendedTournamentMatch[]>,
+  // Alphabetical player order used to group a player's matches together.
+  const participantOrder = useMemo(
+    () =>
+      new Map(
+        allParticipants.map((participant, index) => [participant.id, index]),
+      ),
+    [allParticipants],
   );
 
-  const statuses = Object.keys(matchesByStatus) as MatchStatus[];
+  // Filter matches by selected participant and by the player search query.
+  const filteredMatches = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  if (statuses.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>{t("admin.tournaments.groups.matches.title")}</CardTitle>
+    const getParticipantRanks = (match: ExtendedTournamentMatch) =>
+      match.TournamentMatchParticipant.map((matchParticipant) =>
+        isTeamBased && matchParticipant.team
+          ? matchParticipant.team.id
+          : matchParticipant.participant?.id,
+      )
+        .filter((id): id is string => Boolean(id))
+        .map((id) => participantOrder.get(id) ?? Number.MAX_SAFE_INTEGER)
+        .sort((a, b) => a - b);
+
+    const filtered = matches.filter((match) => {
+      if (selectedStatus !== "all" && match.status !== selectedStatus) {
+        return false;
+      }
+
+      const matchesSelectedParticipant =
+        selectedParticipant === "all" ||
+        match.TournamentMatchParticipant.some((matchParticipant) => {
+          if (isTeamBased && matchParticipant.team) {
+            return matchParticipant.team.id === selectedParticipant;
+          }
+
+          return matchParticipant.participant?.id === selectedParticipant;
+        });
+
+      if (!matchesSelectedParticipant) return false;
+      if (!normalizedQuery) return true;
+
+      return match.TournamentMatchParticipant.some((matchParticipant) => {
+        const name =
+          (isTeamBased && matchParticipant.team
+            ? matchParticipant.team.name
+            : matchParticipant.participant?.nickname) ?? "";
+
+        return name.toLowerCase().includes(normalizedQuery);
+      });
+    });
+
+    // Group matches by the earliest player in the roster: all of the first
+    // player's matches come first, then the next player's remaining matches.
+    return filtered.sort((a, b) => {
+      const aRanks = getParticipantRanks(a);
+      const bRanks = getParticipantRanks(b);
+      const length = Math.max(aRanks.length, bRanks.length);
+
+      for (let index = 0; index < length; index++) {
+        const difference =
+          (aRanks[index] ?? Number.MAX_SAFE_INTEGER) -
+          (bRanks[index] ?? Number.MAX_SAFE_INTEGER);
+        if (difference !== 0) return difference;
+      }
+
+      return 0;
+    });
+  }, [
+    matches,
+    selectedParticipant,
+    selectedStatus,
+    searchQuery,
+    isTeamBased,
+    participantOrder,
+  ]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="space-y-3">
+          <CardTitle>{t("title")}</CardTitle>
+          <div className="flex flex-col items-start gap-2">
+            {!isTeamBased && (
+              <RoundRobinMatchCreator
+                groupId={groupId}
+                matches={matches}
+                participants={participants}
+              />
+            )}
+            <AddMatchButton groupId={groupId} />
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="relative w-full max-w-xs">
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
+              <Input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder={t("search_placeholder")}
+                aria-label={t("search_aria")}
+                className="pl-8"
+              />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <label className="text-muted-foreground text-sm font-medium">
+                {t("status_label")}
+              </label>
+              <Select
+                value={selectedStatus}
+                onValueChange={setSelectedStatus}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={t("status_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("all_statuses")}</SelectItem>
+                  {matchStatuses.map(({ value }) => (
+                    <SelectItem
+                      key={value}
+                      value={value}
+                    >
+                      {tStatus(value.toLowerCase())}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             {allParticipants.length > 0 && (
               <div className="flex flex-col space-y-1">
                 <label className="text-muted-foreground text-sm font-medium">
-                  {t("admin.tournaments.groups.matches.filter_by_player")}
+                  {t("filter_by_player")}
                 </label>
                 <Select
                   value={selectedParticipant}
                   onValueChange={setSelectedParticipant}
                 >
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Filter by participant" />
+                    <SelectValue placeholder={t("participant_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">
-                      {t("admin.tournaments.groups.matches.all_participants")}
-                    </SelectItem>
+                    <SelectItem value="all">{t("all_participants")}</SelectItem>
                     {allParticipants.map((participant) => (
                       <SelectItem
                         key={participant.id}
@@ -130,73 +225,16 @@ export function MatchesContainer({
               </div>
             )}
           </div>
-        </CardHeader>
-        <CardContent>
-          <MatchManagement
-            groupId={groupId}
-            matches={[]}
-            matchMode={matchMode}
-            isTeamBased={isTeamBased}
-            isMixed={isMixed}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>{t("admin.tournaments.groups.matches.title")}</CardTitle>
-          {allParticipants.length > 0 && (
-            <div className="flex flex-col space-y-1">
-              <label className="text-muted-foreground text-sm font-medium">
-                {t("admin.tournaments.groups.matches.filter_by_player")}
-              </label>
-              <Select
-                value={selectedParticipant}
-                onValueChange={setSelectedParticipant}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Filter by participant" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    {t("admin.tournaments.groups.matches.all_participants")}
-                  </SelectItem>
-                  {allParticipants.map((participant) => (
-                    <SelectItem
-                      key={participant.id}
-                      value={participant.id}
-                    >
-                      {participant.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </div>
       </CardHeader>
       <CardContent>
-        {statuses.map((status) => (
-          <div
-            key={status}
-            className="mb-6"
-          >
-            <h3 className="mb-2 text-lg font-semibold">
-              {status} ({matchesByStatus[status]?.length ?? 0})
-            </h3>
-            <MatchManagement
-              groupId={groupId}
-              matches={matchesByStatus[status] ?? []}
-              matchMode={matchMode}
-              isTeamBased={isTeamBased}
-              isMixed={isMixed}
-            />
-          </div>
-        ))}
+        <MatchManagement
+          groupId={groupId}
+          matches={filteredMatches}
+          matchUrlBase={matchUrlBase}
+          isTeamBased={isTeamBased}
+          isMixed={isMixed}
+        />
       </CardContent>
     </Card>
   );
