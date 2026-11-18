@@ -20,6 +20,7 @@ interface Calendar24Props {
   timeValue?: string;
   onTimeChange?: (time: string) => void;
   disabled?: boolean;
+  disablePastDates?: boolean;
   className?: string;
   dateLabel?: string;
   timeLabel?: string;
@@ -31,6 +32,7 @@ export function Calendar24({
   timeValue,
   onTimeChange,
   disabled = false,
+  disablePastDates = true,
   className,
   dateLabel = "Date",
   timeLabel = "Time",
@@ -93,8 +95,10 @@ export function Calendar24({
               selected={date}
               captionLayout="dropdown"
               onSelect={handleDateSelect}
-              disabled={(date) =>
-                date < new Date(new Date().setHours(0, 0, 0, 0))
+              disabled={
+                disablePastDates
+                  ? (date) => date < new Date(new Date().setHours(0, 0, 0, 0))
+                  : undefined
               }
             />
           </PopoverContent>
