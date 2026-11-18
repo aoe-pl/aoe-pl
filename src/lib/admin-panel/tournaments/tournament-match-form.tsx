@@ -393,6 +393,7 @@ export function TournamentMatchForm({
                         }
                       }}
                       disabled={isPending}
+                      disablePastDates={false}
                     />
                   </FormControl>
                   <FormDescription>
