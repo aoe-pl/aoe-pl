@@ -102,7 +102,8 @@
       "tournaments": "Turnieje",
       "archived_tournaments": "Archiwum turniejów",
       "settings": "Ustawienia",
-      "recording_parser": "Parser nagrań"
+      "recording_parser": "Parser nagrań",
+      "discord_roles": "Role Discord"
     },
     "tournaments": {
       "title": "Turnieje",
@@ -710,6 +711,56 @@
           "update_success": "Użytkownik został zaktualizowany pomyślnie",
           "delete_success": "Użytkownik został usunięty pomyślnie"
         }
+      }
+    },
+    "discordRoles": {
+      "page_title": "Role Discord",
+      "page_description": "Ta strona synchronizuje przypisanie do grup turniejowych z rolami Discord. Wybierz turniej, aby sprawdzić każdego uczestnika i rolę, którą powinien otrzymać, a następnie wyślij do naszego discordowego bota. Gracze bez powiązanego konta Discord są pomijani, a grupy rotacyjne są ignorowane, ponieważ odzwierciedlają zwykłe grupy.",
+      "select_tournament": "Turniej",
+      "select_tournament_placeholder": "Wybierz turniej",
+      "targets_title": "Cele synchronizacji",
+      "targets_description": "Każdy uczestnik jest wysyłany do bota z nazwą swojej grupy jako docelową rolą.",
+      "participants": "Uczestnicy: {count}",
+      "missing_discord": "Bez konta Discord: {count}",
+      "loading_targets": "Ładowanie uczestników...",
+      "no_groups": "Nie znaleziono grup z uczestnikami dla tego turnieju.",
+      "player": "Gracz",
+      "discord_id": "Discord ID",
+      "target_group": "Docelowa grupa",
+      "status_column": "Status",
+      "not_linked": "Brak powiązania",
+      "sync_button": "Wyślij do bota",
+      "syncing": "Wysyłanie...",
+      "sync_hint": "Zapytania są wysyłane pojedynczo. Limity i chwilowe przerwy bota są ponawiane automatycznie.",
+      "results_title": "Odpowiedź bota",
+      "results_description": "Wynik ostatniego uruchomienia synchronizacji.",
+      "summary_total": "Razem",
+      "summary_synced": "Przypisano",
+      "summary_already": "Już przypisane",
+      "summary_skipped": "Pominięto",
+      "summary_failed": "Błędy",
+      "http": "HTTP",
+      "details": "Szczegóły",
+      "raw_response": "Surowa odpowiedź",
+      "status": {
+        "synced": "Przypisano",
+        "already_assigned": "Już przypisana",
+        "no_discord_id": "Brak Discord ID",
+        "member_not_found": "Brak użytkownika na serwerze",
+        "invalid_request": "Nieprawidłowe żądanie",
+        "config_error": "Niezgodna konfiguracja",
+        "unauthorized": "Brak autoryzacji",
+        "rate_limited": "Limit zapytań",
+        "discord_api_error": "Błąd Discorda",
+        "unavailable": "Bot niedostępny",
+        "server_error": "Błąd bota",
+        "network_error": "Błąd sieci",
+        "aborted": "Przerwano",
+        "error": "Błąd"
+      },
+      "toast": {
+        "success": "Synchronizacja zakończona: przypisano {synced}, {alreadyAssigned} miało już rolę.",
+        "error": "Synchronizacja ról nie powiodła się."
       }
     },
     "debug": {

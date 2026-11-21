@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import {
   computeScores,
+  countSeriesGames,
   findDifferentPlayers,
   gameKey,
   getGameAlignment,
@@ -226,8 +227,12 @@ export function useRecordingsUpload({
     setAdminOverride(false);
   }, []);
 
-  // Best-of extras are ignored rather than rejected; play-all must be exact.
-  const tooManyGames = mode === "PLAY_ALL" && games.length > gameCount;
+  // A restored game adds extra recording files but is still a single game, so
+  // the format's game limit applies to the number of distinct games. This also
+  // covers best-of series, which must never contain more games than the format
+  // allows.
+  const countedGames = countSeriesGames(games);
+  const tooManyGames = countedGames > gameCount;
   const differentPlayers = findDifferentPlayers(games);
   const playersMismatchError = differentPlayers
     ? t("validation_error_different_players", { ...differentPlayers })
@@ -256,7 +261,7 @@ export function useRecordingsUpload({
   );
   const seriesComplete =
     mode === "PLAY_ALL"
-      ? games.length === gameCount
+      ? countedGames === gameCount
       : isSeriesDecided(computeScores(games), gameCount, mode);
   const canSubmit =
     !parsing &&
@@ -272,6 +277,7 @@ export function useRecordingsUpload({
     parseError,
     adminOverride,
     tooManyGames,
+    countedGames,
     seriesComplete,
     mappedPlayer1,
     playerMappingError,
