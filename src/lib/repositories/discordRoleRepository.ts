@@ -13,7 +13,13 @@ export interface DiscordRoleTargetGroup {
   name: string;
   color: string | null;
   displayOrder: number;
+  roleId: string | null;
   participants: DiscordRoleTargetParticipant[];
+}
+
+export interface DiscordRoleGroupInput {
+  name: string;
+  roleId: string;
 }
 
 export interface DiscordRoleTargets {
@@ -31,31 +37,33 @@ export const discordRoleRepository = {
   async getTournamentRoleTargets(
     tournamentId: string,
   ): Promise<DiscordRoleTargets> {
-    const groups = await db.tournamentGroup.findMany({
-      where: { tournamentId, isRotational: false },
-      orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        displayOrder: true,
-        TournamentGroupParticipant: {
-          orderBy: { displayOrder: "asc" },
-          select: {
-            tournamentParticipant: {
-              select: {
-                id: true,
-                nickname: true,
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    playerNumber: true,
-                    accounts: {
-                      where: { provider: "discord" },
-                      select: { providerAccountId: true },
-                      orderBy: { id: "asc" },
-                      take: 1,
+    const [groups, roleGroups] = await Promise.all([
+      db.tournamentGroup.findMany({
+        where: { tournamentId, isRotational: false },
+        orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          displayOrder: true,
+          TournamentGroupParticipant: {
+            orderBy: { displayOrder: "asc" },
+            select: {
+              tournamentParticipant: {
+                select: {
+                  id: true,
+                  nickname: true,
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      playerNumber: true,
+                      accounts: {
+                        where: { provider: "discord" },
+                        select: { providerAccountId: true },
+                        orderBy: { id: "asc" },
+                        take: 1,
+                      },
                     },
                   },
                 },
@@ -63,8 +71,13 @@ export const discordRoleRepository = {
             },
           },
         },
-      },
-    });
+      }),
+      db.discordRoleGroup.findMany({ select: { name: true, roleId: true } }),
+    ]);
+
+    const roleIdByName = new Map(
+      roleGroups.map((group) => [group.name, group.roleId]),
+    );
 
     const targetGroups = groups
       .map((group) => ({
@@ -72,6 +85,7 @@ export const discordRoleRepository = {
         name: group.name,
         color: group.color,
         displayOrder: group.displayOrder,
+        roleId: roleIdByName.get(group.name) ?? null,
         participants: group.TournamentGroupParticipant.map(
           ({ tournamentParticipant }) => ({
             participantId: tournamentParticipant.id,
@@ -93,5 +107,29 @@ export const discordRoleRepository = {
       totalParticipants: participants.length,
       withDiscordId: participants.filter((p) => p.discordId !== null).length,
     };
+  },
+
+  async listRoleGroups() {
+    return db.discordRoleGroup.findMany({ orderBy: { name: "asc" } });
+  },
+
+  async getRoleGroupByName(name: string) {
+    return db.discordRoleGroup.findUnique({ where: { name } });
+  },
+
+  async getRoleGroupById(id: string) {
+    return db.discordRoleGroup.findUnique({ where: { id } });
+  },
+
+  async createRoleGroup(data: DiscordRoleGroupInput) {
+    return db.discordRoleGroup.create({ data });
+  },
+
+  async updateRoleGroup(id: string, data: DiscordRoleGroupInput) {
+    return db.discordRoleGroup.update({ where: { id }, data });
+  },
+
+  async deleteRoleGroup(id: string) {
+    return db.discordRoleGroup.delete({ where: { id } });
   },
 };

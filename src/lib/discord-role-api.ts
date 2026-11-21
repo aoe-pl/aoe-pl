@@ -2,19 +2,41 @@ import "server-only";
 
 import { env } from "@/env";
 
-const REQUEST_TIMEOUT_MS = 15_000;
+const REQUEST_TIMEOUT_MS = 120_000;
 const MAX_ATTEMPTS = 3;
 const MAX_RETRY_WAIT_MS = 20_000;
+
+export interface DiscordRoleApiMember {
+  discordId: string;
+  roleId: string;
+  group: string;
+}
+
+export interface DiscordRoleApiMemberResult {
+  discordId: string;
+  roleId: string;
+  group: string | null;
+  ok: boolean;
+  changed?: boolean;
+  alreadyAssigned?: boolean;
+  removedRoleIds?: string[];
+  error?: {
+    code: string;
+    message: string;
+  };
+}
 
 export interface DiscordRoleApiSuccessPayload {
   success: true;
   data: {
-    discordId: string;
-    roleId: string;
-    group: string;
-    changed: boolean;
-    alreadyAssigned: boolean;
-    removedRoleIds?: string[];
+    requestId?: string;
+    summary?: {
+      total: number;
+      succeeded: number;
+      failed: number;
+      changed: number;
+    };
+    results: DiscordRoleApiMemberResult[];
   };
 }
 
@@ -127,16 +149,16 @@ function shouldRetry(status: number, attempt: number): boolean {
 }
 
 /**
- * Calls the role bot for a single Discord member and group.
+ * Calls the role bot for a batch of Discord members.
  *
  * The bot is idempotent, so retrying after transient failures is safe. A
  * 429 response is retried only after the delay advertised in `Retry-After`;
  * if that delay is longer than we are willing to hold the request open, the
- * response is returned to the caller instead of blocking the UI for minutes.
+ * response is returned to the caller instead of blocking for minutes.
  */
-export async function syncDiscordRole(
-  discordId: string,
-  group: string,
+export async function syncDiscordRoles(
+  members: DiscordRoleApiMember[],
+  groupRoleIds: string[],
 ): Promise<DiscordRoleApiAttempt> {
   const { apiUrl, configured } = getDiscordRoleApiConfig();
   const secret = env.DISCORD_ROLE_API_SECRET;
@@ -160,7 +182,7 @@ export async function syncDiscordRole(
           Authorization: `Bearer ${secret}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ discordId, group }),
+        body: JSON.stringify({ groupRoleIds, members }),
         signal: controller.signal,
       });
 

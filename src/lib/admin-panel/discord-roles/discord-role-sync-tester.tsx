@@ -30,6 +30,7 @@ import { AlertCircle, Bot, Loader2, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DiscordRoleGroups } from "./discord-role-groups";
 
 export interface DiscordRoleTournamentOption {
   id: string;
@@ -44,6 +45,7 @@ const STATUS_LABEL_KEYS = {
   synced: "status.synced",
   already_assigned: "status.already_assigned",
   no_discord_id: "status.no_discord_id",
+  duplicate_discord_id: "status.duplicate_discord_id",
   member_not_found: "status.member_not_found",
   invalid_request: "status.invalid_request",
   config_error: "status.config_error",
@@ -59,6 +61,7 @@ const STATUS_LABEL_KEYS = {
 
 const SKIPPED_STATUSES: SyncStatus[] = [
   "no_discord_id",
+  "duplicate_discord_id",
   "member_not_found",
   "aborted",
 ];
@@ -89,6 +92,7 @@ export function DiscordRoleSyncTester({
         groupId: group.id,
         groupName: group.name,
         groupColor: group.color,
+        roleId: group.roleId,
       })),
     );
   }, [targetsQuery.data]);
@@ -143,6 +147,8 @@ export function DiscordRoleSyncTester({
           {t("page_description")}
         </p>
       </div>
+
+      <DiscordRoleGroups onChanged={() => void targetsQuery.refetch()} />
 
       <Card>
         <CardHeader>
@@ -282,6 +288,18 @@ export function DiscordRoleSyncTester({
                             />
                             {row.groupName}
                           </span>
+                          {row.roleId ? (
+                            <code className="text-muted-foreground mt-1 block text-xs">
+                              {row.roleId}
+                            </code>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className="mt-1 text-amber-300"
+                            >
+                              {t("role_not_configured")}
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           {rowResult ? (
