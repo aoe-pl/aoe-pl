@@ -102,7 +102,8 @@
       "tournaments": "Turnieje",
       "archived_tournaments": "Archiwum turniejów",
       "settings": "Ustawienia",
-      "recording_parser": "Parser nagrań"
+      "recording_parser": "Parser nagrań",
+      "discord_roles": "Role Discord"
     },
     "tournaments": {
       "title": "Turnieje",
@@ -710,6 +711,88 @@
           "update_success": "Użytkownik został zaktualizowany pomyślnie",
           "delete_success": "Użytkownik został usunięty pomyślnie"
         }
+      }
+    },
+    "discordRoles": {
+      "page_title": "Role Discord",
+      "page_description": "Ta strona synchronizuje przypisanie do grup turniejowych z rolami Discord. Skonfiguruj rolę Discord dla każdej nazwy grupy, wybierz turniej, aby sprawdzić każdego uczestnika i rolę, którą powinien otrzymać, a następnie wyślij całą partię do bota w jednym żądaniu. Gracze bez powiązanego konta Discord są pomijani, a grupy rotacyjne są ignorowane, ponieważ odzwierciedlają zwykłe grupy.",
+      "role_groups": {
+        "title": "Grupy ról Discord",
+        "description": "Przypisz nazwy grup turniejowych do ról Discord. Bot synchronizuje każdego uczestnika z rolą odpowiadającą nazwie jego grupy.",
+        "name_placeholder": "Nazwa grupy (np. Grupa A)",
+        "role_id_placeholder": "ID roli Discord",
+        "hint": "Nazwy grup muszą dokładnie odpowiadać nazwom grup turniejowych.",
+        "loading": "Ładowanie grup ról...",
+        "empty": "Nie skonfigurowano jeszcze żadnych grup ról Discord.",
+        "group_name": "Grupa",
+        "role_id": "ID roli",
+        "actions": "Akcje",
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "add": "Dodaj grupę",
+        "save": "Zapisz",
+        "cancel": "Anuluj",
+        "invalid": "Podaj nazwę grupy (maks. 64 znaki) i ID roli Discord.",
+        "toast": {
+          "created": "Grupa roli została dodana.",
+          "updated": "Grupa roli została zaktualizowana.",
+          "deleted": "Grupa roli została usunięta."
+        },
+        "delete_dialog": {
+          "title": "Usunąć grupę roli?",
+          "description": "Uczestnicy grupy \"{name}\" nie otrzymają roli, dopóki nie skonfigurujesz zastępstwa.",
+          "cancel": "Anuluj",
+          "delete": "Usuń",
+          "deleting": "Usuwanie..."
+        }
+      },
+      "select_tournament": "Turniej",
+      "select_tournament_placeholder": "Wybierz turniej",
+      "targets_title": "Cele synchronizacji",
+      "targets_description": "Każdy uczestnik jest dopasowywany do roli Discord skonfigurowanej dla jego grupy.",
+      "participants": "Uczestnicy: {count}",
+      "missing_discord": "Bez konta Discord: {count}",
+      "loading_targets": "Ładowanie uczestników...",
+      "no_groups": "Nie znaleziono grup z uczestnikami dla tego turnieju.",
+      "player": "Gracz",
+      "discord_id": "Discord ID",
+      "target_group": "Docelowa grupa",
+      "role_not_configured": "Brak skonfigurowanej roli",
+      "status_column": "Status",
+      "not_linked": "Brak powiązania",
+      "sync_button": "Wyślij do bota",
+      "syncing": "Wysyłanie...",
+      "sync_hint": "Wszyscy członkowie są wysyłani w jednym zbiorczym żądaniu. Limity i chwilowe przerwy bota są ponawiane automatycznie.",
+      "results_title": "Odpowiedź bota",
+      "results_description": "Wynik ostatniego uruchomienia synchronizacji.",
+      "summary_total": "Razem",
+      "summary_synced": "Przypisano",
+      "summary_already": "Już przypisane",
+      "summary_skipped": "Pominięto",
+      "summary_failed": "Błędy",
+      "http": "HTTP",
+      "details": "Szczegóły",
+      "raw_response": "Surowa odpowiedź",
+      "status": {
+        "synced": "Przypisano",
+        "already_assigned": "Już przypisana",
+        "no_discord_id": "Brak Discord ID",
+        "duplicate_discord_id": "Zduplikowany Discord ID",
+        "member_not_found": "Brak użytkownika na serwerze",
+        "invalid_request": "Nieprawidłowe żądanie",
+        "config_error": "Niezgodna konfiguracja",
+        "unauthorized": "Brak autoryzacji",
+        "rate_limited": "Limit zapytań",
+        "discord_api_error": "Błąd Discorda",
+        "unavailable": "Bot niedostępny",
+        "server_error": "Błąd bota",
+        "network_error": "Błąd sieci",
+        "aborted": "Przerwano",
+        "error": "Błąd"
+      },
+      "toast": {
+        "success": "Synchronizacja zakończona: przypisano {synced}, {alreadyAssigned} miało już rolę.",
+        "error": "Synchronizacja ról nie powiodła się."
       }
     },
     "debug": {

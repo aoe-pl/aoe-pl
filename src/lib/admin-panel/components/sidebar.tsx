@@ -7,7 +7,7 @@ import {
   TrophyIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { Archive, Bug } from "lucide-react";
+import { Archive, Bot, Bug } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,6 +46,13 @@ export function Sidebar() {
           active={pathname.startsWith("/admin/settings")}
         >
           {t("settings")}
+        </NavItem>
+        <NavItem
+          href="/admin/discord-roles"
+          icon={<Bot className="h-5 w-5" />}
+          active={pathname.startsWith("/admin/discord-roles")}
+        >
+          {t("discord_roles")}
         </NavItem>
         <NavItem
           href="/admin/debug/recordings"

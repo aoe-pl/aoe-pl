@@ -102,7 +102,8 @@
       "tournaments": "Tournaments",
       "archived_tournaments": "Archived tournaments",
       "settings": "Settings",
-      "recording_parser": "Recording parser"
+      "recording_parser": "Recording parser",
+      "discord_roles": "Discord roles"
     },
     "tournaments": {
       "title": "Tournaments",
@@ -710,6 +711,88 @@
           "update_success": "User updated successfully",
           "delete_success": "User deleted successfully"
         }
+      }
+    },
+    "discordRoles": {
+      "page_title": "Discord roles",
+      "page_description": "This page synchronizes tournament group assignments with Discord roles. Configure a Discord role for each group name, select a tournament to review every participant and the role they should receive, then send the whole batch to the role bot in one request. Players without a linked Discord account are skipped, and rotational groups are ignored because they mirror regular groups.",
+      "role_groups": {
+        "title": "Discord role groups",
+        "description": "Map tournament group names to Discord roles. The bot syncs every participant to the role matching their group name.",
+        "name_placeholder": "Group name (e.g. Group A)",
+        "role_id_placeholder": "Discord role ID",
+        "hint": "Group names must match tournament group names exactly.",
+        "loading": "Loading role groups...",
+        "empty": "No Discord role groups configured yet.",
+        "group_name": "Group",
+        "role_id": "Role ID",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "add": "Add group",
+        "save": "Save",
+        "cancel": "Cancel",
+        "invalid": "Enter a group name (max 64 characters) and a Discord role ID.",
+        "toast": {
+          "created": "Role group added.",
+          "updated": "Role group updated.",
+          "deleted": "Role group deleted."
+        },
+        "delete_dialog": {
+          "title": "Delete role group?",
+          "description": "Participants in \"{name}\" will no longer receive a role until you configure a replacement.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "deleting": "Deleting..."
+        }
+      },
+      "select_tournament": "Tournament",
+      "select_tournament_placeholder": "Select a tournament",
+      "targets_title": "Role targets",
+      "targets_description": "Each participant is matched to their group's configured Discord role.",
+      "participants": "{count} participants",
+      "missing_discord": "{count} without Discord account",
+      "loading_targets": "Loading participants...",
+      "no_groups": "No groups with participants found for this tournament.",
+      "player": "Player",
+      "discord_id": "Discord ID",
+      "target_group": "Target group",
+      "role_not_configured": "No role configured",
+      "status_column": "Status",
+      "not_linked": "Not linked",
+      "sync_button": "Send to bot",
+      "syncing": "Sending...",
+      "sync_hint": "All members are sent in one bulk request. Rate limits and temporary bot outages are retried automatically.",
+      "results_title": "Bot response",
+      "results_description": "Result of the last sync run.",
+      "summary_total": "Total",
+      "summary_synced": "Assigned",
+      "summary_already": "Already assigned",
+      "summary_skipped": "Skipped",
+      "summary_failed": "Failed",
+      "http": "HTTP",
+      "details": "Details",
+      "raw_response": "Raw response",
+      "status": {
+        "synced": "Assigned",
+        "already_assigned": "Already assigned",
+        "no_discord_id": "No Discord ID",
+        "duplicate_discord_id": "Duplicate Discord ID",
+        "member_not_found": "Member not found",
+        "invalid_request": "Invalid request",
+        "config_error": "Config mismatch",
+        "unauthorized": "Unauthorized",
+        "rate_limited": "Rate limited",
+        "discord_api_error": "Discord error",
+        "unavailable": "Bot unavailable",
+        "server_error": "Bot error",
+        "network_error": "Network error",
+        "aborted": "Aborted",
+        "error": "Error"
+      },
+      "toast": {
+        "success": "Sync finished: {synced} assigned, {alreadyAssigned} already had the role.",
+        "error": "Role sync failed."
       }
     },
     "debug": {

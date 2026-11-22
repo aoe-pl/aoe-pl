@@ -29,6 +29,18 @@ export function isRestoredGame(game: ParsedGame): boolean {
 }
 
 /**
+ * Number of uploaded games that count towards the match format's game limit.
+ * A restored game is split into several recordings but still represents a
+ * single game, so it counts once. A restored segment that was not grouped with
+ * the game it continues does not start a new game, so it is not counted.
+ */
+export function countSeriesGames(games: ParsedGame[]): number {
+  return games.filter(
+    (game) => !isRestoredGame(game) || game.recordings[0]?.worldTime === 0,
+  ).length;
+}
+
+/**
  * Number of game wins a player needs to win a best-of series.
  */
 export function winsNeeded(gameCount: number): number {

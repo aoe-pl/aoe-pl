@@ -2,6 +2,7 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { aoe2CompanionRouter } from "./aoe2companion";
 import { baseMapRouter } from "./baseMap";
 import { civRouter } from "./civ";
+import { discordRolesRouter } from "./discordRoles";
 import { leaderboardRouter } from "./leaderboard";
 import { mapRouter } from "./map";
 import { newsRouter } from "./news";
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   baseMaps: baseMapRouter,
   civs: civRouter,
   roles: rolesRouter,
+  discordRoles: discordRolesRouter,
   leaderboard: leaderboardRouter,
   news: newsRouter,
   aoe2companion: aoe2CompanionRouter,

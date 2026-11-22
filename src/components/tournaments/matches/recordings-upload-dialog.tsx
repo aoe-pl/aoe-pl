@@ -103,6 +103,7 @@ export function RecordingsUploadDialog({
     parseError,
     adminOverride,
     tooManyGames,
+    countedGames,
     seriesComplete,
     mappedPlayer1,
     playerMappingError,
@@ -322,7 +323,7 @@ export function RecordingsUploadDialog({
           <Alert variant="destructive">
             <AlertDescription>
               {t("too_many_games", {
-                count: uploadedCount,
+                count: countedGames,
                 total: gameCount,
               })}
             </AlertDescription>
